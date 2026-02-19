@@ -1,0 +1,13 @@
+{
+  "name": "dev10x-db",
+  "description": "Safe database query planning and execution for Claude Code. Schema-first query construction with read-only safety conventions.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Janusz Skonieczny",
+    "email": "js+dev10x@bravelabs.io"
+  },
+  "homepage": "https://github.com/wooyek/dev10x-claude-plugin",
+  "repository": "https://github.com/wooyek/dev10x-claude-plugin",
+  "license": "MIT",
+  "keywords": ["database", "psql", "postgresql", "query", "safety", "read-only"]
+}
