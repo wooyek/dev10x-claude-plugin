@@ -97,11 +97,6 @@ mkdir -p ~/.claude/skills/<namespace>:<skill-name>
 
 Then create `SKILL.md` following the frontmatter template above.
 
-> **Note:** `skill:create/scripts/init_skill.py` can scaffold the directory
-> but its name validator rejects colons — a false positive for all local
-> dev10x skills. Use it for the directory scaffold only; ignore the name
-> warning.
-
 ### 2. Write
 
 Follow `superpowers:writing-skills` RED-GREEN-REFACTOR:
@@ -112,13 +107,14 @@ Follow `superpowers:writing-skills` RED-GREEN-REFACTOR:
 
 ### 3. Validate Structure
 
-```bash
-~/.claude/skills/skill:create/scripts/quick_validate.py \
-  ~/.claude/skills/<namespace>:<skill-name>
-```
+Verify the frontmatter YAML is valid and all required fields (`name`,
+`description`, `user-invocable`, `invocation-name`) are present. You
+can do this manually or with a YAML linter of your choice.
 
-Ignore the name validation error (colon in name is valid locally). Verify
-only that frontmatter parses and required fields exist.
+> **Tip:** If you have the `superpowers` plugin installed, its
+> `skill:create/scripts/quick_validate.py` can automate this check.
+> Colons in skill names are valid locally — ignore any name validation
+> warnings it produces.
 
 ### 4. Register in MOTD
 
