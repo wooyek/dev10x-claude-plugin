@@ -25,7 +25,7 @@ Present as a markdown table:
 
 | # | Status | Task |
 |---|--------|------|
-| 1 | in_progress | Write payment integration |
+| 1 | in_progress | Implement checkout feature |
 | 2 | pending | Create PR for TICKET-42 |
 | 3 | completed | Add webhook endpoint |
 
