@@ -1,8 +1,8 @@
 ---
-name: dev10x:skill-audit
+name: dx:skill-audit
 description: Audit a session's skill usage, compliance, and extract lessons learned. Reads the session transcript directly — run from a separate terminal.
 user-invocable: true
-invocation-name: dev10x:skill-audit
+invocation-name: dx:skill-audit
 allowed-tools:
   - Read(~/.claude/**)
   - Read(~/.claude/skills/**)
@@ -11,7 +11,7 @@ allowed-tools:
   - Write(/tmp/claude/skill-audit/**)
   - Edit(~/.claude/**)
   - Edit(/tmp/claude/skill-audit/**)
-  - Bash(~/.claude/skills/dev10x:skill-audit/scripts/:*)
+  - Bash(~/.claude/skills/skill-audit/scripts/:*)
   - Bash(ls -t ~/.claude/:*)
   - Bash(wc:*)
 ---
@@ -86,7 +86,7 @@ When a trigger is detected, find the current session's JSONL path and suggest:
 
 > "I've noticed [trigger description]. Open a new terminal and run:
 > ```
-> claude '/dev10x:skill-audit <jsonl-path>'
+> claude '/dx:skill-audit <jsonl-path>'
 > ```
 > to capture these as improvements."
 
@@ -129,7 +129,7 @@ If resolution fails, ask the user to provide the JSONL path explicitly.
 
 Run the extraction script:
 ```bash
-~/.claude/skills/dev10x:skill-audit/scripts/extract-session.sh \
+~/.claude/skills/skill-audit/scripts/extract-session.sh \
   "<session_file>" /tmp/claude/skill-audit/audit-transcript.md
 ```
 
@@ -607,7 +607,7 @@ Review user corrections and `[CORRECTION]` markers:
 
 2. Use AskUserQuestion to confirm each change (or batch related changes).
 
-3. If approved, edit the files. For new skills, suggest using `/dev10x:skill-create`.
+3. If approved, edit the files. For new skills, suggest using `/dx:skill-create`.
 
 4. Generate a summary report:
    - Total actions reviewed

@@ -1,5 +1,5 @@
 ---
-name: dev10x:skill-create
+name: dx:skill-create
 description: >
   Use when creating or improving a local skill and hitting friction — bash
   commands keep prompting for approval, the skill doesn't appear in MOTD,
@@ -7,12 +7,12 @@ description: >
   get the dev10x-specific setup right without hunting through existing
   skills for examples.
 user-invocable: true
-invocation-name: skill-create
+invocation-name: dx:skill-create
 ---
 
 # dev10x Skill Create
 
-**Announce:** "Using dev10x:skill-create to [create/improve] the `<name>` skill."
+**Announce:** "Using dx:skill-create to [create/improve] the `<name>` skill."
 
 **Foundation:** Read `superpowers:writing-skills` first for TDD methodology,
 CSO principles, and quality standards. This skill covers only the local
@@ -28,16 +28,16 @@ dev10x conventions that sit on top of that foundation.
     references/         # markdown reference docs (optional)
 ```
 
-Active namespaces: `dev10x:`, `ticket:`, `pr:`, `commit:`
+Active namespaces: `dx:`, `ticket:`, `pr:`, `commit:`
 
 ## Frontmatter Template
 
 ```yaml
 ---
-name: dev10x:skill-name
+name: dx:skill-name
 description: Use when [situation trigger] so [what the user gains or stops suffering]
 user-invocable: true          # include for user-invocable skills
-invocation-name: skill-name   # short alias, no namespace prefix
+invocation-name: dx:skill-name
 allowed-tools:                # pre-approve bash commands (removes prompts)
   - Bash(git commit:*)
   - Bash(~/.claude/skills/<name>/scripts/*:*)
@@ -122,16 +122,16 @@ Skills don't appear in session context until indexed. Regenerate so the
 new skill is discoverable at the next session start:
 
 ```bash
-~/.claude/skills/dev10x:skill-motd/scripts/generate-motd.sh --force
+~/.claude/skills/skill-motd/scripts/generate-motd.sh --force
 ```
 
 ## Patterns from Existing Skills
 
 | Skill | Patterns to study |
 |---|---|
-| `dev10x:git-worktree` | Step-numbered workflow, `allowed-tools`, templates |
+| `dx:git-worktree` | Step-numbered workflow, `allowed-tools`, templates |
 | `ticket:create` | Prerequisites check, integration section |
-| `dev10x:skill-motd` | Minimal skill that fully delegates to a script |
+| `dx:skill-motd` | Minimal skill that fully delegates to a script |
 | `commit` | Multi-step workflow with explicit validation gates |
 
 ## Calling Other Skills
