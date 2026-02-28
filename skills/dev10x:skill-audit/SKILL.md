@@ -2,7 +2,7 @@
 name: dev10x:skill-audit
 description: Audit a session's skill usage, compliance, and extract lessons learned. Reads the session transcript directly — run from a separate terminal.
 user-invocable: true
-invocation-name: skill:audit
+invocation-name: dev10x:skill-audit
 allowed-tools:
   - Read(~/.claude/**)
   - Read(~/.claude/skills/**)
