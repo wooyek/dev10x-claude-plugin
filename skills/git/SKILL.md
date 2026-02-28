@@ -1,22 +1,22 @@
 ---
-name: dev10x:git
+name: dx:git
 description: Use before running git push or git rebase — so force-pushes to
   protected branches are blocked and non-interactive rebases run unattended
   without manual editor approval prompts.
 user-invocable: true
-invocation-name: dev10x:git
+invocation-name: dx:git
 allowed-tools:
-  - Bash(~/.claude/skills/dev10x:git/scripts/git-push-safe.sh:*)
-  - Bash(~/.claude/skills/dev10x:git/scripts/git-rebase-groom.sh:*)
-  - Bash(~/.claude/skills/dev10x:git/scripts/git-seq-editor.sh:*)
+  - Bash(~/.claude/skills/git/scripts/git-push-safe.sh:*)
+  - Bash(~/.claude/skills/git/scripts/git-rebase-groom.sh:*)
+  - Bash(~/.claude/skills/git/scripts/git-seq-editor.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
   - Write(/tmp/claude/branch-groom/**)
 ---
 
-**Announce:** "Using dev10x:git to [push / groom commits]."
+**Announce:** "Using dx:git to [push / groom commits]."
 
-# dev10x:git — Hardened Git Operations
+# dx:git — Hardened Git Operations
 
 Provides hardened scripts for safe git push and non-interactive rebase.
 Add the `allowed-tools` entries to your project's `settings.local.json`
@@ -28,7 +28,7 @@ Always push via the wrapper script to prevent force-pushing to protected
 branches:
 
 ```bash
-~/.claude/skills/dev10x:git/scripts/git-push-safe.sh [git push arguments...]
+~/.claude/skills/git/scripts/git-push-safe.sh [git push arguments...]
 ```
 
 Default protected branches: `main master`
@@ -37,7 +37,7 @@ To extend the list, set `GIT_PROTECTED_BRANCHES` before calling:
 
 ```bash
 GIT_PROTECTED_BRANCHES="main master staging" \
-  ~/.claude/skills/dev10x:git/scripts/git-push-safe.sh --force-with-lease
+  ~/.claude/skills/git/scripts/git-push-safe.sh --force-with-lease
 ```
 
 `--force-with-lease` is always allowed (verifies the remote has not
@@ -82,7 +82,7 @@ Then Read the file, then Write the sequence content.
 2. Run the rebase:
 
 ```bash
-~/.claude/skills/dev10x:git/scripts/git-rebase-groom.sh <base-ref>
+~/.claude/skills/git/scripts/git-rebase-groom.sh <base-ref>
 ```
 
 ### Sequence file ordering
@@ -128,9 +128,9 @@ Add to your project's `.claude/settings.local.json`:
 {
   "permissions": {
     "allow": [
-      "Bash(~/.claude/skills/dev10x:git/scripts/git-push-safe.sh:*)",
-      "Bash(~/.claude/skills/dev10x:git/scripts/git-rebase-groom.sh:*)",
-      "Bash(~/.claude/skills/dev10x:git/scripts/git-seq-editor.sh:*)",
+      "Bash(~/.claude/skills/git/scripts/git-push-safe.sh:*)",
+      "Bash(~/.claude/skills/git/scripts/git-rebase-groom.sh:*)",
+      "Bash(~/.claude/skills/git/scripts/git-seq-editor.sh:*)",
       "Bash(git reset --soft:*)",
       "Bash(git push --force-with-lease:*)",
       "Write(/tmp/claude/branch-groom/**)"
