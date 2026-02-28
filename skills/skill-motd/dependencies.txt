@@ -1,6 +1,6 @@
 # Skill dependency map: skill|dep1,dep2,...
 # Only list direct orchestration dependencies (skill A invokes skill B).
 # Maintain this when adding new skills that orchestrate others.
-dev10x:wrap-up|dev10x:tasks,dev10x:defer,dev10x:todo
-dev10x:defer|dev10x:tasks,dev10x:todo,dev10x:remind
-dev10x:todo|dev10x:defer,dev10x:todo-review
+dx:wrap-up|dx:tasks,dx:defer,dx:todo
+dx:defer|dx:tasks,dx:todo,dx:remind
+dx:todo|dx:defer,dx:todo-review

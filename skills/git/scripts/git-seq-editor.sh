@@ -2,7 +2,7 @@
 # GIT_SEQUENCE_EDITOR replacement — reads rebase instructions from
 # /tmp/claude/branch-groom/rebase-seq.txt (skill-namespaced data dir).
 #
-# Usage: GIT_SEQUENCE_EDITOR=~/.claude/skills/dev10x:git/scripts/git-seq-editor.sh git rebase -i ...
+# Usage: GIT_SEQUENCE_EDITOR=~/.claude/skills/git/scripts/git-seq-editor.sh git rebase -i ...
 #
 # Before running rebase, write the desired todo content to:
 #   /tmp/claude/branch-groom/rebase-seq.txt
