@@ -26,11 +26,11 @@ user corrections, and process improvements worth persisting into skill definitio
 The skill accepts one optional argument, resolved in this order:
 
 1. **JSONL path** — if arg ends in `.jsonl`, use it directly
-2. **Worktree path** — if arg is a directory (e.g., `/work/tt/tt-pos`), encode it
+2. **Worktree path** — if arg is a directory (e.g., `/work/myproject/my-repo`), encode it
    to a project directory and find the latest JSONL in it
 3. **`latest`** (or no arg) — encode the current working directory, find latest JSONL
 
-**Path encoding**: `/work/tt/tt-pos` → `-work-tt-tt-pos` (replace leading `/` then
+**Path encoding**: `/work/myproject/my-repo` → `-work-myproject-my-repo` (replace leading `/` then
 all `/` with `-`).
 
 **Project directory**: `~/.claude/projects/<encoded-path>/`
@@ -257,7 +257,7 @@ For each candidate, note:
 
 | Skill | Inline block (type + line count) | Suggested script path |
 |-------|----------------------------------|-----------------------|
-| `inbox:triage` | 12-line bash loop | already extracted ✓ |
+| `dev10x:some-skill` | 12-line bash loop | already extracted ✓ |
 | `some:skill` | 8-line curl + jq pipeline | `scripts/fetch-data.sh` |
 
 Also scan the session transcript for Bash tool calls that were multi-step
@@ -333,7 +333,7 @@ a new rule). Structural friction needs skill updates and/or hooks.
 | 1 | `BASE=$(git merge...) && script` | PREFIX_POISONED_SUBSHELL | `$()` shifts prefix | Skill: pass `develop` directly |
 | 2 | `cat <<'EOF'\n...\nEOF` | HOOK_BLOCKED_RETRY | hook blocks `cat <<` | Skill: Write + `git commit -F` |
 | 3 | `mkdir -p /tmp && script` | PREFIX_POISONED_CHAIN | `&&` shifts prefix to `mkdir` | Skill: script creates own dirs |
-| 4 | `git -C /work/tt log` | PREFIX_POISONED_GIT_C | `-C` breaks `Bash(git log:*)` | Skill: use CWD |
+| 4 | `git -C /work/myproject log` | PREFIX_POISONED_GIT_C | `-C` breaks `Bash(git log:*)` | Skill: use CWD |
 | 5 | `pytest src/` (3x) | NUISANCE_APPROVE | No matching rule | Allow: `Bash(pytest:*)` |
 
 **Recommendations per category:**
@@ -392,7 +392,7 @@ classification. Non-toxic commands get a rule-based classification.
 | **MISSING_RULE** | No allow rule covers this command/path at all | `pytest` not in allow list |
 | **PATTERN_TOO_NARROW** | A rule exists for similar commands but the glob pattern doesn't match this invocation | `Bash(git log:*)` exists but `git -C /other/path log` was used |
 | **PREFIX_MISMATCH** | The command starts differently than the allow pattern expects | `uv run pytest` vs `pytest` |
-| **PATH_NOT_COVERED** | A Read/Write/Edit rule exists but doesn't cover this path | `Read(/work/tt/**)` missing |
+| **PATH_NOT_COVERED** | A Read/Write/Edit rule exists but doesn't cover this path | `Read(/work/myproject/**)` missing |
 | **CORRECTLY_PROMPTED** | The command is risky and SHOULD require approval | `git push --force`, `rm -rf` |
 
 **Priority**: Structural classifications take precedence. If a command
@@ -435,7 +435,7 @@ For each PREFIX_POISONED finding:
 
 ```
 Fix type: SKILL_UPDATE + HOOKIFY_RULE
-Skill: branch:groom (line 38)
+Skill: dev10x:some-skill (line 38)
 Before: BASE=$(git merge-base develop HEAD) && script "$BASE"
 After:  script develop
 Hook: Reject Bash commands matching $() && .*skills/ with message:
@@ -473,7 +473,7 @@ For each REDUNDANT_UV_PREFIX finding:
 
 ```
 Fix type: SKILL_UPDATE
-Skill: pr:respond (line 42)
+Skill: dev10x:some-skill (line 42)
 Before: uv run --script ~/.claude/tools/gh-pr-comments.py get ...
 After:  ~/.claude/tools/gh-pr-comments.py get ...
 Prereq: script has #!/usr/bin/env -S uv run --script + chmod +x
@@ -532,8 +532,8 @@ for consistency.
 | 1 | `tools/gh-pr-comments.py` | `#!/usr/bin/env python3` | WRONG_SHEBANG | Change to uv shebang + PEP 723 |
 | 2 | `tools/upload-screenshots.py` | Has deps but python3 shebang | WRONG_SHEBANG | Change shebang (deps already in PEP 723) |
 | 3 | `scripts/fernet-decrypt.py` | mode 644 | NOT_EXECUTABLE | `chmod +x` |
-| 4 | `pr:respond/SKILL.md` | `uv run --script ~/.claude/tools/...` | REDUNDANT_UV_PREFIX | Drop prefix |
-| 5 | `investigate/scripts/reply.sh` | `uv run --script ...slack-notify.py` | REDUNDANT_UV_PREFIX_SHELL | Drop prefix |
+| 4 | `dev10x:some-skill/SKILL.md` | `uv run --script ~/.claude/tools/...` | REDUNDANT_UV_PREFIX | Drop prefix |
+| 5 | `dev10x:some-skill/scripts/notify.sh` | `uv run --script ...slack-notify.py` | REDUNDANT_UV_PREFIX_SHELL | Drop prefix |
 
 **Recommendations:**
 
@@ -566,11 +566,11 @@ pattern as skill scripts under `Bash(~/.claude/skills/<name>/scripts/:*)`.
 
 | # | Classification | Fix Type | Target | Action |
 |---|---|---|---|---|
-| 1 | PREFIX_POISONED | Skill + Hook | `branch:groom` | Replace $(), add hookify rule |
+| 1 | PREFIX_POISONED | Skill + Hook | `dev10x:some-skill` | Replace $(), add hookify rule |
 | 2 | HOOK_BLOCKED | Skill + Memory | `commit` | Replace heredoc with Write + -F |
 | 3 | MISSING_RULE | Allow rule | `settings.local.json` | Add `Bash(pytest:*)` |
 | 4 | CORRECTLY_PROMPTED | None | — | `git push` should require approval |
-| 5 | REDUNDANT_UV_PREFIX | Skill update | `pr:respond` | Drop `uv run --script` prefix |
+| 5 | REDUNDANT_UV_PREFIX | Skill update | `dev10x:some-skill` | Drop `uv run --script` prefix |
 | 6 | WRONG_SHEBANG | Script fix | `tools/script.py` | Add uv shebang + PEP 723 |
 
 ---
@@ -632,7 +632,7 @@ Review user corrections and `[CORRECTION]` markers:
   finding, propose: (1) moving the block to `~/.claude/skills/<skill>/scripts/`,
   (2) updating SKILL.md to call the script, (3) adding a
   `Bash(~/.claude/skills/<skill>/scripts/:*)` allow rule so future runs need zero
-  approval prompts. Reference `inbox:triage/scripts/triage.py` as the canonical
+  approval prompts. Reference `dev10x:some-skill/scripts/triage.py` as the canonical
   example of a skill that already does this correctly.
 - **Structural before rule-based**: When analyzing permission friction, always
   check Step 4c toxicity first. A PREFIX_POISONED command should never get a
