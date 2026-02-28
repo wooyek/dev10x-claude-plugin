@@ -49,7 +49,7 @@ Output (KEY=VALUE lines, one per line):
 PR_NUMBER=123
 REPO=your-org/your-repo
 PR_URL=https://github.com/your-org/your-repo/pull/123
-BRANCH=user/TICKET-616/feature-description
+BRANCH=user/TICKET-123/feature-description
 ```
 
 Exits non-zero with an error message to stderr if detection fails.

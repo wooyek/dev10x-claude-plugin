@@ -8,7 +8,7 @@
 #   PR_NUMBER=123
 #   REPO=your-org/your-repo
 #   PR_URL=https://github.com/your-org/your-repo/pull/123
-#   BRANCH=user/TICKET-616/feature-description
+#   BRANCH=user/TICKET-123/feature-description
 #
 # CRITICAL: BRANCH is always fetched from GitHub via `gh pr view --json headRefName`.
 # Never use `git branch --show-current` — it returns the CURRENT WORKTREE's branch,
