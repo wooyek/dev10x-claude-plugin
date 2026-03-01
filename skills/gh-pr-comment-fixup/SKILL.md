@@ -3,6 +3,8 @@ name: dx:gh-pr-comment-fixup
 description: Implement a fix for a validated PR review comment, create a fixup! commit, push, and reply with the commit reference. Creates ONE fixup commit per comment.
 user-invocable: true
 invocation-name: dx:gh-pr-comment-fixup
+allowed-tools:
+  - Bash(~/.claude/tools/gh-pr-comments.py:*)
 ---
 
 # Implement Fix for PR Review Comment
