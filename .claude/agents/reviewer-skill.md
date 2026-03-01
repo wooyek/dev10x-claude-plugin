@@ -34,6 +34,10 @@ Files matching: `skills/**`
 
 ## Output Format
 
+Apply this checklist to ALL `skills/**` files in the diff, including
+any added in the same PR as rule changes — new checklist items are
+not retroactively applied to same-PR additions otherwise.
+
 For each issue:
 - **File**: path
 - **Severity**: CRITICAL / WARNING / INFO
