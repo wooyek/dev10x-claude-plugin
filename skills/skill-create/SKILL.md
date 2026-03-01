@@ -28,16 +28,16 @@ dev10x conventions that sit on top of that foundation.
     references/         # markdown reference docs (optional)
 ```
 
-Active namespaces: `dx:`, `ticket:`, `pr:`, `commit:`
+Active namespaces: `my:`, `dx:`, `ticket:`, `pr:`, `commit:`
 
 ## Frontmatter Template
 
 ```yaml
 ---
-name: dx:skill-name
+name: my-skill-name
 description: Use when [situation trigger] so [what the user gains or stops suffering]
 user-invocable: true          # include for user-invocable skills
-invocation-name: dx:skill-name
+invocation-name: skill-name   # short alias, no namespace prefix
 allowed-tools:                # pre-approve bash commands (removes prompts)
   - Bash(git commit:*)
   - Bash(~/.claude/skills/<name>/scripts/*:*)
@@ -92,7 +92,7 @@ which skill is running:
 ### 1. Scaffold
 
 ```bash
-mkdir -p ~/.claude/skills/<namespace>:<skill-name>
+mkdir -p ~/.claude/skills/<namespace>-<skill-name>
 ```
 
 Then create `SKILL.md` following the frontmatter template above.

@@ -118,6 +118,7 @@ From the gathered context, extract:
   wants to send the customer an SMS, so the customer can pay immediately")
 - The "so [beneficiary] can" should contrast with the current broken state
 - One sentence. No bullet points. No implementation details.
+- See `references/job-story-format.md` for detailed guidance
 
 ### Subject Selection by PR Type
 

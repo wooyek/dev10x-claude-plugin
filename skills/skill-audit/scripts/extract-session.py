@@ -71,13 +71,11 @@ def extract_tool_uses(content: list) -> list[dict]:
                 input_summary = ", ".join(summary_parts)
             else:
                 input_summary = truncate(str(tool_input), MAX_TOOL_INPUT_LEN)
-            tools.append(
-                {
-                    "name": block.get("name", "unknown"),
-                    "id": block.get("id", ""),
-                    "input_summary": input_summary,
-                }
-            )
+            tools.append({
+                "name": block.get("name", "unknown"),
+                "id": block.get("id", ""),
+                "input_summary": input_summary,
+            })
     return tools
 
 
@@ -96,12 +94,10 @@ def extract_tool_results(content: list) -> list[dict]:
                     elif isinstance(item, str):
                         text_parts.append(item)
                 raw = "\n".join(text_parts)
-            results.append(
-                {
-                    "tool_use_id": block.get("tool_use_id", ""),
-                    "content": truncate(str(raw), MAX_TOOL_RESULT_LEN),
-                }
-            )
+            results.append({
+                "tool_use_id": block.get("tool_use_id", ""),
+                "content": truncate(str(raw), MAX_TOOL_RESULT_LEN),
+            })
     return results
 
 
@@ -172,9 +168,7 @@ def process_jsonl(jsonl_path: str, out: TextIO) -> None:
 
         if msg_type == "user":
             text = extract_text_from_content(content)
-            tool_results = extract_tool_results(
-                content if isinstance(content, list) else []
-            )
+            tool_results = extract_tool_results(content if isinstance(content, list) else [])
 
             if text.strip():
                 turn_num += 1
@@ -185,11 +179,9 @@ def process_jsonl(jsonl_path: str, out: TextIO) -> None:
 
             if tool_results:
                 for tr in tool_results:
-                    out.write(
-                        f"<details><summary>Tool result ({tr['tool_use_id'][:12]}...)</summary>\n\n"
-                    )
+                    out.write(f"<details><summary>Tool result ({tr['tool_use_id'][:12]}...)</summary>\n\n")
                     out.write(f"```\n{tr['content']}\n```\n")
-                    out.write("</details>\n\n")
+                    out.write(f"</details>\n\n")
 
         elif msg_type == "assistant":
             text = extract_text_from_content(content)

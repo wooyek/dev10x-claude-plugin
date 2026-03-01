@@ -38,7 +38,7 @@ directly in the code:
 
 ```python
 # TODO: Configure webhook secret from dashboard before going live
-WEBHOOK_SECRET = os.environ.get("PAYMENT_WEBHOOK_SECRET", "")
+WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 ```
 
 ### 2. Project TODO File
