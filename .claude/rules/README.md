@@ -35,7 +35,7 @@ The code review system uses a **multi-agent architecture**:
 | File                            | Trigger                             | Rules Referenced             |
 |---------------------------------|-------------------------------------|------------------------------|
 | `reviewer-generic.md`           | `**/*.py`, `**/*.sh`                | `review-checks-common.md`    |
-| `reviewer-infra.md`             | `Makefile`, `*.sh`, `bin/**`        | `github-workflows.md`        |
+| `reviewer-infra.md`             | `Makefile`, `**/*.sh`, `bin/**`, `.github/workflows/**` | `github-workflows.md` |
 | `reviewer-docs.md`              | `docs/**`, `.claude/**/*.md`        | (self-contained)             |
 | `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**` | (self-contained)         |
 | `reviewer-skill.md`             | `skills/**`                         | `skill-naming.md`            |

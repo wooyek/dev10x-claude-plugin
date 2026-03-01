@@ -7,6 +7,9 @@ workflow rules, see `review-guidelines.md`.
 
 Before posting **any** inline comment:
 
+0. **Diff scope** — is this file changed in the current PR diff?
+   Run `gh pr diff --name-only` to confirm. If not in diff, mark
+   pre-existing and skip.
 1. Does this violate a documented CLAUDE.md rule? (No rule = preference)
 2. Does this contradict an established codebase pattern? (5+ uses)
 3. Does referenced documentation file exist? (Verify with Read tool)

@@ -21,12 +21,16 @@ Files matching: `skills/**`
    trigger the skill; vague descriptions reduce discoverability
 4. **Script references** — if SKILL.md references scripts, verify
    they exist in the skill directory
-5. **Executable permissions** — shell scripts must be executable
-   (`chmod +x`)
+5. **Executable permissions** — all scripts (shell and Python)
+   invoked directly must be executable (`chmod +x`). Verify with
+   `git ls-files --stage <path>` — mode `100644` means not executable.
 6. **Error handling** — scripts should use `set -e` and handle
    missing dependencies gracefully
 7. **No hardcoded paths** — scripts should use relative paths or
    environment variables, not absolute user-specific paths
+8. **allowed-tools paths** — `Bash(...)` entries in SKILL.md front
+   matter must not reference `~/.claude/` or other user-specific
+   absolute paths; use plugin-relative paths or omit the path restriction
 
 ## Output Format
 

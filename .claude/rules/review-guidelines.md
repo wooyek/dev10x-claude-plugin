@@ -153,6 +153,8 @@ fixed code here
 - Multi-line: set start_line=N, line=M
 - Add explanation before the suggestion block
 - Use for straightforward fixes; describe approach for complex changes
+- Do NOT use suggestion blocks for non-code changes (permissions,
+  file renames, `git mv`). Use plain text instructions instead.
 
 ## Positive Validation
 
