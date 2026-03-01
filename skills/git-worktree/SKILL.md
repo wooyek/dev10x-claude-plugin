@@ -51,7 +51,8 @@ skip to Step A2.
 
 If missing or incomplete, detect project type and propose the appropriate
 template from the **Hook Templates** section below. Present to the user for
-approval before writing.
+approval before writing. The hook must always ensure `.claude` exists —
+either by copying from the source repo or creating an empty scaffold.
 
 ### Step A2: Create Worktree (native tool)
 
@@ -179,7 +180,10 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     ORIGINAL_REPO=/work/<org>/<project-name>
     cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
     cp "$ORIGINAL_REPO/development.secrets.env" . 2>/dev/null || true
-    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || true
+    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || {
+        mkdir -p .claude
+        echo '{}' > .claude/settings.local.json
+    }
     cp -r "$ORIGINAL_REPO/.idea" . 2>/dev/null || true
     command -v uv >/dev/null && uv sync
 fi
@@ -194,7 +198,10 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     pwd
     ORIGINAL_REPO=/work/<org>/<project-name>
     cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
-    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || true
+    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || {
+        mkdir -p .claude
+        echo '{}' > .claude/settings.local.json
+    }
     command -v yarn >/dev/null && yarn install --frozen-lockfile
 fi
 ```
@@ -211,7 +218,10 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     pwd
     ORIGINAL_REPO=/work/<org>/<project-name>
     cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
-    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || true
+    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || {
+        mkdir -p .claude
+        echo '{}' > .claude/settings.local.json
+    }
     if command -v yarn >/dev/null; then
         yarn install --frozen-lockfile
     elif command -v npm >/dev/null; then
