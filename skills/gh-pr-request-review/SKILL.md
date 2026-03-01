@@ -12,21 +12,27 @@ Request reviews on GitHub pull requests from teams or individual users.
 ### Request review from a team
 
 ```bash
-gh pr edit PR_NUMBER --add-reviewer your-org/your-team
+~/.claude/tools/gh-request-review.py \
+  --pr PR_NUMBER \
+  --reviewer org-name/team-slug
 ```
 
 ### Request review from a user
 
 ```bash
-gh pr edit PR_NUMBER --add-reviewer username
+~/.claude/tools/gh-request-review.py \
+  --pr PR_NUMBER \
+  --reviewer username
 ```
 
 ### Request review from multiple reviewers
 
 ```bash
-gh pr edit PR_NUMBER \
-  --add-reviewer user1 \
-  --add-reviewer your-org/your-team
+~/.claude/tools/gh-request-review.py \
+  --pr PR_NUMBER \
+  --reviewer user1 \
+  --reviewer user2 \
+  --reviewer org-name/team-slug
 ```
 
 ### With verification
@@ -38,6 +44,6 @@ gh pr view PR_NUMBER --json reviewRequests \
 
 ## Notes
 
-- Use `--add-reviewer` with `gh pr edit` for both users and teams
+- Use `gh-request-review.py` for requesting reviews (handles both users and teams)
 - Team format: `org-name/team-slug`
 - Verify the review request was assigned by checking `reviewRequests`
