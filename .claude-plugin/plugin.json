@@ -1,6 +1,6 @@
 {
-  "name": "dev10x-db",
-  "description": "Safe database query planning and execution for Claude Code. Schema-first query construction with read-only safety conventions.",
+  "name": "dev10x",
+  "description": "28 skills for structured commits, PR lifecycle, branch hygiene, task tracking, and code review in Claude Code.",
   "version": "0.1.0",
   "author": {
     "name": "Janusz Skonieczny",
@@ -9,5 +9,5 @@
   "homepage": "https://github.com/wooyek/dev10x-claude-plugin",
   "repository": "https://github.com/wooyek/dev10x-claude-plugin",
   "license": "MIT",
-  "keywords": ["database", "psql", "postgresql", "query", "safety", "read-only"]
+  "keywords": ["git", "commits", "pull-requests", "code-review", "workflow", "tasks"]
 }

@@ -1,0 +1,17 @@
+{
+  "name": "dev10x",
+  "owner": {
+    "name": "Janusz Skonieczny",
+    "email": "js+dev10x@bravelabs.io"
+  },
+  "metadata": {
+    "description": "Dev10x community plugin marketplace"
+  },
+  "plugins": [
+    {
+      "name": "dev10x",
+      "source": "./",
+      "description": "28 skills for structured commits, PR lifecycle, branch hygiene, task tracking, and code review."
+    }
+  ]
+}
