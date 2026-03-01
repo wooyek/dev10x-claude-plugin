@@ -78,6 +78,11 @@ When docs reference CLI commands (e.g., install instructions):
 - Confirm they are known Claude Code CLI built-ins
 - Unverified commands in user-facing docs are WARNING severity
 
+## Shell Anti-Patterns
+
+- **Silent error swallowing**: `|| true` on setup steps hides failures;
+  replace with a fallback action (`|| { cmd; }`) or an explicit error.
+
 ## Python Linting Checks
 
 - **f-strings without expressions**: `f"static string"` with no `{}`
