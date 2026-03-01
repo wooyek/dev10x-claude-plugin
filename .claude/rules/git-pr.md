@@ -1,0 +1,127 @@
+# Pull Request & Branch Grooming Guidelines
+
+Standards for pull requests and branch grooming in this repository.
+
+## Branch Grooming
+
+Restructure commit history to create atomic, well-organized commits.
+
+### When Grooming is Acceptable
+
+- ✅ Before creating a PR
+- ✅ While PR is in **draft** status
+- ✅ After CI feedback (before human review starts)
+- ✅ When CI blocks merge due to fixup commits
+
+### When Grooming is Discouraged
+
+- ❌ After a human reviewer has started reviewing
+
+*Why?* Rewriting history after human review started creates noise and
+confusion. Reviewers lose context, and GitHub shows "force-pushed"
+which hides the diff of what changed.
+
+### Strategies
+
+**A. Fixup + Autosquash** (small targeted fixes):
+```bash
+git commit --fixup=<target-sha>
+git rebase -i --autosquash $(git merge-base develop HEAD)
+```
+
+**B. Soft Reset** (major reorganization):
+```bash
+git reset --soft $(git merge-base develop HEAD)
+git reset HEAD  # unstage
+git add -p      # selectively stage
+git commit -m "First logical change"
+# repeat for each logical unit
+```
+
+**C. Interactive Rebase** (reorder/edit/split):
+```bash
+git rebase -i $(git merge-base develop HEAD)
+```
+
+### Safety
+
+- Create backup before complex rewrites: `git branch backup-before-rewrite`
+- Use `--force-with-lease` not `--force` when pushing rewrites
+- Coordinate with teammates before force-pushing shared branches
+
+## Pull Request Guidelines
+
+### Before Creating PR
+
+1. Ensure all commits are atomic and well-organized
+2. Squash any fixup commits
+3. Run quality checks locally (shellcheck for scripts, ruff for Python)
+4. Verify branch is up to date with develop
+
+### PR Title
+
+Use the main commit's title line (gitmoji + ticket + description).
+
+### PR Body
+
+The body should be **compact** to avoid cluttering Slack previews.
+
+**Required elements** (in this order):
+1. A JTBD Job Story as the **first paragraph** (1-3 lines, see `git-jtbd.md`)
+2. `Fixes:` link at the end — either:
+   - `Fixes: https://github.com/wooyek/dev10x-claude-plugin/issues/NUMBER`
+
+**Optional elements** (keep brief):
+- Compact commit list with links (one line per commit)
+- Critical context that reviewers need immediately
+
+**Do not include in body**:
+- Detailed summaries (put in first comment)
+- Implementation checklists (put in first comment)
+
+```markdown
+**When** reviewing PRs without automated checks, **I want to** have
+Claude review code quality, **so I can** catch issues before merging.
+
+[`b3a015a`](REPO_URL/pull/N/commits/HASH) ✨ GH-7 Enable code review
+[`fec4999`](REPO_URL/pull/N/commits/HASH) 📝 GH-7 Document review agents
+
+Fixes: https://github.com/wooyek/dev10x-claude-plugin/issues/7
+```
+
+*Why?* The JTBD Job Story must be the first paragraph because the
+release notes process parses PR descriptions by position.
+
+*Bootstrapping exception:* A PR that introduces a new PR body
+requirement may not follow that requirement itself — the rule
+wasn't enforced when the PR was submitted.
+
+### PR First Comment (Summary + Checklist)
+
+Detailed context for reviewers without bloating the Slack preview.
+
+```markdown
+### Summary
+
+- Added multi-agent code review architecture
+- Created 5 domain-specific reviewer agents
+```
+
+### PR Checklist
+
+- [ ] Self-reviewed the diff
+- [ ] Updated documentation if needed
+- [ ] No fixup commits remaining
+
+## Handling Review Feedback
+
+1. Create fixup commits for each review comment
+2. Reference the comment in fixup commit body
+3. Reply to comment with commit SHA
+4. Before final push, squash all fixups:
+   ```bash
+   git rebase -i --autosquash $(git merge-base develop HEAD)
+   git push --force-with-lease
+   ```
+
+For commit format and branch naming, see `git-commits.md`.
