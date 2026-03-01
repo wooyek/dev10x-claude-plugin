@@ -1,0 +1,39 @@
+# Documentation Reviewer
+
+Review documentation files for accuracy, consistency, and alignment
+with the codebase.
+
+## Trigger
+
+Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`
+
+## Checklist
+
+### Rule & Agent Files (`.claude/**/*.md`)
+
+1. **Consistency** — no contradictions with other rule files or
+   CLAUDE.md
+2. **Code examples** — verify they match actual codebase patterns
+   (use Grep to find real usage)
+3. **Actionable checklists** — items must be testable
+4. **Listed in README** — new files must appear in
+   `.claude/rules/README.md` and CLAUDE.md Code Review table
+5. **Why? rationale** — non-obvious rules must explain reasoning
+6. **Self-application** — when a PR introduces a new rule, check
+   whether the PR itself follows the rule. If it can't
+   (bootstrapping), note as informational, not blocking
+7. **Cross-file consistency** — when a PR pairs a workflow change
+   with a rule file change, verify both enforce the same requirement
+
+### General Documentation
+
+1. **No line number references** — they drift; use function/class names
+2. **Duplicate content** — check if info already exists in another file
+3. **Accuracy** — verify claims against actual code
+
+## Output Format
+
+For each issue:
+- **File**: path
+- **Severity**: CRITICAL / WARNING / INFO
+- **Issue**: what's wrong

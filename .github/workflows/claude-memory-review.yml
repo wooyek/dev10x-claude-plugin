@@ -1,0 +1,242 @@
+name: Claude Memory Review - Post-PR Lessons Learned
+
+on:
+  pull_request:
+    types: [closed]
+    paths-ignore:
+      - '.claude/**'
+      - '.github/workflows/claude-memory-review.yml'
+      - '.github/workflows/claude-code-review.yml'
+      - '.github/workflows/claude.yml'
+      - 'CLAUDE.md'
+
+jobs:
+  lessons-learned:
+    # Skip analysis for draft PRs and revert PRs
+    if: >-
+      github.event.pull_request.draft == false
+      && !startsWith(github.event.pull_request.title, 'Revert ')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gather PR context
+        id: pr-context
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          if [[ "$PR_MERGED" == "true" ]]; then
+            echo "outcome=merged" >> "$GITHUB_OUTPUT"
+          else
+            echo "outcome=rejected" >> "$GITHUB_OUTPUT"
+          fi
+
+          PR_TITLE=$(gh pr view "$PR_NUMBER" --json title -q '.title')
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "pr_title=$PR_TITLE" >> "$GITHUB_OUTPUT"
+          echo "pr_author=$PR_AUTHOR" >> "$GITHUB_OUTPUT"
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Skip cancelled PRs without comments
+        id: skip-check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+        run: |
+          if [[ "$PR_MERGED" != "true" ]]; then
+            COMMENT_COUNT=$(gh pr view "$PR_NUMBER" --json comments,reviews -q '[.comments | length, .reviews | length] | add')
+            if [[ "$COMMENT_COUNT" -eq 0 ]]; then
+              echo "PR was cancelled without any comments — skipping analysis"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare output directory
+        if: steps.skip-check.outputs.skip != 'true'
+        run: mkdir -p "${{ github.workspace }}/.claude-output"
+
+      - name: Run Claude Memory Review Analysis
+        if: steps.skip-check.outputs.skip != 'true'
+        id: claude-analysis
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            # Post-PR Lessons Learned Analysis
+
+            You are analyzing a closed Pull Request to extract lessons learned
+            and identify improvements for the Claude Code review process.
+
+            ## PR Context
+            - **Repository**: ${{ github.repository }}
+            - **PR Number**: ${{ github.event.pull_request.number }}
+            - **PR Title**: ${{ steps.pr-context.outputs.pr_title }}
+            - **PR Author**: ${{ steps.pr-context.outputs.pr_author }}
+            - **Outcome**: ${{ steps.pr-context.outputs.outcome }}
+            - **PR URL**: ${{ steps.pr-context.outputs.pr_url }}
+
+            ## Your Task
+
+            ### Step 1: Gather PR Data
+            1. Use `gh pr view ${{ github.event.pull_request.number }} --json body,comments,reviews,files,additions,deletions,changedFiles`
+            2. Use `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments`
+            3. Use `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews`
+            4. Use `gh pr diff ${{ github.event.pull_request.number }}`
+            5. Read CLAUDE.md, .claude/agents/ specs, .claude/rules/review-checks-common.md
+
+            ### Step 2: Analyze Review Feedback Patterns
+            For each review comment from Claude/github-actions[bot]:
+            - Check if the suggestion was accepted or rejected
+            - Look at human responses for reasoning
+            - Note patterns in accepted vs rejected suggestions
+
+            ### Step 3: Identify Improvements
+            Organized by domain:
+            - **CLAUDE.md**: patterns, architectural decisions, clarifications
+            - **Agent specs**: checklist additions/removals, false positive sources
+            - **Rules files**: new patterns, rules that produced false positives
+            - **Orchestrator**: domain routing improvements
+
+            ### Step 4: Create Report
+            Write to `${{ github.workspace }}/.claude-output/lessons_learned_report.md`
+            with: Summary, Statistics, Feedback Analysis, Identified Improvements,
+            and prioritized Action Items (High/Medium/Low).
+
+            IMPORTANT:
+            - Be specific with file paths and line numbers
+            - Quote actual code when referencing
+            - Distinguish between definite improvements and discussion items
+
+          claude_args: '--allowed-tools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh api:*),Read,Glob,Grep,Write"'
+
+      - name: Auto-implement Lessons Learned
+        if: >-
+          steps.skip-check.outputs.skip != 'true'
+          && github.event.pull_request.merged == true
+        id: auto-implement
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            # Implement Lessons Learned
+
+            A Lessons Learned analysis for PR #${{ github.event.pull_request.number }}
+            has been written to:
+            ${{ github.workspace }}/.claude-output/lessons_learned_report.md
+
+            Your task: implement the **mechanical, low-risk improvements** from the
+            "Action Items" section, then open a draft PR for human review.
+
+            ## Hard Constraints (NON-NEGOTIABLE)
+
+            Only modify files in:
+            - `CLAUDE.md`
+            - `.claude/rules/*.md`
+            - `.claude/agents/*.md`
+
+            Never touch:
+            - `skills/` (plugin code)
+            - `.github/workflows/` (CI — would create infinite loops)
+            - `bin/`, `hooks/`, `commands/`, or any other file
+
+            ## Writing Style for Insights
+
+            Write insights as distilled trade-off reasoning without PR# attribution:
+            - GOOD: "Skills with vague descriptions get skipped by the router"
+            - BAD: "PR #42 showed that skill descriptions matter"
+
+            ## Size Budget Enforcement
+
+            After applying changes, verify modified files stay within limits:
+            - Rule files ≤ 200 lines
+            - Agent specs ≤ 50 lines
+            - `review-checks-common.md` ≤ 100 lines
+            - CLAUDE.md ≤ 100 lines
+
+            ## Steps
+
+            1. Read `.claude-output/lessons_learned_report.md`
+            2. Collect **High** and **Medium** priority items targeting allowed files
+            3. Read each target file, then apply minimal precise changes
+            4. If no implementable changes, write "none" to
+               `${{ github.workspace }}/.claude-output/docs_pr_url.txt` and stop
+            5. Configure git identity:
+               git config user.email "github-actions[bot]@users.noreply.github.com"
+               git config user.name "github-actions[bot]"
+            6. Create branch from develop:
+               git checkout develop
+               git pull origin develop
+               git checkout -B "claude/lessons-pr-$PR_NUMBER"
+            7. Stage and commit:
+               git add CLAUDE.md .claude/
+               git commit -m "🤖 Apply lessons learned from PR #$PR_NUMBER"
+            8. Push and open draft PR:
+               git push origin "claude/lessons-pr-$PR_NUMBER"
+               gh pr create --draft \
+                 --title "🤖 Apply lessons learned from PR #$PR_NUMBER" \
+                 --label "rules-maintenance" \
+                 --body "Applies .claude/ and CLAUDE.md improvements.
+               Based on: ${{ github.event.pull_request.html_url }}" \
+                 --base develop
+            9. Write the PR URL to
+               `${{ github.workspace }}/.claude-output/docs_pr_url.txt`
+
+          claude_args: '--allowed-tools "Read,Write,Edit,Glob,Grep,Bash(git config:*),Bash(git checkout:*),Bash(git pull:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr create:*)"'
+
+      - name: Read documentation PR URL
+        if: always() && steps.skip-check.outputs.skip != 'true'
+        id: docs-pr
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+        run: |
+          DOCS_PR_FILE="${GITHUB_WORKSPACE}/.claude-output/docs_pr_url.txt"
+          if [ -f "$DOCS_PR_FILE" ]; then
+            DOCS_PR_URL=$(cat "$DOCS_PR_FILE")
+            if [ "$DOCS_PR_URL" = "none" ]; then
+              echo "No implementable changes — no docs PR created"
+              echo "url=" >> "$GITHUB_OUTPUT"
+            else
+              echo "Documentation PR: $DOCS_PR_URL"
+              echo "url=$DOCS_PR_URL" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "docs_pr_url.txt not found"
+            echo "url=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post analysis report to documentation PR
+        if: >-
+          always()
+          && steps.docs-pr.outputs.url != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+          DOCS_PR_URL: ${{ steps.docs-pr.outputs.url }}
+        run: |
+          REPORT_FILE="${GITHUB_WORKSPACE}/.claude-output/lessons_learned_report.md"
+          if [ -f "$REPORT_FILE" ]; then
+            DOCS_PR_NUMBER=$(echo "$DOCS_PR_URL" | grep -o '[0-9]*$')
+            gh pr comment "$DOCS_PR_NUMBER" --body-file "$REPORT_FILE"
+            echo "Posted analysis report as comment on PR #$DOCS_PR_NUMBER"
+          else
+            echo "Report file not found, skipping comment"
+          fi

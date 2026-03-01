@@ -1,0 +1,113 @@
+name: Claude Code Review
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, synchronize]
+    paths:
+      - "**/*.py"
+      - "**/*.sh"
+      - "**/*.yaml"
+      - "**/*.yml"
+      - "**/Makefile"
+      - "skills/**/SKILL.md"
+      - "CLAUDE.md"
+      - ".claude/rules/**/*.md"
+      - ".claude/agents/**/*.md"
+      - "!.github/workflows/claude*.yml"
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  claude-review:
+    if: |
+      (github.event_name == 'pull_request' && !github.event.pull_request.draft) ||
+      (github.event_name == 'pull_request_review' && github.event.review.user.login == 'github-actions[bot]')
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@v1
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            You are performing an automated code review using a multi-agent
+            architecture. Be brief but thorough.
+
+            STEP 1 — LOAD CORE RULES:
+            Read these files first:
+            - .claude/rules/review-guidelines.md (workflow, threads, summaries)
+            - .claude/rules/review-checks-common.md (false positive prevention)
+            - CLAUDE.md (project conventions)
+
+            STEP 2 — CLASSIFY PR TYPE:
+            Check PR title and description for:
+            - POC/test code (🧪, "POC", "demo", "prototype") → relaxed standards
+            - Revert PR ("Revert" in title) → REQUEST_CHANGES, require explanation
+            - Stacked PR ("Stacked on #N", "Depends on #N") → note in summary,
+              focus review on changes unique to THIS PR, not the base PR
+
+            PR metadata (title, body, commits) is checked by claude-pr-hygiene.yml.
+            Do NOT provide feedback on those items.
+
+            STEP 3 — DOMAIN-ROUTED REVIEW:
+            Run `gh pr diff ${{ github.event.pull_request.number }} --stat` to
+            classify changed files. For EACH affected domain, read the matching
+            agent spec from .claude/agents/ and apply its checklist:
+
+            - Skills (skills/**) → .claude/agents/reviewer-skill.md
+            - Infrastructure (Makefile, **/*.sh, bin/**,
+              .github/workflows/**) → .claude/agents/reviewer-infra.md
+            - Documentation (docs/**/*.md, .claude/**/*.md, CLAUDE.md)
+              → .claude/agents/reviewer-docs.md
+            - Rules/agents (.claude/rules/**, .claude/agents/**)
+              → .claude/agents/reviewer-rules-maintenance.md
+            - Python/shell code (**/*.py, **/*.sh, not covered above)
+              → .claude/agents/reviewer-generic.md
+
+            Only load agent specs for domains with changed files. Skip irrelevant
+            domains to conserve context.
+
+            STEP 4 — CROSS-CUTTING CHECKS:
+            Apply to ALL files regardless of domain:
+            - Dead code detection (Grep for imports of new classes/functions)
+            - Parameter change analysis (Grep ALL call sites, not just diff)
+            - Code verification (read actual file before claiming errors)
+            - Scope awareness (only review changed lines; pre-existing issues
+              are "out of scope")
+
+            STEP 5 — PRODUCE REVIEW OUTPUT:
+            Follow the review workflow from review-guidelines.md:
+            - Check existing review comments to avoid duplicates
+            - Before writing a summary, search previous summaries
+              (`gh pr view {PR_NUMBER} --json comments`) to determine the
+              correct round number (highest existing round + 1)
+            - Use inline comments for specific issues
+            - Create ONE summary comment per review cycle
+            - Positive validation when PR has no issues
+            - After author pushes fixes: acknowledge, focus on new issues only
+
+            Be constructive and helpful in your feedback.
+
+          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          claude_args: '--allowed-tools "Read,Grep,Glob,mcp__github_inline_comment__create_inline_comment,mcp__github__get_pull_request_review_comments,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr review:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh api:*)"'
