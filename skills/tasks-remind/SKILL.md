@@ -6,6 +6,8 @@ description: >
   you might not open.
 user-invocable: true
 invocation-name: dx:remind
+allowed-tools:
+  - Bash(~/.claude/skills/slack/scripts/slack-notify.py:*)
 ---
 
 # dx:remind — Slack DM Reminder
@@ -19,9 +21,8 @@ context so you know where to pick it up.
 
 ## Prerequisites
 
-- Slack token available (env `SLACK_BOT_TOKEN` or system keyring)
-- A Slack notification helper script configured for your project
-  (see `dx:slack` for the canonical sender pattern)
+- Slack token available (env `SLACK_TOKEN` or system keyring)
+- `slack-notify.py` accessible at `~/.claude/skills/slack/scripts/slack-notify.py`
 
 ## Workflow
 
@@ -57,16 +58,12 @@ For multi-line messages, write the formatted text to a temp file
 using the Write tool first, then pass it via command substitution:
 
 ```bash
-<path-to-slack-notify-script> --remind "$(cat /tmp/claude/remind-msg.txt)"
+~/.claude/skills/slack/scripts/slack-notify.py \
+  --remind "$(cat /tmp/claude/remind-msg.txt)"
 ```
 
-The Slack notify script should:
-- Read `SLACK_BOT_TOKEN` from environment or system keyring
-- Send the message as a self-DM (to the bot's own user)
-- Prefix with `🔖` for easy search later
-
 Do NOT use heredoc (`cat <<'EOF'`) to build the message inline —
-bash security hooks may block it. Always use Write tool → temp file
+the bash security hook blocks it. Always use Write tool → temp file
 → `$(cat ...)` for multi-line content.
 
 ### 4. Confirm
