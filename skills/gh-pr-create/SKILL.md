@@ -26,7 +26,7 @@ All multi-line commands live in `~/.claude/skills/gh-pr-create/scripts/`:
 |--------|---------|
 | `verify-state.sh` | Validate branch, commits, and base branch ancestry |
 | `generate-commit-list.sh` | Generate linked commit list for PR body |
-| `pre-pr-checks.sh` | Run linting, formatting, type checks, tests before push |
+| `pre-pr-checks.sh` | Run ruff, black, mypy, pytest before push |
 | `create-pr.sh` | Push branch, create draft PR with body including checklist |
 | `post-summary-comment.sh` | _(deprecated — checklist is now in PR body)_ |
 
@@ -43,6 +43,20 @@ All multi-line commands live in `~/.claude/skills/gh-pr-create/scripts/`:
 2. Verify we're in a git repository with a remote:
    ```bash
    git remote get-url origin
+   ```
+
+3. **Worktree check** — `verify-state.sh` reads git state from the current working
+   directory. If the session is rooted in the main repo but the branch lives in a
+   worktree, run it with `GIT_DIR` pointing to the worktree — BUT that env var
+   prefix breaks `Bash(~/.claude/skills:*)` allow-rule matching. Instead, pass
+   the worktree path as an argument when the script supports it, or use a subshell:
+   ```bash
+   # When invoking from main repo for a branch checked out in a worktree:
+   # ❌  GIT_DIR=... verify-state.sh   (env prefix breaks allow rules)
+   # ✅  Run the script from within the worktree context
+   # Note: env var prefix is still subject to permission friction. The
+   # cleanest alternative is to invoke pr:create while CWD is inside the
+   # worktree, not the main repo.
    ```
 
 ## When to Use This Skill
@@ -200,8 +214,8 @@ If FIXES_URL is empty (unknown tracker), omit the `Fixes:` line entirely.
 ~/.claude/skills/gh-pr-create/scripts/pre-pr-checks.sh
 ```
 
-Automatically skips if no Python files changed. Runs linting, formatting,
-type checks, and tests. Exits on first failure.
+Automatically skips if no Python files changed. Runs ruff, formatting,
+mypy, and pytest. Exits on first failure.
 
 **If any check fails:**
 - Stop the workflow
