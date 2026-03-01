@@ -1,8 +1,9 @@
 ---
 name: dx:git-worktree
 description: >
-  Create git worktrees outside the project directory for clean IDE isolation.
-  Handles post-checkout hook setup, next-number naming, and SessionEnd cleanup prompt.
+  Create git worktrees for clean workspace isolation.
+  Offers two modes: native EnterWorktree (switches CWD in current session)
+  or external worktree (IDE-isolated, requires restarting claude in new dir).
 user-invocable: true
 invocation-name: dx:git-worktree
 allowed-tools:
@@ -11,63 +12,136 @@ allowed-tools:
   - Bash(git worktree remove:*)
 ---
 
-# Git Worktree — External Isolation
-
-Create worktrees **outside** the project directory to prevent IDE cross-indexing
-and accidental imports between worktrees.
+# Git Worktree
 
 **Announce:** "Using dx:git-worktree skill to create an isolated workspace."
 
-## Why Outside the Project?
-
-Worktrees inside the project (`.worktrees/`, `.claude/worktrees/`) cause:
-- IDEs indexing files from sibling worktrees
-- Accidental imports resolving to wrong worktree
-- Cluttered project root
-
 ## Workflow
 
-### Step 1: Determine Worktree Location
+### Step 1: Determine Branch Name
+
+The branch name is needed by both paths. Follow project naming conventions:
+
+- username: check `git branch -a` for the pattern used (e.g. `janusz`)
+- slug: lowercase ticket title, hyphens, stop-words removed, max 3–4 words
+- format: `username/TICKET-ID/slug`
+
+### Step 2: Choose Worktree Mode
+
+Present the two options with AskUserQuestion:
+
+- **Same session** (Recommended) — native `EnterWorktree` tool switches CWD
+  immediately; all subsequent git commands and skills (`commit`, `pr:create`,
+  `branch:groom`) work without flags; worktree lives inside `.claude/worktrees/`
+- **External + new session** — worktree created at `../.worktrees/<project>-NN`
+  outside the project; IDE won't cross-index sibling worktrees; requires closing
+  this session and opening a new one in the worktree directory
+
+Continue to **Path A** or **Path B** based on the choice.
+
+---
+
+## Path A — Same Session (EnterWorktree)
+
+### Step A1: Check post-checkout Hook
+
+Read `.git/hooks/post-checkout` (or `.husky/post-checkout`) if it exists.
+If it handles worktree setup adequately (uv sync, yarn install, env copy),
+skip to Step A2.
+
+If missing or incomplete, detect project type and propose the appropriate
+template from the **Hook Templates** section below. Present to the user for
+approval before writing.
+
+### Step A2: Create Worktree (native tool)
+
+Call the native `EnterWorktree` tool:
+- `name`: use the branch slug (e.g. `fix-railway-deployment`)
+
+After `EnterWorktree` runs the session CWD is the new worktree. All
+subsequent Bash calls, git commands, and skills operate inside it.
+
+### Step A3: Continue Workflow
+
+The session is now in the worktree. Resume the calling skill's next step
+(ticket status, job story, summary). No restart needed.
+
+---
+
+## Path B — External + New Session
+
+### Step B1: Determine Worktree Location
 
 Default pattern: `../.worktrees/<project-basename>-NN`
 
-Example for `/work/myproject/myproject`: `/work/myproject/.worktrees/myproject-1`
-
-Check user memory for a preferred location override. If found, use it.
-
-Calculate next number:
+Calculate the next available path:
 
 ```bash
 ~/.claude/skills/git-worktree/scripts/next-worktree-name.sh
 ```
 
-This prints the full path for the next available worktree.
-
-### Step 2: Confirm with User
-
-Ask the user to confirm the worktree path and which branch to base it on
-(default: current HEAD). Use AskUserQuestion with options:
-
+Ask user to confirm (AskUserQuestion):
 - **Create at `<calculated-path>`** (Recommended)
 - **Custom location** — let user specify
 
-### Step 3: Check post-checkout Hook
+### Step B2: Check post-checkout Hook
 
-Read `.git/hooks/post-checkout` (or `.husky/post-checkout`) if it exists.
-If it already handles worktree setup adequately, skip to Step 4.
+Same as Step A1 — read, verify, and propose a template if needed.
+See **Hook Templates** section below.
 
-**Important:** The skill does NOT run setup commands directly.
-The `post-checkout` hook is responsible for all environment setup.
+### Step B3: Create the Worktree
 
-If the hook is **missing or incomplete**, detect the project type and propose
-the appropriate template (see below). Present to the user for approval before
-writing.
+```bash
+~/.claude/skills/git-worktree/scripts/create-worktree.sh \
+  <worktree-path> <branch-name> [repo-root]
+```
 
-#### All hooks: use the all-zeros SHA guard
+- Omit `repo-root` when already inside the target repo.
+- Pass `repo-root` when the CWD differs from the target repo.
 
-Always use the all-zeros SHA to detect new worktree creation — this is what
-`git worktree add` passes as `$1` (previous HEAD). Do NOT use `[ -f .git ]`
-which would trigger on every branch checkout inside any existing worktree:
+The `post-checkout` hook fires automatically after this script runs.
+
+### Step B4: Install SessionEnd Cleanup Hook
+
+```bash
+~/.claude/skills/git-worktree/scripts/setup-session-end-hook.sh <worktree-path>
+```
+
+This writes a SessionEnd hook into `<worktree-path>/.claude/settings.local.json`
+that prompts the user to remove the worktree when the new session ends.
+
+### Step B5: Hand Off — STOP HERE
+
+Claude Code sessions have a fixed CWD. `cd` inside a Bash call does not
+persist, so every subsequent git command would need `git -C <path>` and
+skills like `pr:create` (whose `verify-state.sh` runs plain `git`) would fail.
+
+Print this message and **stop — do not continue with ticket workflow steps**:
+
+```
+✅ Worktree ready
+   Path:   <worktree-path>
+   Branch: <branch-name>
+
+Close this session and open a new one in the worktree:
+
+  cd <worktree-path> && claude
+
+Copy the command above, close this session, then paste it in your terminal.
+The new session will have the correct CWD and all skills will work normally.
+```
+
+---
+
+## Hook Templates
+
+Templates for projects that lack a `post-checkout` hook.
+
+### All hooks: use the all-zeros SHA guard
+
+`git worktree add` passes `0000000000000000000000000000000000000000` as `$1`
+(previous HEAD) when creating a new worktree. Guard on this value — do NOT
+use `[ -f .git ]` which fires on every branch checkout inside any worktree:
 
 ```sh
 if [ "$1" = "0000000000000000000000000000000000000000" ]; then
@@ -75,99 +149,69 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
 fi
 ```
 
-#### Step 3a: Detect project type
+### Detect project type
 
-Check these files to determine which template to use:
-
-| Check | Meaning |
+| Check | Template |
 |---|---|
-| `uv.lock` or `pyproject.toml` exists | **Python/uv** project |
-| `package.json` exists | **Node.js** project |
-| `.husky/` directory exists **or** `package.json` contains `"prepare": "husky"` | Node.js **with Husky** |
-| `package.json` has a top-level `"workspaces"` key | Node.js **monorepo** (yarn/npm workspaces) |
-| Multiple `package.json` files in subdirs + root `package.json` | **Monorepo** — run install from root |
+| `uv.lock` or `pyproject.toml` exists | Template A (Python/uv) |
+| `package.json` + `.husky/` directory | Template B (Node + Husky) |
+| `package.json` without Husky | Template C (Node, no Husky) |
 
-A project can be Python-only, Node.js-only, or both (e.g., Django + React
-frontend in the same repo). Apply all matching templates.
+A project can match multiple templates (e.g. Django + SvelteKit). Apply all.
 
-#### Step 3b: Determine hook file location
+### Hook file location
 
 | Condition | Write to |
 |---|---|
-| `.husky/` directory exists or Husky in `prepare` script | **`.husky/post-checkout`** (tracked in git) |
-| No Husky | **`.git/hooks/post-checkout`** (untracked, local only) |
+| Husky present (`prepare` script or `.husky/` dir) | `.husky/post-checkout` (tracked) |
+| No Husky | `.git/hooks/post-checkout` (untracked, local only) |
 
-**Why:** Husky manages `.git/hooks/` and overwrites it whenever
-`yarn install` / `npm install` runs the `prepare` script. Writing to
-`.git/hooks/post-checkout` in a Husky project means your changes are silently
-lost on next install. `.husky/post-checkout` is tracked in git and survives
-re-installs.
+Husky overwrites `.git/hooks/` on every `yarn/npm install`. Writing to
+`.git/hooks/post-checkout` in a Husky project means changes are silently lost.
 
-#### Template A: Python/uv project
+### Template A: Python/uv
 
 ```sh
 #!/bin/sh
-
 if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     echo "New worktree detected. Running setup..."
     pwd
-
-    ORIGINAL_REPO=/work/<project-name>
-
-    cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found to copy."
-    cp "$ORIGINAL_REPO/development.secrets.env" . \
-        2>/dev/null || echo "No development.secrets.env found to copy."
-    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || echo "No .claude found to copy."
-    cp -r "$ORIGINAL_REPO/.idea" . 2>/dev/null || echo "No .idea found to copy."
-
-    if command -v uv >/dev/null; then
-        echo "Running uv sync..."
-        uv sync
-    fi
+    ORIGINAL_REPO=/work/<org>/<project-name>
+    cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
+    cp "$ORIGINAL_REPO/development.secrets.env" . 2>/dev/null || true
+    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || true
+    cp -r "$ORIGINAL_REPO/.idea" . 2>/dev/null || true
+    command -v uv >/dev/null && uv sync
 fi
 ```
 
-Adjust which files to copy based on what actually exists in the project root
-(check `git status --short` for untracked files in the original repo).
-
-#### Template B: Node.js + Husky (write to `.husky/post-checkout`)
+### Template B: Node.js + Husky (write to `.husky/post-checkout`)
 
 ```sh
 #!/bin/sh
-
 if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     echo "New worktree detected. Running setup..."
     pwd
-
-    ORIGINAL_REPO=/work/<project-name>
-
-    cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found to copy."
-    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || echo "No .claude found to copy."
-
-    if command -v yarn >/dev/null; then
-        echo "Running yarn install..."
-        yarn install --frozen-lockfile
-    fi
+    ORIGINAL_REPO=/work/<org>/<project-name>
+    cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
+    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || true
+    command -v yarn >/dev/null && yarn install --frozen-lockfile
 fi
 ```
 
-For **monorepos** (yarn workspaces), run `yarn install --frozen-lockfile` from
+For monorepos (yarn workspaces), run `yarn install --frozen-lockfile` from
 the repo root — this installs all workspace packages in one pass.
 
-#### Template C: Node.js without Husky (write to `.git/hooks/post-checkout`)
+### Template C: Node.js without Husky (write to `.git/hooks/post-checkout`)
 
 ```sh
 #!/bin/sh
-
 if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     echo "New worktree detected. Running setup..."
     pwd
-
-    ORIGINAL_REPO=/work/<project-name>
-
-    cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found to copy."
-    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || echo "No .claude found to copy."
-
+    ORIGINAL_REPO=/work/<org>/<project-name>
+    cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
+    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || true
     if command -v yarn >/dev/null; then
         yarn install --frozen-lockfile
     elif command -v npm >/dev/null; then
@@ -176,88 +220,27 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
 fi
 ```
 
-Make the file executable: `chmod +x .git/hooks/post-checkout`
+Make executable: `chmod +x .git/hooks/post-checkout`
 
-#### Node.js: never symlink node_modules
+**Never symlink `node_modules`** — a symlink means `yarn add/remove` in any
+worktree mutates the shared directory. Always run `yarn install --frozen-lockfile`
+(fast via Yarn's hardlink cache).
 
-Do **not** use `ln -sfn .../node_modules node_modules`. A symlink means
-`yarn add` / `yarn remove` in any worktree mutates the shared directory,
-breaking isolation across all worktrees. Always run
-`yarn install --frozen-lockfile` to give each worktree its own copy.
-Yarn's global cache makes this fast (hardlinks from `~/.yarn/cache`).
-
-### Step 4: Create the Worktree
-
-Use the script to wrap the command — this keeps it under a pre-approved path
-so permission prompts are not triggered by the long `git -C ... worktree add`
-form:
-
-```bash
-~/.claude/skills/git-worktree/scripts/create-worktree.sh \
-  <worktree-path> <branch-name> [repo-root]
-```
-
-- `repo-root` is required when the current working directory differs from the
-  target repo (e.g. creating a worktree for one project while in another).
-- Omit `repo-root` when already inside the target repo.
-
-Examples:
-
-```bash
-# From inside the target repo
-~/.claude/skills/git-worktree/scripts/create-worktree.sh \
-  /work/myproject/.worktrees/myproject-1 user/TICKET-123/feature-description
-
-# From a different directory (repo-root required)
-~/.claude/skills/git-worktree/scripts/create-worktree.sh \
-  /work/myproject/.worktrees/myproject-1 user/TICKET-123/feature-description \
-  /work/myproject/myproject
-```
-
-The branch name should follow project conventions (e.g., from ticket:branch skill).
-If no branch name is provided, ask the user or use a descriptive name.
-
-The `post-checkout` hook fires automatically after the script runs.
-
-### Step 5: Install SessionEnd Cleanup Hook
-
-Run the setup script to configure a SessionEnd hook in the new worktree
-that will prompt the user to remove the worktree when the session ends:
-
-```bash
-~/.claude/skills/git-worktree/scripts/setup-session-end-hook.sh <worktree-path>
-```
-
-This creates/updates `<worktree-path>/.claude/settings.local.json` with a
-SessionEnd hook pointing to the cleanup prompt script.
-
-### Step 6: Report
-
-Print:
-- Worktree path
-- Branch name
-- Whether post-checkout hook ran successfully
-- Reminder: `cd <path>` to start working, or open in a new IDE window
+---
 
 ## Cleanup
 
-The SessionEnd hook in the worktree prompts the user:
+The SessionEnd hook installed by Path B prompts:
 
 > This session used worktree at `<path>`. Remove it? [y/N]
 
-If yes, runs `git worktree remove <path>`.
-If no or timeout, the worktree persists for future sessions.
+If yes: `git worktree remove <path>`
+If no: the worktree persists for future sessions.
 
-To manually remove:
+Manual removal:
 
 ```bash
 git worktree remove <path>
-# or force if dirty:
-git worktree remove --force <path>
-```
-
-To list all worktrees:
-
-```bash
-git worktree list
+git worktree remove --force <path>  # if dirty
+git worktree list                   # list all worktrees
 ```
