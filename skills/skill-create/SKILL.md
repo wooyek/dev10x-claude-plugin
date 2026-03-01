@@ -107,14 +107,13 @@ Follow `superpowers:writing-skills` RED-GREEN-REFACTOR:
 
 ### 3. Validate Structure
 
-Verify the frontmatter YAML is valid and all required fields (`name`,
-`description`, `user-invocable`, `invocation-name`) are present. You
-can do this manually or with a YAML linter of your choice.
+```bash
+~/.claude/skills/skill:create/scripts/quick_validate.py \
+  ~/.claude/skills/<namespace>:<skill-name>
+```
 
-> **Tip:** If you have the `superpowers` plugin installed, its
-> `skill:create/scripts/quick_validate.py` can automate this check.
-> Colons in skill names are valid locally — ignore any name validation
-> warnings it produces.
+Ignore the name validation error (colon in name is valid locally). Verify
+only that frontmatter parses and required fields exist.
 
 ### 4. Register in MOTD
 
