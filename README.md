@@ -1,33 +1,126 @@
-# dev10x-db
+# dev10x Claude Plugin
 
-A Claude Code plugin for safe database query planning and execution.
+A Claude Code plugin that turns your CLI into a senior engineering
+partner. Ships 28 skills that automate the tedious parts of your
+dev workflow — structured commits, PR lifecycle, branch hygiene,
+task tracking, and more — so you stay in flow.
 
-## What it does
+## What you get
 
-- **Schema-first query construction** - Claude checks project schemas before writing SQL
-- **Read-only safety** - SQL validation hook blocks write operations
-- **Convention-based context discovery** - auto-discovers `memory/db-*-schema.md` files and `*:db` skills
-- **psql wrapper** - `db.sh` script with alias-based database selection from `databases.json`
+**Git workflow on autopilot.** Type `/commit` and get a properly
+formatted commit with gitmoji, ticket reference, and JTBD
+outcome-focused title — extracted from your branch name and diff.
+No more context-switching to remember conventions.
 
-## Install
+**PR lifecycle from create to merge.** `/pr:create` pushes your
+branch, writes a Job Story description, links the ticket, and
+opens a draft PR. `/pr:monitor` watches CI and review comments
+in the background, auto-fixing issues with fixup commits.
+`/pr:respond` triages and addresses reviewer feedback in batch.
 
+**Branch history that tells a story.** `/branch:groom` restructures
+your commits into atomic, well-organized units before merge.
+`/commit:split` breaks monolithic commits into Clean Architecture
+layers. No more "fix stuff" commits surviving into main.
+
+**Task tracking without leaving the terminal.** `/dx:tasks` tracks
+in-session work items. `/dx:defer` saves items for later.
+`/dx:wrap-up` captures unfinished work at session end so nothing
+falls through the cracks.
+
+**Safe git operations.** The `dx:git` skill guards against
+force-pushes to protected branches and ensures rebases run safely.
+Worktree support (`/dx:git-worktree`) gives you isolated
+workspaces for parallel feature work.
+
+**Issue tracker integration.** Works with GitHub Issues, Linear,
+and JIRA. `/ticket:create` creates tickets. `/commit:to-new-ticket`
+retroactively converts commits into tracked issues.
+
+## Skill families
+
+| Family | Skills | What it automates |
+|--------|--------|-------------------|
+| **Git** | `/commit`, `/commit:split`, `/commit:fixup`, `/branch:groom` | Structured commits, atomic history |
+| **PR** | `/pr:create`, `/pr:review`, `/pr:respond`, `/pr:monitor` | Full PR lifecycle |
+| **Tasks** | `/dx:tasks`, `/dx:defer`, `/dx:todo`, `/dx:wrap-up` | In-session work tracking |
+| **Tickets** | `/ticket:create`, `/ticket:branch`, `/commit:to-new-ticket` | Issue tracker integration |
+| **Tooling** | `/dx:git`, `/dx:git-worktree`, `/dx:py-uv` | Safe operations, workspace isolation |
+| **Meta** | `/dx:skill-create`, `/dx:skill-audit` | Create and audit skills |
+
+Run any skill by typing its name in the Claude Code CLI — e.g.,
+`/commit` or `/pr:create`.
+
+## Installation
+
+### Prerequisites
+
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
+  installed and authenticated
+- Git 2.20+ (for worktree support)
+- GitHub CLI (`gh`) installed and authenticated
+
+### 1. Clone the repo
+
+This is a private repository. You need GitHub access granted through
+the [Dev10x community](https://www.skool.com/dev10x-1892). Once you
+have access:
+
+```bash
+git clone git@github.com:wooyek/dev10x-claude-plugin.git \
+  ~/.claude/plugins/dev10x-claude-plugin
 ```
-/plugin add github:wooyek/dev10x-claude-plugin
+
+> **Using HTTPS?** Replace the URL with
+> `https://github.com/wooyek/dev10x-claude-plugin.git` and
+> authenticate when prompted.
+
+### 2. Register the plugin
+
+Tell Claude Code to load the plugin on every session:
+
+```bash
+claude plugin add --local ~/.claude/plugins/dev10x-claude-plugin
 ```
 
-## Skills
+### 3. Verify the installation
 
-| Skill | Type | Description |
-|-------|------|-------------|
-| `dev10x-db` | Agent (auto) | Query planning workflow and schema discovery conventions |
-| `dev10x-db-psql` | User-invocable | psql execution wrapper with SQL validation |
+Start a new Claude Code session and check that skills are loaded:
 
-## Setup
+```bash
+claude
+# Inside the session, type:
+/dx:skill-motd
+```
 
-1. Install the plugin
-2. Create a `databases.json` in your project's skill directory (see `databases.json.example`)
-3. Set database DSN environment variables in your shell profile
-4. Add permission rules for `db.sh` to your Claude Code settings
+You should see a skills reference listing all available commands.
+
+### Alternative: load for a single session
+
+If you want to try the plugin without a permanent install:
+
+```bash
+claude --plugin-dir ~/.claude/plugins/dev10x-claude-plugin
+```
+
+### Updating
+
+Pull the latest changes to stay current:
+
+```bash
+cd ~/.claude/plugins/dev10x-claude-plugin && git pull
+```
+
+## Getting access
+
+This plugin is available to members of the
+[Dev10x community on Skool](https://www.skool.com/dev10x-1892).
+To get access:
+
+1. Join the community at https://www.skool.com/dev10x-1892
+2. Share your GitHub username in the community
+3. You will be added as a collaborator to the private repo
+4. Clone and install using the steps above
 
 ## Development
 
