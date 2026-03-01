@@ -153,5 +153,5 @@ dx:gh-pr-review
 
 Complements:
 - `/review` — self-review before PR creation (no GitHub posting)
-- `/pr:respond` — respond to review comments on YOUR PR
-- `/pr:triage` — validate a single review comment
+- `/dx:gh-pr-respond` — respond to review comments on YOUR PR
+- `/dx:gh-pr-triage` — validate a single review comment

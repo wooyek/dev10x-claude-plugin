@@ -31,7 +31,7 @@ The branch name is needed by both paths. Follow project naming conventions:
 Present the two options with AskUserQuestion:
 
 - **Same session** (Recommended) — native `EnterWorktree` tool switches CWD
-  immediately; all subsequent git commands and skills (`commit`, `pr:create`,
+  immediately; all subsequent git commands and skills (`commit`, `dx:gh-pr-create`,
   `branch:groom`) work without flags; worktree lives inside `.claude/worktrees/`
 - **External + new session** — worktree created at `../.worktrees/<project>-NN`
   outside the project; IDE won't cross-index sibling worktrees; requires closing
@@ -114,7 +114,7 @@ that prompts the user to remove the worktree when the new session ends.
 
 Claude Code sessions have a fixed CWD. `cd` inside a Bash call does not
 persist, so every subsequent git command would need `git -C <path>` and
-skills like `pr:create` (whose `verify-state.sh` runs plain `git`) would fail.
+skills like `dx:gh-pr-create` (whose `verify-state.sh` runs plain `git`) would fail.
 
 Print this message and **stop — do not continue with ticket workflow steps**:
 

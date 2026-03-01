@@ -1,6 +1,6 @@
 ---
 name: dx:gh
-description: Use when detecting PR context (number, repo, URL, branch) from a URL, PR number, or current branch — so skills like pr:monitor always get the correct target PR even in multi-worktree setups
+description: Use when detecting PR context (number, repo, URL, branch) from a URL, PR number, or current branch — so skills like dx:gh-pr-monitor always get the correct target PR even in multi-worktree setups
 user-invocable: false
 allowed-tools:
   - Bash(~/.claude/skills/gh/scripts/*:*)

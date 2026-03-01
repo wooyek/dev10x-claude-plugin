@@ -185,4 +185,4 @@ gh api repos/{owner}/{repo}/issues/comments/{comment_id} \
 ## Used By
 
 - `dx:wrap-up` — Phase 3 calls this for each deferred item
-- `pr:bookmark` — thin wrapper that pre-selects PR session bookmark target
+- `dx:gh-pr-bookmark` — thin wrapper that pre-selects PR session bookmark target
