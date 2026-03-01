@@ -37,14 +37,12 @@ Files matching: `skills/**`
 10. **Reference doc consistency** — if SKILL.md references a
     `references/` document that defines a process or format, check it
     for consistency with any matching `.claude/rules/` file
+11. **Embedded shell templates** — for `sh`/`bash` code blocks in
+    SKILL.md: POSIX-compatible syntax, no silent `|| true` swallowing,
+    `<>` placeholder markers for user-replaceable values
 
 ## Output Format
 
-Apply this checklist to ALL `skills/**` files in the diff, including
-any added in the same PR as rule changes — new checklist items are
-not retroactively applied to same-PR additions otherwise.
-
-For each issue:
-- **File**: path
-- **Severity**: CRITICAL / WARNING / INFO
-- **Issue**: what's wrong
+Apply to ALL `skills/**` files in the diff, including same-PR additions
+(new checklist items are not retroactively applied to them otherwise).
+For each issue: **File** · **Severity** (CRITICAL/WARNING/INFO) · **Issue**
