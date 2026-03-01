@@ -77,3 +77,8 @@ When docs reference CLI commands (e.g., install instructions):
 - Verify commands appear in `CLAUDE.md` Development section, or
 - Confirm they are known Claude Code CLI built-ins
 - Unverified commands in user-facing docs are WARNING severity
+
+## Python Linting Checks
+
+- **f-strings without expressions**: `f"static string"` with no `{}`
+  placeholders is ruff F541. Flag and suggest removing the `f` prefix.

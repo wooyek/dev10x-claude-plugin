@@ -3,6 +3,11 @@
 Rules for writing Job Stories used in PR titles, PR descriptions,
 commit messages, and issue tickets.
 
+> **Scope**: This format governs commits and PR descriptions.
+> Skills may define their own output formats in `references/`
+> documents. If a skill's reference doc diverges from this format,
+> verify the skill output is not used for PR/commit descriptions.
+
 ## Format
 
 ```

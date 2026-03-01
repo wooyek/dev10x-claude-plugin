@@ -31,6 +31,12 @@ Files matching: `skills/**`
 8. **allowed-tools paths** — `Bash(...)` entries in SKILL.md front
    matter must not reference `~/.claude/` or other user-specific
    absolute paths; use plugin-relative paths or omit the path restriction
+9. **Template consistency** — if SKILL.md contains a YAML code block
+   with a `name:` field (a frontmatter template), verify it follows
+   `skill-naming.md`, not an ad-hoc example
+10. **Reference doc consistency** — if SKILL.md references a
+    `references/` document that defines a process or format, check it
+    for consistency with any matching `.claude/rules/` file
 
 ## Output Format
 
