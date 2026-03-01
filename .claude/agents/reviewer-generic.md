@@ -29,6 +29,11 @@ domain-specific reviewers).
 7. **Established patterns** — don't question patterns with 5+ uses
 8. **Security** — no hardcoded secrets, no eval of untrusted input,
    proper quoting in shell scripts
+9. **Docstring accuracy** — when a script documents a guarantee
+   ("always blocks", "never allows"), verify the implementation
+   covers all code paths. For hooks that parse shell commands:
+   confirm ALL pipe-chained segments are inspected, not just
+   `command.split("|")[0]`.
 
 ## Output Format
 

@@ -52,7 +52,7 @@ Multi-agent architecture with domain-routed reviewers:
 | Agent spec                      | Trigger                          |
 |---------------------------------|----------------------------------|
 | `reviewer-generic.md`           | `**/*.py`, `**/*.sh`             |
-| `reviewer-infra.md`             | `Makefile`, `bin/**`, `*.sh`     |
+| `reviewer-infra.md`             | `Makefile`, `bin/**`, `hooks/**`, `*.sh` |
 | `reviewer-docs.md`              | `docs/**`, `.claude/**`, `README.md` |
 | `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**` |
 | `reviewer-skill.md`             | `skills/**`                      |

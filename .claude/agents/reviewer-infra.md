@@ -4,7 +4,7 @@ Review Makefile, shell script, and GitHub Actions workflow changes.
 
 ## Trigger
 
-Files matching: `Makefile`, `**/*.sh`, `bin/**`,
+Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
 `.github/workflows/**/*.yml`
 
 ## Required Reading
@@ -28,6 +28,9 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`,
    name; use `${{ github.event.pull_request.base.ref }}` instead
 9. **Branch creation idempotency** — flag `git checkout -b <name>`
    in workflow steps; prefer `git checkout -B <name>`
+10. **hooks.json integrity** — for `hooks/hooks.json` changes: verify
+    all referenced script paths exist, matcher patterns are valid
+    (Bash, Edit|Write, Skill, SessionStart), and no duplicate entries
 
 ## Design Intent
 

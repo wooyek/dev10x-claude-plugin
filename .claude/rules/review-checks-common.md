@@ -82,6 +82,11 @@ When docs reference CLI commands (e.g., install instructions):
 
 - **Silent error swallowing**: `|| true` on setup steps hides failures;
   replace with a fallback action (`|| { cmd; }`) or an explicit error.
+- **Pipe segment completeness in security hooks**: when a hook script
+  parses a shell command to detect a pattern (e.g., `python3 -c`),
+  it must inspect ALL pipe-delimited segments, not just
+  `command.split("|")[0]`. Use `for seg in command.split("|"):` or
+  mirror the `segments[1:]` loop pattern from existing hooks.
 
 ## Python Linting Checks
 
