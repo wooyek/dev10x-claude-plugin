@@ -5,7 +5,8 @@ with the codebase.
 
 ## Trigger
 
-Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`
+Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`,
+`README.md`
 
 ## Checklist
 
@@ -30,6 +31,9 @@ Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`
 1. **No line number references** — they drift; use function/class names
 2. **Duplicate content** — check if info already exists in another file
 3. **Accuracy** — verify claims against actual code
+4. **Skill name accuracy** — when README or docs reference skill
+   invocation names, verify each exists in `skills/*/SKILL.md`
+   `name:` fields using Grep
 
 ## Output Format
 

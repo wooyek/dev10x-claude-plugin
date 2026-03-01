@@ -53,7 +53,7 @@ Multi-agent architecture with domain-routed reviewers:
 |---------------------------------|----------------------------------|
 | `reviewer-generic.md`           | `**/*.py`, `**/*.sh`             |
 | `reviewer-infra.md`             | `Makefile`, `bin/**`, `*.sh`     |
-| `reviewer-docs.md`              | `docs/**`, `.claude/**`          |
+| `reviewer-docs.md`              | `docs/**`, `.claude/**`, `README.md` |
 | `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**` |
 | `reviewer-skill.md`             | `skills/**`                      |
 

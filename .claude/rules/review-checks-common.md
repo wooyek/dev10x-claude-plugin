@@ -70,3 +70,10 @@ Before suggesting naming changes:
 Different skills and scripts may use different patterns intentionally.
 Only flag security concerns, documented rule violations, or bugs —
 not valid architectural choices.
+
+## CLI Command Verification
+
+When docs reference CLI commands (e.g., install instructions):
+- Verify commands appear in `CLAUDE.md` Development section, or
+- Confirm they are known Claude Code CLI built-ins
+- Unverified commands in user-facing docs are WARNING severity
