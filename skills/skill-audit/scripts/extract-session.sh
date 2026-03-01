@@ -9,4 +9,4 @@ OUTPUT_DIR="/tmp/claude/skill-audit"
 
 mkdir -p "$OUTPUT_DIR"
 
-exec python3 "$SCRIPT_DIR/extract-session.py" "$@"
+exec "$SCRIPT_DIR/extract-session.py" "$@"
