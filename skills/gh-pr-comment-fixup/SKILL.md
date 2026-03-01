@@ -45,7 +45,7 @@ URL format: https://github.com/{owner}/{repo}/pull/{pr_number}#discussion_r{comm
 
 **Fetch the comment:**
 ```bash
-gh api repos/{owner}/{repo}/pulls/comments/{comment_id}
+~/.claude/tools/gh-pr-comments.py get --comment-id {comment_id}
 ```
 
 Extract:
@@ -107,19 +107,17 @@ this comment:
 
 3. **Run verification (if applicable):**
 
-   Check project tooling (Makefile, package.json, pyproject.toml) for
-   linting and test commands. Common patterns:
-
    **Python projects:**
    ```bash
    pytest {test_file} -x
    ```
+   Note: `ruff format` and `ruff check --fix` run automatically via PostToolUse hook.
 
    **JavaScript/TypeScript projects:**
    ```bash
    npx prettier --write {file_path}
    npx eslint --fix {file_path}
-   npx tsc --noEmit
+   npx tsc --noEmit -p {tsconfig_path}
    npm test -- --testPathPattern="{test_pattern}" --no-coverage
    ```
 
