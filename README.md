@@ -60,7 +60,22 @@ Run any skill by typing its name in the Claude Code CLI — e.g.,
 - Git 2.20+ (for worktree support)
 - GitHub CLI (`gh`) installed and authenticated
 
-### 1. Clone the repo
+### Option A: Marketplace install (recommended)
+
+Add the marketplace source and install the plugin:
+
+```
+/plugin marketplace add wooyek/dev10x-claude-plugin
+/plugin install dev10x@dev10x
+```
+
+Update to the latest version:
+
+```
+/plugin update dev10x@dev10x
+```
+
+### Option B: Manual clone
 
 This is a private repository. You need GitHub access granted through
 the [Dev10x community](https://www.skool.com/dev10x-1892). Once you
@@ -75,15 +90,19 @@ git clone git@github.com:wooyek/dev10x-claude-plugin.git \
 > `https://github.com/wooyek/dev10x-claude-plugin.git` and
 > authenticate when prompted.
 
-### 2. Register the plugin
-
-Tell Claude Code to load the plugin on every session:
+Register the plugin so Claude Code loads it on every session:
 
 ```bash
 claude plugin add --local ~/.claude/plugins/dev10x-claude-plugin
 ```
 
-### 3. Verify the installation
+Update manually with:
+
+```bash
+cd ~/.claude/plugins/dev10x-claude-plugin && git pull
+```
+
+### Verify the installation
 
 Start a new Claude Code session and check that skills are loaded:
 
@@ -95,20 +114,12 @@ claude
 
 You should see a skills reference listing all available commands.
 
-### Alternative: load for a single session
+### Try without installing
 
-If you want to try the plugin without a permanent install:
+Load the plugin for a single session:
 
 ```bash
 claude --plugin-dir ~/.claude/plugins/dev10x-claude-plugin
-```
-
-### Updating
-
-Pull the latest changes to stay current:
-
-```bash
-cd ~/.claude/plugins/dev10x-claude-plugin && git pull
 ```
 
 ## Getting access
