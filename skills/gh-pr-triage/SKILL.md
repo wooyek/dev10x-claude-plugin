@@ -3,6 +3,8 @@ name: dx:gh-pr-triage
 description: Validate a PR review comment against the codebase. If invalid, reply with evidence. Never auto-resolves threads — resolution requires explicit user confirmation. Returns a verdict (VALID, INVALID, QUESTION, OUT_OF_SCOPE) so the caller knows whether a code fix is needed.
 user-invocable: true
 invocation-name: dx:gh-pr-triage
+allowed-tools:
+  - Bash(~/.claude/tools/gh-pr-comments.py:*)
 ---
 
 # Triage PR Review Comment
@@ -52,7 +54,7 @@ URL format: https://github.com/{owner}/{repo}/pull/{pr_number}#discussion_r{comm
 
 **Fetch the comment:**
 ```bash
-gh api repos/{owner}/{repo}/pulls/comments/{comment_id}
+~/.claude/tools/gh-pr-comments.py get --comment-id {comment_id}
 ```
 
 Extract:
@@ -69,8 +71,7 @@ Extract:
 Check for previously addressed issues to avoid duplicate work:
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{pr_number}/comments \
-  | jq '[.[] | select(.in_reply_to_id == null)]'
+~/.claude/tools/gh-pr-comments.py list --pr {pr_number} --root-only
 ```
 
 Look for:
