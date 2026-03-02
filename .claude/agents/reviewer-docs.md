@@ -33,7 +33,10 @@ Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`,
 ### General Documentation
 
 1. **No line number references** — they drift; use function/class names
-2. **Duplicate content** — check if info already exists in another file
+2. **Duplicate content** — check if info already exists in another file.
+   Exception: behavioral constraints in SKILL.md files may appear in
+   overview, point-of-use, and Important Notes — this is intentional
+   emphasis redundancy for behavioral enforcement, not duplication.
 3. **Accuracy** — verify claims against actual code
 4. **Skill name accuracy** — when README or docs reference skill
    invocation names, verify each exists in `skills/*/SKILL.md`

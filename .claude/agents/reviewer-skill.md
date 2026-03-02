@@ -79,6 +79,12 @@ Files matching: `skills/**`
     - Flag size if > 1 MB (INFO severity)
     - Suggest README or SKILL.md install instructions as an alternative
       when the binary is publicly available and stable
+14. **Behavioral constraint language** — when a PR upgrades soft language
+    to mandatory ("This is mandatory", "ALWAYS", "never skip"), verify:
+    (a) rationale is stated (why is it mandatory?);
+    (b) constraint appears in Important Notes section;
+    (c) scripts or calling code are consistent with the constraint.
+    Do NOT flag strong imperative language as "over-emphasis".
 
 ## Output Format
 
