@@ -103,8 +103,9 @@ review comment) is concise enough to evaluate in seconds.
 |--------|--------|-------------------|
 | **Git** | `/commit`, `/commit:split`, `/commit:fixup`, `/branch:groom` | Atomic commits, clean history |
 | **PR** | `/pr:create`, `/pr:review`, `/pr:respond`, `/pr:monitor` | Full PR lifecycle |
-| **Tasks** | `/dx:tasks`, `/dx:defer`, `/dx:todo`, `/dx:wrap-up` | In-session work tracking |
-| **Tickets** | `/ticket:create`, `/ticket:branch`, `/commit:to-new-ticket` | Issue tracker integration |
+| **Session** | `/dx:session-tasks`, `/dx:wrap-up` | In-session work tracking |
+| **Park** | `/dx:park`, `/dx:park-todo`, `/dx:park-remind`, `/dx:park-discover` | Deferred work parking |
+| **Tickets** | `/ticket:create`, `/ticket:branch`, `/dx:git-promote` | Issue tracker integration |
 | **Tooling** | `/dx:git`, `/dx:git-worktree`, `/dx:py-uv` | Safe operations, workspace isolation |
 | **Meta** | `/dx:skill-create`, `/dx:skill-audit` | Create and audit skills |
 
@@ -168,7 +169,7 @@ Start a new Claude Code session and check that skills are loaded:
 ```bash
 claude
 # Inside the session, type:
-/dx:skill-motd
+/dx:skill-index
 ```
 
 You should see a skills reference listing all available commands.

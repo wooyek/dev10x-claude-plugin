@@ -298,6 +298,6 @@ Next steps:
 This skill is designed to be used standalone or as part of larger workflows:
 
 - **ticket:work-on**: Could add an optional final step to create PR when work is done
-- **commit:to-new-ticket**: Uses this skill for Push and Create PR
+- **dx:git-promote**: Uses this skill for Push and Create PR
 - **test:fix-flaky**: Uses this skill for Create PR
 - **Standalone usage**: User manually invokes when ready to create PR
