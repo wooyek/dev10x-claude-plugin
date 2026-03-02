@@ -100,6 +100,11 @@ When an author explains flagged behavior is intentional:
 3. Never re-raise in subsequent cycles
 4. Never require re-explanation after force-pushes
 
+**Skill delegation example**: when an author states that a skill invocation
+name (e.g., `pr:create`) references an external skill at `~/.claude/skills/`,
+verify no `skills/*/SKILL.md` with that name exists in this repo, then close.
+Do NOT re-flag the name in the next review round.
+
 ## Summary Comment Strategy
 
 - ONE summary per review cycle (not per commit)

@@ -43,6 +43,10 @@ Before raising any of these, **verify actual code**:
    (bash, sh, fish) — check the shebang before flagging syntax
 9. **Skill SKILL.md format**: `name:` and `description:` are YAML
    front matter, not arbitrary fields — don't suggest restructuring
+10. **External user-level skill names**: skills may reference skills not in
+    this repo (e.g., `ticket:branch`, `pr:create`). Before flagging as wrong
+    invocation names, check if the author has explained they are external
+    skills at `~/.claude/skills/`. If confirmed, do NOT re-raise.
 
 ## Parameter Change Analysis
 
