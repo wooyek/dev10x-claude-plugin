@@ -37,10 +37,10 @@ import os
 import stat
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
-MSGS_DIR = Path("/tmp/claude/branch-groom/msgs")
-SEQ_EDITOR = Path("/tmp/claude/branch-groom/seq-editor.sh")
+DEFAULT_TMPDIR = Path("/tmp/claude/git")
 
 
 def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess:
@@ -75,14 +75,14 @@ def validate_shas(config_shas: set[str], current_shas: set[str]) -> None:
     sys.exit(1)
 
 
-def write_message_files(commits_config: dict) -> None:
-    MSGS_DIR.mkdir(parents=True, exist_ok=True)
+def write_message_files(commits_config: dict, msgs_dir: Path) -> None:
+    msgs_dir.mkdir(parents=True, exist_ok=True)
     for sha, spec in commits_config.items():
         msg = spec["message"] if isinstance(spec, dict) else spec
-        (MSGS_DIR / sha).write_text(msg, encoding="utf-8")
+        (msgs_dir / sha).write_text(msg, encoding="utf-8")
 
 
-def write_seq_editor(commits_config: dict) -> None:
+def write_seq_editor(commits_config: dict, msgs_dir: Path, seq_editor: Path) -> None:
     """Generate a GIT_SEQUENCE_EDITOR script that injects exec lines.
 
     Commits with renames get a single chained exec (mv + amend) to avoid
@@ -104,7 +104,7 @@ def write_seq_editor(commits_config: dict) -> None:
         "    fi",
         "    SHA=$(echo \"$line\" | awk '{print $2}')",
         '    SHORT="${SHA:0:7}"',
-        '    MSGFILE="/tmp/claude/branch-groom/msgs/$SHORT"',
+        f'    MSGFILE="{msgs_dir}/$SHORT"',
         '    printf \'%s\\n\' "$line" >> "$TMPFILE"',
     ]
 
@@ -132,15 +132,15 @@ def write_seq_editor(commits_config: dict) -> None:
         "",
     ]
 
-    SEQ_EDITOR.write_text("\n".join(lines), encoding="utf-8")
-    SEQ_EDITOR.chmod(
-        SEQ_EDITOR.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH
+    seq_editor.write_text("\n".join(lines), encoding="utf-8")
+    seq_editor.chmod(
+        seq_editor.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH
     )
 
 
-def run_rebase(base_sha: str) -> None:
+def run_rebase(base_sha: str, seq_editor: Path) -> None:
     env = os.environ.copy()
-    env["GIT_SEQUENCE_EDITOR"] = str(SEQ_EDITOR)
+    env["GIT_SEQUENCE_EDITOR"] = str(seq_editor)
     env["GIT_EDITOR"] = "true"
     result = subprocess.run(
         ["git", "rebase", "-i", base_sha],
@@ -154,6 +154,12 @@ def run_rebase(base_sha: str) -> None:
         sys.exit(result.returncode)
 
 
+def create_workdir() -> Path:
+    DEFAULT_TMPDIR.mkdir(parents=True, exist_ok=True)
+
+    return Path(tempfile.mkdtemp(prefix="groom.", dir=DEFAULT_TMPDIR))
+
+
 def main() -> None:
     if len(sys.argv) < 2:
         print(__doc__, file=sys.stderr)
@@ -165,7 +171,12 @@ def main() -> None:
     base_ref: str = config.get("base", "develop")
     commits_config: dict = config["commits"]
 
+    workdir = create_workdir()
+    msgs_dir = workdir / "msgs"
+    seq_editor = workdir / "seq-editor.sh"
+
     print(f"Base: {base_ref}  |  Commits to rewrite: {len(commits_config)}")
+    print(f"Workdir: {workdir}")
 
     base_sha = get_base_sha(base_ref)
     current_commits = get_current_commits(base_sha)
@@ -178,14 +189,18 @@ def main() -> None:
 
     validate_shas(set(commits_config.keys()), current_shas)
 
-    print(f"\nWriting message files → {MSGS_DIR}")
-    write_message_files(commits_config)
+    print(f"\nWriting message files → {msgs_dir}")
+    write_message_files(commits_config=commits_config, msgs_dir=msgs_dir)
 
-    print(f"Writing sequence editor → {SEQ_EDITOR}")
-    write_seq_editor(commits_config)
+    print(f"Writing sequence editor → {seq_editor}")
+    write_seq_editor(
+        commits_config=commits_config,
+        msgs_dir=msgs_dir,
+        seq_editor=seq_editor,
+    )
 
     print("Running rebase…")
-    run_rebase(base_sha)
+    run_rebase(base_sha=base_sha, seq_editor=seq_editor)
 
     print("\nDone. New log:")
     result = run(["git", "log", "--oneline", f"{base_sha}..HEAD"])

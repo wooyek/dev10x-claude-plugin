@@ -6,6 +6,7 @@ invocation-name: dx:skill-audit
 allowed-tools:
   - Read(~/.claude/**)
   - Read(~/.claude/skills/**)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)
   - Read(/tmp/claude/skill-audit/**)
   - Write(~/.claude/**)
   - Write(/tmp/claude/skill-audit/**)
@@ -127,20 +128,24 @@ If resolution fails, ask the user to provide the JSONL path explicitly.
 
 ### Step 2: Extract transcript
 
-Run the extraction script:
+Create a unique output file:
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh skill-audit audit-transcript .md
+```
+Store the returned path, then run the extraction script:
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/skill-audit/scripts/extract-session.sh \
-  "<session_file>" /tmp/claude/skill-audit/audit-transcript.md
+  "<session_file>" <unique-path>
 ```
 
-> **Note:** Do NOT prefix this with `mkdir -p /tmp/claude/skill-audit &&` — the script
-> creates the output directory automatically. Prefixing with `mkdir &&` shifts
+> **Note:** Do NOT prefix this with `mkdir -p ... &&` — the `mktmp.sh` script
+> creates the directory automatically. Prefixing with `mkdir &&` shifts
 > the command prefix to `mkdir`, breaking the `Bash(~/.claude/skills:*)` allow rule.
 
 ### Step 3: Read the transcript
 
-Use the Read tool to read `/tmp/claude/skill-audit/audit-transcript.md`. This is the session you
-are auditing.
+Use the Read tool to read the transcript at the unique path returned in Step 2.
+This is the session you are auditing.
 
 ### Step 4: Detect project context
 

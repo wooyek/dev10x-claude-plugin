@@ -8,7 +8,8 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
-  - Write(/tmp/claude/branch-groom/**)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)
+  - Write(/tmp/claude/git/**)
 ---
 
 # Git Branch History Grooming
@@ -61,8 +62,9 @@ git commit --fixup=<target-commit-sha>
 GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base develop HEAD)
 
 # Custom sequence (reordering, message rewrites, splits):
-# Write sequence to /tmp/claude/branch-groom/rebase-seq.txt first
-${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh develop
+# 1. Create unique seq file: ${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git rebase-seq .txt
+# 2. Write sequence to the returned path
+# 3. Run: GROOM_SEQ_FILE=<path> ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh develop
 ```
 
 **Key insight:** For pure autosquash (squashing fixup commits into their targets), use `GIT_SEQUENCE_EDITOR=true` directly — it accepts git's auto-generated todo as-is. The rebase script (`git-rebase-groom.sh`) replaces the todo with your sequence file, so commits not listed in the file are dropped. Only use the script when you need custom sequence control.
@@ -90,9 +92,13 @@ Fully automatable — no interactive editor required.
 
 **Use the script** (single permission approval, runs unattended):
 ```bash
-# Build config, write to /tmp/claude/branch-groom/groom-config.json, then:
-${CLAUDE_PLUGIN_ROOT}/skills/git-groom/scripts/mass-rewrite.py /tmp/claude/branch-groom/groom-config.json
+${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git groom-config .json
 ```
+Write the config to the returned path, then run:
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/git-groom/scripts/mass-rewrite.py <config-path>
+```
+The script creates its own isolated workdir under `/tmp/claude/git/`.
 
 Config format:
 ```json
@@ -121,35 +127,42 @@ cannot be used.
 git log --oneline $(git merge-base develop HEAD)..HEAD
 ```
 
-**Step 2:** Write one message file per commit to rewrite using the Write tool:
+**Step 2:** Create an isolated workdir for this groom session:
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh -d git groom
+```
+Store the returned path as `$WORKDIR`.
+
+**Step 3:** Write one message file per commit to rewrite using the Write tool:
 
 ```
-Write /tmp/claude/branch-groom/msgs/<7-char-sha>:
+Write $WORKDIR/msgs/<7-char-sha>:
 Enable user login with HMAC session auth
 ```
 
-Repeat for each commit needing a new message. No `mkdir` needed —
-`mass-rewrite.py` creates `/tmp/claude/branch-groom/msgs/` automatically, and the
-Write tool creates parent directories as needed.
+Repeat for each commit needing a new message. The Write tool creates
+parent directories as needed.
 
-**Step 3:** Write the complete rebase sequence using the Write tool:
+**Step 4:** Write the complete rebase sequence using the Write tool:
 
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git rebase-seq .txt
 ```
-Write /tmp/claude/branch-groom/rebase-seq.txt:
+
+Write to the returned path:
+```
 pick <oldest-sha> First commit
-exec git commit --amend -F /tmp/claude/branch-groom/msgs/<oldest-sha-short>
+exec git commit --amend -F $WORKDIR/msgs/<oldest-sha-short>
 pick <sha> Second commit with git mv
-exec git mv old/path new/path && git commit --amend -F /tmp/claude/branch-groom/msgs/<sha-short>
+exec git mv old/path new/path && git commit --amend -F $WORKDIR/msgs/<sha-short>
 pick <newest-sha> Third commit (no rewrite needed)
 ```
 
-Oldest commit at top. `git-rebase-groom.sh` creates `/tmp/claude/branch-groom/`
-automatically. No `mkdir` needed before writing.
+Oldest commit at top.
 
-**Step 4:** Run the non-interactive rebase via `git:safe`:
+**Step 5:** Run the non-interactive rebase:
 ```bash
-BASE=$(git merge-base develop HEAD)
-${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh "$BASE"
+GROOM_SEQ_FILE=<seq-path> ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh develop
 ```
 
 `GIT_EDITOR="true"` suppresses the commit message editor for `--amend`
@@ -323,7 +336,7 @@ error: cannot rebase: Your index contains uncommitted changes.
 using `&&` so the index is clean before the next `pick`:
 
 ```
-exec git mv old/path/A new/path/A && git mv old/path/B new/path/B && git commit --amend -F /tmp/claude/branch-groom/msgs/<sha>
+exec git mv old/path/A new/path/A && git mv old/path/B new/path/B && git commit --amend -F $WORKDIR/msgs/<sha>
 ```
 
 Never use separate `exec git mv` lines for the same commit amendment.
@@ -359,7 +372,7 @@ and use the fresh SHAs when writing the next sequence file.
 
 `git-rebase-groom.sh` uses a custom `GIT_SEQUENCE_EDITOR` that
 replaces the rebase todo with the contents of
-`/tmp/claude/branch-groom/rebase-seq.txt`. If the sequence file
+`$GROOM_SEQ_FILE`. If the sequence file
 doesn't list ALL commits, the missing ones are dropped.
 
 **Symptom:** After running `git-rebase-groom.sh`, only a subset

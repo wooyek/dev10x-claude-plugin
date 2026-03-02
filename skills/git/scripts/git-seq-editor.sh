@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 # GIT_SEQUENCE_EDITOR replacement — reads rebase instructions from
-# /tmp/claude/branch-groom/rebase-seq.txt (skill-namespaced data dir).
+# a caller-provided path via GROOM_SEQ_FILE env var.
 #
-# Usage: GIT_SEQUENCE_EDITOR=~/.claude/skills/git/scripts/git-seq-editor.sh git rebase -i ...
-#
-# Before running rebase, write the desired todo content to:
-#   /tmp/claude/branch-groom/rebase-seq.txt
+# Usage:
+#   GROOM_SEQ_FILE=/tmp/claude/git/rebase-seq.abc123.txt \
+#   GIT_SEQUENCE_EDITOR=.../git-seq-editor.sh git rebase -i ...
 
 set -euo pipefail
 
 TODO_FILE="${1:?GIT_SEQUENCE_EDITOR was called without a todo file argument}"
-SEQ_SOURCE="/tmp/claude/branch-groom/rebase-seq.txt"
+SEQ_SOURCE="${GROOM_SEQ_FILE:?GROOM_SEQ_FILE env var must point to the rebase-seq file}"
 
 if [[ ! -f "$SEQ_SOURCE" ]]; then
     echo "ERROR: $SEQ_SOURCE not found." >&2
