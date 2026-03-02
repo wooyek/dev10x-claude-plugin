@@ -31,6 +31,10 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
 10. **hooks.json integrity** — for `hooks/hooks.json` changes: verify
     all referenced script paths exist, matcher patterns are valid
     (Bash, Edit|Write, Skill, SessionStart), and no duplicate entries
+11. **GraphQL mutations** — verify mutation names against GitHub
+    GraphQL schema; confirm required OAuth scopes appear in the
+    workflow job's `permissions:` block (e.g., `minimizeComment`
+    requires `pull-requests: write`)
 
 ## Design Intent
 

@@ -17,6 +17,8 @@ in code, see the domain-specific agent specs in `.claude/agents/`.
    - Changed but issue remains → reply with update
 5. Use inline comment tools ONLY for NEW issues
 6. Hide obsolete review summaries before posting the new one:
+   (Must precede step 7 — posting first risks self-minimization
+   if the current review is included in the "previous summaries" query.)
    a. Query `reviewThreads` via `gh api graphql` — for each thread,
       check `isResolved` and group by `pullRequestReview.databaseId`
    b. For each previous Claude review with a non-empty body:
@@ -25,6 +27,8 @@ in code, see the domain-specific agent specs in `.claude/agents/`.
       - Review has NO inline threads (summary-only) → minimize
    c. Minimize: `minimizeComment(input: {subjectId: "<node_id>",
       classifier: OUTDATED})`
+      (`node_id` is the base64 GraphQL ID, NOT the integer `databaseId`.
+      Use the `id` field from `pullRequestReviews { nodes { id } }`.)
    d. Skip the current review cycle's own review
    e. Thread resolution must come from the human supervisor —
       the reviewer MUST NOT resolve threads to trigger this gate
