@@ -66,6 +66,20 @@ Skills use family prefixes for tab-completion discoverability:
 Other skills use the full directory name: `dx:git-worktree`,
 `dx:skill-audit`, `dx:skill-create`.
 
+## `invocation-name` vs `name`
+
+`name:` is the canonical plugin-registered invocation and MUST use the
+`dx:` prefix. `invocation-name:` is an optional alias and MAY use an
+alternative namespace when the skill bridges to an external skill family:
+
+| `name:`           | `invocation-name:` | Use case                             |
+|-------------------|--------------------|--------------------------------------|
+| `dx:ticket-jtbd`  | `ticket:jtbd`      | Cross-family alias for ticket skills |
+| `dx:git-promote`  | `dx:git-promote`   | Redundant (harmless)                 |
+
+Do NOT flag `invocation-name:` with a non-`dx:` prefix as a naming
+violation when `name:` already carries the correct `dx:` prefix.
+
 ## Rationale Summary
 
 - **Directory**: plain name → clean filesystem, no redundant prefix

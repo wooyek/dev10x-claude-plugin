@@ -16,9 +16,10 @@ Files matching: `skills/**`
 1. **SKILL.md exists** — every skill directory must contain a SKILL.md with
    valid YAML front matter. Required: `name:`, `description:`. Optional:
    `invocation-name:`, `allowed-tools:`, `user-invocable:`.
-2. **Naming convention** — directory uses plain name (no `dx-`
-   prefix); invocation name uses `dx:<feature>` format or
-   `dx:<family>:<skill>` for grouped families (see `skill-naming.md`)
+2. **Naming convention** — directory uses plain name (no `dx-` prefix);
+   `name:` MUST use `dx:<feature>` format; `invocation-name:` MAY use
+   a non-`dx:` prefix for cross-family aliases — do NOT flag as a
+   naming violation if `name:` is correct (see `skill-naming.md`)
 3. **Description quality** — `description:` must explain when to
    trigger the skill; vague descriptions reduce discoverability
 4. **Script references** — SKILL.md-referenced scripts must exist in the
