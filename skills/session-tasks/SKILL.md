@@ -1,15 +1,15 @@
 ---
-name: dx:tasks
+name: dx:session-tasks
 description: >
   Use when tracking in-session work items — so open loops are visible
   and triageable before session end without losing track of parallel work.
 user-invocable: true
-invocation-name: dx:tasks
+invocation-name: dx:session-tasks
 ---
 
-# dx:tasks — In-Session Task Tracking
+# dx:session-tasks — In-Session Task Tracking
 
-**Announce:** "Using dx:tasks to [show/add/update] session tasks."
+**Announce:** "Using dx:session-tasks to [show/add/update] session tasks."
 
 ## Overview
 

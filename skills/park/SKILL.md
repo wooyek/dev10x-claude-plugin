@@ -82,7 +82,7 @@ For each selected target:
 | PR comment | Post as PR comment (simple format) |
 | PR session bookmark | Post as PR comment with rich metadata (see PR Bookmark Format below) |
 | Inline TODO/FIXME | Invoke `dx:park-todo` (inline mode) — ask user for file path if not provided |
-| Keep in session | Invoke `dx:tasks` to create a TaskCreate entry |
+| Keep in session | Invoke `dx:session-tasks` to create a TaskCreate entry |
 
 ### 5. Confirm
 
