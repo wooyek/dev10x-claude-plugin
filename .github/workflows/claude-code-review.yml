@@ -106,7 +106,15 @@ jobs:
 
             Be constructive and helpful in your feedback.
 
-            STEP 6 — CONVERT TO DRAFT IF ISSUES FOUND:
+            STEP 6 — HIDE OBSOLETE REVIEW SUMMARIES:
+            Before posting the new summary, follow review-guidelines.md step 6
+            to minimize previous Claude review summaries where ALL associated
+            review threads are resolved. Use `gh api graphql` to query
+            `reviewThreads` (check `isResolved`, group by review) and
+            `minimizeComment` mutation to hide fully-resolved summaries.
+            Leave reviews with any unresolved threads visible.
+
+            STEP 7 — CONVERT TO DRAFT IF ISSUES FOUND:
             After completing the review, if you posted ANY inline comments
             (via create_inline_comment), convert the PR to draft:
               `gh pr ready --undo ${{ github.event.pull_request.number }}`
