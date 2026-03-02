@@ -23,13 +23,18 @@ in code, see the domain-specific agent specs in `.claude/agents/`.
    - Acknowledgment of addressed issues
    - DO NOT repeat inline comment content
 8. Use COMMENT status (not REQUEST_CHANGES or APPROVE)
+9. If inline comments were posted, convert PR to draft:
+   `gh pr ready --undo $PR_NUMBER`
+   - Prevents noisy re-reviews on fixup commits
+   - Author marks "Ready for review" when fixes are complete
+   - Do NOT convert if the review was clean (no inline comments)
 
 ## Workflow Cross-Awareness
 
 | Workflow                   | Trigger              | Scope                          |
 |----------------------------|----------------------|--------------------------------|
 | `pr-hygiene-review.yml`   | PR opened/ready      | PR metadata (title, body, commits) |
-| `claude-code-review.yml`  | PR opened/synchronize | Code quality, architecture     |
+| `claude-code-review.yml`  | PR opened/ready/sync  | Code quality, architecture     |
 | `claude.yml`              | @claude mention      | Interactive assistance         |
 | `claude-memory-review.yml`| PR merged            | Lessons learned extraction     |
 
