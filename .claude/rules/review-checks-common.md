@@ -46,9 +46,9 @@ Before raising any of these, **verify actual code**:
 10. **External user-level skill names**: before flagging invocation names not
     in this repo (e.g., `ticket:branch`), check if the author confirmed they
     are external skills at `~/.claude/skills/`. If confirmed, do NOT re-raise.
-11. **`allowed-tools ~/.claude/skills/` paths**: a skill's own installed
-    script (`Bash(~/.claude/skills/<name>/scripts/...)`) is the correct path
-    — do NOT flag as a user-specific path violation.
+11. **`~/.claude/` in `allowed-tools`**: skills delegating to user-installed
+    tools (`~/.claude/tools/`, `~/.claude/skills/`) legitimately use these
+    paths. Only flag if the path belongs to a plugin-distributed script.
 12. **`/pull/new/` commit links**: pre-creation artifacts generated before the
     PR number is assigned — flag as RECOMMENDED to update to
     `/pull/<number>/commits/<sha>`, not REQUIRED.

@@ -29,8 +29,12 @@ Files matching: `skills/**`
    environment variables, not absolute user-specific paths
 8. **`allowed-tools` coverage** — if SKILL.md calls external scripts,
    front matter must declare matching `Bash(...)` entries (missing entries
-   cause per-invocation approval prompts); `~/.claude/` paths are only
-   allowed when referencing the skill's own installed script.
+   cause per-invocation approval prompts). Plugin-distributed scripts must
+   use relative paths; `~/.claude/tools/` or `~/.claude/skills/` paths
+   are accepted for user-tool delegation, not portability violations.
+8b. **`allowed-tools` sync** — when a PR adds Bash calls to external
+    scripts, confirm each has a matching `Bash(<path>:*)` frontmatter
+    entry. Missing entries cause approval prompts and are WARNING.
 9. **Template consistency** — YAML code blocks containing a `name:` field
    must follow `skill-naming.md`, not ad-hoc examples.
 10. **Reference doc consistency** — cross-check `references/` documents
