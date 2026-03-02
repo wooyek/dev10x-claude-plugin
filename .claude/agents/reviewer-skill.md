@@ -21,27 +21,27 @@ Files matching: `skills/**`
    `dx:<family>:<skill>` for grouped families (see `skill-naming.md`)
 3. **Description quality** — `description:` must explain when to
    trigger the skill; vague descriptions reduce discoverability
-4. **Script references** — if SKILL.md references scripts, verify
-   they exist in the skill directory
+4. **Script references** — SKILL.md-referenced scripts must exist in the directory
 5. **Executable permissions** — directly-invoked scripts must be
    executable; `git ls-files --stage <path>` mode `100644` = not executable.
-6. **Error handling** — scripts should use `set -e` and handle
-   missing dependencies gracefully
+6. **Error handling** — scripts use `set -e`; handle missing dependencies
 7. **No hardcoded paths** — scripts should use relative paths or
    environment variables, not absolute user-specific paths
 8. **`allowed-tools` coverage** — if SKILL.md calls external scripts,
    front matter must declare matching `Bash(...)` entries (missing entries
-   cause per-invocation approval prompts); declared entries must not
-   reference `~/.claude/` or other user-specific absolute paths.
+   cause per-invocation approval prompts); `~/.claude/` paths are only
+   allowed when referencing the skill's own installed script.
 9. **Template consistency** — YAML code blocks containing a `name:` field
    must follow `skill-naming.md`, not ad-hoc examples.
 10. **Reference doc consistency** — cross-check `references/` documents
     against any matching `.claude/rules/` file.
+10b. **Inline table consistency** — when SKILL.md contains a reference
+     table (e.g., "Aliases Configured"), cross-check documented values
+     against the script; mismatches are a reliable bug signal.
 11. **Embedded shell templates** — POSIX-compatible, no silent `|| true`,
     `<>` placeholder markers for user-replaceable values.
-12. **Self-contained content** — no ephemeral references: no "(see
-    Memory note...)", no "as discussed", no session-specific links;
-    all constraints must be documented inline.
+12. **Self-contained content** — no ephemeral references ("see Memory note",
+    "as discussed"); all constraints documented inline.
 
 ## Output Format
 

@@ -43,10 +43,12 @@ Before raising any of these, **verify actual code**:
    (bash, sh, fish) — check the shebang before flagging syntax
 9. **Skill SKILL.md format**: `name:` and `description:` are YAML
    front matter, not arbitrary fields — don't suggest restructuring
-10. **External user-level skill names**: skills may reference skills not in
-    this repo (e.g., `ticket:branch`, `pr:create`). Before flagging as wrong
-    invocation names, check if the author has explained they are external
-    skills at `~/.claude/skills/`. If confirmed, do NOT re-raise.
+10. **External user-level skill names**: before flagging invocation names not
+    in this repo (e.g., `ticket:branch`), check if the author confirmed they
+    are external skills at `~/.claude/skills/`. If confirmed, do NOT re-raise.
+11. **`allowed-tools ~/.claude/skills/` paths**: a skill's own installed
+    script (`Bash(~/.claude/skills/<name>/scripts/...)`) is the correct path
+    — do NOT flag as a user-specific path violation.
 
 ## Parameter Change Analysis
 
