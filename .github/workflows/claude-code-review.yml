@@ -18,17 +18,11 @@ on:
       - ".claude/rules/**/*.md"
       - ".claude/agents/**/*.md"
       - "!.github/workflows/claude*.yml"
-  pull_request_review:
-    types: [submitted]
 
 jobs:
   claude-review:
-    if: |
-      !github.event.pull_request.draft &&
-      (
-        github.event_name == 'pull_request' ||
-        (github.event_name == 'pull_request_review' && github.event.review.user.login == 'github-actions[bot]')
-      )
+    if: >-
+      !github.event.pull_request.draft
 
     runs-on: ubuntu-latest
     permissions:
