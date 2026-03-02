@@ -21,7 +21,11 @@ Files matching: `skills/**`
    `dx:<family>:<skill>` for grouped families (see `skill-naming.md`)
 3. **Description quality** — `description:` must explain when to
    trigger the skill; vague descriptions reduce discoverability
-4. **Script references** — SKILL.md-referenced scripts must exist in the directory
+4. **Script references** — SKILL.md-referenced scripts must exist in the
+   directory. Check both `allowed-tools` entries AND inline code blocks.
+   Pay special attention when a path conversion corrects a typo (e.g.,
+   `skill:create` → `skill-create`) — the fix may reveal a pre-existing
+   missing script.
 5. **Executable permissions** — directly-invoked scripts must be
    executable; `git ls-files --stage <path>` mode `100644` = not executable.
 6. **Error handling** — scripts use `set -e`; handle missing dependencies
@@ -35,6 +39,10 @@ Files matching: `skills/**`
 8b. **`allowed-tools` sync** — when a PR adds Bash calls to external
     scripts, confirm each has a matching `Bash(<path>:*)` frontmatter
     entry. Missing entries cause approval prompts and are WARNING.
+8c. **Plugin directory existence** — for every `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`
+    entry in `allowed-tools`, verify `skills/<name>/` exists using
+    Glob(`skills/<name>/SKILL.md`). A missing directory means the skill is
+    user-level; the path must stay as `~/.claude/skills/<name>/`.
 9. **Template consistency** — YAML code blocks containing a `name:` field
    must follow `skill-naming.md`, not ad-hoc examples.
 10. **Reference doc consistency** — cross-check `references/` documents

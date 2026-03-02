@@ -52,6 +52,11 @@ Before raising any of these, **verify actual code**:
 12. **`/pull/new/` commit links**: pre-creation artifacts generated before the
     PR number is assigned — flag as RECOMMENDED to update to
     `/pull/<number>/commits/<sha>`, not REQUIRED.
+13. **Plugin-vs-user skill path conversions**: when a PR converts
+    `~/.claude/skills/<name>/` to `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`,
+    verify each `<name>` directory actually exists in `skills/`. Use Glob:
+    `skills/<name>/SKILL.md`. Non-existent directories are user-level skills
+    — the `~/.claude/` prefix must be preserved.
 
 ## Parameter Change Analysis
 
