@@ -7,7 +7,7 @@ description: >
 user-invocable: true
 invocation-name: dx:park-remind
 allowed-tools:
-  - Bash(~/.claude/skills/slack/scripts/slack-notify.py:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/slack/slack-notify.py:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)
   - Write(/tmp/claude/slack/**)
 ---
@@ -24,7 +24,7 @@ context so you know where to pick it up.
 ## Prerequisites
 
 - Slack token available (env `SLACK_TOKEN` or system keyring)
-- `slack-notify.py` accessible at `~/.claude/skills/slack/scripts/slack-notify.py`
+- `slack-notify.py` accessible at `${CLAUDE_PLUGIN_ROOT}/skills/slack/slack-notify.py`
 
 ## Workflow
 
@@ -64,7 +64,7 @@ ${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh slack remind-msg .txt
 ```
 Write content to the returned path using Write tool, then:
 ```bash
-~/.claude/skills/slack/scripts/slack-notify.py \
+${CLAUDE_PLUGIN_ROOT}/skills/slack/slack-notify.py \
   --remind "$(cat <unique-path>)"
 ```
 
