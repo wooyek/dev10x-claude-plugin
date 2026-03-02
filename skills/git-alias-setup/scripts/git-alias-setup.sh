@@ -9,6 +9,12 @@ ALIASES=(
     "develop-log:git log --oneline \$(git merge-base develop HEAD)..HEAD"
     "develop-diff:git diff \$(git merge-base develop HEAD)..HEAD"
     "develop-rebase:git rebase -i --autosquash \$(git merge-base develop HEAD)"
+    "development-log:git log --oneline \$(git merge-base development HEAD)..HEAD"
+    "development-diff:git diff \$(git merge-base development HEAD)..HEAD"
+    "development-rebase:git rebase -i --autosquash \$(git merge-base development HEAD)"
+    "trunk-log:git log --oneline \$(git merge-base trunk HEAD)..HEAD"
+    "trunk-diff:git diff \$(git merge-base trunk HEAD)..HEAD"
+    "trunk-rebase:git rebase -i --autosquash \$(git merge-base trunk HEAD)"
 )
 
 for entry in "${ALIASES[@]}"; do
@@ -23,9 +29,3 @@ for entry in "${ALIASES[@]}"; do
         echo "  + git ${name} (configured)"
     fi
 done
-
-echo ""
-echo "Aliases ready. Use:"
-echo "  git develop-log     — commits since diverging from develop"
-echo "  git develop-diff    — diff since diverging from develop"
-echo "  git develop-rebase  — interactive autosquash rebase onto develop"

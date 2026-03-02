@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-ALIASES=(develop-log develop-diff develop-rebase)
+ALIASES=(develop-log develop-diff develop-rebase development-log development-diff development-rebase trunk-log trunk-diff trunk-rebase)
 
 missing=()
 present=()
@@ -21,10 +21,12 @@ done
 
 if [[ ${#missing[@]} -eq 0 ]]; then
     echo "Git aliases available: ${present[*]}"
-    echo "Use \`git develop-log\`, \`git develop-diff\`, \`git develop-rebase\`"
+    echo "Use \`git {base}-log\`, \`git {base}-diff\`, \`git {base}-rebase\`"
     echo "instead of \$(git merge-base ...) to avoid permission prompts."
 else
     echo "Git aliases missing: ${missing[*]}"
+    if [[ ${#present[@]} -gt 0 ]]; then
+        echo "Git aliases available: ${present[*]}"
+    fi
     echo "Run the git-alias-setup skill (/dx:git-alias-setup) to configure them."
-    echo "These aliases reduce permission friction by avoiding \$(git merge-base ...) subshells."
 fi

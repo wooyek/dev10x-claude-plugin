@@ -27,18 +27,26 @@ Run the setup script:
 
 ## Aliases Configured
 
+Each base branch gets three aliases: `{base}-log`, `{base}-diff`, `{base}-rebase`.
+
 | Alias                | Equivalent                                                  |
 |----------------------|-------------------------------------------------------------|
 | `git develop-log`    | `git log --oneline $(git merge-base develop HEAD)..HEAD`    |
 | `git develop-diff`   | `git diff $(git merge-base develop HEAD)..HEAD`             |
 | `git develop-rebase` | `git rebase -i --autosquash $(git merge-base develop HEAD)` |
+| `git development-log`    | `git log --oneline $(git merge-base development HEAD)..HEAD`    |
+| `git development-diff`   | `git diff $(git merge-base development HEAD)..HEAD`             |
+| `git development-rebase` | `git rebase -i --autosquash $(git merge-base development HEAD)` |
+| `git trunk-log`      | `git log --oneline $(git merge-base trunk HEAD)..HEAD`      |
+| `git trunk-diff`     | `git diff $(git merge-base trunk HEAD)..HEAD`               |
+| `git trunk-rebase`   | `git rebase -i --autosquash $(git merge-base trunk HEAD)`   |
 
 ## When to Use
 
 The session start hook checks for these aliases automatically.
 If they are missing, it will suggest running this skill.
 
-After setup, use `git develop-log` instead of the full subshell form
+After setup, use `git {base}-log` instead of the full subshell form
 in all git operations to avoid permission friction.
 
 ## Scope
