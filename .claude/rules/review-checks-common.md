@@ -61,6 +61,10 @@ Before raising any of these, **verify actual code**:
     alongside `name: dx:ticket-foo` is valid. The `dx:` prefix requirement
     applies to `name:` only — do NOT flag `invocation-name:` as a naming
     violation when `name:` is already correct.
+15. **Write-path namespace coverage** — when a `Write(/tmp/claude/<ns>/**)`
+    entry is renamed, verify the new namespace matches the first argument of
+    every `mktmp.sh` invocation in that SKILL.md. A mismatch causes a
+    write-permission rejection at runtime.
 
 ## Parameter Change Analysis
 
@@ -98,6 +102,11 @@ When docs reference CLI commands (e.g., install instructions):
 
 ## Shell Anti-Patterns
 
+- **Hardcoded temp paths**: skills must not hardcode `/tmp/claude/<x>.txt`.
+  All temp files must be created via
+  `${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh <namespace> <prefix> [.ext]`.
+  Hardcoded paths are WARNING; missing `allowed-tools` coverage is also WARNING
+  (see rules 8b/8e in `reviewer-skill.md`).
 - **Silent error swallowing**: `|| true` on setup steps and `2>/dev/null`
   on media-encoding commands (ffmpeg, convert, ImageMagick) hide failures;
   replace with a fallback action (`|| { cmd; }`) or remove the redirect.
