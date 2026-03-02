@@ -37,9 +37,16 @@ Files matching: `skills/**`
    cause per-invocation approval prompts). Plugin-distributed scripts must
    use relative paths; `~/.claude/tools/` or `~/.claude/skills/` paths
    are accepted for user-tool delegation, not portability violations.
-8b. **`allowed-tools` sync** — when a PR adds Bash calls to external
-    scripts, confirm each has a matching `Bash(<path>:*)` frontmatter
-    entry. Missing entries cause approval prompts and are WARNING.
+8b. **`allowed-tools` sync** — when a PR adds `mktmp.sh <ns> ...` calls,
+    verify BOTH entries are present: `Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)`
+    (covers the mktmp call) AND `Write(/tmp/claude/<ns>/**)` (covers writing
+    the returned path). For other Bash calls to external scripts, confirm a
+    matching `Bash(<path>:*)` entry exists. Missing either causes WARNING.
+8e. **Shared helper propagation** — when a PR introduces or propagates a
+    new `bin/<script>` helper across multiple skills, enumerate ALL changed
+    SKILL.md files and verify each has a matching
+    `Bash(${CLAUDE_PLUGIN_ROOT}/bin/<script>:*)` entry in `allowed-tools`.
+    Do not rely on spotting individual occurrences — grep across the diff.
 8c. **Plugin directory existence** — for every `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`
     entry in `allowed-tools`, verify `skills/<name>/` exists using
     Glob(`skills/<name>/SKILL.md`). A missing directory means the skill is
