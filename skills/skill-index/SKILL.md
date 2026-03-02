@@ -1,11 +1,11 @@
 ---
-name: dx:skill-motd
+name: dx:skill-index
 description: >
   Generate the Skills Reference MOTD shown at session start.
   Scans all skills, extracts metadata, and writes a pre-rendered
   ~/.claude/SKILLS.md grouped by category.
 user-invocable: true
-invocation-name: dx:skill-motd
+invocation-name: dx:skill-index
 ---
 
 ## Instructions
@@ -13,7 +13,7 @@ invocation-name: dx:skill-motd
 Regenerate the SKILLS.md file by running the generator script:
 
 ```bash
-~/.claude/skills/skill-motd/scripts/generate-motd.sh --force
+~/.claude/skills/skill-index/scripts/generate-motd.sh --force
 ```
 
 Then display the generated file contents to the user:

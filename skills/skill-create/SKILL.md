@@ -121,7 +121,7 @@ Skills don't appear in session context until indexed. Regenerate so the
 new skill is discoverable at the next session start:
 
 ```bash
-~/.claude/skills/skill-motd/scripts/generate-motd.sh --force
+~/.claude/skills/skill-index/scripts/generate-motd.sh --force
 ```
 
 ## Patterns from Existing Skills
@@ -130,7 +130,7 @@ new skill is discoverable at the next session start:
 |---|---|
 | `dx:git-worktree` | Step-numbered workflow, `allowed-tools`, templates |
 | `ticket:create` | Prerequisites check, integration section |
-| `dx:skill-motd` | Minimal skill that fully delegates to a script |
+| `dx:skill-index` | Minimal skill that fully delegates to a script |
 | `commit` | Multi-step workflow with explicit validation gates |
 
 ## Calling Other Skills
