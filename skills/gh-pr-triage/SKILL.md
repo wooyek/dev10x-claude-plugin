@@ -30,7 +30,7 @@ the PR review needs resolved threads to remain visible so they can
 verify the triage decisions without searching through hidden threads.
 
 **When to use this skill:**
-- Called by `dx:gh-pr-respond` before delegating to `dx:gh-pr-comment-fixup`
+- Called by `dx:gh-pr-respond` before delegating to `dx:gh-pr-fixup`
 - Standalone when you want to validate a comment without committing to a fix
 
 ## Input Requirements
@@ -141,7 +141,7 @@ Based on investigation, choose one of:
 #### VALID — Real issue, needs a fix
 
 Do nothing. Return verdict to caller (usually `dx:gh-pr-respond`) which will
-delegate to `dx:gh-pr-comment-fixup`.
+delegate to `dx:gh-pr-fixup`.
 
 **Output:**
 ```
@@ -239,7 +239,7 @@ Skipped: Thread already resolved
 ```
 dx:gh-pr-monitor → dx:gh-pr-respond (orchestrator)
                  ├── dx:gh-pr-triage         ← this skill
-                 └── dx:gh-pr-comment-fixup
+                 └── dx:gh-pr-fixup
                       └── commit:fixup
 ```
 
@@ -252,7 +252,7 @@ dx:gh-pr-monitor → dx:gh-pr-respond (orchestrator)
 ```
 dx:gh-pr-respond receives comment URL
   → delegates to dx:gh-pr-triage
-  → if VALID → delegates to dx:gh-pr-comment-fixup
+  → if VALID → delegates to dx:gh-pr-fixup
   → if INVALID/QUESTION/OUT_OF_SCOPE → dx:gh-pr-triage replied,
     dx:gh-pr-respond asks user to confirm thread resolution
 ```

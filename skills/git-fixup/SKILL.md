@@ -23,7 +23,7 @@ Why fixup commits?
 
 ## When to Use This Skill
 
-- Called by `dx:gh-pr-comment-fixup` when addressing review comments
+- Called by `dx:gh-pr-fixup` when addressing review comments
 - When you need to create a fixup commit for a specific review comment
 - When you need a standalone fixup for a self-initiated improvement
 - **When you fix a bug or anti-pattern that belongs to a prior commit in the branch** — use `dx:git-fixup` immediately rather than a standalone commit that would need converting later
@@ -206,7 +206,7 @@ echo "Created fixup commit: ${COMMIT_HASH}"
 echo "URL: ${COMMIT_URL}"
 ```
 
-**Return to caller (dx:gh-pr-comment-fixup):**
+**Return to caller (dx:gh-pr-fixup):**
 - `commit_hash` - Short hash for reply
 - `commit_url` - Full URL for linking (PR-based when PR number available)
 
@@ -248,13 +248,13 @@ https://github.com/owner/repo/pull/123#discussion_r456789
 This links the fixup to the specific review comment it addresses.
 ```
 
-## Integration with dx:gh-pr-comment-fixup
+## Integration with dx:gh-pr-fixup
 
-The `dx:gh-pr-comment-fixup` skill calls this skill instead of creating commits
+The `dx:gh-pr-fixup` skill calls this skill instead of creating commits
 directly:
 
 ```
-dx:gh-pr-comment-fixup workflow:
+dx:gh-pr-fixup workflow:
 1. Analyze comment
 2. Implement fix
 3. Stage changes: git add {file}
@@ -277,7 +277,7 @@ dx:gh-pr-comment-fixup workflow:
 
 ## Example Usage
 
-### Review fixup (called by dx:gh-pr-comment-fixup)
+### Review fixup (called by dx:gh-pr-fixup)
 
 ```bash
 # Stage the fix

@@ -1,6 +1,6 @@
 ---
 name: dx:gh-pr-respond
-description: Validate and respond to PR review comments. Handles single comment (with follow-up offer) or batch mode for all unaddressed comments on a PR/review. Orchestrates dx:gh-pr-triage and dx:gh-pr-comment-fixup.
+description: Validate and respond to PR review comments. Handles single comment (with follow-up offer) or batch mode for all unaddressed comments on a PR/review. Orchestrates dx:gh-pr-triage and dx:gh-pr-fixup.
 user-invocable: true
 invocation-name: dx:gh-pr-respond
 ---
@@ -18,13 +18,13 @@ This skill handles PR review comments end-to-end in two modes:
 
 Sub-skills:
 - **`dx:gh-pr-triage`** — Validate the comment against the codebase
-- **`dx:gh-pr-comment-fixup`** — Implement the fix if the comment is valid
+- **`dx:gh-pr-fixup`** — Implement the fix if the comment is valid
 
 ```
 dx:gh-pr-respond (this skill)
     ├── dx:gh-pr-triage         → validate, reply if invalid (never auto-resolves)
     ├── resolve gate      → ask user to confirm thread resolution
-    └── dx:gh-pr-comment-fixup  → implement fix, fixup commit, reply with ref
+    └── dx:gh-pr-fixup  → implement fix, fixup commit, reply with ref
          └── commit:fixup → create the fixup! commit
 ```
 
@@ -58,7 +58,7 @@ Delegate to `dx:gh-pr-triage` with the comment URL (and any additional context).
 
 `dx:gh-pr-triage` returns a verdict: `VALID`, `INVALID`, `QUESTION`, or `OUT_OF_SCOPE`.
 
-- If **VALID** → delegate to `dx:gh-pr-comment-fixup` to implement fix, commit, push,
+- If **VALID** → delegate to `dx:gh-pr-fixup` to implement fix, commit, push,
   and reply.
 - If **not VALID** → `dx:gh-pr-triage` has posted a reply but has NOT resolved the
   thread. Ask the user whether to resolve it (see Step 1b).
@@ -164,7 +164,7 @@ reviewer").
 
 For each approved comment:
 
-- **VALID** → delegate to `dx:gh-pr-comment-fixup` (one fixup commit per comment)
+- **VALID** → delegate to `dx:gh-pr-fixup` (one fixup commit per comment)
 - **INVALID / QUESTION / OUT_OF_SCOPE** → post reply using `gh api`:
   ```bash
   gh api --method POST \
@@ -254,7 +254,7 @@ Input URL
     ├─ Has #discussion_r{id} ──► MODE A (single)
     │       │
     │       ├── dx:gh-pr-triage → verdict
-    │       ├── if VALID → dx:gh-pr-comment-fixup
+    │       ├── if VALID → dx:gh-pr-fixup
     │       ├── if not VALID → reply posted, ask user to resolve
     │       ├── check remaining
     │       └── offer: next / batch / stop
@@ -275,7 +275,7 @@ Input URL
 ```
 dx:gh-pr-monitor → dx:gh-pr-respond (this skill)
                  ├── dx:gh-pr-triage
-                 └── dx:gh-pr-comment-fixup
+                 └── dx:gh-pr-fixup
                       └── commit:fixup
 ```
 
