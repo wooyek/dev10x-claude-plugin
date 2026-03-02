@@ -5,7 +5,7 @@ user-invocable: true
 invocation-name: dx:gh-pr-create
 allowed-tools:
   - Bash(~/.claude/skills/gh-pr-create/scripts/*:*)
-  - Bash(~/.claude/skills/gh/scripts/*:*)
+  - Bash(~/.claude/skills/gh-context/scripts/*:*)
 ---
 
 # Create Pull Request for Ticket
@@ -138,7 +138,7 @@ before generating a new one.
 Run `detect-tracker.sh` with the ISSUE extracted from the branch name:
 
 ```bash
-~/.claude/skills/gh/scripts/detect-tracker.sh "$ISSUE"
+~/.claude/skills/gh-context/scripts/detect-tracker.sh "$ISSUE"
 ```
 
 Parse TRACKER and FIXES_URL from output.
@@ -149,7 +149,7 @@ Dispatch based on TRACKER:
 
 | TRACKER | How to search |
 |---------|--------------|
-| `github` | `~/.claude/skills/gh/scripts/gh-issue-get.sh` for body, `~/.claude/skills/gh/scripts/gh-issue-comments.sh` for comments |
+| `github` | `~/.claude/skills/gh-context/scripts/gh-issue-get.sh` for body, `~/.claude/skills/gh-context/scripts/gh-issue-comments.sh` for comments |
 | `linear` | Linear MCP tools for description and comments |
 | `jira` | JIRA API for description |
 | `unknown` | Skip ticket search, rely on commit messages |

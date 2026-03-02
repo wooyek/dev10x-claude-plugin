@@ -4,7 +4,7 @@ description: Launch a background agent to monitor PR CI checks and review commen
 user-invocable: true
 invocation-name: dx:gh-pr-monitor
 allowed-tools:
-  - Bash(~/.claude/skills/gh/scripts/*:*)
+  - Bash(~/.claude/skills/gh-context/scripts/*:*)
 ---
 
 # PR Review Monitor (Background Agent)
@@ -45,10 +45,10 @@ When the user invokes `/dx:gh-pr-monitor`:
 
 ### Step 1: Detect PR context
 
-Use the `dx:gh` script to detect PR context in one call:
+Use the `dx:gh-context` script to detect PR context in one call:
 
 ```bash
-~/.claude/skills/gh/scripts/gh-pr-detect.sh "$ARG"
+~/.claude/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
 # Parse PR_NUMBER, REPO, PR_URL, BRANCH from KEY=VALUE stdout
 ```
 
