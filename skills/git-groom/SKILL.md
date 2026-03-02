@@ -1,10 +1,10 @@
 ---
-name: dx:git-branch-groom
+name: dx:git-groom
 description: Restructure, polish, and clean up git commit history in the current branch before merging. Creates atomic, well-organized commits that tell a clear story.
 user-invocable: true
-invocation-name: dx:git-branch-groom
+invocation-name: dx:git-groom
 allowed-tools:
-  - Bash(~/.claude/skills/git-branch-groom/scripts/*:*)
+  - Bash(~/.claude/skills/git-groom/scripts/*:*)
   - Bash(~/.claude/skills/git/scripts/git-rebase-groom.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
@@ -91,7 +91,7 @@ Fully automatable — no interactive editor required.
 **Use the script** (single permission approval, runs unattended):
 ```bash
 # Build config, write to /tmp/claude/branch-groom/groom-config.json, then:
-~/.claude/skills/git-branch-groom/scripts/mass-rewrite.py /tmp/claude/branch-groom/groom-config.json
+~/.claude/skills/git-groom/scripts/mass-rewrite.py /tmp/claude/branch-groom/groom-config.json
 ```
 
 Config format:
