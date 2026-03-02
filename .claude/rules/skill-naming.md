@@ -1,3 +1,8 @@
+---
+paths:
+  - "skills/**"
+---
+
 # Skill Naming Convention
 
 Rules for naming skill directories and invocation names in

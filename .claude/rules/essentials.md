@@ -1,0 +1,37 @@
+# Essential Conventions
+
+Universal rules for every session. Detailed guides live in
+`references/` and load on-demand via skills.
+
+## Branch & PR Targeting
+
+- **Feature PRs** target `develop` — always pass `--base develop`
+- **Release PRs** target `main` only via merge from `develop`
+- Branch format: `username/TICKET-ID/short-description`
+
+## Commit Format
+
+- Title: `<gitmoji> <TICKET-ID> <outcome-focused description>`
+- Max 72 characters per line (title and body)
+- Outcome-focused: "Enable X" not "Add X" — describe what
+  the change enables, not what was implemented
+- One logical change per commit (atomic commits)
+- No "Co-Authored-By: Claude" footer
+- Full format guide: `references/git-commits.md`
+
+## PR Body
+
+- First paragraph: JTBD Job Story (`**When** ... **wants to** ...
+  **so** ... **can** ...`)
+- Last line: `Fixes:` link (issue URL or `none — self-motivated`)
+- Full guide: `references/git-pr.md`
+
+## Reference Documents
+
+| Document | Topic | Loaded by |
+|----------|-------|-----------|
+| `references/git-commits.md` | Commit format, gitmoji, atomic commits | `dx:git-commit` skill |
+| `references/git-jtbd.md` | Job Story format, anti-patterns | `dx:jtbd` skill |
+| `references/git-pr.md` | PR body, grooming, review feedback | `dx:gh-pr-create` skill |
+| `references/review-guidelines.md` | Review workflow, threads, summaries | `dx:gh-pr-review` skill |
+| `references/review-checks-common.md` | False positive prevention, verification | Review agent specs |
