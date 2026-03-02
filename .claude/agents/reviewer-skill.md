@@ -13,33 +13,34 @@ Files matching: `skills/**`
 
 ## Checklist
 
-1. **SKILL.md exists** — every skill directory must contain a
-   SKILL.md with valid YAML front matter (`name:`, `description:`)
+1. **SKILL.md exists** — every skill directory must contain a SKILL.md with
+   valid YAML front matter. Required: `name:`, `description:`. Optional:
+   `invocation-name:`, `allowed-tools:`, `user-invocable:`.
 2. **Naming convention** — directory uses plain name (no `dx-`
    prefix); invocation name uses `dx:<feature>` format
 3. **Description quality** — `description:` must explain when to
    trigger the skill; vague descriptions reduce discoverability
 4. **Script references** — if SKILL.md references scripts, verify
    they exist in the skill directory
-5. **Executable permissions** — all scripts (shell and Python)
-   invoked directly must be executable (`chmod +x`). Verify with
-   `git ls-files --stage <path>` — mode `100644` means not executable.
+5. **Executable permissions** — directly-invoked scripts must be
+   executable; `git ls-files --stage <path>` mode `100644` = not executable.
 6. **Error handling** — scripts should use `set -e` and handle
    missing dependencies gracefully
 7. **No hardcoded paths** — scripts should use relative paths or
    environment variables, not absolute user-specific paths
-8. **allowed-tools paths** — `Bash(...)` entries in SKILL.md front
-   matter must not reference `~/.claude/` or other user-specific
-   absolute paths; use plugin-relative paths or omit the path restriction
-9. **Template consistency** — if SKILL.md contains a YAML code block
-   with a `name:` field (a frontmatter template), verify it follows
-   `skill-naming.md`, not an ad-hoc example
-10. **Reference doc consistency** — if SKILL.md references a
-    `references/` document that defines a process or format, check it
-    for consistency with any matching `.claude/rules/` file
-11. **Embedded shell templates** — for `sh`/`bash` code blocks in
-    SKILL.md: POSIX-compatible syntax, no silent `|| true` swallowing,
-    `<>` placeholder markers for user-replaceable values
+8. **`allowed-tools` coverage** — if SKILL.md calls external scripts,
+   front matter must declare matching `Bash(...)` entries (missing entries
+   cause per-invocation approval prompts); declared entries must not
+   reference `~/.claude/` or other user-specific absolute paths.
+9. **Template consistency** — YAML code blocks containing a `name:` field
+   must follow `skill-naming.md`, not ad-hoc examples.
+10. **Reference doc consistency** — cross-check `references/` documents
+    against any matching `.claude/rules/` file.
+11. **Embedded shell templates** — POSIX-compatible, no silent `|| true`,
+    `<>` placeholder markers for user-replaceable values.
+12. **Self-contained content** — no ephemeral references: no "(see
+    Memory note...)", no "as discussed", no session-specific links;
+    all constraints must be documented inline.
 
 ## Output Format
 
