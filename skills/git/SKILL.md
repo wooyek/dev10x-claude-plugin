@@ -11,7 +11,8 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-seq-editor.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
-  - Write(/tmp/claude/branch-groom/**)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)
+  - Write(/tmp/claude/git/**)
 ---
 
 **Announce:** "Using dx:git to [push / groom commits]."
@@ -49,40 +50,39 @@ protected branches.
 Two scripts power fully automated rebases:
 
 - **`git-seq-editor.sh`** — replaces `GIT_SEQUENCE_EDITOR`; reads the
-  rebase todo sequence from `/tmp/claude/branch-groom/rebase-seq.txt` and
-  injects it into the rebase todo file.
+  rebase todo from the path in `GROOM_SEQ_FILE` env var.
 - **`git-rebase-groom.sh`** — convenience wrapper that sets
   `GIT_SEQUENCE_EDITOR` and `GIT_EDITOR=true`, then runs
-  `git rebase -i <base-ref>`.
+  `git rebase -i <base-ref>`. Requires `GROOM_SEQ_FILE` env var.
 
 ### Usage
 
-1. Write the rebase todo (oldest commit first) using the Write tool:
+1. Create a unique temp file for the rebase sequence:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git rebase-seq .txt
+```
+
+Store the returned path (e.g., `/tmp/claude/git/rebase-seq.a7b3c9.txt`).
+
+2. Write the rebase todo (oldest commit first) to that file using
+   the Write tool:
 
 ```
-Write /tmp/claude/branch-groom/rebase-seq.txt:
+Write <unique-path>:
 pick abc1234 First commit
 pick def5678 Second commit
 fixup fed9876 fixup! Second commit
 ```
 
-The `git-rebase-groom.sh` script creates `/tmp/claude/branch-groom/` automatically,
-so no `mkdir` is needed before writing the file.
-
 **Note:** The Write tool requires reading a file before writing to it.
-For the first rebase in a session (when the file doesn't exist yet),
-create it first:
+For a new file, `mktmp.sh` already created it (empty), so Read it first,
+then Write the sequence content.
+
+3. Run the rebase with `GROOM_SEQ_FILE` pointing to the file:
 
 ```bash
-touch /tmp/claude/branch-groom/rebase-seq.txt
-```
-
-Then Read the file, then Write the sequence content.
-
-2. Run the rebase:
-
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh <base-ref>
+GROOM_SEQ_FILE=<unique-path> ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh <base-ref>
 ```
 
 ### Sequence file ordering
@@ -133,7 +133,8 @@ Add to your project's `.claude/settings.local.json`:
       "Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-seq-editor.sh:*)",
       "Bash(git reset --soft:*)",
       "Bash(git push --force-with-lease:*)",
-      "Write(/tmp/claude/branch-groom/**)"
+      "Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)",
+      "Write(/tmp/claude/git/**)"
     ]
   }
 }

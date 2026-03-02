@@ -153,36 +153,36 @@ in PosSubModelNode for cohesion.
 **IMPORTANT:** Never use `cat <<EOF` or heredoc syntax — the
 `validate-bash-security.py` hook blocks it. Use Write tool + `git commit -F`.
 
-Use a unique temp file path to avoid cross-session clashes:
-`/tmp/claude/fixup-msg-{comment_id}.txt` (review) or
-`/tmp/claude/fixup-msg-{short_hash}.txt` (standalone).
+Create a unique temp file via `mktemp` to avoid cross-session collisions:
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git fixup-msg .txt
+```
+Store the returned path for subsequent steps.
 
 **Review fixup:**
 ```bash
-# 1. Write message to temp file (use Write tool, NOT echo/cat)
-#    Path: /tmp/claude/fixup-msg-{comment_id}.txt
-Write "/tmp/claude/fixup-msg-{comment_id}.txt" with:
+# 1. Write message to the unique temp file (use Write tool, NOT echo/cat)
+Write "<unique-path>" with:
   fixup! {ORIGINAL_MESSAGE}
 
   Addresses review comment:
   {COMMENT_URL}
 
 # 2. Commit with -F
-git commit -F /tmp/claude/fixup-msg-{comment_id}.txt
+git commit -F <unique-path>
 ```
 
 **Standalone fixup:**
 ```bash
-# 1. Write message (use Write tool)
-#    Path: /tmp/claude/fixup-msg-{short_hash}.txt
-Write "/tmp/claude/fixup-msg-{short_hash}.txt" with:
+# 1. Write message to the unique temp file (use Write tool)
+Write "<unique-path>" with:
   fixup! {ORIGINAL_MESSAGE}
 
   Standalone fixup
   {DESCRIPTION}
 
 # 2. Commit with -F
-git commit -F /tmp/claude/fixup-msg-{short_hash}.txt
+git commit -F <unique-path>
 ```
 
 ### Step 6: Verify and Return

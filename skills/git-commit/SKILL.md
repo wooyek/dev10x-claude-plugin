@@ -371,9 +371,15 @@ git add file1 file2 file3
 
 **Use Write tool + `-F` to preserve formatting (hookify blocks heredocs):**
 
-1. Write the commit message to a temp file using the Write tool:
+1. Create a unique temp file to avoid cross-session collisions:
+   ```bash
+   ${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git commit-msg .txt
    ```
-   Write /tmp/claude/commit-msg.txt:
+   Store the returned path (e.g., `/tmp/claude/git/commit-msg.7f3a9b2c1d4e.txt`).
+
+2. Write the commit message to that file using the Write tool:
+   ```
+   Write <unique-path>:
    <gitmoji> <TICKET-ID> <description>
 
    <problem explanation>
@@ -386,9 +392,9 @@ git add file1 file2 file3
    Fixes: <TICKET-ID>
    ```
 
-2. Create the commit from the file:
+3. Create the commit from the file:
    ```bash
-   git commit -F /tmp/claude/commit-msg.txt
+   git commit -F <unique-path>
    ```
 
 **Verify success:**

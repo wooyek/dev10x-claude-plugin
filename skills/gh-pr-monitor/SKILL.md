@@ -60,7 +60,7 @@ If the script exits non-zero, tell the user and stop.
 
 ### Step 2: Check for poll mode
 
-Read the state file at `/tmp/claude/pr-monitor/pr-monitor-{pr_number}.json`
+Read the state file at `/tmp/claude/pr-monitor/state-{pr_number}.json`
 (if it exists). If the state file contains `phases_completed` that includes
 **both** `phase0` and `phase3`, offer **lightweight polling** instead:
 
@@ -113,7 +113,7 @@ first, then Phase 0, 1, 2, 2.5, and 3 in order.
 Before running any phases, check if work has already been done by
 reading the state file and comparing against current PR state.
 
-1. Read `/tmp/claude/pr-monitor/pr-monitor-{pr_number}.json` (if exists)
+1. Read `/tmp/claude/pr-monitor/state-{pr_number}.json` (if exists)
 2. Fetch current PR state:
    ```bash
    gh pr checks {pr_number} --repo {repo} --json name,state,conclusion
@@ -297,7 +297,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
   send --pr {pr_number} --repo {repo} \
   --channel {CHANNEL_ID} \
   --reviewer {REVIEWER_TEAM} \
-  --message-file /tmp/claude/pr-monitor/pr-notify-{pr_number}.txt
+  --message-file /tmp/claude/pr-monitor/notify-{pr_number}.txt
 ```
 
 If user declines, run with `--skip-slack`:

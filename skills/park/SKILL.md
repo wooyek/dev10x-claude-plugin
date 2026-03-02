@@ -171,15 +171,19 @@ Compose the comment:
 2. {next step}
 ```
 
-Write the comment to a temp file and post via `--body-file`:
+Write the comment to a unique temp file and post via `--body-file`:
 ```bash
-gh pr comment {number} --body-file /tmp/claude/pr-comment-{number}.txt
+${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git pr-comment .txt
+```
+Write content to the returned path using Write tool, then:
+```bash
+gh pr comment {number} --body-file <unique-path>
 ```
 
 To **update** an existing bookmark comment instead of creating a new one:
 ```bash
 gh api repos/{owner}/{repo}/issues/comments/{comment_id} \
-  -X PATCH -F body=@/tmp/claude/pr-comment-{number}.txt
+  -X PATCH -F body=@<unique-path>
 ```
 
 ## Used By

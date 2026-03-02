@@ -8,6 +8,8 @@ user-invocable: true
 invocation-name: dx:park-remind
 allowed-tools:
   - Bash(~/.claude/skills/slack/scripts/slack-notify.py:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)
+  - Write(/tmp/claude/slack/**)
 ---
 
 # dx:park-remind — Slack DM Reminder
@@ -54,12 +56,16 @@ separate line after the item text.
 
 ### 3. Send DM
 
-For multi-line messages, write the formatted text to a temp file
+For multi-line messages, write the formatted text to a unique temp file
 using the Write tool first, then pass it via command substitution:
 
 ```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh slack remind-msg .txt
+```
+Write content to the returned path using Write tool, then:
+```bash
 ~/.claude/skills/slack/scripts/slack-notify.py \
-  --remind "$(cat /tmp/claude/remind-msg.txt)"
+  --remind "$(cat <unique-path>)"
 ```
 
 Do NOT use heredoc (`cat <<'EOF'`) to build the message inline —
