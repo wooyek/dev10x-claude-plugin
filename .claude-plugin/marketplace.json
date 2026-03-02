@@ -11,7 +11,7 @@
     {
       "name": "dev10x",
       "source": "./",
-      "description": "28 skills for structured commits, PR lifecycle, branch hygiene, task tracking, and code review."
+      "description": "40 skills for structured commits, PR lifecycle, branch hygiene, ticket management, task tracking, code review, scoping, and QA automation."
     }
   ]
 }

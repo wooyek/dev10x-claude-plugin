@@ -29,7 +29,7 @@ git operation.
 
 ### Pre-approved workflows, not ad-hoc scripts
 
-28 skills encapsulate complete dev workflows as slash commands.
+40 skills encapsulate complete dev workflows as slash commands.
 `/commit` handles gitmoji, ticket reference, and benefit-focused
 title — all through pre-approved tool calls that never trigger
 permission prompts.
@@ -39,7 +39,7 @@ step matches an allow rule. Zero interruptions.
 
 ### Guardrails that teach, not just block
 
-7 hooks intercept dangerous patterns *before* they execute — and
+8 hooks intercept dangerous patterns *before* they execute — and
 redirect the AI toward the approved path:
 
 - **`detect-and-chaining`** catches `mkdir && script.sh` that
@@ -60,14 +60,14 @@ their phone:
 
 | Step | Skill | Output |
 |------|-------|--------|
-| Scope | `/ticket:scope` | Architecture research, ticket update |
-| Branch | `/ticket:work-on` | Named branch, gathered context |
-| Commit | `/commit` | Atomic commits with benefit-focused titles |
-| Groom | `/branch:groom` | Clean history, no fixup commits |
-| PR | `/pr:create` | Job Story description, ticket links |
-| Monitor | `/pr:monitor` | Background CI + review watch |
-| Respond | `/pr:respond` | Batched review responses, minimal noise |
-| Review | `/pr:review` | Domain-routed review across 5 agents |
+| Scope | `dx:ticket-scope` | Architecture research, ticket update |
+| Branch | `dx:work-on` | Named branch, gathered context |
+| Commit | `dx:git-commit` | Atomic commits with benefit-focused titles |
+| Groom | `dx:git-groom` | Clean history, no fixup commits |
+| PR | `dx:gh-pr-create` | Job Story description, ticket links |
+| Monitor | `dx:gh-pr-monitor` | Background CI + review watch |
+| Respond | `dx:gh-pr-respond` | Batched review responses, minimal noise |
+| Review | `dx:gh-pr-review` | Domain-routed review across 5 agents |
 
 No step produces wall-of-text. Each output is sized for a Slack
 preview, a PR comment, or a task list glance.
@@ -101,15 +101,18 @@ review comment) is concise enough to evaluate in seconds.
 
 | Family | Skills | What it automates |
 |--------|--------|-------------------|
-| **Git** | `/commit`, `/commit:split`, `/commit:fixup`, `/branch:groom` | Atomic commits, clean history |
-| **PR** | `/pr:create`, `/pr:review`, `/pr:respond`, `/pr:monitor` | Full PR lifecycle |
-| **Session** | `/dx:session-tasks`, `/dx:wrap-up` | In-session work tracking |
-| **Park** | `/dx:park`, `/dx:park-todo`, `/dx:park-remind`, `/dx:park-discover` | Deferred work parking |
-| **Tickets** | `/ticket:create`, `/ticket:branch`, `/dx:git-promote` | Issue tracker integration |
-| **Tooling** | `/dx:git`, `/dx:git-worktree`, `/dx:py-uv` | Safe operations, workspace isolation |
-| **Meta** | `/dx:skill-create`, `/dx:skill-audit` | Create and audit skills |
+| **Git** (8) | `git-commit`, `git-commit-split`, `git-fixup`, `git-groom`, `git-promote`, `git-worktree`, `git`, `git-alias-setup` | Atomic commits, clean history, workspace isolation |
+| **PR** (9) | `gh-pr-create`, `gh-pr-review`, `gh-pr-respond`, `gh-pr-monitor`, `gh-pr-triage`, `gh-pr-fixup`, `gh-pr-request-review`, `gh-pr-bookmark`, `gh-context` | Full PR lifecycle, domain-routed review |
+| **Tickets** (6) | `ticket-create`, `ticket-branch`, `ticket-scope`, `ticket-jtbd`, `work-on`, `linear` | Issue tracker integration, ticket scoping |
+| **Park** (4) | `park`, `park-todo`, `park-remind`, `park-discover` | Deferred work parking |
+| **Scoping** (3) | `scope`, `jtbd`, `adr` | Architecture decisions, Job Story format |
+| **QA** (3) | `qa-scope`, `qa-self`, `playwright` | Test planning, self-review, browser testing |
+| **Session** (2) | `session-tasks`, `wrap-up` | In-session work tracking |
+| **Tooling** (2) | `py-uv`, `slack` | Python packaging, Slack notifications |
+| **Meta** (3) | `skill-create`, `skill-audit`, `skill-index` | Create, audit, and discover skills |
 
-Type any skill name in the Claude Code CLI to run it.
+All skills use the `dx:` prefix — type `/dx:git-commit` in the Claude
+Code CLI to run it. Run `/dx:skill-index` for the full reference.
 
 ## Installation
 
