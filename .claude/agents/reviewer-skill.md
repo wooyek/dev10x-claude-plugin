@@ -54,6 +54,12 @@ Files matching: `skills/**`
     `<>` placeholder markers for user-replaceable values.
 12. **Self-contained content** — no ephemeral references ("see Memory note",
     "as discussed"); all constraints documented inline.
+13. **Bundled binaries** — if `skills/<name>/bin/` contains a non-script
+    binary (`.jar`, `.exe`, compiled binary):
+    - Verify license is compatible with the plugin's license
+    - Flag size if > 1 MB (INFO severity)
+    - Suggest README or SKILL.md install instructions as an alternative
+      when the binary is publicly available and stable
 
 ## Output Format
 
