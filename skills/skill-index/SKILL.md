@@ -13,7 +13,7 @@ invocation-name: dx:skill-index
 Regenerate the SKILLS.md file by running the generator script:
 
 ```bash
-~/.claude/skills/skill-index/scripts/generate-motd.sh --force
+${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-motd.sh --force
 ```
 
 Then display the generated file contents to the user:

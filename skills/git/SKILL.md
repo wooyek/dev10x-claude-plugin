@@ -6,9 +6,9 @@ description: Use before running git push or git rebase — so force-pushes to
 user-invocable: true
 invocation-name: dx:git
 allowed-tools:
-  - Bash(~/.claude/skills/git/scripts/git-push-safe.sh:*)
-  - Bash(~/.claude/skills/git/scripts/git-rebase-groom.sh:*)
-  - Bash(~/.claude/skills/git/scripts/git-seq-editor.sh:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-push-safe.sh:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-seq-editor.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
   - Write(/tmp/claude/branch-groom/**)
@@ -28,7 +28,7 @@ Always push via the wrapper script to prevent force-pushing to protected
 branches:
 
 ```bash
-~/.claude/skills/git/scripts/git-push-safe.sh [git push arguments...]
+${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-push-safe.sh [git push arguments...]
 ```
 
 Default protected branches: `main master`
@@ -37,7 +37,7 @@ To extend the list, set `GIT_PROTECTED_BRANCHES` before calling:
 
 ```bash
 GIT_PROTECTED_BRANCHES="main master staging" \
-  ~/.claude/skills/git/scripts/git-push-safe.sh --force-with-lease
+  ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-push-safe.sh --force-with-lease
 ```
 
 `--force-with-lease` is always allowed (verifies the remote has not
@@ -82,7 +82,7 @@ Then Read the file, then Write the sequence content.
 2. Run the rebase:
 
 ```bash
-~/.claude/skills/git/scripts/git-rebase-groom.sh <base-ref>
+${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh <base-ref>
 ```
 
 ### Sequence file ordering
@@ -128,9 +128,9 @@ Add to your project's `.claude/settings.local.json`:
 {
   "permissions": {
     "allow": [
-      "Bash(~/.claude/skills/git/scripts/git-push-safe.sh:*)",
-      "Bash(~/.claude/skills/git/scripts/git-rebase-groom.sh:*)",
-      "Bash(~/.claude/skills/git/scripts/git-seq-editor.sh:*)",
+      "Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-push-safe.sh:*)",
+      "Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh:*)",
+      "Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-seq-editor.sh:*)",
       "Bash(git reset --soft:*)",
       "Bash(git push --force-with-lease:*)",
       "Write(/tmp/claude/branch-groom/**)"

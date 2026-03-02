@@ -4,8 +4,8 @@ description: Create a GitHub pull request for the current branch with issue trac
 user-invocable: true
 invocation-name: dx:gh-pr-create
 allowed-tools:
-  - Bash(~/.claude/skills/gh-pr-create/scripts/*:*)
-  - Bash(~/.claude/skills/gh-context/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
 ---
 
 # Create Pull Request for Ticket
@@ -20,7 +20,7 @@ PR in your browser.
 
 ## Scripts
 
-All multi-line commands live in `~/.claude/skills/gh-pr-create/scripts/`:
+All multi-line commands live in `${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/`:
 
 | Script | Purpose |
 |--------|---------|
@@ -84,7 +84,7 @@ When a PR number or URL is provided as argument, switch to "update" mode:
 Run the verification script:
 
 ```bash
-~/.claude/skills/gh-pr-create/scripts/verify-state.sh
+${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/verify-state.sh
 ```
 
 This validates:
@@ -138,7 +138,7 @@ before generating a new one.
 Run `detect-tracker.sh` with the ISSUE extracted from the branch name:
 
 ```bash
-~/.claude/skills/gh-context/scripts/detect-tracker.sh "$ISSUE"
+${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/detect-tracker.sh "$ISSUE"
 ```
 
 Parse TRACKER and FIXES_URL from output.
@@ -149,7 +149,7 @@ Dispatch based on TRACKER:
 
 | TRACKER | How to search |
 |---------|--------------|
-| `github` | `~/.claude/skills/gh-context/scripts/gh-issue-get.sh` for body, `~/.claude/skills/gh-context/scripts/gh-issue-comments.sh` for comments |
+| `github` | `${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-issue-get.sh` for body, `${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-issue-comments.sh` for comments |
 | `linear` | Linear MCP tools for description and comments |
 | `jira` | JIRA API for description |
 | `unknown` | Skip ticket search, rely on commit messages |
@@ -187,7 +187,7 @@ the issue tracker reference.
 
 **Generate commit list (for preview before PR creation):**
 ```bash
-~/.claude/skills/gh-pr-create/scripts/generate-commit-list.sh PLACEHOLDER
+${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/generate-commit-list.sh PLACEHOLDER
 ```
 
 **Body format (Job Story + separator + commit list + issue link + separator + checklist):**
@@ -211,7 +211,7 @@ If FIXES_URL is empty (unknown tracker), omit the `Fixes:` line entirely.
 ### Step 5: Run Pre-PR Checks
 
 ```bash
-~/.claude/skills/gh-pr-create/scripts/pre-pr-checks.sh
+${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/pre-pr-checks.sh
 ```
 
 Automatically skips if no Python files changed. Runs ruff, formatting,
@@ -225,7 +225,7 @@ mypy, and pytest. Exits on first failure.
 ### Step 6: Push and Create Draft PR
 
 ```bash
-~/.claude/skills/gh-pr-create/scripts/create-pr.sh "$TITLE" "$JOB_STORY" "$ISSUE" "$FIXES_URL"
+${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/create-pr.sh "$TITLE" "$JOB_STORY" "$ISSUE" "$FIXES_URL"
 ```
 
 This script:

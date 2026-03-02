@@ -4,8 +4,8 @@ description: Restructure, polish, and clean up git commit history in the current
 user-invocable: true
 invocation-name: dx:git-groom
 allowed-tools:
-  - Bash(~/.claude/skills/git-groom/scripts/*:*)
-  - Bash(~/.claude/skills/git/scripts/git-rebase-groom.sh:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git-groom/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
   - Write(/tmp/claude/branch-groom/**)
@@ -62,7 +62,7 @@ GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base develop HEA
 
 # Custom sequence (reordering, message rewrites, splits):
 # Write sequence to /tmp/claude/branch-groom/rebase-seq.txt first
-~/.claude/skills/git/scripts/git-rebase-groom.sh develop
+${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh develop
 ```
 
 **Key insight:** For pure autosquash (squashing fixup commits into their targets), use `GIT_SEQUENCE_EDITOR=true` directly — it accepts git's auto-generated todo as-is. The rebase script (`git-rebase-groom.sh`) replaces the todo with your sequence file, so commits not listed in the file are dropped. Only use the script when you need custom sequence control.
@@ -91,7 +91,7 @@ Fully automatable — no interactive editor required.
 **Use the script** (single permission approval, runs unattended):
 ```bash
 # Build config, write to /tmp/claude/branch-groom/groom-config.json, then:
-~/.claude/skills/git-groom/scripts/mass-rewrite.py /tmp/claude/branch-groom/groom-config.json
+${CLAUDE_PLUGIN_ROOT}/skills/git-groom/scripts/mass-rewrite.py /tmp/claude/branch-groom/groom-config.json
 ```
 
 Config format:
@@ -149,7 +149,7 @@ automatically. No `mkdir` needed before writing.
 **Step 4:** Run the non-interactive rebase via `git:safe`:
 ```bash
 BASE=$(git merge-base develop HEAD)
-~/.claude/skills/git/scripts/git-rebase-groom.sh "$BASE"
+${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh "$BASE"
 ```
 
 `GIT_EDITOR="true"` suppresses the commit message editor for `--amend`
@@ -405,10 +405,10 @@ When calling skill scripts, never wrap arguments in `$()` subshells:
 ```bash
 # BAD — $() changes the effective command prefix, breaking allow rules
 BASE=$(git merge-base develop HEAD)
-~/.claude/skills/git/scripts/git-rebase-groom.sh "$BASE"
+${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh "$BASE"
 
 # GOOD — pass branch name directly, script resolves merge-base internally
-~/.claude/skills/git/scripts/git-rebase-groom.sh develop
+${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh develop
 ```
 
 **Symptom:** Every invocation prompts for permission even though the

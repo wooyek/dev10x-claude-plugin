@@ -7,7 +7,7 @@ description: >
 user-invocable: true
 invocation-name: dx:git-worktree
 allowed-tools:
-  - Bash(~/.claude/skills/git-worktree/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/*:*)
   - Bash(git worktree list:*)
   - Bash(git worktree remove:*)
 ---
@@ -78,7 +78,7 @@ Default pattern: `../.worktrees/<project-basename>-NN`
 Calculate the next available path:
 
 ```bash
-~/.claude/skills/git-worktree/scripts/next-worktree-name.sh
+${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/next-worktree-name.sh
 ```
 
 Ask user to confirm (AskUserQuestion):
@@ -93,7 +93,7 @@ See **Hook Templates** section below.
 ### Step B3: Create the Worktree
 
 ```bash
-~/.claude/skills/git-worktree/scripts/create-worktree.sh \
+${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/create-worktree.sh \
   <worktree-path> <branch-name> [repo-root]
 ```
 
@@ -105,7 +105,7 @@ The `post-checkout` hook fires automatically after this script runs.
 ### Step B4: Install SessionEnd Cleanup Hook
 
 ```bash
-~/.claude/skills/git-worktree/scripts/setup-session-end-hook.sh <worktree-path>
+${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/setup-session-end-hook.sh <worktree-path>
 ```
 
 This writes a SessionEnd hook into `<worktree-path>/.claude/settings.local.json`

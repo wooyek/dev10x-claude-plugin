@@ -3,7 +3,7 @@ name: dx:gh-context
 description: Use when detecting PR context (number, repo, URL, branch) from a URL, PR number, or current branch — so skills like dx:gh-pr-monitor always get the correct target PR even in multi-worktree setups
 user-invocable: false
 allowed-tools:
-  - Bash(~/.claude/skills/gh-context/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
 ---
 
 # dx:gh-context — GitHub CLI helpers
@@ -34,7 +34,7 @@ Detects PR number, repo, URL, and branch. Accepts a GitHub PR URL, a
 bare PR number, or nothing (detects from current branch).
 
 ```bash
-~/.claude/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
+${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
 ```
 
 | Input | Behaviour |
@@ -63,18 +63,18 @@ allow-rule prefix matching.
 
 ```bash
 # ✅ Run directly — script path is first token, matches allow rules
-~/.claude/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
+${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
 # Parse PR_NUMBER, REPO, PR_URL, BRANCH from stdout
 
 # ❌ NEVER use source <() — breaks allow rules, triggers permission prompt
-source <(~/.claude/skills/gh-context/scripts/gh-pr-detect.sh "$ARG")
+source <(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG")
 ```
 
 When a single Bash call needs the variables (e.g., chaining with
 another command), use the temp-file pattern:
 
 ```bash
-~/.claude/skills/gh-context/scripts/gh-pr-detect.sh "$ARG" > /tmp/claude/pr-detect.env && source /tmp/claude/pr-detect.env && echo "PR #$PR_NUMBER"
+${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG" > /tmp/claude/pr-detect.env && source /tmp/claude/pr-detect.env && echo "PR #$PR_NUMBER"
 ```
 
 This keeps the script path as the first token so allow rules match.
@@ -85,7 +85,7 @@ Detects issue tracker type from a ticket ID using prefix heuristics
 and GitHub autolink references.
 
 ```bash
-~/.claude/skills/gh-context/scripts/detect-tracker.sh TICKET_ID
+${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/detect-tracker.sh TICKET_ID
 ```
 
 Detection cascade:
@@ -114,7 +114,7 @@ and parse KEY=VALUE stdout. Do not use `source <(...)`.
 Fetches a GitHub issue as JSON with full details.
 
 ```bash
-~/.claude/skills/gh-context/scripts/gh-issue-get.sh NUMBER [REPO]
+${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-issue-get.sh NUMBER [REPO]
 ```
 
 | Param | Required | Default |
@@ -130,7 +130,7 @@ Output: JSON object with fields `number`, `title`, `body`, `state`,
 Returns comments on a GitHub issue as a JSON array.
 
 ```bash
-~/.claude/skills/gh-context/scripts/gh-issue-comments.sh NUMBER [REPO]
+${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-issue-comments.sh NUMBER [REPO]
 ```
 
 | Param | Required | Default |

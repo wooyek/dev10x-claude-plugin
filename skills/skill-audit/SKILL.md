@@ -11,7 +11,7 @@ allowed-tools:
   - Write(/tmp/claude/skill-audit/**)
   - Edit(~/.claude/**)
   - Edit(/tmp/claude/skill-audit/**)
-  - Bash(~/.claude/skills/skill-audit/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-audit/scripts/:*)
   - Bash(ls -t ~/.claude/:*)
   - Bash(wc:*)
 ---
@@ -129,7 +129,7 @@ If resolution fails, ask the user to provide the JSONL path explicitly.
 
 Run the extraction script:
 ```bash
-~/.claude/skills/skill-audit/scripts/extract-session.sh \
+${CLAUDE_PLUGIN_ROOT}/skills/skill-audit/scripts/extract-session.sh \
   "<session_file>" /tmp/claude/skill-audit/audit-transcript.md
 ```
 

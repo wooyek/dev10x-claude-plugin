@@ -4,7 +4,7 @@ description: Guide UV installation and migrate Python scripts from legacy sheban
 user-invocable: true
 invocation-name: dx:py-uv
 allowed-tools:
-  - Bash(~/.claude/skills/py-uv/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/py-uv/scripts/:*)
   - WebFetch(https://docs.astral.sh/uv/getting-started/installation/:*)
   - AskUserQuestion
   - Read(~/.claude/**)
@@ -26,7 +26,7 @@ with PEP 723 inline metadata.
 Run the check script to assess current state:
 
 ```
-~/.claude/skills/py-uv/scripts/check-uv.sh
+${CLAUDE_PLUGIN_ROOT}/skills/py-uv/scripts/check-uv.sh
 ```
 
 Parse the structured output:

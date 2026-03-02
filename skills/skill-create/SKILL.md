@@ -108,7 +108,7 @@ Follow `superpowers:writing-skills` RED-GREEN-REFACTOR:
 ### 3. Validate Structure
 
 ```bash
-~/.claude/skills/skill:create/scripts/quick_validate.py \
+${CLAUDE_PLUGIN_ROOT}/skills/skill-create/scripts/quick_validate.py \
   ~/.claude/skills/<namespace>:<skill-name>
 ```
 
@@ -121,7 +121,7 @@ Skills don't appear in session context until indexed. Regenerate so the
 new skill is discoverable at the next session start:
 
 ```bash
-~/.claude/skills/skill-index/scripts/generate-motd.sh --force
+${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-motd.sh --force
 ```
 
 ## Patterns from Existing Skills

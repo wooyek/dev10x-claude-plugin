@@ -5,7 +5,7 @@ description: Set up git aliases that reduce permission friction by wrapping
 user-invocable: true
 invocation-name: dx:git-alias-setup
 allowed-tools:
-  - Bash(~/.claude/skills/git-alias-setup/scripts/git-alias-setup.sh)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git-alias-setup/scripts/git-alias-setup.sh)
 ---
 
 **Announce:** "Using dx:git-alias-setup to configure branch-comparison aliases."
@@ -22,7 +22,7 @@ the Bash command prefix.
 Run the setup script:
 
 ```bash
-~/.claude/skills/git-alias-setup/scripts/git-alias-setup.sh
+${CLAUDE_PLUGIN_ROOT}/skills/git-alias-setup/scripts/git-alias-setup.sh
 ```
 
 ## Aliases Configured

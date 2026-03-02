@@ -4,7 +4,7 @@ description: Launch a background agent to monitor PR CI checks and review commen
 user-invocable: true
 invocation-name: dx:gh-pr-monitor
 allowed-tools:
-  - Bash(~/.claude/skills/gh-context/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
 ---
 
 # PR Review Monitor (Background Agent)
@@ -48,7 +48,7 @@ When the user invokes `/dx:gh-pr-monitor`:
 Use the `dx:gh-context` script to detect PR context in one call:
 
 ```bash
-~/.claude/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
+${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
 # Parse PR_NUMBER, REPO, PR_URL, BRANCH from KEY=VALUE stdout
 ```
 
@@ -273,7 +273,7 @@ created to address them.
 Gather PR info, count open threads, verify readiness:
 
 ```bash
-~/.claude/skills/gh-pr-monitor/scripts/pr-notify.py \
+${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
   prepare --pr {pr_number} --repo {repo}
 ```
 
@@ -293,7 +293,7 @@ Use `AskUserQuestion`:
 If user approves:
 
 ```bash
-~/.claude/skills/gh-pr-monitor/scripts/pr-notify.py \
+${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
   send --pr {pr_number} --repo {repo} \
   --channel {CHANNEL_ID} \
   --reviewer {REVIEWER_TEAM} \
@@ -302,7 +302,7 @@ If user approves:
 
 If user declines, run with `--skip-slack`:
 ```bash
-~/.claude/skills/gh-pr-monitor/scripts/pr-notify.py \
+${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
   send --pr {pr_number} --repo {repo} --skip-slack
 ```
 
