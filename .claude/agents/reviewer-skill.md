@@ -44,6 +44,12 @@ Files matching: `skills/**`
     entry in `allowed-tools`, verify `skills/<name>/` exists using
     Glob(`skills/<name>/SKILL.md`). A missing directory means the skill is
     user-level; the path must stay as `~/.claude/skills/<name>/`.
+8d. **Skill porting pattern** — when a PR converts `~/.claude/skills/<name>/`
+    to `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`, systematically verify:
+    (a) all scripts have mode `100755` (`git ls-files --stage`)
+    (b) all `allowed-tools:` entries cover every script invocation,
+        including cross-skill delegations to other plugin skill directories
+    (c) no hardcoded absolute paths — use `${VAR:-/default/path}`
 9. **Template consistency** — YAML code blocks containing a `name:` field
    must follow `skill-naming.md`, not ad-hoc examples.
 10. **Reference doc consistency** — cross-check `references/` documents
@@ -53,6 +59,11 @@ Files matching: `skills/**`
      against the script; mismatches are a reliable bug signal.
 11. **Embedded shell templates** — POSIX-compatible, no silent `|| true`,
     `<>` placeholder markers for user-replaceable values.
+11b. **Embedded Python templates** — Python code blocks inside SKILL.md that
+     are generated into scripts must pass the same quality checks:
+     - No duplicate imports (ruff F811)
+     - No f-strings without expressions (ruff F541)
+     - `os.environ[...]` for credentials, never hardcoded values
 12. **Self-contained content** — no ephemeral references ("see Memory note",
     "as discussed"); all constraints documented inline.
 13. **Bundled binaries** — if `skills/<name>/bin/` contains a non-script

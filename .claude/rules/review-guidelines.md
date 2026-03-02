@@ -131,6 +131,11 @@ Do NOT re-flag the name in the next review round.
 - [only genuinely new or previously unfixed items]
 ```
 
+Round numbering tracks review invocations, not author fix commits.
+Each time Claude is triggered to review (e.g., on `synchronize`),
+that is a new round — even if the author pushed multiple fix commits
+between rounds.
+
 ## Context Rot Mitigation
 
 ### Before Each Re-Review
