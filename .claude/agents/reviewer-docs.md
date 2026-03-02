@@ -10,7 +10,7 @@ Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`,
 
 ## Required Reading
 
-- `.claude/rules/review-checks-common.md` — CLI verification, false positives
+- `references/review-checks-common.md` — CLI verification, false positives
 
 ## Checklist
 

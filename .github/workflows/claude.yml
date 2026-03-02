@@ -51,7 +51,7 @@ jobs:
             Read these files for context:
             1. CLAUDE.md - Repository conventions and patterns
             2. .claude/rules/README.md - Index of all rule files
-            3. .claude/rules/review-checks-common.md - False positive prevention
+            3. references/review-checks-common.md - False positive prevention
 
             FOR PR REVIEWS:
             - Focus ONLY on changes in the PR, not the entire codebase
@@ -59,13 +59,13 @@ jobs:
             - Use `gh pr view [PR_NUMBER] --json files` to get changed files list
             - Load domain-specific agent specs from .claude/agents/ based on
               changed file types (see CLAUDE.md Code Review table)
-            - Follow review workflow from .claude/rules/review-guidelines.md
+            - Follow review workflow from references/review-guidelines.md
 
             FOR COMMITS AND PR CREATION:
-            Follow outcome-focused (JTBD) principles from `.claude/rules/git-jtbd.md`:
+            Follow outcome-focused (JTBD) principles from `references/git-jtbd.md`:
             - Shift from implementation details ("Add X") to user outcomes ("Enable Y")
             - Extract ticket ID from branch name (format: username/TICKET-ID/description)
-            - Use appropriate gitmoji (see `.claude/rules/git-commits.md`)
+            - Use appropriate gitmoji (see `references/git-commits.md`)
 
             CODE VERIFICATION:
             Before claiming code contains an error:

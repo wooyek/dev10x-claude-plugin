@@ -5,6 +5,7 @@ on:
     types: [closed]
     paths-ignore:
       - '.claude/**'
+      - 'references/**'
       - '.github/workflows/claude-memory-review.yml'
       - '.github/workflows/claude-code-review.yml'
       - '.github/workflows/claude.yml'
@@ -97,7 +98,7 @@ jobs:
             2. Use `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments`
             3. Use `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews`
             4. Use `gh pr diff ${{ github.event.pull_request.number }}`
-            5. Read CLAUDE.md, .claude/agents/ specs, .claude/rules/review-checks-common.md
+            5. Read CLAUDE.md, .claude/agents/ specs, references/review-checks-common.md
 
             ### Step 2: Analyze Review Feedback Patterns
             For each review comment from Claude/github-actions[bot]:
@@ -153,6 +154,7 @@ jobs:
             - `CLAUDE.md`
             - `.claude/rules/*.md`
             - `.claude/agents/*.md`
+            - `references/*.md`
 
             Never touch:
             - `skills/` (plugin code)
@@ -182,7 +184,7 @@ jobs:
             ## PR & Commit Convention (MANDATORY)
 
             This project uses JTBD (Jobs To Be Done) outcome-focused titles.
-            Read `.claude/rules/git-jtbd.md` and `.claude/rules/git-pr.md`
+            Read `references/git-jtbd.md` and `references/git-pr.md`
             before writing titles or PR bodies.
 
             - Commit and PR titles must describe **what reviewers/contributors

@@ -66,7 +66,7 @@ DTOs):
 
 ### Step 5: Apply Review Guidelines
 
-Load project review guidelines from `.claude/rules/`:
+Load project review guidelines from `references/`:
 - `review-guidelines.md` — workflow, threads, summaries
 - `review-checks-common.md` — false positive prevention
 - Domain-specific agents from `.claude/agents/` based on file types

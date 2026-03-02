@@ -36,10 +36,10 @@ jobs:
 
             REQUIRED FIRST STEP:
             Read these files:
-            1. .claude/rules/git-commits.md — conventions for commit messages,
+            1. references/git-commits.md — conventions for commit messages,
                PR titles, and branch naming
-            2. .claude/rules/git-pr.md — PR body format, grooming, review feedback
-            3. .claude/rules/git-jtbd.md — Job Story format, principles,
+            2. references/git-pr.md — PR body format, grooming, review feedback
+            3. references/git-jtbd.md — Job Story format, principles,
                anti-patterns, and examples for outcome-focused titles
 
             GATHER PR DATA:
@@ -105,7 +105,7 @@ jobs:
               - Each bullet prefixed with **REQUIRED** or **RECOMMENDED** label
               - Each bullet includes a concrete fix (alternative wording, example)
               - When flagging non-outcome-focused titles, append:
-                "📖 See `.claude/rules/git-jtbd.md`"
+                "📖 See `references/git-jtbd.md`"
               - Keep tone constructive — this is a helpful nudge, not a gate
 
             IMPORTANT:

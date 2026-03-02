@@ -10,7 +10,7 @@ domain-specific reviewers).
 
 ## Required Reading
 
-- `.claude/rules/review-checks-common.md` — false positive prevention
+- `references/review-checks-common.md` — false positive prevention
 
 ## Checklist
 

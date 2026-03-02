@@ -16,6 +16,7 @@ on:
       - "skills/**/SKILL.md"
       - "CLAUDE.md"
       - ".claude/rules/**/*.md"
+      - "references/**/*.md"
       - ".claude/agents/**/*.md"
       - "!.github/workflows/claude*.yml"
 
@@ -53,8 +54,8 @@ jobs:
 
             STEP 1 — LOAD CORE RULES:
             Read these files first:
-            - .claude/rules/review-guidelines.md (workflow, threads, summaries)
-            - .claude/rules/review-checks-common.md (false positive prevention)
+            - references/review-guidelines.md (workflow, threads, summaries)
+            - references/review-checks-common.md (false positive prevention)
             - CLAUDE.md (project conventions)
 
             STEP 2 — CLASSIFY PR TYPE:

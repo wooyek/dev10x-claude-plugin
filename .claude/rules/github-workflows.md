@@ -35,8 +35,8 @@ See `.claude/rules/README.md` for the full architecture diagram.
 ## Shared Guidelines
 
 Review guidelines are centralized in:
-- `.claude/rules/review-guidelines.md` (workflow)
-- `.claude/rules/review-checks-common.md` (cross-cutting checks)
+- `references/review-guidelines.md` (workflow)
+- `references/review-checks-common.md` (cross-cutting checks)
 - `.claude/agents/*.md` (domain-specific checklists)
 
 Workflows should reference these files rather than duplicating content.
