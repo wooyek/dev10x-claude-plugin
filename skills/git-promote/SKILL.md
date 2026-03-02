@@ -1,8 +1,8 @@
 ---
-name: dx:ticket:from-commit
+name: dx:git-promote
 description: Convert existing git commits into issue tracker tickets with proper branch management and commit message formatting. Use this skill when a commit needs to be retroactively tracked, typically for tech debt fixes, bug fixes, or improvements that were committed without a ticket reference. This skill automates the workflow of creating the ticket, branching, cherry-picking, and updating the commit message.
 user-invocable: true
-invocation-name: dx:ticket:from-commit
+invocation-name: dx:git-promote
 ---
 
 # Commit to Ticket
@@ -72,7 +72,7 @@ Use the `dx:gh-pr-create` skill to push the branch and create a PR.
 ## Integration with Other Skills
 
 ```
-dx:ticket:from-commit
+dx:git-promote
 ├── Uses: ticket:create (Step 3)
 ├── Uses: ticket:branch (Step 4)
 └── Uses: dx:gh-pr-create (Step 8, optional)

@@ -123,7 +123,7 @@ Job Story was already sourced from the Linear ticket earlier in this session
 ### Step 3: Determine Commit Type
 
 **Orchestrated mode:** When this skill is invoked by an orchestrating skill
-(e.g., `test:fix-flaky`, `dx:ticket:from-commit`) and the commit type is
+(e.g., `test:fix-flaky`, `dx:git-promote`) and the commit type is
 unambiguous from context, auto-select the type and description without
 interactive prompts. Present the result in the preview (Step 9) for review.
 
