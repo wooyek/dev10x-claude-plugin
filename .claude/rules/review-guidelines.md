@@ -12,11 +12,22 @@ in code, see the domain-specific agent specs in `.claude/agents/`.
    to identify obsolete summaries
 3. Analyze current diff (`gh pr diff`)
 4. For each previous Claude Code Review thread:
-   - Fixed/removed → reply "Addressed" and resolve
+   - Fixed/removed → reply "Addressed" (do NOT resolve — leave for human)
    - Persists in unchanged code → reply "Still applies"; do NOT duplicate
    - Changed but issue remains → reply with update
 5. Use inline comment tools ONLY for NEW issues
-6. Hide obsolete summaries (only if all threads resolved)
+6. Hide obsolete review summaries before posting the new one:
+   a. Query `reviewThreads` via `gh api graphql` — for each thread,
+      check `isResolved` and group by `pullRequestReview.databaseId`
+   b. For each previous Claude review with a non-empty body:
+      - ALL threads `isResolved: true` → minimize as OUTDATED
+      - ANY thread unresolved → leave visible
+      - Review has NO inline threads (summary-only) → minimize
+   c. Minimize: `minimizeComment(input: {subjectId: "<node_id>",
+      classifier: OUTDATED})`
+   d. Skip the current review cycle's own review
+   e. Thread resolution must come from the human supervisor —
+      the reviewer MUST NOT resolve threads to trigger this gate
 7. Create ONE summary review comment (`gh pr review --comment`) with:
    - High-level observations and quality assessment
    - Cross-cutting concerns not tied to specific lines
