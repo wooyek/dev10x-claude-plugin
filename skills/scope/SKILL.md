@@ -1,6 +1,6 @@
 ---
 name: dx:scope
-description: Base scoping skill for technical research and architecture design. Provides reusable scoping workflow for investigating codebases, designing solutions, and documenting decisions. Used as foundation by ticket:scope (Linear tickets) and adr:create (Architecture Decision Records).
+description: Base scoping skill for technical research and architecture design. Provides reusable scoping workflow for investigating codebases, designing solutions, and documenting decisions. Used as foundation by ticket:scope (Linear tickets) and dx:adr (Architecture Decision Records).
 user-invocable: false
 ---
 
@@ -12,7 +12,7 @@ Foundational scoping skill that provides reusable research and
 architecture design workflows. Not directly invocable — extended by:
 
 - `ticket:scope` — for scoping Linear tickets
-- `adr:create` — for creating Architecture Decision Records
+- `dx:adr` — for creating Architecture Decision Records
 
 ## Core Scoping Workflow
 
@@ -231,7 +231,7 @@ Adds:
 - Story point estimation
 - Acceptance criteria format
 
-### adr:create
+### dx:adr
 Adds:
 - ADR format and numbering
 - Decision record structure

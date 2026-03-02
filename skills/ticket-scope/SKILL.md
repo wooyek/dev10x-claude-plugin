@@ -18,7 +18,7 @@ This skill creates comprehensive technical scoping documents for Linear tickets.
 - Creating detailed implementation plan
 
 **Do NOT use for:**
-- Architectural decisions (use `adr:create` instead)
+- Architectural decisions (use `dx:adr` instead)
 - Simple bug fixes with obvious solutions
 - Quick tasks under 1 story point
 
@@ -351,7 +351,7 @@ dx:ticket-scope
 ├── Uses: Linear MCP (ticket data)
 ├── Uses: dx:jtbd (JTBD story drafting in Phase 4b)
 ├── May lead to: dx:work-on (start implementation)
-├── Alternative: adr:create (for architectural decisions)
+├── Alternative: dx:adr (for architectural decisions)
 └── Saves to: /tmp/claude/ticket-scope/TICKET-ID-scope.md
 ```
 
@@ -387,5 +387,5 @@ dx:ticket-scope
 
 ### Related Skills
 - `scope` - Base scoping skill
-- `adr:create` - For architectural decisions
+- `dx:adr` - For architectural decisions
 - `dx:work-on` - Start implementation
