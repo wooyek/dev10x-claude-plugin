@@ -63,6 +63,7 @@ that goes away. It should contrast with the current broken state.
 |---|---|---|
 | Technical language | Not understandable by stakeholders | Use business/domain language |
 | Solution-focused "When" | Prescribes implementation | Describe the real-world trigger |
+| CLI/command-invocation "When" | "When running `make release-features`" prescribes the tool | Describe the real-world trigger: "When a feature release produces skipped version numbers" |
 | Vague outcome | Not testable | Be specific about what improves |
 | No contrast with current state | Unclear why it matters | Show what's wrong today |
 

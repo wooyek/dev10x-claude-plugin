@@ -83,6 +83,13 @@ def md_to_slack_bold(text: str) -> str:
     return re.sub(r"\*\*(.+?)\*\*", r"*\1*", text)
 
 
+def split_title_jtbd(pr_title: str) -> tuple[str, str | None]:
+    if " \u2014 " in pr_title:
+        title, embedded_jtbd = pr_title.split(" \u2014 ", maxsplit=1)
+        return title.strip(), embedded_jtbd.strip()
+    return pr_title, None
+
+
 def format_slack_message(
     pr_number: int,
     repo: str,
@@ -92,9 +99,11 @@ def format_slack_message(
 ) -> str:
     repo_short = repo.split("/")[-1]
     link = f"<{pr_url}|{repo_short}#{pr_number}>"
-    lines = [f"Please review {link}", pr_title]
-    if jtbd:
-        lines.append(f"> {md_to_slack_bold(jtbd)}")
+    short_title, title_jtbd = split_title_jtbd(pr_title=pr_title)
+    effective_jtbd = jtbd or title_jtbd
+    lines = [f"Please review {link}", short_title]
+    if effective_jtbd:
+        lines.append(f"> {md_to_slack_bold(effective_jtbd)}")
     return "\n".join(lines)
 
 

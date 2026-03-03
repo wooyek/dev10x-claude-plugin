@@ -110,6 +110,10 @@ When docs reference CLI commands (e.g., install instructions):
 - **Silent error swallowing**: `|| true` on setup steps and `2>/dev/null`
   on media-encoding commands (ffmpeg, convert, ImageMagick) hide failures;
   replace with a fallback action (`|| { cmd; }`) or remove the redirect.
+  Also flag `2>/dev/null` on any command whose stdout is captured into a
+  variable (`var=$(cmd 2>/dev/null)`) when that variable drives branching
+  logic — an empty string from a silenced failure produces misleading errors
+  downstream.
 - **Pipe segment completeness in security hooks**: when a hook script
   parses a shell command to detect a pattern (e.g., `python3 -c`),
   it must inspect ALL pipe-delimited segments, not just
