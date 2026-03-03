@@ -34,6 +34,8 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
 11. **hooks.json integrity** — for `hooks/hooks.json` changes: verify
     all referenced script paths exist, matcher patterns are valid
     (Bash, Edit|Write, Skill, SessionStart), and no duplicate entries
+12. **Hook JSON output fields** — for `hooks/scripts/*.sh`: `SessionStart`
+    must use `hookSpecificOutput.additionalContext`; flag `additional_context`.
 
 ## Design Intent
 
