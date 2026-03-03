@@ -120,6 +120,14 @@ When docs reference CLI commands (e.g., install instructions):
   `command.split("|")[0]`. Use `for seg in command.split("|"):` or
   mirror the `segments[1:]` loop pattern from existing hooks.
 
+## Sequential Step Integrity
+
+When SKILL.md defines ordered task lists, flag:
+- **Inverted prerequisites**: step N requires step N+1 to have run first
+  (e.g., "Request re-review" before "Self-review") — WARNING
+- **Subsumed steps**: step N is a proper subset of step N+1 (both perform
+  the same action) — WARNING; suggest removing the more specific step
+
 ## Python Linting Checks
 
 - **f-strings without expressions**: `f"static string"` with no `{}`

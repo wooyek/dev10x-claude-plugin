@@ -49,6 +49,11 @@ Files matching: `skills/**`
     SKILL.md files and verify each has a matching
     `Bash(${CLAUDE_PLUGIN_ROOT}/bin/<script>:*)` entry in `allowed-tools`.
     Do not rely on spotting individual occurrences — grep across the diff.
+8f. **Memory file Write coverage** — when a skill conditionally writes
+    to `~/.claude/projects/<project>/memory/<file>`, verify
+    `allowed-tools:` includes a matching `Write(~/.claude/projects/**/<file>)`
+    or `Write(~/.claude/projects/**/**)` entry. Missing entry causes a
+    per-invocation approval prompt on every persistence operation (WARNING).
 8c. **Plugin directory existence** — for every `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`
     entry in `allowed-tools`, verify `skills/<name>/` exists using
     Glob(`skills/<name>/SKILL.md`). A missing directory means the skill is
@@ -88,6 +93,26 @@ Files matching: `skills/**`
     (b) constraint appears in Important Notes section;
     (c) scripts or calling code are consistent with the constraint.
     Do NOT flag strong imperative language as "over-emphasis".
+
+15. **Config file schema** — when a skill reads or writes a structured
+    config file (YAML, JSON, TOML), SKILL.md must:
+    (a) show a concrete schema example with all supported keys and
+        value types
+    (b) document the full resolution/fallback order (which keys take
+        priority, what happens when the file is absent)
+    (c) state when and how the file is created (never, on-demand,
+        always). Missing schema is WARNING; missing fallback is WARNING.
+16. **Resolution-order completeness** — when SKILL.md documents a
+    prioritized fallback/resolution list and also documents multiple
+    variants of the same key (e.g., `persist: true` vs `persist: false`),
+    verify every variant appears as a distinct step in the resolution
+    order. A variant that is documented but never checked is a logic bug
+    (WARNING).
+17. **Conditional steps** — when a task has a branch that produces no
+    artifact (e.g., "done" / "skip" / "abort"), the immediately following
+    step must either be absent from that branch or marked conditional
+    (e.g., "(if PR created)"). An unconditional step after a branch-point
+    is INFO severity.
 
 ## Output Format
 
