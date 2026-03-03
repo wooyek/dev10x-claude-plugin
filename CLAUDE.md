@@ -12,9 +12,10 @@ development workflows.
 | `hooks/`         | PreToolUse / PostToolUse hooks             |
 | `bin/`           | Helper scripts (release, CI)               |
 | `.claude-plugin/`| Plugin manifest (`plugin.json`)            |
+| `agents/`        | Plugin-distributed Claude Code sub-agent specs |
 | `references/`    | Shared docs (git, review, JTBD guides)     |
 | `.claude/rules/` | Always-loaded essentials + path-scoped rules |
-| `.claude/agents/`| Domain-specific reviewer agent specs       |
+| `.claude/agents/`| Internal domain-specific reviewer agent specs |
 
 ## Development
 

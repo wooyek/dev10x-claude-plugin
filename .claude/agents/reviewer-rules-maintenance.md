@@ -6,7 +6,7 @@ budget compliance and structural consistency.
 ## Trigger
 
 Files matching: `.claude/rules/**/*.md`, `.claude/agents/**/*.md`,
-`references/**/*.md`, `CLAUDE.md`
+`agents/**/*.md`, `references/**/*.md`, `CLAUDE.md`
 
 ## Required Reading
 
@@ -16,7 +16,8 @@ Files matching: `.claude/rules/**/*.md`, `.claude/agents/**/*.md`,
 
 1. **Size budgets** — verify modified files stay within limits:
    - Rule files ≤ 200 lines
-   - Agent specs ≤ 50 lines
+   - Agent specs (`.claude/agents/`) ≤ 50 lines
+   - Plugin sub-agent specs (`agents/`) ≤ 200 lines
    - `review-checks-common.md` ≤ 100 lines
    - CLAUDE.md ≤ 100 lines
 2. **Split detection** — flag files approaching limits (>80%)

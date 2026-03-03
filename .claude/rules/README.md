@@ -37,13 +37,25 @@ The code review system uses a **multi-agent architecture**:
 
 ## Agent Specs (`.claude/agents/`)
 
+Internal review-only agents (≤ 50 lines each).
+
 | File | Trigger | References |
 |------|---------|------------|
 | `reviewer-generic.md` | `**/*.py`, `**/*.sh` | `references/review-checks-common.md` |
 | `reviewer-infra.md` | `Makefile`, `**/*.sh`, `bin/**`, `.github/workflows/**` | `references/review-checks-common.md` |
 | `reviewer-docs.md` | `docs/**`, `.claude/**/*.md` | `references/review-checks-common.md` |
-| `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**` | (self-contained) |
+| `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | (self-contained) |
 | `reviewer-skill.md` | `skills/**` | `.claude/rules/skill-naming.md` |
+
+## Plugin-Distributed Sub-Agents (`agents/`)
+
+Sub-agent specs shipped with the plugin for user workflows (≤ 200 lines each).
+Distinct from `.claude/agents/` — these are operational agents, not review
+checklists, and need full phase logic and examples.
+
+| File | Purpose |
+|------|---------|
+| `agents/<name>.md` | Plugin sub-agent spec (e.g., `permission-auditor.md`) |
 
 ## Size Budgets
 
