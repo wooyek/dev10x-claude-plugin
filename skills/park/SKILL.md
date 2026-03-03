@@ -173,7 +173,7 @@ Compose the comment:
 
 Write the comment to a unique temp file and post via `--body-file`:
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git pr-comment .txt
+/tmp/claude/bin/mktmp.sh git pr-comment .txt
 ```
 Write content to the returned path using Write tool, then:
 ```bash

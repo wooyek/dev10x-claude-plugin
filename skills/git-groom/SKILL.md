@@ -8,7 +8,7 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)
+  - Bash(/tmp/claude/bin/mktmp.sh:*)
   - Write(/tmp/claude/git/**)
 ---
 
@@ -62,9 +62,9 @@ git commit --fixup=<target-commit-sha>
 GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base develop HEAD)
 
 # Custom sequence (reordering, message rewrites, splits):
-# 1. Create unique seq file: ${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git rebase-seq .txt
+# 1. Create unique seq file: /tmp/claude/bin/mktmp.sh git rebase-seq .txt
 # 2. Write sequence to the returned path
-# 3. Run: GROOM_SEQ_FILE=<path> ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh develop
+# 3. Run: ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh <path> develop
 ```
 
 **Key insight:** For pure autosquash (squashing fixup commits into their targets), use `GIT_SEQUENCE_EDITOR=true` directly — it accepts git's auto-generated todo as-is. The rebase script (`git-rebase-groom.sh`) replaces the todo with your sequence file, so commits not listed in the file are dropped. Only use the script when you need custom sequence control.
@@ -92,7 +92,7 @@ Fully automatable — no interactive editor required.
 
 **Use the script** (single permission approval, runs unattended):
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git groom-config .json
+/tmp/claude/bin/mktmp.sh git groom-config .json
 ```
 Write the config to the returned path, then run:
 ```bash
@@ -129,7 +129,7 @@ git log --oneline $(git merge-base develop HEAD)..HEAD
 
 **Step 2:** Create an isolated workdir for this groom session:
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh -d git groom
+/tmp/claude/bin/mktmp.sh -d git groom
 ```
 Store the returned path as `$WORKDIR`.
 
@@ -146,7 +146,7 @@ parent directories as needed.
 **Step 4:** Write the complete rebase sequence using the Write tool:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git rebase-seq .txt
+/tmp/claude/bin/mktmp.sh git rebase-seq .txt
 ```
 
 Write to the returned path:
@@ -162,7 +162,7 @@ Oldest commit at top.
 
 **Step 5:** Run the non-interactive rebase:
 ```bash
-GROOM_SEQ_FILE=<seq-path> ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh develop
+${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh <seq-path> develop
 ```
 
 `GIT_EDITOR="true"` suppresses the commit message editor for `--amend`

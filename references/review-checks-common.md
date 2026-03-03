@@ -104,7 +104,7 @@ When docs reference CLI commands (e.g., install instructions):
 
 - **Hardcoded temp paths**: skills must not hardcode `/tmp/claude/<x>.txt`.
   All temp files must be created via
-  `${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh <namespace> <prefix> [.ext]`.
+  `/tmp/claude/bin/mktmp.sh <namespace> <prefix> [.ext]`.
   Hardcoded paths are WARNING; missing `allowed-tools` coverage is also WARNING
   (see rules 8b/8e in `reviewer-skill.md`).
 - **Silent error swallowing**: `|| true` on setup steps and `2>/dev/null`

@@ -40,7 +40,7 @@ Files matching: `skills/**`
    use relative paths; `~/.claude/tools/` or `~/.claude/skills/` paths
    are accepted for user-tool delegation, not portability violations.
 8b. **`allowed-tools` sync** — when a PR adds `mktmp.sh <ns> ...` calls,
-    verify BOTH entries are present: `Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)`
+    verify BOTH entries are present: `Bash(/tmp/claude/bin/mktmp.sh:*)`
     (covers the mktmp call) AND `Write(/tmp/claude/<ns>/**)` (covers writing
     the returned path). For other Bash calls to external scripts, confirm a
     matching `Bash(<path>:*)` entry exists. Missing either causes WARNING.

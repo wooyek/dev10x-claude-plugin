@@ -116,7 +116,7 @@ Use the Write tool to create the review JSON, then post via `gh api --input`:
 
 1. Create a unique temp file:
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git pr-review .json
+/tmp/claude/bin/mktmp.sh git pr-review .json
 ```
 
 2. Write the review payload to the unique path:

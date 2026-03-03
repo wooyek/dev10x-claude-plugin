@@ -6,7 +6,7 @@ invocation-name: dx:skill-audit
 allowed-tools:
   - Read(~/.claude/**)
   - Read(~/.claude/skills/**)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)
+  - Bash(/tmp/claude/bin/mktmp.sh:*)
   - Read(/tmp/claude/skill-audit/**)
   - Write(~/.claude/**)
   - Write(/tmp/claude/skill-audit/**)
@@ -130,7 +130,7 @@ If resolution fails, ask the user to provide the JSONL path explicitly.
 
 Create a unique output file:
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh skill-audit audit-transcript .md
+/tmp/claude/bin/mktmp.sh skill-audit audit-transcript .md
 ```
 Store the returned path, then run the extraction script:
 ```bash
