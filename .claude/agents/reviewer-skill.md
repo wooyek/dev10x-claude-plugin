@@ -34,6 +34,9 @@ Files matching: `skills/**`
    environment variables, not absolute user-specific paths.
    Applies equally to shell code blocks in SKILL.md workflow
    descriptions and `references/` documents, not just deployed scripts.
+   For external binaries (yq, jq, gh, etc.) the preferred resolution
+   pattern is: `TOOL="${TOOL:-$(command -v tool 2>/dev/null || echo "/fallback/path/tool")}"`.
+   Flag bare absolute paths without this pattern.
 8. **`allowed-tools` coverage** — if SKILL.md calls external scripts,
    front matter must declare matching `Bash(...)` entries (missing entries
    cause per-invocation approval prompts). Plugin-distributed scripts must
@@ -113,6 +116,11 @@ Files matching: `skills/**`
     step must either be absent from that branch or marked conditional
     (e.g., "(if PR created)"). An unconditional step after a branch-point
     is INFO severity.
+18. **Config-file cache coverage** — when a script uses a skip/cache
+    pattern (`[[ "${1:-}" != "--force" ]]`), verify that ALL external
+    config files read by the script are included in the staleness check
+    alongside source files. Missing config files cause stale output
+    after user edits without `--force`.
 
 ## Output Format
 
