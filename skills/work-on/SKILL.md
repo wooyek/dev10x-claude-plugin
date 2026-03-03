@@ -177,6 +177,50 @@ heuristics to decide which tasks to include:
 **Always include at the end:**
 - Create PR & ensure CI passes — epic
 - Self-review & request human review — epic
+- Verify acceptance criteria — detailed (see below)
+
+### Acceptance Criteria Verification
+
+The **last task** in every plan verifies the work is shippable
+or ready for handover. Read the acceptance criteria YAML file:
+
+```
+~/.claude/projects/<project>/memory/acceptance-criteria.yaml
+```
+
+**Determine the work type** from the gathered context:
+
+| Context | Work type |
+|---------|-----------|
+| Ticket with implementation | `feature` |
+| Sentry/bug ticket | `bugfix` |
+| PR with review comments | `pr-continuation` |
+| No ticket, no PR | `local-only` |
+| Sentry/Slack only, no fix planned | `investigation` |
+
+**Resolve criteria** in this order:
+1. Check `overrides` for a matching `work_type` with
+   `persist: true` — use if found
+2. Fall back to `defaults[work_type].criteria`
+
+**Present the criteria** when building the plan. Show the
+resolved criteria in the final task description. If the user
+has persistent overrides from past sessions, present them
+as choices alongside the default:
+
+```
+Acceptance criteria for this feature work:
+- PR is approved, CI passes, ready to merge (Default)
+- PR created and CI green, skip review (Your past choice)
+- Different criteria this time
+```
+
+If the user picks a non-default option, ask whether to
+persist it (`AskUserQuestion` with "Always" / "Just this
+time"). Update the YAML file accordingly:
+- `persist: true` → add to `overrides` for future sessions
+- `persist: false` → add with `persist: false`; the skill
+  removes consumed one-time overrides after use
 
 ### Example Plans
 
@@ -189,6 +233,7 @@ heuristics to decide which tasks to include:
 5. [epic]     Verify (tests, lint)
 6. [epic]     Create PR & ensure CI passes
 7. [epic]     Self-review & request human review
+8. [detailed] Verify acceptance criteria met
 ```
 
 **Bug fix from Sentry + ticket:**
@@ -199,6 +244,7 @@ heuristics to decide which tasks to include:
 4. [epic]     Implement fix
 5. [epic]     Verify fix (tests, regression)
 6. [epic]     Create PR & ensure CI passes
+7. [detailed] Verify acceptance criteria met
 ```
 
 **PR continuation:**
@@ -207,6 +253,7 @@ heuristics to decide which tasks to include:
 2. [epic]     Address review comments
 3. [epic]     Verify changes pass CI
 4. [epic]     Request re-review
+5. [detailed] Verify acceptance criteria met
 ```
 
 **Local-only work (no ticket, no PR):**
@@ -215,6 +262,7 @@ heuristics to decide which tasks to include:
 2. [epic]     Implement changes
 3. [epic]     Verify
 4. [detailed] Decide: create ticket, create PR, or done
+5. [detailed] Verify acceptance criteria met
 ```
 
 ### Supervisor Approval Gate
@@ -230,10 +278,32 @@ After approval, set task dependencies where appropriate (use
 
 ---
 
-## Phase 4: Execute (Adaptive)
+## Phase 4: Execute (Adaptive, Auto-Advance)
 
 Work through the approved task list. Update task status via
 `TaskUpdate` as work progresses.
+
+### Auto-Advance Rule
+
+**Complete a task → immediately start the next.** Do not pause
+between tasks to ask "should I continue?" or wait for the user
+to say "go" / "next" / "continue". The approved plan is the
+authorization to proceed.
+
+**Only pause for genuine decisions** — A/B choices where the
+user's preference is unknown and cannot be inferred from
+context. Routine confirmations are not decisions.
+
+**If blocked on the current task** (waiting for user input,
+external dependency, CI), check whether the next unblocked
+task can start. Examples:
+- Waiting for CI? Start self-review in parallel.
+- Waiting for user input on approach? Create the branch or
+  draft the Job Story meanwhile.
+- Stuck on a sub-task? Mark it `pending` with a note and
+  advance to the next unblocked task in the list.
+
+Return to the blocked task once the blocker resolves.
 
 ### Executing Detailed Tasks
 
@@ -261,12 +331,17 @@ When reaching an epic task:
    This may involve:
    - Reading code to understand scope
    - `AskUserQuestion` for A/B decisions (e.g., "approach X
-     vs approach Y?")
+     vs approach Y?") — but only when the choice genuinely
+     cannot be inferred from context
    - Follow-up information gathering
-3. **Present sub-tasks** to the supervisor for approval
+3. **Present sub-tasks** briefly (inline, not a new approval
+   gate) and begin executing immediately. Only ask for
+   approval if the expansion reveals unexpected scope or
+   trade-offs the supervisor should weigh in on.
 4. **Check for parallelism** — if sub-tasks are independent,
    ask the supervisor before launching parallel agents
-5. **Execute sub-tasks**, marking each completed as they finish
+5. **Execute sub-tasks**, marking each completed as they finish.
+   Auto-advance between sub-tasks (same rule as top-level).
 6. **Mark the epic completed** when all sub-tasks are done
 
 ### Parallelism Policy
@@ -381,10 +456,13 @@ issue. Body mentions PR #42 → fetch PR. Produce context summary.
 4. [epic]     Implement changes
 5. [epic]     Verify
 6. [epic]     Create PR & ensure CI passes
+7. [detailed] Verify acceptance criteria met
 ```
 Supervisor approves.
 
-**Phase 4:** Execute tasks 1-6, expanding epics as reached.
+**Phase 4:** Auto-advance through tasks 1-7, expanding epics
+as reached. No pauses between tasks unless a genuine decision
+is needed.
 
 ### Example 2: Multiple Inputs
 
@@ -409,6 +487,7 @@ sources.
 5. [epic]     Implement fix
 6. [epic]     Verify fix
 7. [epic]     Create PR & ensure CI passes
+8. [detailed] Verify acceptance criteria met
 ```
 
 ### Example 3: PR Continuation
@@ -426,6 +505,7 @@ PR has 3 review comments → note them.
 2. [epic]     Address review comments
 3. [epic]     Verify CI passes
 4. [epic]     Request re-review
+5. [detailed] Verify acceptance criteria met
 ```
 
 ### Example 4: Mid-Workflow Pause
