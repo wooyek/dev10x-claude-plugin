@@ -23,6 +23,9 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
    step-level `if:`)
 6. **Config monitoring** — linting workflows must include their config
    files in `paths:` trigger
+6b. **Script config-file staleness** — for shell scripts that cache
+    output (skip-if-not-stale pattern), verify that all config files
+    read by the script are listed in the staleness check.
 7. **Security** — no secrets in prompts/logs, minimal tool permissions
 8. **Hardcoded branch names** — flag any step that hardcodes a branch
    name; use `${{ github.event.pull_request.base.ref }}` instead
@@ -34,6 +37,8 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
 11. **hooks.json integrity** — for `hooks/hooks.json` changes: verify
     all referenced script paths exist, matcher patterns are valid
     (Bash, Edit|Write, Skill, SessionStart), and no duplicate entries
+12. **Hook JSON output fields** — for `hooks/scripts/*.sh`: `SessionStart`
+    must use `hookSpecificOutput.additionalContext`; flag `additional_context`.
 
 ## Design Intent
 

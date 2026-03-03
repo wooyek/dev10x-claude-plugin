@@ -65,6 +65,12 @@ Before raising any of these, **verify actual code**:
     entry is renamed, verify the new namespace matches the first argument of
     every `mktmp.sh` invocation in that SKILL.md. A mismatch causes a
     write-permission rejection at runtime.
+16. **Ticket-ID when self-motivated** — if PR body contains
+    `Fixes: none — self-motivated`, do not flag missing ticket ID in
+    PR title or commit messages. No issue exists to reference.
+17. **Branch name convention** — flag branch name violations
+    INFORMATIONAL in Round 1 only. Do not re-raise in subsequent rounds
+    as the branch name is immutable while the PR is open.
 
 ## Parameter Change Analysis
 
@@ -119,6 +125,14 @@ When docs reference CLI commands (e.g., install instructions):
   it must inspect ALL pipe-delimited segments, not just
   `command.split("|")[0]`. Use `for seg in command.split("|"):` or
   mirror the `segments[1:]` loop pattern from existing hooks.
+
+## Sequential Step Integrity
+
+When SKILL.md defines ordered task lists, flag:
+- **Inverted prerequisites**: step N requires step N+1 to have run first
+  (e.g., "Request re-review" before "Self-review") — WARNING
+- **Subsumed steps**: step N is a proper subset of step N+1 (both perform
+  the same action) — WARNING; suggest removing the more specific step
 
 ## Python Linting Checks
 

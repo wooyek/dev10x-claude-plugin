@@ -15,6 +15,10 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-audit/scripts/:*)
   - Bash(ls -t ~/.claude/:*)
   - Bash(wc:*)
+  - Bash(git config --list:*)
+  - Bash(ls ~/.config/fish/functions/:*)
+  - Bash(ls ~/.claude/tools/:*)
+  - Bash(find ~/.claude/skills:*)
 ---
 
 # Skill Audit
@@ -295,6 +299,8 @@ a new rule). Structural friction needs skill updates and/or hooks.
 | `PREFIX_POISONED_COMMENT` | `# comment\ncommand` | `#` breaks all prefix matching | Use Bash `description` param |
 | `HOOK_BLOCKED_RETRY` | `cat <<'EOF'...` or `echo >` | Hook rejects it; Claude retries anyway | Update skill to use Write + `-F` |
 | `NUISANCE_APPROVE` | Safe command prompted 3+ times | Allow rule exists but pattern doesn't match | Widen existing rule or add new one |
+| `UNNECESSARY_CD_WORKTREE` | `cd /worktree/path && command` | `cd` shifts prefix; CWD is already the worktree | Drop the `cd` — session is already there |
+| `WORKTREE_CWD_NOT_SWITCHED` | Commands run in main repo after worktree creation | Worktree creation should switch CWD | Investigate `dx:git-worktree` — CWD switch may have failed |
 
 **Detection algorithm:**
 
@@ -331,6 +337,21 @@ a new rule). Structural friction needs skill updates and/or hooks.
    when the same command pattern appears 3+ times with no structural
    issue.
 
+8. **Unnecessary `cd` in worktree**: Scan for `cd /path && command`
+   where `/path` matches the session's CWD (from transcript header).
+   If the session is in a worktree (`.git` is a file), `cd` into
+   the worktree root is always redundant. Classification:
+   `UNNECESSARY_CD_WORKTREE`. Fix: drop the `cd` prefix.
+
+9. **Worktree CWD not switched**: After a `dx:git-worktree`
+   invocation in the transcript, check whether subsequent Bash
+   commands target the new worktree path or still operate in the
+   original repo. If commands use `cd <worktree>` or `git -C
+   <worktree>` after creation, the CWD switch may have failed.
+   Classification: `WORKTREE_CWD_NOT_SWITCHED`. Fix: investigate
+   `dx:git-worktree` skill — the EnterWorktree tool should have
+   switched the session directory automatically.
+
 **Output format:**
 
 | # | Command (truncated) | Toxicity | Root Cause | Recommended Fix |
@@ -340,14 +361,64 @@ a new rule). Structural friction needs skill updates and/or hooks.
 | 3 | `mkdir -p /tmp && script` | PREFIX_POISONED_CHAIN | `&&` shifts prefix to `mkdir` | Skill: script creates own dirs |
 | 4 | `git -C /work/myproject log` | PREFIX_POISONED_GIT_C | `-C` breaks `Bash(git log:*)` | Skill: use CWD |
 | 5 | `pytest src/` (3x) | NUISANCE_APPROVE | No matching rule | Allow: `Bash(pytest:*)` |
+| 6 | `cd /work/.worktrees/proj && pytest` | UNNECESSARY_CD_WORKTREE | CWD is already the worktree | Drop the `cd` |
+| 7 | `git -C /work/.worktrees/proj log` after worktree create | WORKTREE_CWD_NOT_SWITCHED | CWD switch failed | Fix `dx:git-worktree` skill |
+
+**10. Wrapper discovery**: For each PREFIX_POISONED or chained
+command finding, check whether a wrapper already exists that
+encapsulates the toxic pattern:
+
+| Wrapper source | How to check | Example |
+|---|---|---|
+| Git aliases | `git config --list \| grep alias\.` | `git develop-log` wraps `$(git merge-base develop HEAD)` |
+| Fish functions | `ls ~/.config/fish/functions/` | `fish_func.fish` wrapping a pipeline |
+| Claude tools | `ls ~/.claude/tools/` | `~/.claude/tools/helper.sh` |
+| Skill scripts | `find ~/.claude/skills -name '*.sh'` | `scripts/fetch.sh` in a skill dir |
+
+Classify each finding:
+
+| Classification | Condition | Proposal |
+|---|---|---|
+| `USE_EXISTING_WRAPPER` | Wrapper found | MEMORY_UPDATE: document the wrapper invocation |
+| `CREATE_WRAPPER_ALIAS` | No wrapper; git-related chain | Create git alias + MEMORY_UPDATE |
+| `CREATE_WRAPPER_SCRIPT` | No wrapper; non-git chain | Create `~/.claude/tools/<name>.sh` + allow rule + MEMORY_UPDATE |
+
+Add a **Wrapper Status** column to the output table:
+
+| # | Command | Toxicity | Wrapper Status | Recommended Fix |
+|---|---|---|---|---|
+| 1 | `BASE=$(git merge-base develop HEAD) && git log` | PREFIX_POISONED_SUBSHELL | EXISTS: `git develop-log` | MEMORY_UPDATE: use `git develop-log` |
+| 2 | `mkdir -p /tmp/out && ~/.claude/tools/export.sh` | PREFIX_POISONED_CHAIN | MISSING | CREATE_WRAPPER_SCRIPT: let script create dirs |
+| 3 | `ENV=val ~/.claude/skills/foo/scripts/run.sh` | PREFIX_POISONED_ENVVAR | MISSING | CREATE_WRAPPER_SCRIPT: script sets env internally |
+
+When wrapper exists, the primary recommendation is MEMORY_UPDATE
+(not a new script or alias). The memory note should document:
+- The toxic pattern that triggers it
+- The correct invocation using the wrapper
+- Where the wrapper lives (for reference)
+
+Example memory update proposal:
+```
+MEMORY_UPDATE: "Use `git develop-log` instead of
+`git log $(git merge-base develop HEAD)..HEAD` —
+the alias wraps the subshell, keeping the command prefix stable
+for allow-rule matching."
+```
+
+When no wrapper exists, propose creating one AND a memory update
+documenting it. For git aliases, reference `dx:git-alias-setup`
+as the canonical setup mechanism rather than proposing raw
+`git config` commands.
 
 **Recommendations per category:**
 
-- **PREFIX_POISONED_***: Update the SKILL.md that teaches the broken
-  pattern. Also propose a PreToolUse hook (via `/hookify`) to
-  auto-reject the pattern with a helpful error message pointing to
-  the correct approach. This prevents future sessions from
-  re-discovering the same friction.
+- **PREFIX_POISONED_***: First check wrapper discovery (step 8
+  above). If a wrapper exists, propose MEMORY_UPDATE to use it
+  and SKILL_UPDATE to teach the wrapper pattern. If no wrapper
+  exists, propose creating one, then update the SKILL.md that
+  teaches the broken pattern. Also propose a PreToolUse hook
+  (via `/hookify`) to auto-reject the pattern with a helpful
+  error message pointing to the wrapper.
 
 - **HOOK_BLOCKED_RETRY**: Update the SKILL.md to use the correct
   pattern. No new hook needed (existing hook already blocks). Add a
@@ -430,21 +501,42 @@ pre-approve destructive commands.
 - Commands that send messages (Slack, email) without review
 - `--force`, `--no-verify`, `--hard` flags
 
-**2. PREFIX_POISONED → Skill update + hook proposal**
+**2. PREFIX_POISONED → Wrapper discovery + skill update + hook**
 
-For each PREFIX_POISONED finding:
-1. Identify the skill that teaches the broken pattern (grep SKILL.md
-   files for the toxic command fragment)
-2. Propose a skill edit replacing the broken pattern with the correct one
-3. Propose a hookify rule to auto-reject the pattern in future sessions:
+For each PREFIX_POISONED finding, run wrapper discovery (4c step 8)
+first, then route based on result:
+
+**2a. Wrapper exists (`USE_EXISTING_WRAPPER`):**
+1. Propose MEMORY_UPDATE documenting the wrapper invocation
+2. Propose SKILL_UPDATE replacing the toxic pattern with the wrapper
+3. No new hook or script needed — the wrapper already solves it
 
 ```
-Fix type: SKILL_UPDATE + HOOKIFY_RULE
+Fix type: MEMORY_UPDATE + SKILL_UPDATE
+Wrapper: git develop-log (git alias)
 Skill: dev10x:some-skill (line 38)
-Before: BASE=$(git merge-base develop HEAD) && script "$BASE"
-After:  script develop
-Hook: Reject Bash commands matching $() && .*skills/ with message:
-  "Pass arguments directly to skill scripts — $() breaks prefix matching"
+Before: git log $(git merge-base develop HEAD)..HEAD
+After:  git develop-log
+Memory: "Use `git develop-log` — wraps the subshell"
+```
+
+**2b. No wrapper exists (`CREATE_WRAPPER_ALIAS` / `CREATE_WRAPPER_SCRIPT`):**
+1. Propose creating the wrapper (alias via `dx:git-alias-setup`
+   or script in `~/.claude/tools/`)
+2. Propose SKILL_UPDATE replacing the toxic pattern
+3. Propose MEMORY_UPDATE documenting the new wrapper
+4. If script: propose allow rule for the new path
+5. Propose hookify rule to auto-reject the toxic pattern
+
+```
+Fix type: CREATE_WRAPPER + SKILL_UPDATE + HOOKIFY_RULE
+Proposed: ~/.claude/tools/export-with-env.sh
+Skill: dev10x:some-skill (line 38)
+Before: ENV=val ~/.claude/skills/foo/scripts/run.sh
+After:  ~/.claude/tools/export-with-env.sh
+Allow:  Bash(~/.claude/tools/export-with-env:*)
+Hook: Reject ENV= prefix before skill scripts
+Memory: "Use export-with-env.sh — sets env internally"
 ```
 
 **3. HOOK_BLOCKED → Skill update + memory note**
@@ -571,12 +663,13 @@ pattern as skill scripts under `Bash(~/.claude/skills/<name>/scripts/:*)`.
 
 | # | Classification | Fix Type | Target | Action |
 |---|---|---|---|---|
-| 1 | PREFIX_POISONED | Skill + Hook | `dev10x:some-skill` | Replace $(), add hookify rule |
-| 2 | HOOK_BLOCKED | Skill + Memory | `commit` | Replace heredoc with Write + -F |
-| 3 | MISSING_RULE | Allow rule | `settings.local.json` | Add `Bash(pytest:*)` |
-| 4 | CORRECTLY_PROMPTED | None | — | `git push` should require approval |
-| 5 | REDUNDANT_UV_PREFIX | Skill update | `dev10x:some-skill` | Drop `uv run --script` prefix |
-| 6 | WRONG_SHEBANG | Script fix | `tools/script.py` | Add uv shebang + PEP 723 |
+| 1 | PREFIX_POISONED (wrapper exists) | Memory + Skill | `dev10x:some-skill` | USE_EXISTING_WRAPPER: `git develop-log` |
+| 2 | PREFIX_POISONED (no wrapper) | Wrapper + Skill + Hook | `~/.claude/tools/` | CREATE_WRAPPER_SCRIPT + hookify |
+| 3 | HOOK_BLOCKED | Skill + Memory | `commit` | Replace heredoc with Write + -F |
+| 4 | MISSING_RULE | Allow rule | `settings.local.json` | Add `Bash(pytest:*)` |
+| 5 | CORRECTLY_PROMPTED | None | — | `git push` should require approval |
+| 6 | REDUNDANT_UV_PREFIX | Skill update | `dev10x:some-skill` | Drop `uv run --script` prefix |
+| 7 | WRONG_SHEBANG | Script fix | `tools/script.py` | Add uv shebang + PEP 723 |
 
 ---
 
