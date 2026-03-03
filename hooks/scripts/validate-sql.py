@@ -17,7 +17,7 @@ import re
 import shlex
 import sys
 
-POSTGRES_CONN_RE = re.compile(r"postgres://[^'\"\s]+:[^@'\"\s]+@[a-zA-Z0-9._-]+")
+POSTGRES_CONN_RE = re.compile(r"postgres(?:ql)?://[^'\"\s]+:[^@'\"\s]+@[a-zA-Z0-9._-]+")
 
 BLOCKED_KEYWORDS = re.compile(
     r"\b("
