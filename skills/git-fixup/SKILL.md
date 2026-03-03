@@ -155,7 +155,7 @@ in PosSubModelNode for cohesion.
 
 Create a unique temp file via `mktemp` to avoid cross-session collisions:
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git fixup-msg .txt
+/tmp/claude/bin/mktmp.sh git fixup-msg .txt
 ```
 Store the returned path for subsequent steps.
 

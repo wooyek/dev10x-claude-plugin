@@ -373,7 +373,7 @@ git add file1 file2 file3
 
 1. Create a unique temp file to avoid cross-session collisions:
    ```bash
-   ${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git commit-msg .txt
+   /tmp/claude/bin/mktmp.sh git commit-msg .txt
    ```
    Store the returned path (e.g., `/tmp/claude/git/commit-msg.7f3a9b2c1d4e.txt`).
 

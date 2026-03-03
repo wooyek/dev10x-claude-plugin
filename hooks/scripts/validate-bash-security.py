@@ -29,7 +29,7 @@ SKILL_PATH_RE = re.compile(r"/\.claude/skills/.*\.(md|sh)$")
 SHELL_WRITE_MSG = (
     "Use the Write/Edit tool instead of cat/echo/printf redirects.\n"
     "For multi-line commit messages: create a unique file with"
-    " ${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git commit-msg .txt,"
+    " /tmp/claude/bin/mktmp.sh git commit-msg .txt,"
     " Write content to the returned path, then git commit -F <path>"
 )
 

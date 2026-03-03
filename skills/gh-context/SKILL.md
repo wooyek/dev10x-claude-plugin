@@ -4,7 +4,7 @@ description: Use when detecting PR context (number, repo, URL, branch) from a UR
 user-invocable: false
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh:*)
+  - Bash(/tmp/claude/bin/mktmp.sh:*)
 ---
 
 # dx:gh-context — GitHub CLI helpers
@@ -75,7 +75,7 @@ When a single Bash call needs the variables (e.g., chaining with
 another command), use the temp-file pattern:
 
 ```bash
-ENVFILE=$(${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh git pr-detect .env)
+ENVFILE=$(/tmp/claude/bin/mktmp.sh git pr-detect .env)
 ${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG" > "$ENVFILE"
 source "$ENVFILE"
 echo "PR #$PR_NUMBER"
