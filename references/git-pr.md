@@ -57,6 +57,7 @@ git rebase -i $(git merge-base develop HEAD)
 2. Squash any fixup commits
 3. Run quality checks locally (shellcheck for scripts, ruff for Python)
 4. Verify branch is up to date with develop
+5. Rebase to linearize history — no merge commits before opening
 
 ### PR Title
 
@@ -68,9 +69,10 @@ The body should be **compact** to avoid cluttering Slack previews.
 
 **Required elements** (in this order):
 1. A JTBD Job Story as the **first paragraph** (1-3 lines, see `git-jtbd.md`)
-2. `Fixes:` link at the end — either:
+2. `Fixes:` link — must be the **absolute last line** of the body:
    - `Fixes: https://github.com/wooyek/dev10x-claude-plugin/issues/NUMBER`
    - `Fixes: none — self-motivated refactor` (if no issue tracks this work)
+   - Do NOT add `---`, blank lines, or separators after `Fixes:`
 
 **Optional elements** (keep brief):
 - Compact commit list with links (one line per commit)
