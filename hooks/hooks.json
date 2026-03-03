@@ -61,6 +61,11 @@
             "type": "command",
             "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-commit-jtbd.py",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-sql.py",
+            "timeout": 5
           }
         ]
       },
