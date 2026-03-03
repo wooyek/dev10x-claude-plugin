@@ -278,9 +278,8 @@ time"). Update the YAML file accordingly:
 1. [detailed] Fetch PR and review context
 2. [epic]     Address review comments
 3. [epic]     Verify changes pass CI
-4. [epic]     Request re-review
-5. [epic]     Self-review & request human review
-6. [detailed] Verify acceptance criteria met
+4. [epic]     Self-review & request human review
+5. [detailed] Verify acceptance criteria met
 ```
 
 **Local-only work (no ticket, no PR):**
@@ -534,9 +533,8 @@ PR has 3 review comments → note them.
 1. [detailed] Fetch review comments and understand feedback
 2. [epic]     Address review comments
 3. [epic]     Verify CI passes
-4. [epic]     Request re-review
-5. [epic]     Self-review & request human review
-6. [detailed] Verify acceptance criteria met
+4. [epic]     Self-review & request human review
+5. [detailed] Verify acceptance criteria met
 ```
 
 ### Example 4: Mid-Workflow Pause
