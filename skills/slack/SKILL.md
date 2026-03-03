@@ -63,23 +63,10 @@ bot_username: Claude AI
 user_groups:
   "@dev-team": "<!subteam^S0123456789>"
   "@qa-team": "<!subteam^S9876543210>"
-
-# GitHub login → Slack identity mapping
-# Other skills (release:safe-to-ship, etc.) read this section
-# to resolve PR authors to Slack mentions.
-users:
-  wooyek:
-    slack_id: U040B2ES3N2
-    name: Janusz Skonieczny
-  stole-dev:
-    slack_id: U08M4V5N4AC
-    name: Matej Stosic
 ```
 
 All fields are optional. The script works without a config file —
-user group mentions and self-DMs just won't resolve. The `users`
-section is not used by the script itself — it's a shared registry
-consumed by other skills that need GitHub → Slack resolution.
+user group mentions and self-DMs just won't resolve.
 
 ## Usage
 
@@ -187,12 +174,6 @@ To discover user IDs, use MCP `slack_search_users` tool.
 This script is used by:
 - **dx:park-remind** — sends deferred-item DMs to yourself
 - **dx:gh-pr-monitor** — posts PR review notifications
-- **release:safe-to-ship** — reads `users` to resolve PR authors
-  to Slack mentions in safe-to-ship messages
-
-Any skill can read `~/.claude/memory/slack-config.yaml` to look up
-GitHub → Slack mappings. To add a new user, append an entry under
-`users` — all skills pick it up automatically.
 
 For multi-line messages, use the Write tool to create a temp file,
 then pass via `--message-file` or `$(cat /tmp/msg.txt)`. Do NOT use
