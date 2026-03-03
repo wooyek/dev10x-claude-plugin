@@ -17,6 +17,11 @@
           },
           {
             "type": "command",
+            "command": "bash $CLAUDE_PLUGIN_ROOT/hooks/scripts/session-start-guidance.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/session-start-migrate-permissions.py",
             "timeout": 10
           }
