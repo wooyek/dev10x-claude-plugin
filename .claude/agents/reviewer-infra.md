@@ -39,6 +39,9 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
     (Bash, Edit|Write, Skill, SessionStart), and no duplicate entries
 12. **Hook JSON output fields** — for `hooks/scripts/*.sh`: `SessionStart`
     must use `hookSpecificOutput.additionalContext`; flag `additional_context`.
+12b. **SessionStart side-effects** — flag new file-copy, directory-creation,
+     or tool-installation operations added to existing `SessionStart` scripts;
+     verify the side-effect is documented and intentional (WARNING if undocumented).
 
 ## Design Intent
 
