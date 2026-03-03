@@ -16,9 +16,10 @@ quality gates (Claude Code Review, CI) run as expected.
 
 Format: `username/TICKET-ID/short-description`
 
-Examples:
-- `janusz/GH-7/add-semver-releases`
-- `maria/GH-42/fix-hook-validation`
+Examples (TICKET-ID is the issue number with optional prefix):
+- `janusz/79/add-semver-releases` (bare number)
+- `janusz/GH-7/add-semver-releases` (with GH- prefix)
+- `maria/feature/short-description` (no ticket)
 
 ## Commit Message Format
 
@@ -75,7 +76,7 @@ See `git-jtbd.md` for comprehensive Job Story format and examples.
 ### Example Commit
 
 ```
-🐛 GH-7 Fix hook validation for heredoc commands
+🐛 79 Fix hook validation for heredoc commands
 
 validate-bash-security.py rejects heredoc syntax used by the
 commit skill, causing false positives on every commit.

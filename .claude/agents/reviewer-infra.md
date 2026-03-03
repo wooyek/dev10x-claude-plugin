@@ -34,6 +34,11 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
 11. **hooks.json integrity** — for `hooks/hooks.json` changes: verify
     all referenced script paths exist, matcher patterns are valid
     (Bash, Edit|Write, Skill, SessionStart), and no duplicate entries
+12. **SessionStart hook robustness** — for `.py` scripts in
+    `hooks/scripts/` triggered by `SessionStart`: verify ALL
+    filesystem ops (`iterdir`, `read_text`, `write_text`, `open`)
+    are inside `try/except OSError` — an unguarded `OSError`
+    crashes every session start
 
 ## Design Intent
 

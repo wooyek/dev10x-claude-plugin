@@ -17,7 +17,9 @@ domain-specific reviewers).
 1. **Pattern following** — new code matches the patterns used by
    existing scripts in the same directory
 2. **Error handling** — `set -e` in shell scripts, proper exit codes,
-   meaningful error messages
+   meaningful error messages; for `SessionStart` hooks, any unguarded
+   filesystem I/O that could raise `OSError` is **Bug** severity
+   (a crash blocks every session start)
 3. **Type annotations** — Python scripts should have type hints on
    function signatures
 4. **Named parameters** — multiline for 3+ args (only flag truly

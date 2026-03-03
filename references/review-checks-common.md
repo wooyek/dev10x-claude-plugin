@@ -65,6 +65,10 @@ Before raising any of these, **verify actual code**:
     entry is renamed, verify the new namespace matches the first argument of
     every `mktmp.sh` invocation in that SKILL.md. A mismatch causes a
     write-permission rejection at runtime.
+16. **Ticket ID prefix (`GH-` vs bare number)**: examples in
+    `references/git-commits.md` show both `GH-<N>` and bare numbers (e.g.
+    `79`). Only flag format as REQUIRED if the project has an explicit rule —
+    otherwise raise as RECOMMENDED at most.
 
 ## Parameter Change Analysis
 
