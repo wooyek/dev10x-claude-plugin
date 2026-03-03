@@ -1,145 +1,521 @@
 #!/usr/bin/env bash
-# Generate two files from skill directories:
-#   ~/.claude/SKILLS.md         — flat list for humans and AI context
-#   ~/.claude/.skills-motd.txt  — tree with dependencies for terminal MOTD
-# Default: skip if both outputs are newer than all SKILL.md files.
-# Pass --force to always regenerate.
+# Generate ~/.claude/SKILLS.md — family-grouped, adaptive-density skill index.
+# Sources: local skills, dev10x plugin, official plugins.
+# Pass --force to regenerate even when cache is fresh.
 set -euo pipefail
 
-SKILLS_DIR="${HOME}/.claude/skills"
 SKILLS_MD="${HOME}/.claude/SKILLS.md"
-MOTD="${HOME}/.claude/.skills-motd.txt"
-
-if [[ "${1:-}" != "--force" ]]; then
-    needs_regen=0
-    for out in "$SKILLS_MD" "$MOTD"; do
-        if [[ ! -f "$out" ]]; then
-            needs_regen=1; break
-        fi
-        stale=$(find "$SKILLS_DIR" -maxdepth 2 -name 'SKILL.md' -newer "$out" 2>/dev/null | head -1)
-        [[ -n "$stale" ]] && { needs_regen=1; break; }
-    done
-    [[ $needs_regen -eq 0 ]] && exit 0
-fi
-
+OLD_MOTD="${HOME}/.claude/.skills-motd.txt"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DEPS_FILE="${SCRIPT_DIR}/dependencies.txt"
+FAMILIES_FILE="${SCRIPT_DIR}/families.yaml"
+HIDDEN_FILE="${SCRIPT_DIR}/hidden.yaml"
+YQ="${YQ:-$(command -v yq 2>/dev/null || echo "/home/linuxbrew/.linuxbrew/bin/yq")}"
+LINE_WIDTH=55
+LINE_BUDGET=45
 
-declare -A DEPS
-if [[ -f "$DEPS_FILE" ]]; then
-    while IFS='|' read -r dep_skill dep_list; do
-        [[ "$dep_skill" =~ ^#|^$ ]] && continue
-        DEPS["$dep_skill"]=$(echo "$dep_list" | tr ',' '\n' | sort | paste -sd',' -)
-    done < "$DEPS_FILE"
+if ! command -v "$YQ" &>/dev/null; then
+    echo >&2 "ERROR: yq not found — install mikefarah/yq v4"
+    exit 1
 fi
 
-declare -A DESC INV
-names_file=$(mktemp)
-trap 'rm -f "$names_file"' EXIT
+# ── Resolve skill source directories ────────────────────────────
+LOCAL_DIR="${HOME}/.claude/skills"
 
-for skill_dir in "$SKILLS_DIR"/*/; do
-    sf="${skill_dir}SKILL.md"
-    [[ -f "$sf" ]] || continue
+DEV10X_BASE="${HOME}/.claude/plugins/cache/dev10x/dev10x"
+DEV10X_DIR=""
+if [[ -d "$DEV10X_BASE" ]]; then
+    DEV10X_LATEST=$(ls "$DEV10X_BASE" | sort -V | tail -1)
+    DEV10X_DIR="${DEV10X_BASE}/${DEV10X_LATEST}/skills"
+fi
 
-    name="" desc="" invocable="false"
-    in_fm=0 grab_desc=0
+OFFICIAL_BASE="${HOME}/.claude/plugins/cache/claude-plugins-official"
+
+# ── Cache check ─────────────────────────────────────────────────
+if [[ "${1:-}" != "--force" && -f "$SKILLS_MD" ]]; then
+    stale=0
+    for src_dir in "$LOCAL_DIR" "$DEV10X_DIR"; do
+        [[ -z "$src_dir" || ! -d "$src_dir" ]] && continue
+        found=$(find "$src_dir" -maxdepth 2 -name 'SKILL.md' -newer "$SKILLS_MD" 2>/dev/null | head -1)
+        [[ -n "$found" ]] && { stale=1; break; }
+    done
+    if [[ -d "$OFFICIAL_BASE" ]]; then
+        found=$(find "$OFFICIAL_BASE" -name 'SKILL.md' -newer "$SKILLS_MD" 2>/dev/null | head -1)
+        [[ -n "$found" ]] && stale=1
+    fi
+    for cfg in "$FAMILIES_FILE" "$HIDDEN_FILE"; do
+        [[ -f "$cfg" && "$cfg" -nt "$SKILLS_MD" ]] && { stale=1; break; }
+    done
+    [[ $stale -eq 0 ]] && exit 0
+fi
+
+# ── Parse SKILL.md frontmatter ──────────────────────────────────
+# Reads: name, description, user-invocable, invocation-name
+# Sets associative arrays: SKILL_NAME, SKILL_DESC, SKILL_INV, SKILL_INVOCABLE
+declare -A SKILL_NAME SKILL_DESC SKILL_INVOCABLE
+ALL_KEYS=()
+
+parse_skill() {
+    local skill_file="$1"
+    local name="" desc="" invocable="false" inv_name="" in_fm=0 grab_desc=0
 
     while IFS= read -r line; do
-        [[ "$line" == "---" ]] && { in_fm=$((in_fm + 1)); [[ $in_fm -ge 2 ]] && break; continue; }
+        if [[ "$line" == "---" ]]; then
+            in_fm=$((in_fm + 1))
+            [[ $in_fm -ge 2 ]] && break
+            continue
+        fi
         [[ $in_fm -lt 1 ]] && continue
 
         if [[ $grab_desc -eq 1 ]]; then
             if [[ "$line" =~ ^[[:space:]] ]]; then
                 desc="${line#"${line%%[![:space:]]*}"}"
-                grab_desc=0; continue
+                grab_desc=0
+                continue
             fi
             grab_desc=0
         fi
 
         case "$line" in
-            name:*) name="${line#name:}"; name="${name# }" ;;
-            description:*\>*|description:*\|*) grab_desc=1 ;;
-            description:*) desc="${line#description:}"; desc="${desc# }" ;;
-            user-invocable:*true*) invocable="true" ;;
+            name:*)
+                name="${line#name:}"
+                name="${name# }"
+                name="${name#\"}"
+                name="${name%\"}"
+                ;;
+            description:*\>*|description:*\|*)
+                grab_desc=1
+                ;;
+            description:*)
+                desc="${line#description:}"
+                desc="${desc# }"
+                desc="${desc#\"}"
+                desc="${desc%\"}"
+                ;;
+            user-invocable:*true*)
+                invocable="true"
+                ;;
+            invocation-name:*)
+                inv_name="${line#invocation-name:}"
+                inv_name="${inv_name# }"
+                inv_name="${inv_name#\"}"
+                inv_name="${inv_name%\"}"
+                ;;
         esac
-    done < "$sf"
+    done < "$skill_file"
 
-    [[ -z "$name" ]] && name=$(basename "$skill_dir")
-    desc="${desc#\"}"; desc="${desc%\"}"
-    desc="${desc#\'}"; desc="${desc%\'}"
-    [[ ${#desc} -gt 55 ]] && desc="${desc:0:52}..."
+    [[ -z "$name" ]] && return
 
-    DESC["$name"]="$desc"
-    INV["$name"]="$invocable"
-    echo "$name" >> "$names_file"
+    # Skip template/placeholder skills
+    [[ "$name" == *"{"* ]] && return
+    [[ "$name" == "my-skill-name" ]] && return
+
+    # Trim description
+    desc="${desc#\'}"
+    desc="${desc%\'}"
+    [[ ${#desc} -gt 60 ]] && desc="${desc:0:57}..."
+
+    # Determine the display key (invocation-name preferred, else name)
+    local key="${inv_name:-$name}"
+
+    # Remove trailing comment from invocation-name (e.g. "skill-name   # short alias")
+    key="${key%%#*}"
+    key="${key%"${key##*[![:space:]]}"}"
+
+    SKILL_NAME["$key"]="$name"
+    SKILL_DESC["$key"]="$desc"
+    SKILL_INVOCABLE["$key"]="$invocable"
+    ALL_KEYS+=("$key")
+}
+
+# Scan local skills (override priority)
+if [[ -d "$LOCAL_DIR" ]]; then
+    for sf in "$LOCAL_DIR"/*/SKILL.md; do
+        [[ -f "$sf" ]] || continue
+        parse_skill "$sf"
+    done
+fi
+
+# Scan dev10x plugin skills (local overrides)
+if [[ -n "$DEV10X_DIR" && -d "$DEV10X_DIR" ]]; then
+    for sf in "$DEV10X_DIR"/*/SKILL.md; do
+        [[ -f "$sf" ]] || continue
+        parse_skill "$sf"
+    done
+fi
+
+# ── Load hidden list ────────────────────────────────────────────
+declare -A HIDDEN
+if [[ -f "$HIDDEN_FILE" ]]; then
+    while IFS= read -r h; do
+        [[ -n "$h" ]] && HIDDEN["$h"]=1
+    done < <("$YQ" '.hidden[]' "$HIDDEN_FILE")
+fi
+
+# ── Filter: remove hidden skills, build visible list ────────────
+VISIBLE_KEYS=()
+hidden_count=0
+invocable_count=0
+
+for key in "${ALL_KEYS[@]}"; do
+    local_name="${SKILL_NAME[$key]:-}"
+    if [[ -n "${HIDDEN[$key]:-}" || -n "${HIDDEN[$local_name]:-}" ]]; then
+        hidden_count=$((hidden_count + 1))
+        continue
+    fi
+    VISIBLE_KEYS+=("$key")
+    if [[ "${SKILL_INVOCABLE[$key]:-false}" == "true" ]]; then
+        invocable_count=$((invocable_count + 1))
+    fi
 done
 
-total=$(wc -l < "$names_file")
-inv_count=0
-for n in "${!INV[@]}"; do
-    [[ "${INV[$n]}" == "true" ]] && inv_count=$((inv_count + 1))
+# ── Load display_map ──────────────────────────────────────────────
+# Maps display-name → internal invocation-name key
+declare -A DISPLAY_TO_KEY KEY_TO_DISPLAY
+if "$YQ" '.display_map' "$FAMILIES_FILE" | grep -q '^[^n]'; then
+    while IFS='=' read -r display_name internal_key; do
+        display_name="${display_name## }"
+        display_name="${display_name%% }"
+        internal_key="${internal_key## }"
+        internal_key="${internal_key%% }"
+        [[ -n "$display_name" && -n "$internal_key" ]] || continue
+        DISPLAY_TO_KEY["$display_name"]="$internal_key"
+        KEY_TO_DISPLAY["$internal_key"]="$display_name"
+    done < <("$YQ" '.display_map | to_entries | .[] | .key + "=" + .value' "$FAMILIES_FILE")
+fi
+
+# ── Load families ───────────────────────────────────────────────
+declare -a FAMILY_LABELS FAMILY_DESCS
+declare -A FAMILY_SKILLS
+family_count=$("$YQ" '.families | length' "$FAMILIES_FILE")
+
+for ((i = 0; i < family_count; i++)); do
+    label=$("$YQ" ".families[$i].label" "$FAMILIES_FILE")
+    desc=$("$YQ" ".families[$i].description" "$FAMILIES_FILE")
+    FAMILY_LABELS+=("$label")
+    FAMILY_DESCS+=("$desc")
+    skills_str=$("$YQ" ".families[$i].skills[]" "$FAMILIES_FILE" | tr '\n' '|')
+    FAMILY_SKILLS["$label"]="$skills_str"
 done
 
-col=28
+# ── Match visible skills to families ────────────────────────────
+# Build a lookup set of visible keys for fast membership test
+declare -A VISIBLE_SET
+for key in "${VISIBLE_KEYS[@]}"; do
+    VISIBLE_SET["$key"]=1
+done
 
-skill_label() {
-    local prefix="$1" name="$2" sep=""
-    [[ -n "$prefix" ]] && sep=" "
-    if [[ "${INV[$name]:-false}" == "true" ]]; then
-        printf '%s%s/%s' "$prefix" "$sep" "$name"
-    else
-        printf '%s%s %s' "$prefix" "$sep" "$name"
+# Track which visible skills get assigned to a family
+declare -A ASSIGNED
+
+# resolve_key: given a display name from families.yaml, find the
+# matching internal key. Try: 1) direct match, 2) display_map lookup.
+resolve_key() {
+    local display="$1"
+    if [[ -n "${VISIBLE_SET[$display]:-}" ]]; then
+        echo "$display"
+        return
+    fi
+    local mapped="${DISPLAY_TO_KEY[$display]:-}"
+    if [[ -n "$mapped" && -n "${VISIBLE_SET[$mapped]:-}" ]]; then
+        echo "$mapped"
+        return
     fi
 }
 
-render_line() {
-    local prefix="$1" name="$2"
-    printf "%-${col}s %s\n" "$(skill_label "$prefix" "$name")" "${DESC[$name]:-}"
+# For each family, resolve display names to keys, keep display name
+# for rendering. Store as "display=key" pairs separated by |.
+# Uses = separator because display names contain colons.
+declare -A FAMILY_MATCHED
+for label in "${FAMILY_LABELS[@]}"; do
+    IFS='|' read -ra fam_skills <<< "${FAMILY_SKILLS[$label]}"
+    matched=()
+    for display in "${fam_skills[@]}"; do
+        [[ -z "$display" ]] && continue
+        key=$(resolve_key "$display")
+        [[ -z "$key" ]] && continue
+        matched+=("${display}=${key}")
+        ASSIGNED["$key"]=1
+    done
+    FAMILY_MATCHED["$label"]=$(IFS='|'; echo "${matched[*]}")
+done
+
+# Collect unassigned visible skills for "Other" family
+OTHER_SKILLS=()
+for key in "${VISIBLE_KEYS[@]}"; do
+    if [[ -z "${ASSIGNED[$key]:-}" ]]; then
+        OTHER_SKILLS+=("$key")
+    fi
+done
+
+# ── Pick density mode ───────────────────────────────────────────
+visible_total=${#VISIBLE_KEYS[@]}
+if [[ $visible_total -le 40 ]]; then
+    DENSITY="spacious"
+elif [[ $visible_total -le 70 ]]; then
+    DENSITY="compact"
+else
+    DENSITY="packed"
+fi
+
+# ── Scan superpowers ────────────────────────────────────────────
+SUPERPOWERS_SKILLS=()
+SP_DIR=""
+if [[ -d "${OFFICIAL_BASE}/superpowers" ]]; then
+    sp_ver=$(ls "${OFFICIAL_BASE}/superpowers" | sort -V | tail -1)
+    SP_DIR="${OFFICIAL_BASE}/superpowers/${sp_ver}/skills"
+    if [[ -d "$SP_DIR" ]]; then
+        for sf in "$SP_DIR"/*/SKILL.md; do
+            [[ -f "$sf" ]] || continue
+            sp_name=""
+            in_fm=0
+            while IFS= read -r line; do
+                [[ "$line" == "---" ]] && { in_fm=$((in_fm + 1)); [[ $in_fm -ge 2 ]] && break; continue; }
+                [[ $in_fm -lt 1 ]] && continue
+                case "$line" in
+                    name:*) sp_name="${line#name:}"; sp_name="${sp_name# }"; sp_name="${sp_name#\"}"; sp_name="${sp_name%\"}" ;;
+                esac
+            done < "$sf"
+            [[ -n "$sp_name" ]] && SUPERPOWERS_SKILLS+=("$sp_name")
+        done
+    fi
+fi
+
+# ── Scan other official plugins ─────────────────────────────────
+SKIP_PLUGINS="superpowers learning-output-style explanatory-output-style"
+declare -A PLUGIN_COUNTS
+PLUGIN_NAMES=()
+other_plugin_skill_total=0
+
+if [[ -d "$OFFICIAL_BASE" ]]; then
+    for pdir in "$OFFICIAL_BASE"/*/; do
+        [[ -d "$pdir" ]] || continue
+        pname=$(basename "$pdir")
+
+        skip=0
+        for sp in $SKIP_PLUGINS; do
+            [[ "$pname" == "$sp" ]] && { skip=1; break; }
+        done
+        [[ $skip -eq 1 ]] && continue
+
+        pver=$(ls "$pdir" | sort -V | tail -1)
+        skills_path="$pdir/$pver/skills"
+        [[ -d "$skills_path" ]] || continue
+        pcount=$(find "$skills_path" -maxdepth 2 -name 'SKILL.md' | wc -l)
+        [[ $pcount -eq 0 ]] && continue
+
+        PLUGIN_COUNTS["$pname"]=$pcount
+        PLUGIN_NAMES+=("$pname")
+        other_plugin_skill_total=$((other_plugin_skill_total + pcount))
+    done
+fi
+
+# ── Helper: right-pad with ─ to LINE_WIDTH ──────────────────────
+header_line() {
+    local left="$1" right="$2"
+    local pad_char="─"
+    local left_len=${#left}
+    local right_len=${#right}
+    local fill=$((LINE_WIDTH - left_len - right_len))
+    [[ $fill -lt 2 ]] && fill=2
+    local padding=""
+    for ((p = 0; p < fill; p++)); do
+        padding="${padding}${pad_char}"
+    done
+    printf '%s%s%s\n' "$left" "$padding" "$right"
 }
 
-# ── SKILLS.md: flat list for humans + AI context ─────────────
-{
-    printf '%s skills, %s invocable\n' "$total" "$inv_count"
-    sort "$names_file" | while read -r name; do
-        render_line "" "$name"
+# ── Helper: print tokens inline, wrapping at MAX_LINE chars ─────
+MAX_LINE=290
+print_wrapped() {
+    local indent="$1"
+    shift
+    local line="$indent"
+    for token in "$@"; do
+        local candidate="${line}${token}  "
+        if [[ ${#candidate} -gt $MAX_LINE && "$line" != "$indent" ]]; then
+            printf '%s\n' "$line"
+            line="${indent}${token}  "
+        else
+            line="${line}${token}  "
+        fi
     done
-} > "$SKILLS_MD"
+    [[ "$line" != "$indent" ]] && printf '%s\n' "$line"
+}
 
-# ── .skills-motd.txt: tree with deps for terminal ────────────
+# ── Render SKILLS.md ────────────────────────────────────────────
 {
-    printf '%s skills, %s invocable\n' "$total" "$inv_count"
+    # Header
+    header_line "─ dev10x ─" "  ${invocable_count} invocable, ${hidden_count} internal"
 
-    sort "$names_file" | while read -r name; do
-        render_line "" "$name"
+    # Helper: for "Other" skills, map key to display name if available
+    display_name_for() {
+        local key="$1"
+        local mapped="${KEY_TO_DISPLAY[$key]:-}"
+        [[ -n "$mapped" ]] && echo "$mapped" || echo "$key"
+    }
 
-        [[ -z "${DEPS[$name]:-}" ]] && continue
-        IFS=',' read -ra deps <<< "${DEPS[$name]}"
-        last=$((${#deps[@]} - 1))
+    if [[ "$DENSITY" == "spacious" ]]; then
+        # Spacious: family header + one skill per line with description
+        for ((i = 0; i < ${#FAMILY_LABELS[@]}; i++)); do
+            label="${FAMILY_LABELS[$i]}"
+            desc="${FAMILY_DESCS[$i]}"
+            matched="${FAMILY_MATCHED[$label]}"
+            [[ -z "$matched" ]] && continue
 
-        for i in "${!deps[@]}"; do
-            dep="${deps[$i]}"
-            if [[ $i -eq $last ]]; then
-                render_line "└─" "$dep"
-                cont="   "
-            else
-                render_line "├─" "$dep"
-                cont="│  "
-            fi
-
-            [[ -z "${DEPS[$dep]:-}" ]] && continue
-            IFS=',' read -ra subs <<< "${DEPS[$dep]}"
-            sub_last=$((${#subs[@]} - 1))
-
-            for j in "${!subs[@]}"; do
-                sub="${subs[$j]}"
-                if [[ $j -eq $sub_last ]]; then
-                    render_line "${cont}└─" "$sub"
-                else
-                    render_line "${cont}├─" "$sub"
-                fi
+            printf '\n%s — %s\n' "$label" "$desc"
+            IFS='|' read -ra pairs <<< "$matched"
+            for pair in "${pairs[@]}"; do
+                [[ -z "$pair" ]] && continue
+                display="${pair%%=*}"
+                key="${pair#*=}"
+                printf '  /%-22s %s\n' "$display" "${SKILL_DESC[$key]:-}"
             done
         done
-    done
-} > "$MOTD"
 
-echo "Generated SKILLS.md + .skills-motd.txt ($total skills, $inv_count invocable)"
+        if [[ ${#OTHER_SKILLS[@]} -gt 0 ]]; then
+            printf '\nOther\n'
+            for sk in "${OTHER_SKILLS[@]}"; do
+                dn=$(display_name_for "$sk")
+                printf '  /%-22s %s\n' "$dn" "${SKILL_DESC[$sk]:-}"
+            done
+        fi
+
+    elif [[ "$DENSITY" == "compact" ]]; then
+        # Compact: one line per family, skills inline
+        max_label=0
+        for label in "${FAMILY_LABELS[@]}"; do
+            [[ ${#label} -gt $max_label ]] && max_label=${#label}
+        done
+        label_width=$((max_label + 1))
+        indent_str=$(printf "%-${label_width}s" "")
+
+        for ((i = 0; i < ${#FAMILY_LABELS[@]}; i++)); do
+            label="${FAMILY_LABELS[$i]}"
+            matched="${FAMILY_MATCHED[$label]}"
+            [[ -z "$matched" ]] && continue
+
+            IFS='|' read -ra pairs <<< "$matched"
+            tokens=()
+            for pair in "${pairs[@]}"; do
+                [[ -z "$pair" ]] && continue
+                display="${pair%%=*}"
+                tokens+=("/${display}")
+            done
+
+            line=$(printf "%-${label_width}s" "$label")
+            for token in "${tokens[@]}"; do
+                candidate="${line}  ${token}"
+                if [[ ${#candidate} -gt $MAX_LINE && "$line" != "$(printf "%-${label_width}s" "$label")" ]]; then
+                    printf '%s\n' "$line"
+                    line="${indent_str}  ${token}"
+                else
+                    line="${line}  ${token}"
+                fi
+            done
+            printf '%s\n' "$line"
+        done
+
+        if [[ ${#OTHER_SKILLS[@]} -gt 0 ]]; then
+            tokens=()
+            for sk in "${OTHER_SKILLS[@]}"; do
+                dn=$(display_name_for "$sk")
+                tokens+=("/${dn}")
+            done
+            line=$(printf "%-${label_width}s" "Other")
+            for token in "${tokens[@]}"; do
+                candidate="${line}  ${token}"
+                if [[ ${#candidate} -gt $MAX_LINE && "$line" != "$(printf "%-${label_width}s" "Other")" ]]; then
+                    printf '%s\n' "$line"
+                    line="${indent_str}  ${token}"
+                else
+                    line="${line}  ${token}"
+                fi
+            done
+            printf '%s\n' "$line"
+        fi
+
+    else
+        # Packed: inline skills only, no descriptions
+        max_label=0
+        for label in "${FAMILY_LABELS[@]}"; do
+            [[ ${#label} -gt $max_label ]] && max_label=${#label}
+        done
+        label_width=$((max_label + 1))
+        indent_str=$(printf "%-${label_width}s" "")
+
+        for ((i = 0; i < ${#FAMILY_LABELS[@]}; i++)); do
+            label="${FAMILY_LABELS[$i]}"
+            matched="${FAMILY_MATCHED[$label]}"
+            [[ -z "$matched" ]] && continue
+
+            IFS='|' read -ra pairs <<< "$matched"
+            tokens=()
+            for pair in "${pairs[@]}"; do
+                [[ -z "$pair" ]] && continue
+                display="${pair%%=*}"
+                tokens+=("/${display}")
+            done
+
+            line=$(printf "%-${label_width}s" "$label")
+            for token in "${tokens[@]}"; do
+                candidate="${line} ${token}"
+                if [[ ${#candidate} -gt $MAX_LINE && "$line" != "$(printf "%-${label_width}s" "$label")" ]]; then
+                    printf '%s\n' "$line"
+                    line="${indent_str} ${token}"
+                else
+                    line="${line} ${token}"
+                fi
+            done
+            printf '%s\n' "$line"
+        done
+
+        if [[ ${#OTHER_SKILLS[@]} -gt 0 ]]; then
+            tokens=()
+            for sk in "${OTHER_SKILLS[@]}"; do
+                dn=$(display_name_for "$sk")
+                tokens+=("/${dn}")
+            done
+            line=$(printf "%-${label_width}s" "Other")
+            for token in "${tokens[@]}"; do
+                candidate="${line} ${token}"
+                if [[ ${#candidate} -gt $MAX_LINE && "$line" != "$(printf "%-${label_width}s" "Other")" ]]; then
+                    printf '%s\n' "$line"
+                    line="${indent_str} ${token}"
+                else
+                    line="${line} ${token}"
+                fi
+            done
+            printf '%s\n' "$line"
+        fi
+    fi
+
+    # Superpowers section
+    if [[ ${#SUPERPOWERS_SKILLS[@]} -gt 0 ]]; then
+        printf '\n'
+        header_line "─ superpowers ─" "  ${#SUPERPOWERS_SKILLS[@]} skills"
+        print_wrapped "  " "${SUPERPOWERS_SKILLS[@]}"
+    fi
+
+    # Other plugins section
+    if [[ ${#PLUGIN_NAMES[@]} -gt 0 ]]; then
+        printf '\n'
+        header_line "─ other plugins ─" "  ${#PLUGIN_NAMES[@]} plugins, ${other_plugin_skill_total} skills"
+        pl_tokens=()
+        for pn in "${PLUGIN_NAMES[@]}"; do
+            pl_tokens+=("${pn} (${PLUGIN_COUNTS[$pn]})")
+        done
+        print_wrapped "  " "${pl_tokens[@]}"
+    fi
+
+} > "$SKILLS_MD"
+
+# ── Line budget check ───────────────────────────────────────────
+line_count=$(wc -l < "$SKILLS_MD")
+if [[ $line_count -gt $LINE_BUDGET ]]; then
+    echo >&2 "WARNING: SKILLS.md is ${line_count} lines (budget: ${LINE_BUDGET})"
+fi
+
+# ── Clean up old MOTD file ──────────────────────────────────────
+[[ -f "$OLD_MOTD" ]] && rm -f "$OLD_MOTD"
+
+echo "Generated SKILLS.md (${visible_total} visible, ${invocable_count} invocable, ${hidden_count} internal, density: ${DENSITY})"
