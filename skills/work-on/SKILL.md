@@ -198,10 +198,35 @@ or ready for handover. Read the acceptance criteria YAML file:
 | No ticket, no PR | `local-only` |
 | Sentry/Slack only, no fix planned | `investigation` |
 
+**YAML schema:**
+
+```yaml
+# acceptance-criteria.yaml
+defaults:
+  feature:
+    criteria: "PR approved, CI passes, ready to merge"
+  bugfix:
+    criteria: "PR approved, CI passes, regression covered"
+  pr-continuation:
+    criteria: "Re-review requested, CI green"
+  local-only:
+    criteria: "Changes verified locally"
+  investigation:
+    criteria: "Findings documented, next steps clear"
+overrides: {}  # populated when user persists a choice
+```
+
+**If the file is absent** on first use, use the hardcoded
+defaults above — do not fail or skip the verification step.
+Create the file only when the user persists a non-default
+choice.
+
 **Resolve criteria** in this order:
 1. Check `overrides` for a matching `work_type` with
    `persist: true` — use if found
-2. Fall back to `defaults[work_type].criteria`
+2. Fall back to `defaults[work_type].criteria` from the file
+3. If the file is absent or the work type has no entry, use
+   the hardcoded defaults above
 
 **Present the criteria** when building the plan. Show the
 resolved criteria in the final task description. If the user
@@ -244,7 +269,8 @@ time"). Update the YAML file accordingly:
 4. [epic]     Implement fix
 5. [epic]     Verify fix (tests, regression)
 6. [epic]     Create PR & ensure CI passes
-7. [detailed] Verify acceptance criteria met
+7. [epic]     Self-review & request human review
+8. [detailed] Verify acceptance criteria met
 ```
 
 **PR continuation:**
@@ -253,7 +279,8 @@ time"). Update the YAML file accordingly:
 2. [epic]     Address review comments
 3. [epic]     Verify changes pass CI
 4. [epic]     Request re-review
-5. [detailed] Verify acceptance criteria met
+5. [epic]     Self-review & request human review
+6. [detailed] Verify acceptance criteria met
 ```
 
 **Local-only work (no ticket, no PR):**
@@ -262,7 +289,8 @@ time"). Update the YAML file accordingly:
 2. [epic]     Implement changes
 3. [epic]     Verify
 4. [detailed] Decide: create ticket, create PR, or done
-5. [detailed] Verify acceptance criteria met
+5. [epic]     Self-review & request human review
+6. [detailed] Verify acceptance criteria met
 ```
 
 ### Supervisor Approval Gate
@@ -456,11 +484,12 @@ issue. Body mentions PR #42 → fetch PR. Produce context summary.
 4. [epic]     Implement changes
 5. [epic]     Verify
 6. [epic]     Create PR & ensure CI passes
-7. [detailed] Verify acceptance criteria met
+7. [epic]     Self-review & request human review
+8. [detailed] Verify acceptance criteria met
 ```
 Supervisor approves.
 
-**Phase 4:** Auto-advance through tasks 1-7, expanding epics
+**Phase 4:** Auto-advance through tasks 1-8, expanding epics
 as reached. No pauses between tasks unless a genuine decision
 is needed.
 
@@ -487,7 +516,8 @@ sources.
 5. [epic]     Implement fix
 6. [epic]     Verify fix
 7. [epic]     Create PR & ensure CI passes
-8. [detailed] Verify acceptance criteria met
+8. [epic]     Self-review & request human review
+9. [detailed] Verify acceptance criteria met
 ```
 
 ### Example 3: PR Continuation
@@ -505,7 +535,8 @@ PR has 3 review comments → note them.
 2. [epic]     Address review comments
 3. [epic]     Verify CI passes
 4. [epic]     Request re-review
-5. [detailed] Verify acceptance criteria met
+5. [epic]     Self-review & request human review
+6. [detailed] Verify acceptance criteria met
 ```
 
 ### Example 4: Mid-Workflow Pause
