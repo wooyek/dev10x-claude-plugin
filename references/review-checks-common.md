@@ -71,6 +71,10 @@ Before raising any of these, **verify actual code**:
 17. **Branch name convention** — flag branch name violations
     INFORMATIONAL in Round 1 only. Do not re-raise in subsequent rounds
     as the branch name is immutable while the PR is open.
+18. **RECOMMENDED items after author acknowledgment** — once an author
+    has acknowledged a RECOMMENDED suggestion but not acted on it, do
+    not re-raise it in later rounds. Repeating optional feedback the
+    author consciously skipped is noise. Only REQUIRED issues block merge.
 
 ## Parameter Change Analysis
 
@@ -121,10 +125,11 @@ When docs reference CLI commands (e.g., install instructions):
   logic — an empty string from a silenced failure produces misleading errors
   downstream.
 - **Pipe segment completeness in security hooks**: when a hook script
-  parses a shell command to detect a pattern (e.g., `python3 -c`),
-  it must inspect ALL pipe-delimited segments, not just
-  `command.split("|")[0]`. Use `for seg in command.split("|"):` or
-  mirror the `segments[1:]` loop pattern from existing hooks.
+  parses a shell command to detect a pattern (e.g., `psql`, `python3 -c`),
+  it must inspect ALL segments — both pipe-delimited (`|`) AND
+  `&&`- or `;`-chained sub-commands. A detector that only splits on `|`
+  will miss `echo done && psql -h host mydb "DELETE ..."`.
+  Use a segment splitter that handles all shell control operators.
 
 ## Sequential Step Integrity
 
