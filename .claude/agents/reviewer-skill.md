@@ -47,9 +47,10 @@ Files matching: `skills/**`
     (covers the mktmp call) AND `Write(/tmp/claude/<ns>/**)` (covers writing
     the returned path). For other Bash calls to external scripts, confirm a
     matching `Bash(<path>:*)` entry exists. Missing either causes WARNING.
-8e. **Shared helper propagation** — when a PR introduces or propagates a
-    new `bin/<script>` helper across multiple skills, enumerate ALL changed
-    SKILL.md files and verify each has a matching
+8e. **Shared helper propagation** — applies to `bin/` helpers accessed via
+    `${CLAUDE_PLUGIN_ROOT}/bin/<script>`; excludes session-installed helpers
+    like `mktmp.sh` (covered by 8b). When a PR propagates such a helper,
+    enumerate ALL changed SKILL.md files and verify each has a matching
     `Bash(${CLAUDE_PLUGIN_ROOT}/bin/<script>:*)` entry in `allowed-tools`.
     Do not rely on spotting individual occurrences — grep across the diff.
 8f. **Memory file Write coverage** — when a skill conditionally writes

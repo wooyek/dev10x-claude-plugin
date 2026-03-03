@@ -67,6 +67,7 @@ that goes away. It should contrast with the current broken state.
 | Vague outcome | Not testable | Be specific about what improves |
 | No contrast with current state | Unclear why it matters | Show what's wrong today |
 | Solution-focused "I want to" | "I want to see X on separate lines" names the UI change, not the need | Describe the motivation: "I want to quickly triage incoming notifications" |
+| Solution-focused "I want to" (infra) | "I want to use stable, version-independent paths" names the technical fix, not the need | Describe the user motivation: "I want to run skills without being re-prompted for the same permission on every invocation" |
 
 ## Title Writing Principle
 
