@@ -28,7 +28,6 @@ escaped=$(escape_for_json "$guidance")
 
 cat <<EOF
 {
-  "additional_context": "${escaped}",
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
     "additionalContext": "${escaped}"
