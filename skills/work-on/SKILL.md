@@ -223,9 +223,11 @@ choice.
 
 **Resolve criteria** in this order:
 1. Check `overrides` for a matching `work_type` with
+   `persist: false` — use if found, then **remove** the entry
+2. Check `overrides` for a matching `work_type` with
    `persist: true` — use if found
-2. Fall back to `defaults[work_type].criteria` from the file
-3. If the file is absent or the work type has no entry, use
+3. Fall back to `defaults[work_type].criteria` from the file
+4. If the file is absent or the work type has no entry, use
    the hardcoded defaults above
 
 **Present the criteria** when building the plan. Show the
@@ -288,7 +290,7 @@ time"). Update the YAML file accordingly:
 2. [epic]     Implement changes
 3. [epic]     Verify
 4. [detailed] Decide: create ticket, create PR, or done
-5. [epic]     Self-review & request human review
+5. [epic]     Self-review & request human review (if PR created)
 6. [detailed] Verify acceptance criteria met
 ```
 
