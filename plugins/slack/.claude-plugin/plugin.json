@@ -1,0 +1,13 @@
+{
+  "name": "slack",
+  "description": "Slack notifications, review requests, and Slack-based work item reminders.",
+  "version": "0.12.0.dev0",
+  "author": {
+    "name": "Janusz Skonieczny",
+    "email": "js+dev10x@bravelabs.io"
+  },
+  "homepage": "https://github.com/wooyek/dev10x-claude-plugin",
+  "repository": "https://github.com/wooyek/dev10x-claude-plugin",
+  "license": "MIT",
+  "keywords": ["slack", "notifications", "review-requests", "reminders"]
+}
