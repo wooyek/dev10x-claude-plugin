@@ -245,22 +245,43 @@ if Phase 2 found no comments to address.
 **Trigger:** PR had CHANGES_REQUESTED reviews AND fixup commits were
 created to address them.
 
-1. **Identify reviewers who requested changes:**
-   ```bash
-   gh pr view {pr_number} --json reviews \
-     --jq '.reviews[] | select(.state=="CHANGES_REQUESTED") | .author.login'
-   ```
+### Step 1: Identify reviewers who requested changes
 
-2. **Compose the notification:**
-   ```
-   @{reviewer} please take another look
-   {review_url}
-   ```
+```bash
+gh pr view {pr_number} --json reviews \
+  --jq '.reviews[] | select(.state=="CHANGES_REQUESTED") | .author.login'
+```
 
-3. **Ask user for confirmation** via `AskUserQuestion` showing the
-   exact message that will be posted.
+### Step 2: Compose and format each notification
 
-4. **Post the notification** via the project's configured channel.
+For each reviewer who requested changes, compose:
+```
+@{reviewer} please take another look
+```
+
+Format this as a Slack message suitable for posting.
+
+### Step 3: Ask user for confirmation
+
+Use `AskUserQuestion` showing the exact message that will be posted.
+
+Options: "Post re-review notification" / "Skip".
+
+### Step 4: Post the notification
+
+If user approves, invoke `Skill("dx:slack-review-request")` with the
+composed message. The skill reads the project's Slack config and posts
+to the configured channel.
+
+Example invocation:
+```
+Skill("dx:slack-review-request", args="--pr {pr_number} --repo {repo} --message '@{reviewer} please take another look'")
+```
+
+The dx:slack-review-request skill will:
+- Resolve the project's configured channel from userspace config
+- Post the message to that channel
+- Report the result back to the agent
 
 ---
 
@@ -288,27 +309,58 @@ Use `AskUserQuestion`:
 - Show the formatted message from the prepare output
 - Options: "Post notification" / "Skip notification"
 
-### Step 3: Execute
+### Step 3: Execute (if user approves)
 
-If user approves:
+If user approves, execute three delegated steps in sequence:
+
+**Step 3a: Assign GitHub reviewers**
+
+```
+Skill("dx:gh-pr-request-review", args="--pr {pr_number} --repo {repo}")
+```
+
+The dx:gh-pr-request-review skill will:
+- Read the project's GitHub config for default reviewers
+- Assign them via `gh pr edit --add-reviewer`
+- Report results back to the agent
+
+**Step 3b: Post Slack review notification**
+
+```
+Skill("dx:slack-review-request", args="--pr {pr_number} --repo {repo}")
+```
+
+The dx:slack-review-request skill will:
+- Read the project's Slack config (channel, mentions)
+- Format the review notification message
+- Post to the configured Slack channel
+- Report results back to the agent
+
+**Step 3c: Update PR checklist**
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
   send --pr {pr_number} --repo {repo} \
-  --channel {CHANNEL_ID} \
-  --reviewer {REVIEWER_TEAM} \
-  --message-file /tmp/claude/pr-monitor/notify-{pr_number}.txt
+  --skip-slack --skip-reviewers
 ```
 
-If user declines, run with `--skip-slack`:
+This call runs checklist-only mode — no Slack posting, no reviewer
+assignment (those were handled by the delegated skills above).
+
+### Step 4: Execute (if user declines)
+
+If user declines the notification, run checklist-only:
+
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
-  send --pr {pr_number} --repo {repo} --skip-slack
+  send --pr {pr_number} --repo {repo} \
+  --skip-slack --skip-reviewers
 ```
 
-### Step 4: Report final status
+### Step 5: Report final status
 
-Report: CI status, comments addressed, notification sent/skipped.
+Report: CI status, comments addressed, notification sent/skipped, GitHub
+reviewers assigned, Slack notification posted.
 
 ````
 
@@ -334,9 +386,11 @@ Report: CI status, comments addressed, notification sent/skipped.
 
 1. **dx:gh-pr-create** — Use before this skill to create the draft PR
 2. **ticket:jtbd** — Delegated to by the agent in Phase 0
-3. **dx:gh-pr-respond** — Delegated to by the agent for review comments
-4. **qa:scope** — Delegated to by the agent for QA risk assessment
-5. **pr-notify.py** — Phase 3 helper script
+3. **dx:gh-pr-respond** — Delegated to by the agent for review comments (Phase 2)
+4. **qa:scope** — Delegated to by the agent for QA risk assessment (Phase 2.5)
+5. **dx:gh-pr-request-review** — Delegated to by the agent in Phase 3 (GitHub reviewer assignment)
+6. **dx:slack-review-request** — Delegated to by the agent in Phase 2.7 and Phase 3 (Slack notifications)
+7. **pr-notify.py** — Phase 3 helper script (checklist update only)
 
 ## Delegation Pattern
 
@@ -358,11 +412,13 @@ Report: CI status, comments addressed, notification sent/skipped.
         │       └── Skill("qa:scope")
         │
         ├── Phase 2.7: Re-review notification (after comments addressed)
-        │       └── AskUserQuestion → confirm notification
+        │       ├── AskUserQuestion → confirm notification
+        │       └── Skill("dx:slack-review-request") → post to Slack
         │
         └── Phase 3: Notification (initial review request)
                 ├── AskUserQuestion → confirm message
-                ├── Post notification (if approved)
-                ├── Assign reviewers
-                └── Update checklist
+                └── If approved, execute three delegated steps:
+                    ├── Skill("dx:gh-pr-request-review") → assign GitHub reviewers
+                    ├── Skill("dx:slack-review-request") → post Slack notification
+                    └── pr-notify.py send (checklist-only mode)
 ```
