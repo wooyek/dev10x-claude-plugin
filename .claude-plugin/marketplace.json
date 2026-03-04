@@ -29,13 +29,13 @@
       "description": "Safe read-only database query planning and execution."
     },
     {
-      "name": "ticket2",
-      "source": "./plugins/ticket2",
+      "name": "tickets",
+      "source": "./plugins/tickets",
       "description": "Branch creation, Linear integration, JTBD ticket workflows, and scoping."
     },
     {
-      "name": "session",
-      "source": "./plugins/session",
+      "name": "sessions",
+      "source": "./plugins/sessions",
       "description": "Session task tracking, wrap-up, and handover between Claude sessions."
     },
     {
