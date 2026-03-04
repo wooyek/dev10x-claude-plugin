@@ -114,4 +114,4 @@ jobs:
             - Do NOT approve or request changes — only comment
             - Be concise — the goal is a quick, actionable checklist
 
-          claude_args: '--allowed-tools "Read,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh api:*),Bash(gh pr comment:*),Bash(git log:*)"'
+          claude_args: '--model haiku --allowed-tools "Read,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh api:*),Bash(gh pr comment:*),Bash(git log:*)"'
