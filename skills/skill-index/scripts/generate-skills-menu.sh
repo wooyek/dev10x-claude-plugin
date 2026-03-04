@@ -25,12 +25,12 @@ if [[ -d "$DEV10X_BASE" ]]; then
 fi
 
 # ── Parse SKILL.md frontmatter ──────────────────────────────────
-declare -A SKILL_NAME SKILL_INVOCABLE
+declare -A SKILL_NAME
 ALL_KEYS=()
 
 parse_skill() {
     local skill_file="$1"
-    local name="" invocable="false" inv_name="" in_fm=0
+    local name="" inv_name="" in_fm=0
 
     while IFS= read -r line; do
         if [[ "$line" == "---" ]]; then
@@ -46,9 +46,6 @@ parse_skill() {
                 name="${name# }"
                 name="${name#\"}"
                 name="${name%\"}"
-                ;;
-            user-invocable:*true*)
-                invocable="true"
                 ;;
             invocation-name:*)
                 inv_name="${line#invocation-name:}"
@@ -68,7 +65,6 @@ parse_skill() {
     key="${key%"${key##*[![:space:]]}"}"
 
     SKILL_NAME["$key"]="$name"
-    SKILL_INVOCABLE["$key"]="$invocable"
     ALL_KEYS+=("$key")
 }
 

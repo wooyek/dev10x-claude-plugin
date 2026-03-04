@@ -8,8 +8,9 @@ description: >
 user-invocable: true
 invocation-name: dx:skill-index
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-motd.sh:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-all.sh:*)
   - Read(~/.claude/SKILLS.md)
+  - Read(~/.claude/.skills-menu.txt)
 ---
 
 ## Instructions
