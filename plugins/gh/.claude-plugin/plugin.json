@@ -1,0 +1,13 @@
+{
+  "name": "gh",
+  "description": "PR lifecycle: create, review, triage, respond, monitor, and request reviews on GitHub.",
+  "version": "0.12.0.dev0",
+  "author": {
+    "name": "Janusz Skonieczny",
+    "email": "js+dev10x@bravelabs.io"
+  },
+  "homepage": "https://github.com/wooyek/dev10x-claude-plugin",
+  "repository": "https://github.com/wooyek/dev10x-claude-plugin",
+  "license": "MIT",
+  "keywords": ["github", "pull-requests", "code-review", "pr-lifecycle"]
+}
