@@ -143,7 +143,7 @@ The PR body **must** start with a JTBD Job Story as its first paragraph.
 
 3. If a valid Job Story is present → skip to Phase 1.
 
-4. If missing or malformed → generate one using the `ticket:jtbd` skill.
+4. If missing or malformed → generate one using the `dx:ticket-jtbd` skill.
 
 5. After the skill completes, verify the PR body now starts with the
    Job Story.
@@ -386,9 +386,9 @@ reviewers assigned, Slack notification posted.
 ## Integration with Other Skills
 
 1. **dx:gh-pr-create** — Use before this skill to create the draft PR
-2. **ticket:jtbd** — Delegated to by the agent in Phase 0
+2. **dx:ticket-jtbd** — Delegated to by the agent in Phase 0
 3. **dx:gh-pr-respond** — Delegated to by the agent for review comments (Phase 2)
-4. **qa:scope** — Delegated to by the agent for QA risk assessment (Phase 2.5)
+4. **dx:qa-scope** — Delegated to by the agent for QA risk assessment (Phase 2.5)
 5. **dx:gh-pr-request-review** — Delegated to by the agent in Phase 3 (GitHub reviewer assignment)
 6. **dx:slack-review-request** — Delegated to by the agent in Phase 2.7 and Phase 3 (Slack notifications)
 7. **pr-notify.py** — Phase 3 helper script (checklist update only)
@@ -402,7 +402,7 @@ reviewers assigned, Slack notification posted.
         │
         ├── Phase 0: JTBD Job Story check
         │       ├── Fetch PR body, check first paragraph
-        │       └── If missing → Skill("ticket:jtbd") to generate
+        │       └── If missing → Skill("dx:ticket-jtbd") to generate
         │
         ├── Phase 1: CI monitoring (handled directly by agent)
         │

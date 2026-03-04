@@ -2,7 +2,7 @@
 name: dx:ticket-jtbd
 description: Write a JTBD Job Story and apply it to a target (PR description, GitHub issue, Linear ticket, or JIRA ticket). Delegates drafting to the dx:jtbd base skill, then handles the side-effecting write. Replaces the former /job-story skill.
 user-invocable: true
-invocation-name: ticket:jtbd
+invocation-name: dx:ticket-jtbd
 allowed-tools:
   - Bash(gh pr view:*)
   - Bash(gh pr diff:*)
@@ -137,16 +137,16 @@ Updated {target_type} with Job Story.
 
 | Caller | dx:jtbd Mode | Write Target |
 |--------|-----------|-------------|
-| Standalone `/ticket:jtbd 1167` | attended | PR description |
-| Standalone `/ticket:jtbd PAY-519` | attended | Linear ticket |
-| Standalone `/ticket:jtbd GH-15` | attended | GitHub issue (comment) |
+| Standalone `/dx:ticket-jtbd 1167` | attended | PR description |
+| Standalone `/dx:ticket-jtbd PAY-519` | attended | Linear ticket |
+| Standalone `/dx:ticket-jtbd GH-15` | attended | GitHub issue (comment) |
 | `pr:monitor` Phase 0 | attended | PR description |
 
 ## Examples
 
 ### Example 1: Write to PR
 
-**Input:** `/ticket:jtbd 1167`
+**Input:** `/dx:ticket-jtbd 1167`
 
 1. Auto-detect: PR number → target is PR description
 2. Extract ticket ID from branch: `PAY-519`
@@ -156,7 +156,7 @@ Updated {target_type} with Job Story.
 
 ### Example 2: Write to Linear ticket
 
-**Input:** `/ticket:jtbd PAY-519`
+**Input:** `/dx:ticket-jtbd PAY-519`
 
 1. Auto-detect: Linear ticket ID → target is Linear ticket
 2. Find linked PR (if any) for additional context
@@ -166,7 +166,7 @@ Updated {target_type} with Job Story.
 
 ### Example 3: Both PR and ticket
 
-**Input:** `/ticket:jtbd 1167 PAY-519`
+**Input:** `/dx:ticket-jtbd 1167 PAY-519`
 
 1. Auto-detect: PR + ticket → primary target is PR description
 2. Delegate to `dx:jtbd` (attended) with both identifiers
@@ -175,7 +175,7 @@ Updated {target_type} with Job Story.
 
 ### Example 4: Write to GitHub issue
 
-**Input:** `/ticket:jtbd GH-15`
+**Input:** `/dx:ticket-jtbd GH-15`
 
 1. Auto-detect: `GH-` prefix → target is GitHub issue
 2. Fetch issue body and comments for context
