@@ -118,9 +118,9 @@ class TestFormatReviewMessage:
             jtbd=None,
             resolved_mentions=["<!subteam^S0EXAMPLE>"],
         )
-        assert "Please review" in result
-        assert "<https://github.com/org/my-app/pull/42|my-app#42>" in result
-        assert "<!subteam^S0EXAMPLE>" in result
+        first_line = result.splitlines()[0]
+        assert first_line.startswith("<!subteam^S0EXAMPLE> Please review")
+        assert "<https://github.com/org/my-app/pull/42|my-app#42>" in first_line
 
     def test_message_with_jtbd(self):
         result = format_review_message(
@@ -133,7 +133,7 @@ class TestFormatReviewMessage:
         )
         assert "> *When* reconciling, *wants to* see order" in result
 
-    def test_no_mentions_no_cc_line(self):
+    def test_no_mentions_starts_with_please_review(self):
         result = format_review_message(
             pr_number=42,
             repo="org/my-app",
@@ -142,4 +142,4 @@ class TestFormatReviewMessage:
             jtbd=None,
             resolved_mentions=[],
         )
-        assert "cc" not in result.lower()
+        assert result.startswith("Please review")
