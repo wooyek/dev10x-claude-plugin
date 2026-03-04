@@ -14,14 +14,15 @@ allowed-tools:
 
 ## Instructions
 
-Regenerate the SKILLS.md file by running the generator script:
+Regenerate both skill index files by running the generator script:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-motd.sh --force
+${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-all.sh --force
 ```
 
-Then display the generated file contents to the user:
+Then display the generated files to the user:
 
 ```bash
 cat ~/.claude/SKILLS.md
+cat ~/.claude/.skills-menu.txt
 ```
