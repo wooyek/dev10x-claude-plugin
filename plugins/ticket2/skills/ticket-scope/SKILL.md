@@ -2,7 +2,7 @@
 name: dx:ticket-scope
 description: Scope Linear tickets with technical research and architecture design. Extends the base scope skill with Linear ticket integration, story point estimation, and acceptance criteria formatting. Use when preparing to implement a Linear ticket.
 user-invocable: true
-invocation-name: ticket:scope
+invocation-name: dx:ticket-scope
 ---
 
 # Ticket Scope - Linear Ticket Scoping Skill
@@ -359,7 +359,7 @@ dx:ticket-scope
 
 ### User Request
 ```
-/ticket:scope PAY-329
+/dx:ticket-scope PAY-329
 ```
 
 ### Workflow
