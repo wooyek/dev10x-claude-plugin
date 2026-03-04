@@ -34,7 +34,7 @@ git operation.
 title — all through pre-approved tool calls that never trigger
 permission prompts.
 
-When Claude uses `/pr:create` instead of raw `gh` commands, every
+When Claude uses `/dev10x:gh-pr-create` instead of raw `gh` commands, every
 step matches an allow rule. Zero interruptions.
 
 ### Guardrails that teach, not just block

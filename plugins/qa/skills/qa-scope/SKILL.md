@@ -16,7 +16,7 @@ when manual testing or new e2e scenarios are needed.
 **Use when:**
 - A PR is ready for merge and needs QA assessment
 - You want to check if a change needs manual QA testing
-- `/pr:monitor` triggers Phase 2.5 (automatic)
+- `/dev10x:gh-pr-monitor` triggers Phase 2.5 (automatic)
 
 **Do NOT use for:**
 - Test-only PRs (no production code changes)
