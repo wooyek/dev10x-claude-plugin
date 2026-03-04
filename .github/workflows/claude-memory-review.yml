@@ -123,7 +123,7 @@ jobs:
             - Quote actual code when referencing
             - Distinguish between definite improvements and discussion items
 
-          claude_args: '--allowed-tools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh api:*),Read,Glob,Grep,Write"'
+          claude_args: '--model haiku --allowed-tools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh api:*),Read,Glob,Grep,Write"'
 
       - name: Auto-implement Lessons Learned
         if: >-
@@ -259,7 +259,7 @@ jobs:
                `${{ github.workspace }}/.claude-output/docs_pr_url.txt`
                so the Slack notification step can link to it.
 
-          claude_args: '--allowed-tools "Read,Write,Edit,Glob,Grep,Bash(git config:*),Bash(git checkout:*),Bash(git pull:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr create:*)"'
+          claude_args: '--model haiku --allowed-tools "Read,Write,Edit,Glob,Grep,Bash(git config:*),Bash(git checkout:*),Bash(git pull:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr create:*)"'
 
       - name: Read documentation PR URL
         if: always() && steps.skip-check.outputs.skip != 'true'

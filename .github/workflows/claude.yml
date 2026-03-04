@@ -76,4 +76,4 @@ jobs:
             Be brief but thorough. Be constructive and helpful.
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          claude_args: '--allowed-tools "Read,mcp__github_inline_comment__create_inline_comment,mcp__github__get_pull_request_review_comments,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr review:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh api:*)"'
+          claude_args: '--model haiku --allowed-tools "Read,mcp__github_inline_comment__create_inline_comment,mcp__github__get_pull_request_review_comments,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr review:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh api:*)"'
