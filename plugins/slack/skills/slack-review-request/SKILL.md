@@ -114,20 +114,19 @@ skipping the `prepare` step.
 ## Message Format
 
 Messages include:
+- **Mentions** (if any): prepended to the first line before "Please review"
 - **Review link**: formatted as `<url|my-app#42>`
 - **PR title**: on next line
 - **JTBD** (if present in PR body): extracted from first `**When**`
   paragraph and formatted as a blockquote
-- **Mentions** (if any): "cc @backend-team <@alice>" on final line
 
 Example output:
 
 ```
-Please review <https://github.com/org/my-app/pull/42|my-app#42>
+<!subteam^S0EXAMPLE> <@U0ALICE> Please review <https://github.com/org/my-app/pull/42|my-app#42>
 Fix payment routing
 > *When* a customer uses a new card, *wants to* bypass 3D Secure, *so*
 > *can* complete checkout faster.
-cc <!subteam^S0EXAMPLE> <@U0ALICE>
 ```
 
 ## Usage

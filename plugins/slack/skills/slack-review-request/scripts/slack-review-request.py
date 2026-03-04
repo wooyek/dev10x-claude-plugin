@@ -93,11 +93,10 @@ def format_review_message(
 ) -> str:
     repo_short = repo.split("/")[-1]
     link = f"<{pr_url}|{repo_short}#{pr_number}>"
-    lines = [f"Please review {link}", pr_title]
+    mentions_prefix = f"{' '.join(resolved_mentions)} " if resolved_mentions else ""
+    lines = [f"{mentions_prefix}Please review {link}", pr_title]
     if jtbd:
         lines.append(f"> {md_to_slack_bold(jtbd)}")
-    if resolved_mentions:
-        lines.append(f"cc {' '.join(resolved_mentions)}")
     return "\n".join(lines)
 
 
