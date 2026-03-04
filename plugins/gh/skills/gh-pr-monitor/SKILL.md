@@ -222,7 +222,7 @@ This phase runs ONCE when Phase 2 completes. It delegates to the
    Use the Skill tool: skill="dx:qa-scope", args="{pr_number}"
    ```
 
-   The qa:scope skill will:
+   The dx:qa-scope skill will:
    - Analyze the PR diff for QA risk (low/medium/high)
    - Check the project's e2e test directory for existing coverage
    - Present a QA assessment to the user via AskUserQuestion
