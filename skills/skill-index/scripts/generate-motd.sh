@@ -366,17 +366,17 @@ print_wrapped() {
             IFS='|' read -ra pairs <<< "$matched"
             for pair in "${pairs[@]}"; do
                 [[ -z "$pair" ]] && continue
-                display="${pair%%=*}"
                 key="${pair#*=}"
-                printf '  /%-22s %s\n' "$display" "${SKILL_DESC[$key]:-}"
+                invocation="${SKILL_NAME[$key]:-$key}"
+                printf '  /%-22s %s\n' "$invocation" "${SKILL_DESC[$key]:-}"
             done
         done
 
         if [[ ${#OTHER_SKILLS[@]} -gt 0 ]]; then
             printf '\nOther\n'
             for sk in "${OTHER_SKILLS[@]}"; do
-                dn=$(display_name_for "$sk")
-                printf '  /%-22s %s\n' "$dn" "${SKILL_DESC[$sk]:-}"
+                invocation="${SKILL_NAME[$sk]:-$sk}"
+                printf '  /%-22s %s\n' "$invocation" "${SKILL_DESC[$sk]:-}"
             done
         fi
 
@@ -398,8 +398,9 @@ print_wrapped() {
             tokens=()
             for pair in "${pairs[@]}"; do
                 [[ -z "$pair" ]] && continue
-                display="${pair%%=*}"
-                tokens+=("/${display}")
+                key="${pair#*=}"
+                invocation="${SKILL_NAME[$key]:-$key}"
+                tokens+=("/${invocation}")
             done
 
             line=$(printf "%-${label_width}s" "$label")
@@ -418,8 +419,8 @@ print_wrapped() {
         if [[ ${#OTHER_SKILLS[@]} -gt 0 ]]; then
             tokens=()
             for sk in "${OTHER_SKILLS[@]}"; do
-                dn=$(display_name_for "$sk")
-                tokens+=("/${dn}")
+                invocation="${SKILL_NAME[$sk]:-$sk}"
+                tokens+=("/${invocation}")
             done
             line=$(printf "%-${label_width}s" "Other")
             for token in "${tokens[@]}"; do
@@ -452,8 +453,9 @@ print_wrapped() {
             tokens=()
             for pair in "${pairs[@]}"; do
                 [[ -z "$pair" ]] && continue
-                display="${pair%%=*}"
-                tokens+=("/${display}")
+                key="${pair#*=}"
+                invocation="${SKILL_NAME[$key]:-$key}"
+                tokens+=("/${invocation}")
             done
 
             line=$(printf "%-${label_width}s" "$label")
@@ -472,8 +474,8 @@ print_wrapped() {
         if [[ ${#OTHER_SKILLS[@]} -gt 0 ]]; then
             tokens=()
             for sk in "${OTHER_SKILLS[@]}"; do
-                dn=$(display_name_for "$sk")
-                tokens+=("/${dn}")
+                invocation="${SKILL_NAME[$sk]:-$sk}"
+                tokens+=("/${invocation}")
             done
             line=$(printf "%-${label_width}s" "Other")
             for token in "${tokens[@]}"; do
