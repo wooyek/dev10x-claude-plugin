@@ -129,7 +129,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-motd.sh --force
 | Skill | Patterns to study |
 |---|---|
 | `dx:git-worktree` | Step-numbered workflow, `allowed-tools`, templates |
-| `ticket:create` | Prerequisites check, integration section |
+| `dx:ticket-create` | Prerequisites check, integration section |
 | `dx:skill-index` | Minimal skill that fully delegates to a script |
 | `commit` | Multi-step workflow with explicit validation gates |
 
@@ -140,7 +140,7 @@ Never `@`-force-load another skill file — it consumes context immediately.
 
 ```markdown
 ## Prerequisites
-**REQUIRED:** Invoke `ticket:branch` before this workflow begins.
+**REQUIRED:** Invoke `dx:ticket-branch` before this workflow begins.
 ```
 
 ## Script Conventions

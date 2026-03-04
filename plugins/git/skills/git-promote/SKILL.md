@@ -13,7 +13,7 @@ This skill automates the process of converting an existing git commit into a tra
 
 ## Prerequisites Check
 
-**IMPORTANT:** This skill uses the `ticket:create` skill which supports GitHub Issues, Linear, and JIRA.
+**IMPORTANT:** This skill uses the `dx:ticket-create` skill which supports GitHub Issues, Linear, and JIRA.
 
 ## When to Use This Skill
 
@@ -43,11 +43,11 @@ git show <commit-hash>
 
 ### Step 3: Create Ticket
 
-Use the `ticket:create` skill to create a properly structured ticket from the commit.
+Use the `dx:ticket-create` skill to create a properly structured ticket from the commit.
 
 ### Step 4: Create Branch
 
-Use the `ticket:branch` skill to create a properly named branch.
+Use the `dx:ticket-branch` skill to create a properly named branch.
 
 ### Step 5: Cherry-pick Commit
 
@@ -73,7 +73,7 @@ Use the `dx:gh-pr-create` skill to push the branch and create a PR.
 
 ```
 dx:git-promote
-├── Uses: ticket:create (Step 3)
-├── Uses: ticket:branch (Step 4)
+├── Uses: dx:ticket-create (Step 3)
+├── Uses: dx:ticket-branch (Step 4)
 └── Uses: dx:gh-pr-create (Step 8, optional)
 ```

@@ -2,7 +2,7 @@
 name: dx:adr
 description: Create Architecture Decision Records (ADRs) following project conventions. Extends the base scope skill with ADR-specific format, numbering, diagram generation, and decision documentation. Use when documenting significant architectural decisions that affect the codebase.
 user-invocable: true
-invocation-name: adr:create
+invocation-name: dx:adr
 ---
 
 # ADR Create - Architecture Decision Record Skill
@@ -139,7 +139,7 @@ Common corrections include:
 
 #### 6.1 Create Branch
 
-Use `ticket:branch` skill if a ticket exists, or
+Use `dx:ticket-branch` skill if a ticket exists, or
 `dx:git-worktree` for isolated workspace.
 
 #### 6.2 Commit ADR
