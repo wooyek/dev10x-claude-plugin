@@ -2,7 +2,7 @@
 name: dx:slack-review-request
 description: Post a Slack review request for a PR using per-project config (channel, mentions). Reads configuration from userspace YAML.
 user-invocable: true
-invocation-name: pr:request-review
+invocation-name: dx:slack-review-request
 ---
 
 # Slack Review Request
@@ -135,8 +135,8 @@ cc <!subteam^S0EXAMPLE> <@U0ALICE>
 ### Direct invocation (user-facing)
 
 ```
-/pr:request-review                     # uses current branch PR
-/pr:request-review --manual            # force config review
+/dx:slack-review-request                     # uses current branch PR
+/dx:slack-review-request --manual            # force config review
 ```
 
 ### Programmatic (from other skills)
