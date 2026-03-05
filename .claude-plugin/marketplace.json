@@ -1,67 +1,17 @@
 {
-  "name": "dev10x",
+  "name": "WooYek",
   "owner": {
     "name": "Janusz Skonieczny",
-    "email": "js+dev10x@bravelabs.io"
+    "email": "Dev10xAI@WooYek.com"
   },
   "metadata": {
     "description": "Dev10x plugin marketplace — structured workflows for commits, PRs, tickets, QA, and more"
   },
   "plugins": [
     {
-      "name": "fundamentals",
-      "source": "./plugins/fundamentals",
-      "description": "Core guardrails, JTBD drafting, scoping, session orchestration, and PR context detection."
-    },
-    {
-      "name": "git",
-      "source": "./plugins/git",
-      "description": "Atomic commits, worktrees, history grooming, and branch hygiene."
-    },
-    {
-      "name": "gh",
-      "source": "./plugins/gh",
-      "description": "PR lifecycle: create, review, triage, respond, monitor, and request reviews on GitHub."
-    },
-    {
-      "name": "db",
-      "source": "./plugins/db",
-      "description": "Safe read-only database query planning and execution."
-    },
-    {
-      "name": "tickets",
-      "source": "./plugins/tickets",
-      "description": "Branch creation, Linear integration, JTBD ticket workflows, and scoping."
-    },
-    {
-      "name": "sessions",
-      "source": "./plugins/sessions",
-      "description": "Session task tracking, wrap-up, and handover between Claude sessions."
-    },
-    {
-      "name": "parking",
-      "source": "./plugins/parking",
-      "description": "Defer, park, and rediscover work items across PRs, todos, and Slack."
-    },
-    {
-      "name": "py",
-      "source": "./plugins/py",
-      "description": "UV installation and Python script tooling with PEP 723 inline metadata."
-    },
-    {
-      "name": "skills",
-      "source": "./plugins/skills",
-      "description": "Skill authoring, audit, and index for Claude Code plugin development."
-    },
-    {
-      "name": "slack",
-      "source": "./plugins/slack",
-      "description": "Slack notifications, review requests, and Slack-based work item reminders."
-    },
-    {
-      "name": "qa",
-      "source": "./plugins/qa",
-      "description": "QA scoping, self-QA execution via Playwright, and e2e coverage analysis."
+      "name": "Dev10x",
+      "source": "./",
+      "description": "40 skills for structured commits, PR lifecycle, branch hygiene, ticket management, task tracking, code review, scoping, and QA automation."
     }
   ]
 }
