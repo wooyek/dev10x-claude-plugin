@@ -17,12 +17,22 @@ fi
 # ── Resolve skill source directories ────────────────────────────
 LOCAL_DIR="${HOME}/.claude/skills"
 
-DEV10X_BASE="${HOME}/.claude/plugins/cache/dev10x/dev10x"
-DEV10X_DIR=""
-if [[ -d "$DEV10X_BASE" ]]; then
-    DEV10X_LATEST=$(ls "$DEV10X_BASE" | sort -V | tail -1)
-    DEV10X_DIR="${DEV10X_BASE}/${DEV10X_LATEST}/skills"
-fi
+resolve_dev10x_dir() {
+    local cache_base="${HOME}/.claude/plugins/cache"
+    [[ -d "$cache_base" ]] || return 0
+
+    find "$cache_base" -mindepth 4 -maxdepth 4 -type d -name skills 2>/dev/null \
+        | while IFS= read -r skills_dir; do
+            [[ -f "$skills_dir/skill-index/SKILL.md" ]] || continue
+            version="$(basename "$(dirname "$skills_dir")")"
+            printf '%s\t%s\n' "$version" "$skills_dir"
+        done \
+        | sort -t $'\t' -k1,1V \
+        | tail -n1 \
+        | cut -f2-
+}
+
+DEV10X_DIR="$(resolve_dev10x_dir)"
 
 # ── Parse SKILL.md frontmatter ──────────────────────────────────
 declare -A SKILL_NAME

@@ -108,17 +108,17 @@ Follow `superpowers:writing-skills` RED-GREEN-REFACTOR:
 ### 3. Validate Structure
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/skills/skill-create/scripts/quick_validate.py \
-  ~/.claude/skills/<namespace>:<skill-name>
+${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-all.sh --force
+rg -n "<namespace>-<skill-name>" ~/.claude/SKILLS.md ~/.claude/.skills-menu.txt
 ```
 
-Ignore the name validation error (colon in name is valid locally). Verify
-only that frontmatter parses and required fields exist.
+This validates frontmatter parsing and confirms the new skill is indexable.
 
 ### 4. Register in MOTD
 
 Skills don't appear in session context until indexed. Regenerate so the
-new skill is discoverable at the next session start:
+new skill is discoverable at the next session start (run this if you skipped
+step 3 or made additional edits):
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-motd.sh --force
