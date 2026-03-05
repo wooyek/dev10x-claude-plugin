@@ -3,6 +3,10 @@
 Review Python and shell scripts for code quality, correctness, and
 maintainability.
 
+## Severity Distinction
+
+See `references/review-checks-common.md` for enforcement-level guidance.
+
 ## Trigger
 
 Files matching: `**/*.py`, `**/*.sh` (excluding files handled by

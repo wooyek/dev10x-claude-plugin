@@ -3,6 +3,13 @@
 Universal review checks regardless of domain-specific agent. For
 workflow rules, see `review-guidelines.md`.
 
+## Enforcement Levels
+
+- **CRITICAL/WARNING** or **REQUIRED**: Enforced by CI/merge protection or code review; blocks merge
+- **INFO** or **RECOMMENDED**: Advisory only; does not block merge
+- Do not flag as REQUIRED unless enforcement mechanism exists (CI/merge protection/code review gate)
+- When guidance could be misunderstood as always-mandatory, clarify in docs (pattern: "Hook-Blocked Patterns (enforced)" vs "Permission-Friction Anti-Patterns (advisory)" in `hooks/scripts/session-guidance.md`)
+
 ## False Positive Prevention Gate
 
 Before posting **any** inline comment:

@@ -5,6 +5,10 @@ development workflows.
 
 ## Directory Layout
 
+This repo is a **single unified `dev10x` plugin** (consolidated from 11
+separate plugin directories). All skills, hooks, and config are defined at
+the root level.
+
 | Directory        | Purpose                                    |
 |------------------|--------------------------------------------|
 | `skills/`        | Skill definitions (SKILL.md + scripts)     |

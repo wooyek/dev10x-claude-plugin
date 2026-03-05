@@ -3,6 +3,10 @@
 Review documentation files for accuracy, consistency, and alignment
 with the codebase.
 
+## Severity Distinction
+
+See `references/review-checks-common.md` for enforcement-level guidance.
+
 ## Trigger
 
 Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`,
