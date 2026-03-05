@@ -4,18 +4,26 @@ Quick reference for every session. Hooks enforce most of these
 rules automatically; this briefing explains **why** so you choose
 the right pattern on the first attempt.
 
-## Blocked Patterns (hooks will reject these)
+## Hook-Blocked Patterns (enforced)
 
 | Pattern | Why blocked | Use instead |
 |---------|------------|-------------|
-| `cmd1 && cmd2` (setup + script) | `&&` shifts prefix, breaks allow rules | Separate Bash tool calls |
+| `cmd1 && cmd2` (setup + path-based script) | `&&` shifts prefix, breaks allow rules for path-based commands | Separate Bash tool calls |
 | `cat <<'EOF'` / `cat >` / `echo >` | Heredocs/redirects blocked by security hook | Write tool + reference file (`git commit -F`) |
-| `$(git merge-base ...)` inline | Subshell shifts prefix | Git aliases: `git develop-log`, `git develop-diff`, `git develop-rebase` |
 | `python3 -c "..."` inline code | Inline execution blocked | Extract to `~/.claude/tools/script.py` with uv shebang |
-| `# comment` as first line | Leading `#` breaks all prefix matching | Use Bash tool `description` parameter |
-| `ENV=val command` prefix | Env var prefix shifts effective prefix | Script sets env internally |
-| `uv run --script` on executable scripts | Redundant prefix breaks allow rules | Call script directly (it has the uv shebang) |
-| `cd /worktree/path && command` | Redundant when CWD is already the worktree | Run command directly — session switched on worktree creation |
+
+## Permission-Friction Anti-Patterns (advisory)
+
+These are not always hook-blocked, but they commonly trigger avoidable
+prompts or brittle command matching.
+
+| Pattern | Why risky | Use instead |
+|---------|-----------|-------------|
+| `$(git merge-base ...)` inline | Subshell shifts effective command prefix | Git aliases: `git develop-log`, `git develop-diff`, `git develop-rebase` |
+| `# comment` as first line | Leading `#` can break prefix matching and parser expectations | Use Bash tool `description` parameter |
+| `ENV=val command` prefix | Env prefix can shift the effective prefix used for allow rules | Script sets env internally |
+| `uv run --script` on executable scripts | Redundant wrapper can miss direct path-based allow rules | Call script directly (shebang handles uv) |
+| `cd /worktree/path && command` | Redundant when CWD is already the worktree; can trigger chaining checks | Run command directly — session switched on worktree creation |
 
 ## Preferred Patterns
 
@@ -52,8 +60,11 @@ the right pattern on the first attempt.
 - Check with `git rev-parse --show-toplevel` if unsure
 
 ### Temporary files
-- Use `${CLAUDE_PLUGIN_ROOT}/bin/mktmp.sh <namespace> <prefix> [.ext]`
-- Never `mkdir -p && script` — mktmp.sh creates dirs automatically
+- Use `/tmp/claude/bin/mktmp.sh <namespace> <prefix> [.ext]`
+- This stable `/tmp` path is installed at SessionStart to avoid
+  plugin-cache/version path permission friction
+- Never `mkdir -p && script` — `mktmp.sh` creates dirs automatically
+- Keep it as a standalone Bash call (no `&&` prefix setup)
 
 ## Key Skills for Common Tasks
 
