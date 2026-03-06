@@ -1,4 +1,4 @@
-# dev10x Claude Plugin
+# Dev10x Claude Plugin
 
 Stop babysitting your AI. Start supervising it.
 
