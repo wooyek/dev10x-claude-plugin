@@ -33,6 +33,28 @@ verify the triage decisions without searching through hidden threads.
 - Called by `dev10x:gh-pr-respond` before delegating to `dev10x:gh-pr-fixup`
 - Standalone when you want to validate a comment without committing to a fix
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+
+**Auto-advance:** Complete each step, immediately start the next.
+Never pause to ask "should I continue?" between steps.
+
+**Task tracking:** Create tasks for each step so the supervisor
+can track progress:
+
+```
+TaskCreate(subject="Fetch comment context",
+    activeForm="Fetching comment context")
+TaskCreate(subject="Validate against codebase",
+    activeForm="Validating against codebase")
+TaskCreate(subject="Draft verdict and reply",
+    activeForm="Drafting verdict")
+```
+
+Set dependencies: validate blocked by fetch, draft blocked by
+validate.
+
 ## Input Requirements
 
 1. **PR URL or Comment URL** — Full GitHub URL to the PR comment

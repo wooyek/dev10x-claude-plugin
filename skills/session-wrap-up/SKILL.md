@@ -18,6 +18,29 @@ closing this session."
 Collect all open loops, present them to the user, and help defer
 each one to the right discovery context.
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+
+**Auto-advance:** Complete each step, immediately start the next.
+Never pause to ask "should I continue?" between steps.
+
+**Task tracking:** This skill already uses TaskList to discover
+open items. Enhance with explicit TaskCreate for its own phases
+so the supervisor can track wrap-up progress:
+
+```
+TaskCreate(subject="Discover open items",
+    activeForm="Scanning for open loops")
+TaskCreate(subject="Route deferred items",
+    activeForm="Routing deferred items")
+TaskCreate(subject="Post session summary",
+    activeForm="Posting summary")
+```
+
+Set dependencies: route blocked by discover, summary blocked by
+route.
+
 ## Phase 1: Auto-Scan
 
 Run all scans silently, collecting results into a structured list.
