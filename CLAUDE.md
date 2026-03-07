@@ -28,6 +28,16 @@ claude --plugin-dir .          # load plugin locally
 claude plugin validate         # validate plugin structure
 ```
 
+### Testing MCP Servers
+
+```bash
+for server in servers/*_server.py; do
+  timeout 5 uv run --script "$server" & sleep 2; kill $! 2>/dev/null || true
+done
+```
+
+MCP migration: shell scripts → MCP tools. See `.claude/rules/mcp-tools.md`.
+
 ## Coding Style
 
 - **Python scripts**: ruff + black (line-length 99)

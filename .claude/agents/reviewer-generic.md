@@ -39,6 +39,13 @@ domain-specific reviewers).
    confirm ALL pipe-chained segments are inspected, not just
    `command.split("|")[0]`.
 
+## MCP Server Implementations
+
+For `servers/*.py` files:
+- Plugin.json includes server entry; shebang uses `uv run --script`
+- All tools decorated with `@server.tool()`, return `{"error": msg}`, include
+  `-> dict` type hint
+
 ## Output Format
 
 For each issue:

@@ -52,6 +52,14 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
 Trust the author's stated design decisions about workflow defaults.
 Frame concerns as "consider whether..." not "this is wrong."
 
+## Plugin Manifest Validation
+
+For `.claude-plugin/plugin.json` MCP server entries:
+- Commands use `${CLAUDE_PLUGIN_ROOT}` variable (not hardcoded paths)
+- All referenced command paths exist and are executable
+- Server names don't conflict with existing tools or skills
+- MCP server names match corresponding `servers/*_server.py` files
+
 ## Output Format
 
 For each issue:
