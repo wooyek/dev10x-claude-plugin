@@ -25,6 +25,32 @@ Accepts one of:
 **Not for self-review** — use `/review` to review your own branch
 before creating a PR.
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns
+(Tier: Standard).
+
+**Auto-advance:** Complete each step and immediately start the next.
+Never pause between steps to ask "should I continue?".
+
+**Task tracking:** Create tasks for each major step at startup:
+
+```
+TaskCreate(subject="Fetch PR diff",
+    activeForm="Fetching PR context")
+TaskCreate(subject="Review changes",
+    activeForm="Reviewing changes")
+TaskCreate(subject="Post findings",
+    activeForm="Posting review")
+```
+
+Set sequential dependencies: review blocked by fetch, post blocked
+by review.
+
+No user decision gates — this skill runs fully automated once
+invoked. All review decisions (what to flag, severity) are made by
+applying `review-guidelines.md` and `review-checks-common.md`.
+
 ## Workflow
 
 ### Step 1: Parse PR Reference

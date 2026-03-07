@@ -19,6 +19,48 @@ or JIRA). It handles pushing the branch, creating the PR with
 appropriate title and body, adding checklist comments, and opening the
 PR in your browser.
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns
+(Tier: Standard).
+
+**Auto-advance:** Complete each step and immediately start the next.
+Never pause between steps to ask "should I continue?".
+
+**Task tracking:** Create tasks for each major step at startup:
+
+```
+TaskCreate(subject="Verify git state",
+    activeForm="Verifying git state")
+TaskCreate(subject="Generate PR body",
+    activeForm="Generating PR body")
+TaskCreate(subject="Run pre-PR checks",
+    activeForm="Running pre-PR checks")
+TaskCreate(subject="Push and create PR",
+    activeForm="Creating PR")
+```
+
+Set sequential dependencies: generate blocked by verify, checks
+blocked by generate, push blocked by checks.
+
+**Decision gate via AskUserQuestion** after generating the PR body:
+
+```
+AskUserQuestion(questions=[{
+    question: "Create PR with this title and body?",
+    header: "PR Preview",
+    options: [
+        {label: "Create PR (Recommended)",
+         description: "Push branch and create draft PR as shown"},
+        {label: "Edit title/body",
+         description: "I want to revise before creating"},
+        {label: "Abort",
+         description: "Cancel PR creation"}
+    ],
+    multiSelect: false
+}])
+```
+
 ## Scripts
 
 All multi-line commands live in `${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/`:

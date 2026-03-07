@@ -27,6 +27,83 @@ This skill creates properly formatted git commits following project conventions:
 - Bad: `Add customer_id column to invoices table` (implementation)
 - Good: `Link invoices to customer records` (outcome)
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns
+(Tier: Standard).
+
+**Auto-advance:** Complete each step and immediately start the next.
+Never pause between steps to ask "should I continue?".
+
+**Task tracking:** Create tasks for each major step at startup:
+
+```
+TaskCreate(subject="Gather commit context",
+    activeForm="Gathering context")
+TaskCreate(subject="Draft commit message",
+    activeForm="Drafting message")
+TaskCreate(subject="Review and approve",
+    activeForm="Reviewing message")
+TaskCreate(subject="Create commit",
+    activeForm="Creating commit")
+```
+
+Set sequential dependencies: draft blocked by gather, review blocked
+by draft, create blocked by review.
+
+**Decision gates via AskUserQuestion:**
+
+- **Staging approval** (when unstaged changes exist):
+  ```
+  AskUserQuestion(questions=[{
+      question: "Stage these changes for commit?",
+      header: "Staging",
+      options: [
+          {label: "Stage all (Recommended)",
+           description: "git add -A"},
+          {label: "Stage specific files",
+           description: "I'll specify which files to include"},
+          {label: "Abort",
+           description: "Cancel commit"}
+      ],
+      multiSelect: false
+  }])
+  ```
+
+- **Commit type selection** (gitmoji):
+  ```
+  AskUserQuestion(questions=[{
+      question: "What type of change is this?",
+      header: "Commit type",
+      options: [
+          {label: "Feature", description: "New functionality"},
+          {label: "Fix", description: "Bug fix"},
+          {label: "Refactor", description: "Code restructuring"},
+          {label: "Test", description: "Adding or updating tests"},
+          {label: "Docs", description: "Documentation changes"},
+          {label: "Other", description: "Choose a different gitmoji"}
+      ],
+      multiSelect: false
+  }])
+  ```
+
+- **Message preview approval**:
+  ```
+  AskUserQuestion(questions=[{
+      question: "Commit with this message?",
+      header: "Preview",
+      options: [
+          {label: "Commit (Recommended)",
+           description: "Create the commit as shown"},
+          {label: "Edit message",
+           description: "I want to change the message"},
+          {label: "Abort",
+           description: "Cancel commit"}
+      ],
+      multiSelect: false
+  }])
+  ```
+
 ## Prerequisites Check
 
 **IMPORTANT:** Verify git state before committing:

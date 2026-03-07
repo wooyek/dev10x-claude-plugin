@@ -22,6 +22,54 @@ This skill creates comprehensive technical scoping documents for Linear tickets.
 - Simple bug fixes with obvious solutions
 - Quick tasks under 1 story point
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns
+(Tier: Standard). It extends the base `scope` skill's orchestration
+with Linear-specific tasks.
+
+**Auto-advance:** Complete each phase and immediately start the next.
+Never pause between phases to ask "should I continue?".
+
+**Task tracking:** Create tasks for each scoping phase at startup:
+
+```
+TaskCreate(subject="Fetch Linear ticket context",
+    activeForm="Fetching ticket")
+TaskCreate(subject="Research technical context",
+    activeForm="Researching codebase")
+TaskCreate(subject="Design solution architecture",
+    activeForm="Designing solution")
+TaskCreate(subject="Estimate complexity and draft Job Story",
+    activeForm="Estimating complexity")
+TaskCreate(subject="Format and present scoping document",
+    activeForm="Formatting scope")
+TaskCreate(subject="Save and update Linear",
+    activeForm="Saving scope")
+```
+
+Set sequential dependencies: research blocked by fetch, design
+blocked by research, estimate blocked by design, format blocked by
+estimate, save blocked by format.
+
+**Decision gate via AskUserQuestion** after presenting the scope:
+
+```
+AskUserQuestion(questions=[{
+    question: "Approve this scoping document?",
+    header: "Scope Review",
+    options: [
+        {label: "Approve (Recommended)",
+         description: "Save document and optionally update Linear"},
+        {label: "Revise",
+         description: "I have corrections to the scope"},
+        {label: "More research needed",
+         description: "Need to explore additional areas"}
+    ],
+    multiSelect: false
+}])
+```
+
 ## Prerequisites
 
 **Required:**
