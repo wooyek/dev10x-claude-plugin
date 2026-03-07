@@ -88,8 +88,32 @@ alternative namespace when the skill bridges to an external skill family:
 Do NOT flag `invocation-name:` with a non-`dev10x:` prefix as a naming
 violation when `name:` already carries the correct `dev10x:` prefix.
 
+## Eval Criteria Files
+
+Eval criteria define measurable dimensions and test scenarios for skills.
+
+**Structure:** Place all evals in `skills/<feature-name>/evals/evals.json`
+- Directory name: plain feature name (no `dev10x-` prefix)
+- Filename: fixed as `evals.json` (not `dev10x-evals.json`)
+- Inside file: `skill_name` field MUST use `dev10x:` prefix
+
+**Schema:** See `references/eval-criteria.md` for full structure.
+
+**Example:**
+```json
+{
+  "skill_name": "dev10x:git-commit",
+  "eval_dimensions": [...],
+  "evals": [...]
+}
+```
+
+**Note:** Eval files are schema/documentation only, not code.
+They do not require executable permissions or script references.
+
 ## Rationale Summary
 
 - **Directory**: plain name → clean filesystem, no redundant prefix
 - **Invocation**: `dev10x:` prefix → namespace isolation at call time
 - **Families**: prefix groups for tab-completion discoverability
+- **Evals**: structured JSON placed in fixed directory with prefixed `skill_name`
