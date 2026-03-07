@@ -16,6 +16,18 @@ allowed-tools:
 
 **Announce:** "Using dev10x:park-remind to send a Slack reminder to yourself."
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Schedule Slack reminder",
+    activeForm="Scheduling reminder")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 Send a self-DM via Slack with a deferred item, formatted with session

@@ -12,6 +12,18 @@ allowed-tools:
 
 # PostgreSQL Query Execution
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Execute safe database query",
+    activeForm="Querying database")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 Safe read-only psql wrapper with two layers of protection:
 
 1. **PreToolUse hook** (`hooks/scripts/validate-sql.py`) — blocks

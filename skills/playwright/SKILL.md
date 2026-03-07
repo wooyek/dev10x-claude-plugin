@@ -12,6 +12,18 @@ allowed-tools:
 
 # dev10x:playwright
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Run Playwright script",
+    activeForm="Running Playwright")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 Wraps `uv run --with playwright python3` with:

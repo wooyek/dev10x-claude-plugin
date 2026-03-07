@@ -13,6 +13,18 @@ invocation-name: dev10x:park-todo
 **Announce:** "Using dev10x:park-todo to [add TODO/FIXME to code | update
 project TODO list]."
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Create deferred TODO",
+    activeForm="Creating TODO")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 Write deferred items to persistent storage where they will be

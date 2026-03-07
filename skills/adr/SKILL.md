@@ -7,6 +7,18 @@ invocation-name: dev10x:adr
 
 # ADR Create - Architecture Decision Record Skill
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Create Architecture Decision Record",
+    activeForm="Creating ADR")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 This skill creates Architecture Decision Records (ADRs) following

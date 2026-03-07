@@ -16,6 +16,18 @@ allowed-tools:
 
 # dev10x:jtbd — Pure Job Story Drafting
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Draft JTBD Job Story",
+    activeForm="Drafting Job Story")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 This is the **foundational JTBD skill** that provides reusable context

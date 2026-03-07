@@ -23,6 +23,18 @@ Provides hardened scripts for safe git push and non-interactive rebase.
 Add the `allowed-tools` entries to your project's `settings.local.json`
 to pre-approve the scripts without per-call prompts.
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Safe git push",
+    activeForm="Pushing safely")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Safe Push
 
 Always push via the wrapper script to prevent force-pushing to protected

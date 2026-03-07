@@ -11,6 +11,18 @@ invocation-name: dev10x:park-discover
 
 **Announce:** "Using dev10x:park-discover to check all deferral sources."
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Discover deferred items",
+    activeForm="Discovering items")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## When to Use
 
 Invoke this skill when the user asks about existing deferred items:

@@ -5,6 +5,18 @@ user-invocable: true
 invocation-name: dev10x:gh-pr-request-review
 ---
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Request PR review",
+    activeForm="Requesting review")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 Request reviews on GitHub pull requests from teams or individual users.
 
 ## Usage

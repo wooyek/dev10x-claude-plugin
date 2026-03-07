@@ -23,6 +23,18 @@ allowed-tools:
 
 # Write JTBD Story to Target
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Write JTBD Job Story",
+    activeForm="Writing Job Story")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 This skill drafts a JTBD Job Story using the `dev10x:jtbd` base skill and

@@ -11,6 +11,18 @@ invocation-name: dev10x:session-tasks
 
 **Announce:** "Using dev10x:session-tasks to [show/add/update] session tasks."
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Track session work items",
+    activeForm="Tracking items")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 Thin wrapper around Claude's `TaskCreate`/`TaskUpdate`/`TaskList` tools

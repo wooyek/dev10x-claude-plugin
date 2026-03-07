@@ -12,6 +12,18 @@ allowed-tools:
 Shell script wrappers for common `gh` operations. Pre-approved via
 `allowed-tools` so they run without permission prompts.
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Detect PR/issue context",
+    activeForm="Detecting context")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Critical Rule: Never derive BRANCH from local git
 
 **WRONG** — `git branch --show-current` returns the CURRENT WORKTREE's

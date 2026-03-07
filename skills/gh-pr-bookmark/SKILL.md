@@ -12,6 +12,18 @@ invocation-name: dev10x:gh-pr-bookmark
 
 **Announce:** "Using dev10x:gh-pr-bookmark to save session state to the PR."
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Post PR session bookmark",
+    activeForm="Bookmarking PR")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 Thin wrapper around `dev10x:park` that pre-selects the **PR session

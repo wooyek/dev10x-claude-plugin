@@ -7,6 +7,18 @@ invocation-name: dev10x:ticket-branch
 
 # Create Git Branch for Ticket
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Create ticket branch",
+    activeForm="Creating branch")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 This skill creates a properly named git branch following the project convention:

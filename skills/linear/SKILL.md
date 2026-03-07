@@ -16,6 +16,18 @@ allowed-tools:
 
 # dev10x:linear — Linear Issue Tracker
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Linear issue operation",
+    activeForm="Operating on Linear issue")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 Documentation-only skill centralizing Linear MCP tool references.
 No scripts — all operations use MCP tools directly.
 

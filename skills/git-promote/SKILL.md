@@ -11,6 +11,18 @@ invocation-name: dev10x:git-promote
 
 This skill automates the process of converting an existing git commit into a tracked ticket with proper tracking. It creates a ticket from the commit's changes, creates a properly named branch, cherry-picks the commit, and updates the commit message to reference the new ticket.
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Promote commits to tickets",
+    activeForm="Promoting commits")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Prerequisites Check
 
 **IMPORTANT:** This skill uses the `dev10x:ticket-create` skill which supports GitHub Issues, Linear, and JIRA.

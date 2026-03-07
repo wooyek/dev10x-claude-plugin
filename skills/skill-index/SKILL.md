@@ -13,6 +13,18 @@ allowed-tools:
   - Read(~/.claude/.skills-menu.txt)
 ---
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Generate skill index",
+    activeForm="Generating index")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Instructions
 
 Regenerate both skill index files by running the generator script:

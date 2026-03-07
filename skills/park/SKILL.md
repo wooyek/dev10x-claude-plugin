@@ -12,6 +12,18 @@ invocation-name: dev10x:park
 
 **Announce:** "Using dev10x:park to save this item for later."
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Defer work item",
+    activeForm="Deferring item")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 Route a single deferred item to the right discovery context. Can be

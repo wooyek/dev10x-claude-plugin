@@ -13,6 +13,18 @@ allowed-tools:
 
 **Announce:** "Using dev10x:slack to send a Slack notification."
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Send Slack notification",
+    activeForm="Sending notification")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 Post messages, upload files, reply in threads, update or delete

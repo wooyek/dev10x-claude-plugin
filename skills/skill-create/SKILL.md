@@ -12,6 +12,18 @@ invocation-name: dev10x:skill-create
 
 # dev10x Skill Create
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Create or improve skill",
+    activeForm="Working on skill")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 **Announce:** "Using dev10x:skill-create to [create/improve] the `<name>` skill."
 
 **Foundation:** Read `superpowers:writing-skills` first for TDD methodology,

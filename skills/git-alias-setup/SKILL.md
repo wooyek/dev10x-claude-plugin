@@ -17,6 +17,18 @@ Without these aliases, commands like `git log $(git merge-base develop HEAD)..HE
 trigger extra permission prompts because the `$()` substitution shifts
 the Bash command prefix.
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Configure git aliases",
+    activeForm="Configuring aliases")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Usage
 
 Run the setup script:

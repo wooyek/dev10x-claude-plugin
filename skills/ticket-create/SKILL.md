@@ -15,6 +15,18 @@ allowed-tools:
 
 This skill creates a well-structured ticket in GitHub Issues, Linear, or JIRA with proper formatting, comprehensive description, and appropriate labels. It ensures consistent ticket quality across all creation contexts.
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Create issue tracker ticket",
+    activeForm="Creating ticket")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Prerequisites Check
 
 Determine which tracker to use. Priority:

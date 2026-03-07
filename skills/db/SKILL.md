@@ -9,6 +9,18 @@ user-invocable: false
 
 # Database Query Planning
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Plan database query",
+    activeForm="Planning query")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 Schema-first query construction for safe, accurate database queries.
 
 ## Query Planning Workflow

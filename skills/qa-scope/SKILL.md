@@ -7,6 +7,18 @@ invocation-name: dev10x:qa-scope
 
 # QA Scope - PR Quality Assurance Assessment
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Analyze PR for QA needs",
+    activeForm="Analyzing QA scope")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 Analyzes a PR for QA needs by assessing regression risk, checking existing e2e

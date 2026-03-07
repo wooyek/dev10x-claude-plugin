@@ -7,6 +7,18 @@ invocation-name: dev10x:git-fixup
 
 # Create Fixup Commit
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+Create a task at invocation, mark completed when done:
+
+```
+TaskCreate(subject="Create fixup commit",
+    activeForm="Creating fixup")
+# ... do work ...
+TaskUpdate(taskId, status="completed")
+```
+
 ## Overview
 
 This skill creates properly scoped `fixup!` commits. Two modes:
