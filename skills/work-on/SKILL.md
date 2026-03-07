@@ -10,6 +10,7 @@ invocation-name: dev10x:work-on
 allowed-tools:
   - Bash(~/.claude/skills/gh/scripts/*:*)
   - Bash(~/.claude/skills/jira/scripts/*:*)
+  - Write(~/.claude/projects/**/**)
 ---
 
 # dev10x:work-on — Adaptive Work Orchestrator
@@ -30,6 +31,25 @@ the plan, and can pause at any point with `dev10x:wrap-up`.
 **Rule: ALWAYS use `TaskCreate`** — even for single-task work.
 The visible task list is the supervisor's interface for adding
 new tasks mid-session. Skipping it removes that capability.
+
+**Phase-level tasks upfront:** At session start, create exactly
+4 top-level tasks — one per phase:
+
+```
+TaskCreate(subject="Phase 1: Parse & Classify inputs",
+    activeForm="Classifying inputs")
+TaskCreate(subject="Phase 2: Gather context",
+    activeForm="Gathering context")
+TaskCreate(subject="Phase 3: Build work plan",
+    activeForm="Building plan")
+TaskCreate(subject="Phase 4: Execute plan",
+    activeForm="Executing")
+```
+
+Set sequential dependencies (each phase blocked by the previous).
+During each phase, create subtasks for the concrete work items
+discovered — e.g., Phase 2 creates one subtask per source being
+fetched, Phase 4 creates subtasks per plan step.
 
 ## Prerequisites
 
@@ -81,6 +101,49 @@ Parse `TRACKER`, `TICKET_NUMBER`, and `FIXES_URL` from output.
 Each classified input becomes a **source** entry with its type and
 extracted identifiers. Collect all sources into a list for Phase 2.
 
+### Early Workspace Decision
+
+After classification, determine whether a branch is needed and
+what workspace state we're in. This decision happens early because
+it affects Phase 3 planning.
+
+**Decision matrix:**
+
+| Work type | Branch required? | Why |
+|-----------|-----------------|-----|
+| Ticket (feature/bugfix) | Yes | PR is the goal |
+| PR continuation | No | Branch already exists |
+| Local-only (free text) | Deferred | Decided in Phase 4 |
+| Investigation only | No | No code changes expected |
+
+**Detect current workspace state:**
+
+```bash
+# Is CWD a worktree?
+if [ -f .git ]; then
+  WORKSPACE="worktree"
+  WT_BRANCH=$(git symbolic-ref --short HEAD)
+else
+  WORKSPACE="main-repo"
+fi
+```
+
+**Worktree branch check:** If the CWD is a worktree and the
+current branch is a generic worktree branch (e.g., `wt/<name>`
+or matches the worktree directory name but has no ticket ID),
+flag it for replacement. A work-specific branch must be created
+before any commits:
+
+| Workspace state | Branch pattern | Action |
+|----------------|---------------|--------|
+| Main repo, on develop | Any ticket | Create branch (Phase 4.1) |
+| Main repo, on feature branch | Matching ticket | Reuse branch |
+| Worktree, generic WT branch | Any ticket | Create work-specific branch (Phase 4.1) |
+| Worktree, matching feature branch | Same ticket | Reuse branch |
+
+Store the workspace decision in the Phase 1 output so Phase 3
+can include or skip the workspace setup subtask.
+
 ---
 
 ## Phase 2: Gather (Quick & Parallel via Subagents)
@@ -91,6 +154,24 @@ a structured summary — keeping the main session lean.
 
 See `references/task-orchestration.md` Pattern 4 (Subagent
 Dispatch) for the full pattern.
+
+### Subtask Creation
+
+Before dispatching, create one subtask per source under the
+Phase 2 parent task:
+
+```
+TaskCreate(subject="Fetch linear-ticket DEV-42",
+    parentTaskId=phase2TaskId)
+TaskCreate(subject="Fetch sentry-issue #5201839452",
+    parentTaskId=phase2TaskId)
+TaskCreate(subject="Fetch slack-thread #channel",
+    parentTaskId=phase2TaskId)
+```
+
+Mark each subtask `completed` as its subagent returns.
+After cross-reference expansion, create additional subtasks
+for newly discovered sources.
 
 ### Subagent Dispatch
 
@@ -184,8 +265,10 @@ template.
 Examine the gathered context and construct a task list. Use these
 heuristics to decide which tasks to include:
 
-**Always include (if a ticket was found):**
-- Set up workspace (branch or worktree) — detailed
+**Always include (if a ticket was found and branch is needed per
+Phase 1 workspace decision):**
+- Set up workspace (branch or worktree) — detailed. Skip if
+  Phase 1 detected a matching feature branch already exists.
 - Draft Job Story — detailed
 
 **Include based on context:**
@@ -200,8 +283,13 @@ heuristics to decide which tasks to include:
 
 **Always include at the end:**
 - Create PR & ensure CI passes — epic
-- Self-review & request human review — epic
-- Verify acceptance criteria — detailed (see below)
+- Apply fixups to review comments — epic
+- Groom commit history — detailed
+- Request review — detailed
+- Verify acceptance criteria met — detailed (see below)
+
+These plan steps become subtasks of the Phase 4 top-level task.
+The last subtask is always acceptance criteria verification.
 
 ### Acceptance Criteria Verification
 
@@ -228,11 +316,20 @@ or ready for handover. Read the acceptance criteria YAML file:
 # acceptance-criteria.yaml
 defaults:
   feature:
-    criteria: "PR approved, CI passes, ready to merge"
+    criteria: >
+      PR passing CI with automatic fixups applied to review
+      comments, groomed commit history, and review request
+      published
   bugfix:
-    criteria: "PR approved, CI passes, regression covered"
+    criteria: >
+      PR passing CI with automatic fixups applied to review
+      comments, regression test covering the fix, groomed
+      commit history, and review request published
   pr-continuation:
-    criteria: "Re-review requested, CI green"
+    criteria: >
+      PR passing CI with fixups applied to all unaddressed
+      review comments, groomed commit history, and re-review
+      requested
   local-only:
     criteria: "Changes verified locally"
   investigation:
@@ -275,47 +372,56 @@ time"). Update the YAML file accordingly:
 
 ### Example Plans
 
-**Feature from ticket:**
+**Feature from ticket** (subtasks of Phase 4):
 ```
-1. [detailed] Set up workspace (branch, worktree)
-2. [detailed] Draft Job Story
-3. [epic]     Design implementation approach
-4. [epic]     Implement changes
-5. [epic]     Verify (tests, lint)
-6. [epic]     Create PR & ensure CI passes
-7. [epic]     Self-review & request human review
-8. [detailed] Verify acceptance criteria met
+4.1  [detailed] Set up workspace (branch, worktree)
+4.2  [detailed] Draft Job Story
+4.3  [epic]     Design implementation approach
+4.4  [epic]     Implement changes
+4.5  [epic]     Verify (tests, lint)
+4.6  [epic]     Create PR & ensure CI passes
+4.7  [epic]     Apply fixups to review comments
+4.8  [detailed] Groom commit history
+4.9  [detailed] Request review
+4.10 [detailed] Verify acceptance criteria met
 ```
 
 **Bug fix from Sentry + ticket:**
 ```
-1. [detailed] Set up workspace
-2. [detailed] Reproduce the issue locally
-3. [epic]     Investigate root cause
-4. [epic]     Implement fix
-5. [epic]     Verify fix (tests, regression)
-6. [epic]     Create PR & ensure CI passes
-7. [epic]     Self-review & request human review
-8. [detailed] Verify acceptance criteria met
+4.1  [detailed] Set up workspace
+4.2  [detailed] Reproduce the issue locally
+4.3  [epic]     Investigate root cause
+4.4  [epic]     Implement fix
+4.5  [epic]     Verify fix (tests, regression)
+4.6  [epic]     Create PR & ensure CI passes
+4.7  [epic]     Apply fixups to review comments
+4.8  [detailed] Groom commit history
+4.9  [detailed] Request review
+4.10 [detailed] Verify acceptance criteria met
 ```
 
 **PR continuation:**
 ```
-1. [detailed] Fetch PR and review context
-2. [epic]     Address review comments
-3. [epic]     Verify changes pass CI
-4. [epic]     Self-review & request human review
-5. [detailed] Verify acceptance criteria met
+4.1  [detailed] Fetch PR and review context
+4.2  [epic]     Address review comments
+4.3  [epic]     Apply fixups to unaddressed comments
+4.4  [epic]     Verify changes pass CI
+4.5  [detailed] Groom commit history
+4.6  [detailed] Request re-review
+4.7  [detailed] Verify acceptance criteria met
 ```
 
 **Local-only work (no ticket, no PR):**
 ```
-1. [detailed] Summarize the work from gathered context
-2. [epic]     Implement changes
-3. [epic]     Verify
-4. [detailed] Decide: create ticket, create PR, or done
-5. [epic]     Self-review & request human review (if PR created)
-6. [detailed] Verify acceptance criteria met
+4.1  [detailed] Summarize the work from gathered context
+4.2  [epic]     Implement changes
+4.3  [epic]     Verify
+4.4  [detailed] Decide: create ticket, create PR, or done
+4.5  [epic]     Create PR & ensure CI passes (if decided)
+4.6  [epic]     Apply fixups to review comments (if PR)
+4.7  [detailed] Groom commit history (if PR)
+4.8  [detailed] Request review (if PR)
+4.9  [detailed] Verify acceptance criteria met
 ```
 
 ### Supervisor Approval Gate
@@ -387,6 +493,9 @@ Run the task directly. Common detailed tasks delegate to skills:
 | Fetch PR context | `gh pr view` + `gh pr diff` |
 | Create PR | `dev10x:gh-pr-create` skill |
 | Monitor CI | `dev10x:gh-pr-monitor` skill |
+| Apply fixups to review | `dev10x:gh-pr-respond` skill |
+| Groom commit history | `dev10x:git-groom` skill |
+| Request review | `dev10x:gh-pr-request-review` skill |
 
 After completing a detailed task, mark it `completed` via
 `TaskUpdate` and move to the next task.
@@ -433,16 +542,30 @@ Run them in parallel?
 
 ### Skill Delegation During Execution
 
-**Workspace setup:**
-- If in main repo (`.git` is directory): offer "Work here" or
-  "New worktree" via `AskUserQuestion`
-- If in worktree (`.git` is file): offer "Work here" or
-  "New worktree"
-- For worktree path: compute branch name, invoke `dev10x:git-worktree`
-  skill. Do NOT invoke `dev10x:ticket-branch` first — `dev10x:git-worktree`
-  creates the branch internally; calling `dev10x:ticket-branch` first
-  creates a duplicate branch in the main repo.
-- For work-here path: delegate to `dev10x:ticket-branch` skill
+**Workspace setup** (uses the decision from Phase 1):
+
+| State | Action |
+|-------|--------|
+| Main repo, user wants worktree | Invoke `dev10x:git-worktree` (creates branch internally — do NOT call `dev10x:ticket-branch` first) |
+| Main repo, work here | Invoke `dev10x:ticket-branch` to create feature branch |
+| Worktree, generic WT branch | Invoke `dev10x:ticket-branch` to create work-specific branch from within the worktree |
+| Worktree, matching feature branch | No action needed — branch already exists |
+
+If the Phase 1 workspace decision was deferred (local-only
+work), ask at the start of Phase 4:
+```
+AskUserQuestion(questions=[{
+    question: "Where should we work?",
+    header: "Workspace",
+    options: [
+        {label: "Work here (Recommended)",
+         description: "Use current directory and branch"},
+        {label: "New worktree",
+         description: "Create an isolated worktree"}
+    ],
+    multiSelect: false
+}])
+```
 
 **Job Story drafting:**
 - MUST invoke `Skill(dev10x:jtbd)` explicitly — never draft inline
@@ -517,22 +640,24 @@ branch naming, Sentry integration patterns.
 **Phase 2:** Fetch issue. Body mentions Sentry URL → fetch Sentry
 issue. Body mentions PR #42 → fetch PR. Produce context summary.
 
-**Phase 3:** Build plan:
+**Phase 3:** Build plan (subtasks of Phase 4):
 ```
-1. [detailed] Set up workspace
-2. [detailed] Draft Job Story
-3. [epic]     Design implementation approach
-4. [epic]     Implement changes
-5. [epic]     Verify
-6. [epic]     Create PR & ensure CI passes
-7. [epic]     Self-review & request human review
-8. [detailed] Verify acceptance criteria met
+4.1  [detailed] Set up workspace
+4.2  [detailed] Draft Job Story
+4.3  [epic]     Design implementation approach
+4.4  [epic]     Implement changes
+4.5  [epic]     Verify
+4.6  [epic]     Create PR & ensure CI passes
+4.7  [epic]     Apply fixups to review comments
+4.8  [detailed] Groom commit history
+4.9  [detailed] Request review
+4.10 [detailed] Verify acceptance criteria met
 ```
 Supervisor approves.
 
-**Phase 4:** Auto-advance through tasks 1-8, expanding epics
-as reached. No pauses between tasks unless a genuine decision
-is needed.
+**Phase 4:** Auto-advance through subtasks 4.1-4.10, expanding
+epics as reached. No pauses between tasks unless a genuine
+decision is needed.
 
 ### Example 2: Multiple Inputs
 
@@ -550,15 +675,17 @@ sources.
 **Phase 3:** Build plan (adapted — Sentry issue means
 "Reproduce" task added):
 ```
-1. [detailed] Set up workspace
-2. [detailed] Reproduce the Sentry error locally
-3. [detailed] Draft Job Story
-4. [epic]     Investigate root cause
-5. [epic]     Implement fix
-6. [epic]     Verify fix
-7. [epic]     Create PR & ensure CI passes
-8. [epic]     Self-review & request human review
-9. [detailed] Verify acceptance criteria met
+4.1  [detailed] Set up workspace
+4.2  [detailed] Reproduce the Sentry error locally
+4.3  [detailed] Draft Job Story
+4.4  [epic]     Investigate root cause
+4.5  [epic]     Implement fix
+4.6  [epic]     Verify fix
+4.7  [epic]     Create PR & ensure CI passes
+4.8  [epic]     Apply fixups to review comments
+4.9  [detailed] Groom commit history
+4.10 [detailed] Request review
+4.11 [detailed] Verify acceptance criteria met
 ```
 
 ### Example 3: PR Continuation
@@ -572,11 +699,13 @@ PR has 3 review comments → note them.
 
 **Phase 3:** Build plan:
 ```
-1. [detailed] Fetch review comments and understand feedback
-2. [epic]     Address review comments
-3. [epic]     Verify CI passes
-4. [epic]     Self-review & request human review
-5. [detailed] Verify acceptance criteria met
+4.1  [detailed] Fetch review comments and understand feedback
+4.2  [epic]     Address review comments
+4.3  [epic]     Apply fixups to unaddressed comments
+4.4  [epic]     Verify CI passes
+4.5  [detailed] Groom commit history
+4.6  [detailed] Request re-review
+4.7  [detailed] Verify acceptance criteria met
 ```
 
 ### Example 4: Mid-Workflow Pause
