@@ -454,7 +454,11 @@ git add file1 file2 file3
    ```
    Store the returned path (e.g., `/tmp/claude/git/commit-msg.7f3a9b2c1d4e.txt`).
 
-2. Write the commit message to that file using the Write tool:
+2. **Read the empty file first** — the Write tool requires a prior Read
+   on the same path. Call `Read(<unique-path>)` before writing. The file
+   will be empty (mktmp creates it); this is expected.
+
+3. Write the commit message to that file using the Write tool:
    ```
    Write <unique-path>:
    <gitmoji> <TICKET-ID> <description>
@@ -469,7 +473,7 @@ git add file1 file2 file3
    Fixes: <TICKET-ID>
    ```
 
-3. Create the commit from the file:
+4. Create the commit from the file:
    ```bash
    git commit -F <unique-path>
    ```
