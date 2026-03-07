@@ -20,6 +20,42 @@ notification. The user continues working while the agent handles everything.
 - After creating a draft PR with `/dev10x:gh-pr-create`
 - When you want to automate the PR review cycle without blocking your session
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+
+**Auto-advance:** Complete each phase, immediately start the next.
+Never pause to ask "should I continue?" between phases.
+
+**Task tracking:** Create tasks for each monitoring phase so the
+supervisor can track progress. The background agent creates these
+tasks after launch:
+
+```
+TaskCreate(subject="Detect PR context and launch agent",
+    activeForm="Detecting PR context")
+TaskCreate(subject="Check JTBD Job Story (Phase 0)",
+    activeForm="Checking Job Story")
+TaskCreate(subject="Monitor CI checks (Phase 1)",
+    activeForm="Monitoring CI")
+TaskCreate(subject="Address review comments (Phase 2)",
+    activeForm="Addressing comments")
+TaskCreate(subject="Assess QA scope (Phase 2.5)",
+    activeForm="Assessing QA scope")
+TaskCreate(subject="Notify re-review (Phase 2.7)",
+    activeForm="Notifying re-review")
+TaskCreate(subject="Send review notification (Phase 3)",
+    activeForm="Sending notification")
+```
+
+Set dependencies: each phase blocked by its predecessor. Phases
+2.5 and 2.7 are conditional — skip via TaskUpdate status="deleted"
+when their trigger conditions are not met.
+
+**Background agents:** This skill already uses a background Task
+agent. Task tracking wraps the agent phases so the supervisor
+sees progress without reading the agent output file.
+
 ## Execution Model
 
 ```

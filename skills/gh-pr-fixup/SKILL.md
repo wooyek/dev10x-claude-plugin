@@ -26,6 +26,30 @@ already been validated as needing a code change. It:
 - Called by `dev10x:gh-pr-respond` after `dev10x:gh-pr-triage` returns `VALID`
 - Standalone when you already know a comment needs a fix
 
+## Orchestration
+
+This skill follows `references/task-orchestration.md` patterns.
+
+**Auto-advance:** Complete each step, immediately start the next.
+Never pause to ask "should I continue?" between steps.
+
+**Task tracking:** Create tasks for each step so the supervisor
+can track progress:
+
+```
+TaskCreate(subject="Validate review comment",
+    activeForm="Validating comment")
+TaskCreate(subject="Implement fix",
+    activeForm="Implementing fix")
+TaskCreate(subject="Create fixup commit",
+    activeForm="Creating fixup commit")
+TaskCreate(subject="Push and reply",
+    activeForm="Pushing and replying")
+```
+
+Set dependencies: implement blocked by validate, commit blocked
+by implement, push blocked by commit.
+
 ## Input Requirements
 
 1. **PR URL or Comment URL** — Full GitHub URL to the PR comment
