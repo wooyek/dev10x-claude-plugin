@@ -22,6 +22,11 @@ Files matching: `.claude/rules/**/*.md`, `.claude/agents/**/*.md`,
    - CLAUDE.md ≤ 100 lines
 2. **Split detection** — flag files approaching limits (>80%)
    with a suggested seam for future splitting
+2.5. **Override detection** — when a file exceeds budget:
+   - Flag with [OVERRIDE DETECTED]
+   - Verify the author has provided explicit justification in PR comments or CLAUDE.md
+   - Confirm a split plan exists (or is conditional per Budget Overrides section in .claude/rules/README.md)
+   - If absent, request justification before approval
 3. **Table consistency** — verify README.md Rules/Agents tables
    and CLAUDE.md Code Review table match actual files on disk
 4. **Pruning hygiene** — new entries should contain trade-off

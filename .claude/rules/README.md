@@ -28,14 +28,14 @@ The code review system uses a **multi-agent architecture**:
 
 ## Reference Documents (`references/`)
 
-| File | Topic | Loaded by |
-|------|-------|-----------|
-| `git-commits.md` | Commit format, gitmoji, atomic commits | `dev10x:git-commit` skill, PR hygiene CI |
-| `git-pr.md` | PR format, grooming, review feedback | `dev10x:gh-pr-create` skill, PR hygiene CI |
-| `git-jtbd.md` | Job Story format, principles, examples | `dev10x:jtbd` skill, PR hygiene CI |
-| `review-guidelines.md` | Review workflow, threads, summaries | `dev10x:gh-pr-review` skill, code review CI |
-| `review-checks-common.md` | False positives, verification | Review agent specs, code review CI |
-| `task-orchestration.md` | Auto-advance, batched decisions, TaskCreate | All skills (via `## Orchestration` section) |
+| File | Topic | Loaded by | Scope |
+|------|-------|-----------|-------|
+| `git-commits.md` | Commit format, gitmoji, atomic commits | `dev10x:git-commit` skill, PR hygiene CI | Mandatory for all commits |
+| `git-pr.md` | PR format, grooming, review feedback | `dev10x:gh-pr-create` skill, PR hygiene CI | Mandatory for all PRs |
+| `git-jtbd.md` | Job Story format, principles, examples | `dev10x:jtbd` skill, PR hygiene CI | Mandatory for JTBD decisions |
+| `review-guidelines.md` | Review workflow, threads, summaries | `dev10x:gh-pr-review` skill, code review CI | Mandatory for PR reviews |
+| `review-checks-common.md` | False positives, verification | Review agent specs, code review CI | Mandatory for code review agents |
+| `task-orchestration.md` | Orchestration patterns, auto-advance, batched decisions | All skills (via `## Orchestration` section) | Referenced, not auto-loaded |
 
 ## Agent Specs (`.claude/agents/`)
 
@@ -69,3 +69,19 @@ checklists, and need full phase logic and examples.
 | `CLAUDE.md` | 100 |
 
 When a file reaches 80% of its budget, plan a split.
+
+## Budget Overrides
+
+File size budgets (200 lines for reference docs, 50 for agent specs, 100 for CLAUDE.md) are guidelines to prevent sprawl. Exceptions are permitted when:
+
+1. **Content is semantically cohesive** — splitting would obscure relationships between concepts
+2. **All consumers link to a single file** — multi-file splits would increase maintenance burden
+3. **Author justification is explicit** — the rationale for keeping the file together is documented in the PR
+4. **A split plan is conditional** — if maintenance becomes problematic, the team commits to splitting by [topic/pattern group]
+
+Example: `references/task-orchestration.md` (353 lines) exceeds the 200-line budget because the 7 orchestration patterns form a unified framework that skills reference atomically. Splitting would force 43+ skills to track multiple files.
+
+Reviewers must flag overrides with `[OVERRIDE DETECTED]` comments and verify:
+- Cohesion justification is clear
+- A conditional split plan exists (e.g., "if file exceeds 400 lines, extract patterns 5-7")
+- The author acknowledges the override explicitly
