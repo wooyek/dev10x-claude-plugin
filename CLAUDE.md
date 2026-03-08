@@ -54,6 +54,17 @@ MCP migration: shell scripts → MCP tools. See `.claude/rules/mcp-tools.md`.
 - **Decision Gates**: Skills with blocking user choice points MUST use
   `AskUserQuestion` tool calls (not plain text). See `.claude/rules/skill-gates.md`
 
+## Allowed-Tools Declaration
+
+`allowed-tools:` declares only MCP tools, Bash script paths, and Write operations:
+
+- MCP tools: `mcp__plugin_Dev10x_<server>__<function>`
+- Bash scripts: `Bash(${CLAUDE_PLUGIN_ROOT}/path/to/script:*)`
+- File operations: `Write(/path/to/file)`
+
+Do NOT declare: `AskUserQuestion`, `TaskCreate`, `TaskUpdate`, `Skill()`,
+`Read`, `Glob`, `Grep`, `Edit`. These built-in tools are implicitly available.
+
 ## Git Conventions
 
 - **Default branch**: `develop` (PR target)

@@ -44,11 +44,16 @@ Files matching: `skills/**`
    For external binaries (yq, jq, gh, etc.) the preferred resolution
    pattern is: `TOOL="${TOOL:-$(command -v tool 2>/dev/null || echo "/fallback/path/tool")}"`.
    Flag bare absolute paths without this pattern.
-8. **`allowed-tools` coverage** — if SKILL.md calls external scripts,
-   front matter must declare matching `Bash(...)` entries (missing entries
-   cause per-invocation approval prompts). Plugin-distributed scripts must
-   use relative paths; `~/.claude/tools/` or `~/.claude/skills/` paths
-   are accepted for user-tool delegation, not portability violations.
+8. **`allowed-tools` coverage** — if SKILL.md calls:
+   - **External scripts or MCP tools**: front matter must declare matching
+     `Bash(...)` or MCP tool entries (missing causes per-invocation approval
+     prompts)
+   - **Built-in Claude Code tools** (`AskUserQuestion`, `TaskCreate`, etc.):
+     no declaration needed (they are implicitly available)
+
+   Plugin-distributed scripts must use relative paths; `~/.claude/tools/` or
+   `~/.claude/skills/` paths are accepted for user-tool delegation. See
+   CLAUDE.md "Allowed-Tools Declaration" section for complete reference.
 8b. **`allowed-tools` sync** — when a PR adds `mktmp.sh <ns> ...` calls,
     verify BOTH entries are present: `Bash(/tmp/claude/bin/mktmp.sh:*)`
     (covers the mktmp call) AND `Write(/tmp/claude/<ns>/**)` (covers writing
@@ -156,11 +161,14 @@ Files matching: `skills/**`
     after user edits without `--force`.
 19. **Decision gates enforcement** — when a PR adds/modifies a skill's
     documented blocking decision point (marked `REQUIRED: AskUserQuestion`),
-    verify: (a) enforcement marker is present in SKILL.md, (b) **`AskUserQuestion`
-    is declared in front matter `allowed-tools`**, (c) evals.json includes
-    assertions to detect plain-text substitution, (d) evals include signals
-    like `gate*-uses-tool` and `gate*-no-plain-text`. Missing the tool
-    declaration causes per-invocation approval prompts.
+    verify: (a) enforcement marker is present in SKILL.md, (b) evals.json
+    includes assertions to detect plain-text substitution, (c) evals include
+    signals like `gate*-uses-tool` and `gate*-no-plain-text`.
+
+    Note: `AskUserQuestion`, `TaskCreate`, `TaskUpdate`, and `Skill()` are
+    built-in Claude Code tools and do not require `allowed-tools` declarations.
+    Only MCP tools and Bash script paths (in `allowed-tools:`) need declarations.
+    Missing MCP tool declarations causes per-invocation approval prompts.
 
 ## Output Format
 

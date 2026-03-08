@@ -50,3 +50,18 @@ Determine which pattern applies:
 3. Check if SKILL.md references external binaries or `~/.claude/tools/` only
    - Yes + no `scripts/` → Orchestration-based; Items 4, 5 do NOT apply
    - No → Ambiguous; flag as INFO for author clarification
+
+## Evals for Skills with Decision Gates
+
+Skills with decision gates (marked `REQUIRED: Call AskUserQuestion` in SKILL.md)
+must include `evals/evals.json`:
+
+- **Field names** must match `references/eval-schema.md`: `setup`, `checks`,
+  `type`, `assertion`, `signal` (not `check`, `assertions`, or other variations)
+- **Gate coverage**: Count gates in SKILL.md and verify evals include assertions
+  for ALL gates, including branch-conditional gates (create separate scenarios
+  if needed)
+- **Schema example**: Point to a well-formed evals file in an existing skill
+  when asking authors; naming is non-obvious
+
+Refer to `references/eval-schema.md` for complete format and examples.

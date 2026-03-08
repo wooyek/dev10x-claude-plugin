@@ -117,6 +117,20 @@ Use negative signals (`✗`) to detect regressions like:
 }
 ```
 
+## Decision Gate Coverage
+
+When a skill has N documented decision gates (marked `REQUIRED: Call AskUserQuestion`):
+
+1. Count the gates in SKILL.md (search for "REQUIRED: Call AskUserQuestion")
+2. Verify evals.json includes assertions for ALL N gates
+3. If a gate is branch-conditional (e.g., gate 1 only on free-text input),
+   create a separate eval scenario that triggers that branch
+
+Example: skill with 3 gates
+- Scenario A: Triggers gates 2, 3 (via ticket reference input)
+- Scenario B: Triggers gates 1, 2, 3 (via free-text input)
+- Result: All 3 gates have explicit assertions
+
 ## Size Guidelines
 
 - Minimum: 2 test scenarios for skills with 2+ decision gates
