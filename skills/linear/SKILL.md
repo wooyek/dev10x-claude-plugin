@@ -12,6 +12,12 @@ allowed-tools:
   - mcp__claude_ai_Linear__get_issue_status
   - mcp__claude_ai_Linear__list_issue_labels
   - mcp__claude_ai_Linear__create_issue_label
+  - mcp__claude_ai_Linear__save_project
+  - mcp__claude_ai_Linear__get_project
+  - mcp__claude_ai_Linear__list_projects
+  - mcp__claude_ai_Linear__save_milestone
+  - mcp__claude_ai_Linear__get_milestone
+  - mcp__claude_ai_Linear__list_milestones
 ---
 
 # dev10x:linear — Linear Issue Tracker
@@ -44,6 +50,12 @@ No scripts — all operations use MCP tools directly.
 | Get status | `mcp__claude_ai_Linear__get_issue_status` | `id: "STATUS_UUID"` |
 | List labels | `mcp__claude_ai_Linear__list_issue_labels` | `team: "your-team-uuid"` |
 | Create label | `mcp__claude_ai_Linear__create_issue_label` | `team: "your-team-uuid", name: "label"` |
+| Create/update project | `mcp__claude_ai_Linear__save_project` | `name: "Project", teamIds: ["UUID"]` |
+| Get project | `mcp__claude_ai_Linear__get_project` | `id: "PROJECT_UUID"` |
+| List projects | `mcp__claude_ai_Linear__list_projects` | `team: "TEAM_UUID"` |
+| Create/update milestone | `mcp__claude_ai_Linear__save_milestone` | `name: "Phase 1", projectId: "UUID"` |
+| Get milestone | `mcp__claude_ai_Linear__get_milestone` | `id: "MILESTONE_UUID"` |
+| List milestones | `mcp__claude_ai_Linear__list_milestones` | `projectId: "UUID"` |
 
 ## Team IDs
 
