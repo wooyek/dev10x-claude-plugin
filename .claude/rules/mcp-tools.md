@@ -37,6 +37,10 @@ async def function_name(param: str, optional: str | None = None) -> dict:
     return {"success": True, "data": result}
 ```
 
+**Note:** Existing tools use tool-specific success responses (e.g.,
+`{"path": ...}`, `{"raw_output": ...}`). New tools should follow
+the standard pattern above. Existing tools will be migrated over time.
+
 ## Skill Usage
 
 In SKILL.md, declare MCP tool access via `allowed-tools:`:
