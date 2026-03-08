@@ -3,6 +3,11 @@ name: dev10x:gh-pr-request-review
 description: Request review on a GitHub PR from teams or users
 user-invocable: true
 invocation-name: dev10x:gh-pr-request-review
+allowed-tools:
+  - Bash(~/.claude/tools/gh-request-review.py:*)
+  - Bash(gh repo view:*)
+  - Bash(yq:*)
+  - AskUserQuestion
 ---
 
 ## Orchestration
