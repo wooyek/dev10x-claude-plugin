@@ -72,6 +72,21 @@ When porting skills to external platforms (e.g., Codex format):
 - **Documentation**: Include example showing skill's original and ported forms
 - **Commit**: One commit per stable skill or batch of related skills
 
+## Skill Authoring: Formatting as Semantic Signal
+
+Markdown formatting affects agent interpretation of orchestration
+directives:
+
+- **Numbered lists** — `TaskCreate` calls in numbered lists are read
+  as mandatory instructions to execute at skill startup
+- **Code blocks** — the same calls in fenced code blocks (```) are
+  read as illustrative examples, not executable
+- **Enforcement language** — prefix numbered lists with `REQUIRED:`,
+  `MANDATORY:`, or `DO NOT SKIP` to clarify intent
+
+See `.claude/rules/skill-orchestration-format.md` for detailed patterns
+and examples. Review checklist item 14a enforces this pattern.
+
 ## Code Review
 
 Multi-agent architecture with domain-routed reviewers:
