@@ -289,21 +289,9 @@ time"). Update the YAML file accordingly:
 
 Present the plan as a numbered list.
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text):
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
 
-```
-AskUserQuestion(questions=[{
-    question: "How would you like to proceed with the work plan?",
-    header: "Plan",
-    options: [
-        {label: "Approve (Recommended)",
-         description: "Start execution immediately"},
-        {label: "Edit",
-         description: "Describe what to change (add/remove/reorder steps)"}
-    ],
-    multiSelect: false
-}])
-```
+1. `AskUserQuestion(questions=[{question: "How would you like to proceed with the work plan?", header: "Plan", options: [{label: "Approve (Recommended)", description: "Start execution immediately"}, {label: "Edit", description: "Describe what to change (add/remove/reorder steps)"}], multiSelect: false}])`
 
 After approval, set task dependencies where appropriate (use
 `TaskUpdate` with `addBlockedBy`). Mark the first task as
