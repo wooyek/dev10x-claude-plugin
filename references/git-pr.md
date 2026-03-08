@@ -91,6 +91,30 @@ The body should be **compact** to avoid cluttering Slack previews.
 - Implementation checklists (put in first comment)
 - Known limitations or TODOs (put in first comment)
 
+### Examples
+
+**WRONG** — Header before JTBD (breaks release notes parsing):
+```markdown
+## Summary
+
+**When** reviewing code, **I want to** have automated checks, **so I can** catch issues.
+
+[Details...]
+
+Fixes: ...
+```
+
+**CORRECT** — JTBD as absolute first element:
+```markdown
+**When** reviewing code, **I want to** have automated checks, **so I can** catch issues.
+
+[Details or commit list — optional...]
+
+Fixes: ...
+```
+
+### Proper Format
+
 ```markdown
 **When** reviewing PRs without automated checks, **I want to** have
 Claude review code quality, **so I can** catch issues before merging.

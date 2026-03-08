@@ -28,6 +28,22 @@ Example: "**so** reviewers can catch issues before merging."
 The canonical `**so I can**` form is preferred for first-person
 outcomes. Either form is accepted by the hygiene reviewer.
 
+## Voice Requirement
+
+Job Stories must use first-person or explicit third-party voice.
+Objective voice ("wants to") is incorrect:
+
+| Form | Example | Status |
+|------|---------|--------|
+| ✅ First-person | **I want to** have Claude config copied | REQUIRED |
+| ✅ Third-party | **so** reviewers can catch issues | REQUIRED |
+| ❌ Objective voice | **wants to** have Claude config copied | WRONG |
+| ❌ Mixed voice | **I want to** X **so** reviewer wants Y | WRONG |
+
+The difference: "I want to" (first-person) vs "wants to" (objective).
+When describing outcomes benefiting others, use explicit names:
+`**so** [person/system] can ...` — not just `**so**` alone.
+
 ## Key Principles
 
 ### 1. No Personas — Focus on Situation
