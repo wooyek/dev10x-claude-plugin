@@ -35,7 +35,7 @@ Never pause between phases.
 
 ### Step 0: Initialize task tracking (MANDATORY)
 
-**REQUIRED: Create all 8 phase tasks before ANY other work.**
+**REQUIRED: Create all 9 phase tasks before ANY other work.**
 Do NOT skip task creation or improvise an ad-hoc workflow.
 If you find yourself reading files or analyzing the transcript
 without having created tasks first, STOP and create them now.
@@ -50,6 +50,7 @@ Execute these exact `TaskCreate` calls at startup:
 6. `TaskCreate(subject="Run permission friction analysis (Phase 4)", activeForm="Analyzing permissions")`
 7. `TaskCreate(subject="Extract lessons learned (Phase 5)", activeForm="Extracting lessons")`
 8. `TaskCreate(subject="Propose changes (Phase 6)", activeForm="Proposing changes")`
+9. `TaskCreate(subject="Upstream reporting (Phase 7)", activeForm="Reporting upstream")`
 
 Then set sequential dependencies: each phase blocked by the
 previous. Update each task to `in_progress` before starting it
@@ -764,6 +765,56 @@ Review user corrections and `[CORRECTION]` markers:
 
 ---
 
+#### Phase 7: Upstream Reporting (optional delegation)
+
+After Phase 6 completes, check whether any findings warrant
+reporting to the Dev10x plugin maintainers.
+
+**Step 7a: Collect upstream-relevant findings**
+
+Scan all findings from Phases 2–6 and select those that relate
+to Dev10x plugin skills (under `~/.claude/plugins/`). Include:
+- `SKILL_UPDATE`, `GAP`, `SKIPPED_STEP`
+- `DEVIATED` with assessment `regression`
+- `PREFIX_POISONED_*`, `HOOK_BLOCKED_RETRY`, `REDUNDANT_UV_PREFIX`
+
+Exclude findings about user-local skills (`~/.claude/skills/`),
+memory files, or `settings.local.json` — those are local-only.
+
+If no upstream-relevant findings exist, mark Phase 7 completed.
+
+**Step 7b: Ask user whether to report**
+
+**REQUIRED: invoke `AskUserQuestion` tool** (not a plain text
+question) to ask whether to file upstream. Present the count
+of upstream-relevant findings and two options: "File issue
+(Recommended)" to delegate to `dev10x:audit-report`, or
+"Skip" to keep findings local only.
+
+If the user selects **Skip**, mark Phase 7 completed and end.
+
+**Step 7c: Delegate to dev10x:audit-report**
+
+Write a findings summary to a temp file so the delegated
+skill can read it without needing the full transcript:
+
+```bash
+/tmp/claude/bin/mktmp.sh skill-audit findings .md
+```
+
+Write the upstream-relevant findings table and proposed fixes
+to that file, then invoke:
+
+```
+Skill(skill="dev10x:audit-report", args="<findings-file-path>")
+```
+
+The `dev10x:audit-report` skill handles version detection,
+issue body generation, and `gh issue create`. Mark Phase 7
+completed after delegation returns.
+
+---
+
 ## Important Rules
 
 - **Read-only by default**: Only modify files after explicit user approval
@@ -798,3 +849,11 @@ Review user corrections and `[CORRECTION]` markers:
   only does JSON/YAML parsing, prefer `jq` or `yq` over inline
   `python3 -c "import json..."`. Flag Python one-liners that could be
   replaced with a single `jq`/`yq` invocation as `PREFER_JQ_YQ`.
+- **Upstream reporting scope**: Phase 7 only considers findings
+  about Dev10x plugin skills (under `~/.claude/plugins/`). User-
+  local skills, memory updates, and permission rule changes are
+  local-only and never filed upstream.
+- **Delegation over embedding**: Phase 7 delegates issue filing to
+  `dev10x:audit-report` rather than implementing it inline. This
+  keeps skill-audit focused on analysis and lets users who don't
+  want upstream reporting skip the skill entirely.
