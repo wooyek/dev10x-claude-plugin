@@ -30,6 +30,13 @@ if [[ ! "$FIRST_LINE" =~ ^fixup!\  ]]; then
     exit 0
 fi
 
+# Allow bare fixup commits (human workflow: title-only, no body)
+# Claude always writes a body with context, so empty body = human commit
+BODY=$(tail -n +2 "$COMMIT_MSG_FILE" | sed '/^#/d')
+if [ -z "$(echo "$BODY" | tr -d '[:space:]')" ]; then
+    exit 0
+fi
+
 # Pattern matches: https://github.com/{owner}/{repo}/pull/{number}#discussion_r{id}
 # Also matches: https://github.com/{owner}/{repo}/pull/{number}#pullrequestreview-{id}
 COMMENT_LINK_PATTERN='https://github\.com/[^/]+/[^/]+/pull/[0-9]+#(discussion_r|pullrequestreview-)[0-9]+'
