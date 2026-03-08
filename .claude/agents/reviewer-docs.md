@@ -47,7 +47,12 @@ Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`,
    `name:` fields using Grep
 5. **CLI command verification** — verify README commands appear in
    CLAUDE.md Development section or are known Claude Code built-ins
-6. **PR hygiene** — do NOT flag `Fixes:` links, PR title format, or
+6. **Code example verification** — For any code block referencing files,
+   directories, or commands: Use Glob to verify directories exist
+   (e.g., `codex-skills/`, `scripts/`); verify scripts are executable
+   and present; if documenting future features, clearly mark as
+   `[PLANNED]` or `[NOT YET IMPLEMENTED]` to prevent user confusion
+7. **PR hygiene** — do NOT flag `Fixes:` links, PR title format, or
    commit message structure; these are `pr-hygiene-review` scope
 
 ## Output Format
