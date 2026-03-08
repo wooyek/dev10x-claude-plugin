@@ -25,8 +25,8 @@ Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`,
 2. **Code examples** — verify they match actual codebase patterns
    (use Grep to find real usage)
 3. **Actionable checklists** — items must be testable
-4. **Listed in INDEX** — new files must appear in
-   `.claude/rules/INDEX.md` and CLAUDE.md Code Review section
+4. **Listed in README** — new files must appear in
+   `.claude/rules/README.md` and CLAUDE.md Code Review table
 5. **Why? rationale** — non-obvious rules must explain reasoning
 6. **Self-application** — when a PR introduces a new rule, check
    whether the PR itself follows the rule. If it can't

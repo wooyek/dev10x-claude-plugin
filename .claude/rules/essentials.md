@@ -24,14 +24,12 @@ Universal rules for every session. Detailed guides live in
 
 ## PR Body
 
-- First paragraph: JTBD Job Story (`**When** ... **I want to** ...
-  **so I can** ...`)
-- Use first-person or explicit third-party voice (e.g., `**so** reviewers can`)
-- Objective voice ("wants to") is a REQUIRED violation
+- First paragraph: JTBD Job Story (`**When** ... **wants to** ...
+  **so** ... **can** ...`)
 - Optional: Compact commit list (one line per commit)
 - Last line: `Fixes:` link (issue URL or `none — self-motivated`)
 - Do NOT add separators (`---`) or blank lines between sections
-- Full guide: `references/git-pr.md`; voice rules in `references/git-jtbd.md` lines 31–45
+- Full guide: `references/git-pr.md`
 
 ## Decision Gates & Orchestration
 
