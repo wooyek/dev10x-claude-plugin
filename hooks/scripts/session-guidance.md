@@ -9,6 +9,7 @@ the right pattern on the first attempt.
 | Pattern | Why blocked | Use instead |
 |---------|------------|-------------|
 | `cmd1 && cmd2` (setup + path-based script) | `&&` shifts prefix, breaks allow rules for path-based commands | Separate Bash tool calls |
+| `GIT_SEQUENCE_EDITOR=... git` | Env prefix shifts effective prefix, breaks allow rules | `git develop-rebase` alias |
 | `cat <<'EOF'` / `cat >` / `echo >` | Heredocs/redirects blocked by security hook | Write tool + reference file (`git commit -F`) |
 | `python3 -c "..."` inline code | Inline execution blocked | Extract to `~/.claude/tools/script.py` with uv shebang |
 
