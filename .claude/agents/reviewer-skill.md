@@ -10,6 +10,7 @@ Files matching: `skills/**`
 ## Required Reading
 
 - `.claude/rules/skill-naming.md` — naming convention
+- `references/task-orchestration.md` — orchestration patterns and formatting
 
 ## Checklist
 
@@ -97,6 +98,11 @@ Files matching: `skills/**`
     (b) constraint appears in Important Notes section;
     (c) scripts or calling code are consistent with the constraint.
     Do NOT flag strong imperative language as "over-emphasis".
+14a. **Orchestration list formatting** — if Orchestration section contains
+    multiple `TaskCreate` calls, verify they are in a numbered list (not
+    a fenced code block) and each item includes `REQUIRED:` or enforcement
+    language. Numbered lists read as instructions; code blocks read as
+    examples. See `.claude/rules/skill-orchestration-format.md`.
 
 15. **Config file schema** — when a skill reads or writes a structured
     config file (YAML, JSON, TOML), SKILL.md must:
