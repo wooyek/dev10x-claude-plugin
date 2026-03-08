@@ -30,7 +30,7 @@ domain-routed architecture:
 - **Cross-cutting checks** in `review-checks-common.md` apply to
   all domains
 
-See `.claude/rules/INDEX.md` for the routing table.
+See `.claude/rules/README.md` for the full architecture diagram.
 
 ## Shared Guidelines
 
