@@ -3,7 +3,11 @@
 Rules for writing Job Stories used in PR titles, PR descriptions,
 commit messages, and issue tickets.
 
-> **Scope**: This format governs commits and PR descriptions.
+> **Scope**: This format governs Job Stories in commits and PR descriptions.
+> It also applies to issue titles and tickets.
+> **Critical dependency**: Release notes parsing requires precise JTBD
+> voice format (first-person "I want to" or explicit third-party "so X can").
+> Objective voice ("wants to") breaks automated release notes collection.
 > Skills may define their own output formats in `references/`
 > documents. If a skill's reference doc diverges from this format,
 > verify the skill output is not used for PR/commit descriptions.
