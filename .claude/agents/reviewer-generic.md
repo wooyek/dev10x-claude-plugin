@@ -49,13 +49,6 @@ For `servers/*.py` files:
 - Plugin.json includes server entry; shebang uses `uv run --script`
 - All tools decorated with `@server.tool()`, return `{"error": msg}`, include
   `-> dict` type hint
-- **Return pattern consistency** — verify tools match the pattern documented
-  in `.claude/rules/mcp-tools.md`. If success response differs from examples,
-  flag as WARNING and suggest docs update
-- **Test plan verification** — flag unchecked items in PR body; MCP servers
-  must be validated to start without errors before merge
-- **Replacement deprecation** — if tool replaces a Bash fallback, require
-  documented deprecation timeline in session-guidance.md or a tracking issue
 
 ## Output Format
 

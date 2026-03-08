@@ -50,7 +50,7 @@ jobs:
 
             Read these files for context:
             1. CLAUDE.md - Repository conventions and patterns
-            2. .claude/rules/README.md - Index of all rule files
+            2. .claude/rules/INDEX.md - Agent routing table
             3. references/review-checks-common.md - False positive prevention
 
             FOR PR REVIEWS:

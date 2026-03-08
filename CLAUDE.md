@@ -102,14 +102,6 @@ marker guidance, and examples. Review checklist item 14a enforces this.
 
 ## Code Review
 
-Multi-agent architecture with domain-routed reviewers:
-
-| Agent spec                      | Trigger                          |
-|---------------------------------|----------------------------------|
-| `reviewer-generic.md`           | `**/*.py`, `**/*.sh`             |
-| `reviewer-infra.md`             | `Makefile`, `bin/**`, `hooks/**`, `*.sh` |
-| `reviewer-docs.md`              | `docs/**`, `.claude/**`, `README.md` |
-| `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**` |
-| `reviewer-skill.md`             | `skills/**`                      |
-
-See `.claude/rules/README.md` for the full architecture.
+Multi-agent architecture with domain-routed reviewers.
+See `.claude/rules/INDEX.md` for the routing table and
+`references/rules-architecture.md` for the full architecture.
