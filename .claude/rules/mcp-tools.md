@@ -51,9 +51,19 @@ Callers must know each tool's specific success response format.
 MCP tools are added incrementally. Document the minimum plugin version
 supporting each tool:
 
-| Tool | Server | Introduced | Availability |
-|------|--------|------------|--------------|
-| `mktmp` | `utils` | PR #160 | Available in all current versions |
+| Tool | Server | Purpose | Availability |
+|------|--------|---------|--------------|
+| `mktmp` | `utils` | Create temp namespace directories | Available in all current versions |
+| `push_safe` | `git` | Safely push branches (guards main/develop) | Available in all current versions |
+| `rebase_groom` | `git` | Interactive rebase sequencer | Available in all current versions |
+| `create_worktree` | `git` | Create isolated git worktrees | Available in all current versions |
+| `detect_tracker` | `gh` | Detect issue tracker type (GH-, TEAM-, TT-, etc.) | Available in all current versions |
+| `pr_detect` | `gh` | Extract PR context from number/URL/branch | Available in all current versions |
+| `issue_get` | `gh` | Fetch issue details and metadata | Available in all current versions |
+| `issue_comments` | `gh` | Fetch or manage issue comments | Available in all current versions |
+| `pr_comments` | `gh` | Fetch, add, edit, or delete PR comments | Available in all current versions |
+| `request_review` | `gh` | Request reviewers on a PR | Available in all current versions |
+| `query` | `db` | Execute read-only SQL queries (SELECT only) | Available in all current versions |
 
 When adding a new tool, update this table and note any dependencies on
 specific CLI commands or external programs. Skills should declare required

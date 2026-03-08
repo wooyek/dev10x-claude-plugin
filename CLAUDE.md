@@ -64,8 +64,7 @@ MCP migration: shell scripts → MCP tools. See `.claude/rules/mcp-tools.md`.
 - **Commit titles**: outcome-focused — "Enable X" not "Add X"
 - **Job Story voice** (REQUIRED): First-person "**I want to**" or explicit
   third-party "**so [name] can**" — never objective voice ("wants to")
-  See `.claude/rules/essentials.md` and `references/git-jtbd.md` lines 31–45
-- See `references/git-commits.md`, `git-pr.md`, `git-jtbd.md`
+- Full guides: `references/git-commits.md`, `git-pr.md`, `git-jtbd.md`
 
 ### Plugin Directory Renames
 
@@ -107,5 +106,4 @@ marker guidance, and examples. Review checklist item 14a enforces this.
 ## Code Review
 
 Multi-agent architecture with domain-routed reviewers.
-See `.claude/rules/INDEX.md` for the routing table and
-`references/rules-architecture.md` for the full architecture.
+See `.claude/rules/README.md` for the routing table.

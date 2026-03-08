@@ -24,6 +24,7 @@ The code review system uses a **multi-agent architecture**:
 | `.claude/rules/skill-naming.md` | When editing `skills/**` | Skill naming conventions |
 | `.claude/rules/agents.md` | When editing `agents/**` | Plugin-distributed agent specs |
 | `.claude/rules/github-workflows.md` | When editing `.github/workflows/**` | GitHub Actions patterns |
+| `.claude/rules/mcp-tools.md` | When editing `servers/**` or MCP-related skills | MCP tool naming, versioning, availability |
 | `references/*.md` | On-demand by skills/CI | Detailed git, review, JTBD guides |
 
 ## Reference Documents (`references/`)
@@ -49,7 +50,8 @@ Internal review-only agents (≤ 50 lines each).
 | `reviewer-infra.md` | `Makefile`, `**/*.sh`, `bin/**`, `.github/workflows/**` | `references/review-checks-common.md` |
 | `reviewer-docs.md` | `docs/**`, `.claude/**/*.md` | `references/review-checks-common.md` |
 | `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | (self-contained) |
-| `reviewer-skill.md` | `skills/**` | `.claude/rules/skill-naming.md` |
+| `reviewer-rules-structure.md` | `.claude/rules/**/*.md`, `.claude/agents/**/*.md` | (self-contained) |
+| `reviewer-skill.md` | `skills/**`, `codex-skills/**` | `.claude/rules/skill-naming.md` |
 
 ## Plugin-Distributed Sub-Agents (`agents/`)
 
