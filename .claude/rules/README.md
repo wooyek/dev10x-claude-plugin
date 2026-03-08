@@ -36,6 +36,7 @@ The code review system uses a **multi-agent architecture**:
 | `review-guidelines.md` | Review workflow, threads, summaries | `dev10x:gh-pr-review` skill, code review CI | Mandatory for PR reviews |
 | `review-checks-common.md` | False positives, verification | Review agent specs, code review CI | Mandatory for code review agents |
 | `eval-schema.md` | Evaluation assertions format for skills | `reviewer-skill.md` (item 19) | Decision gate validation |
+| `skill-invocation.md` | Skill() syntax, named parameters, delegation | `reviewer-skill.md` (items 8g, 9a) | Mandatory for skill reviews |
 | `task-orchestration.md` | Orchestration patterns, auto-advance, batched decisions | All skills (via `## Orchestration` section) | Referenced, not auto-loaded |
 
 ## Agent Specs (`.claude/agents/`)
@@ -82,7 +83,7 @@ File size budgets (200 lines for reference docs, 50 for agent specs, 100 for CLA
 
 Examples:
 - `references/task-orchestration.md` (367 lines) exceeds the 200-line budget because 7 orchestration patterns form a unified framework that 43+ skills reference atomically. Splitting would force each skill to track multiple files.
-- `.claude/agents/reviewer-skill.md` (135 lines) exceeds the 50-line budget because skill review spans 19 distinct domains (naming, scripting, tooling, behavioral constraints, config management). Future additions will require a split into `reviewer-skill-paths.md` (items 7-8f) + `reviewer-skill-behavior.md` (items 14-19) if the file exceeds 150 lines.
+- `.claude/agents/reviewer-skill.md` (151 lines) exceeds the 50-line budget because skill review spans 19 distinct checklist items covering naming, scripting, tooling, behavioral constraints, and config management. If the file exceeds 170 lines, split into `reviewer-skill-paths.md` (items 7–8g) and `reviewer-skill-behavior.md` (items 14–19).
 
 Reviewers must flag overrides with `[OVERRIDE DETECTED]` comments and verify:
 - Cohesion justification is clear

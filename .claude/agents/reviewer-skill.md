@@ -59,6 +59,13 @@ Files matching: `skills/**`
     `allowed-tools:` includes a matching `Write(~/.claude/projects/**/<file>)`
     or `Write(~/.claude/projects/**/**)` entry. Missing entry causes a
     per-invocation approval prompt on every persistence operation (WARNING).
+8g. **Cross-skill delegation compatibility** — when a skill delegates to
+    another skill via `Skill()`, verify:
+    (a) delegated skill's `allowed-tools` includes `Read()` for the findings file path
+    (b) both skills declare compatible temp namespace in `allowed-tools`
+        (e.g., both use `/tmp/claude/skill-audit/**` for findings exchange)
+    (c) findings file path is deterministic (no session-unique uuids)
+    Missing Read coverage causes per-invocation approval (WARNING).
 8c. **Plugin directory existence** — for every `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`
     entry in `allowed-tools`, verify `skills/<name>/` exists using
     Glob(`skills/<name>/SKILL.md`). A missing directory means the skill is
@@ -71,6 +78,10 @@ Files matching: `skills/**`
     (c) no hardcoded absolute paths — use `${VAR:-/default/path}`
 9. **Template consistency** — YAML code blocks containing a `name:` field
    must follow `skill-naming.md`, not ad-hoc examples.
+9a. **Skill tool invocation syntax** — when SKILL.md or inline code blocks
+    use the `Skill()` tool (inter-skill delegation), verify named parameters:
+    `Skill(skill="dev10x:target-name", args="...")`, not positional syntax
+    like `Skill(dev10x:target-name, args="...")`. See `references/skill-invocation.md`.
 10. **Reference doc consistency** — cross-check `references/` documents
     against any matching `.claude/rules/` file.
 10b. **Inline table consistency** — when SKILL.md contains a reference
@@ -103,6 +114,10 @@ Files matching: `skills/**`
     a fenced code block) and each item includes `REQUIRED:` or enforcement
     language. Numbered lists read as instructions; code blocks read as
     examples. See `.claude/rules/skill-orchestration-format.md`.
+    **False-positive prevention**: Do NOT flag `TaskCreate` or `AskUserQuestion`
+    calls appearing in "Example" or "Anti-pattern" subsections even if inside
+    fenced code blocks — these are illustrative only. Only enforce the
+    formatting rule for the main Orchestration section.
 
 15. **Config file schema** — when a skill reads or writes a structured
     config file (YAML, JSON, TOML), SKILL.md must:
