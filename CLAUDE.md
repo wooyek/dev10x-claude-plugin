@@ -93,11 +93,12 @@ directives:
   as mandatory instructions to execute at skill startup
 - **Code blocks** — the same calls in fenced code blocks (```) are
   read as illustrative examples, not executable
-- **Enforcement language** — prefix numbered lists with `REQUIRED:`,
-  `MANDATORY:`, or `DO NOT SKIP` to clarify intent
+- **Enforcement language** — use `REQUIRED:`, `MANDATORY:`, or `DO NOT SKIP`
+  for constraints that must be preserved; pair with imperative language
+  (`MUST`, `never`) rather than advisory (`should`, `try to`)
 
-See `.claude/rules/skill-orchestration-format.md` for detailed patterns
-and examples. Review checklist item 14a enforces this pattern.
+See `.claude/rules/skill-orchestration-format.md` for detailed patterns,
+marker guidance, and examples. Review checklist item 14a enforces this.
 
 ## Code Review
 
