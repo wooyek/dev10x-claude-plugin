@@ -25,7 +25,7 @@ registration:
 
 ## Tool Declaration Pattern
 
-All MCP tools must follow this pattern:
+All MCP tools must follow this structure:
 
 ```python
 @server.tool()
@@ -34,8 +34,30 @@ async def function_name(param: str, optional: str | None = None) -> dict:
     # implementation
     if error_occurs:
         return {"error": "descriptive message"}
-    return {"success": True, "data": result}
+    return {tool-specific fields}  # see examples below
 ```
+
+**Important**: Error responses are uniform (`{"error": msg}`), but success
+responses are **tool-specific**. Document your tool's return structure in
+its docstring. Examples:
+- `mktmp`: returns `{"path": "/tmp/file"}`
+- Some tools return `{"success": True, "data": result}`
+- Some tools return only tool-specific fields without a `success` flag
+
+Callers must know each tool's specific success response format.
+
+## Tool Availability by Plugin Version
+
+MCP tools are added incrementally. Document the minimum plugin version
+supporting each tool:
+
+| Tool | Server | Introduced | Availability |
+|------|--------|------------|--------------|
+| `mktmp` | `utils` | PR #160 | Available in all current versions |
+
+When adding a new tool, update this table and note any dependencies on
+specific CLI commands or external programs. Skills should declare required
+tools explicitly in `allowed-tools:` to catch availability mismatches early.
 
 ## Skill Usage
 
