@@ -267,6 +267,15 @@ For each action where a skill WAS invoked:
 
 Assess each deviation: improvement, regression, or neutral?
 
+**AskUserQuestion enforcement check:** When a SKILL.md documents
+`AskUserQuestion` (or marks a step as `REQUIRED: AskUserQuestion`),
+verify the session transcript contains an actual `AskUserQuestion`
+tool call at that decision point — not a plain text question. If
+the transcript shows the agent asked the question as inline text
+instead of calling the tool, classify it as:
+- **DEVIATED** with assessment **regression** — plain text
+  questions don't block execution and lack structured options
+
 ---
 
 #### Phase 4: Permission Friction Analysis
