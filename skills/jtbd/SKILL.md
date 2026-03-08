@@ -202,22 +202,17 @@ real cost of not doing it).
 
 ### Step 4: Present or Return
 
-**Attended mode** — present the draft and ask for approval:
+**Attended mode** — present the draft and ask for approval.
 
-```
-Job Story draft:
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text)
+with the draft and these options:
+- **Accept** — use this story
+- **Edit** — describe what to change
+- **Reject** — discard and return empty
 
-**When** a merchant processes an ACH bank transfer for an order,
-**the cashier wants to** select "ACH" as the payment method,
-**so the merchant can** accurately reconcile bank transfer transactions
-instead of grouping them under "Other".
-
-Accept? (y/edit/n)
-```
-
-If **edit**: ask what to change and iterate.
-If **n**: return empty string.
-If **y**: return the story string.
+If **Edit**: ask what to change and iterate.
+If **Reject**: return empty string.
+If **Accept**: return the story string.
 
 **Unattended mode** — return the draft directly without user
 interaction. The caller decides what to do with it.

@@ -32,19 +32,13 @@ the plan, and can pause at any point with `dev10x:wrap-up`.
 The visible task list is the supervisor's interface for adding
 new tasks mid-session. Skipping it removes that capability.
 
-**Phase-level tasks upfront:** At session start, create exactly
-4 top-level tasks — one per phase:
+**REQUIRED: Create phase tasks before ANY work.** At session
+start, create exactly 4 top-level tasks — one per phase:
 
-```
-TaskCreate(subject="Phase 1: Parse & Classify inputs",
-    activeForm="Classifying inputs")
-TaskCreate(subject="Phase 2: Gather context",
-    activeForm="Gathering context")
-TaskCreate(subject="Phase 3: Build work plan",
-    activeForm="Building plan")
-TaskCreate(subject="Phase 4: Execute plan",
-    activeForm="Executing")
-```
+1. `TaskCreate(subject="Phase 1: Parse & Classify inputs", activeForm="Classifying inputs")`
+2. `TaskCreate(subject="Phase 2: Gather context", activeForm="Gathering context")`
+3. `TaskCreate(subject="Phase 3: Build work plan", activeForm="Building plan")`
+4. `TaskCreate(subject="Phase 4: Execute plan", activeForm="Executing")`
 
 Set sequential dependencies (each phase blocked by the previous).
 During each phase, create subtasks for the concrete work items

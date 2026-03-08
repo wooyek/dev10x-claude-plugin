@@ -105,11 +105,13 @@ Present all discovered open loops in a scannable format:
 Is there anything else to capture before closing?
 ```
 
-Use `AskUserQuestion` to let the user add free-text items.
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text)
+to let the user add free-text items.
 
 ## Phase 3: Per-Item Triage
 
-For each open loop, present a choice using `AskUserQuestion`:
+For each open loop, **REQUIRED: Call `AskUserQuestion`**
+(do NOT use plain text) to present a choice:
 
 **Options:**
 - **Finish now** — keep as session task, continue working

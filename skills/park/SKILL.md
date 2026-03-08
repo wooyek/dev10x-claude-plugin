@@ -78,8 +78,9 @@ Conditionally available (include only when detected):
 | 6 | Inline TODO/FIXME | User mentions a specific file |
 | 7 | Keep in session | User wants to finish later this session |
 
-Present using `AskUserQuestion` with multiSelect enabled so user
-can pick multiple targets for the same item.
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text)
+with multiSelect enabled so user can pick multiple targets
+for the same item.
 
 ### 4. Delegate to targets
 
