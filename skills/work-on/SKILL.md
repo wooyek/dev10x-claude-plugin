@@ -426,10 +426,23 @@ time"). Update the YAML file accordingly:
 
 ### Supervisor Approval Gate
 
-Present the plan as a numbered list. Then use `AskUserQuestion`:
+Present the plan as a numbered list.
 
-- **Approve (Recommended)** — start execution
-- **Edit** — describe what to change (add/remove/reorder steps)
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text):
+
+```
+AskUserQuestion(questions=[{
+    question: "How would you like to proceed with the work plan?",
+    header: "Plan",
+    options: [
+        {label: "Approve (Recommended)",
+         description: "Start execution immediately"},
+        {label: "Edit",
+         description: "Describe what to change (add/remove/reorder steps)"}
+    ],
+    multiSelect: false
+}])
+```
 
 After approval, set task dependencies where appropriate (use
 `TaskUpdate` with `addBlockedBy`). Mark the first task as
