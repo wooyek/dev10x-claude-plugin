@@ -24,6 +24,7 @@ Present the two options with AskUserQuestion:
 - **Same session** (Recommended) — native `EnterWorktree` tool switches CWD
   immediately; all subsequent git commands and skills (`commit`, `dev10x:gh-pr-create`,
   `branch:groom`) work without flags; worktree lives inside `.claude/worktrees/`
+  (excluded from hook copies and `.gitignore`)
 - **External + new session** — worktree created at `../.worktrees/<project>-NN`
   outside the project; IDE won't cross-index sibling worktrees; requires closing
   this session and opening a new one in the worktree directory
@@ -171,7 +172,7 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     ORIGINAL_REPO=/work/<org>/<project-name>
     cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
     cp "$ORIGINAL_REPO/development.secrets.env" . 2>/dev/null || true
-    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || {
+    rsync -a --exclude=worktrees "$ORIGINAL_REPO/.claude/" .claude/ 2>/dev/null || {
         mkdir -p .claude
         echo '{}' > .claude/settings.local.json
     }
@@ -189,7 +190,7 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     pwd
     ORIGINAL_REPO=/work/<org>/<project-name>
     cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
-    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || {
+    rsync -a --exclude=worktrees "$ORIGINAL_REPO/.claude/" .claude/ 2>/dev/null || {
         mkdir -p .claude
         echo '{}' > .claude/settings.local.json
     }
@@ -209,7 +210,7 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     pwd
     ORIGINAL_REPO=/work/<org>/<project-name>
     cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
-    cp -r "$ORIGINAL_REPO/.claude" . 2>/dev/null || {
+    rsync -a --exclude=worktrees "$ORIGINAL_REPO/.claude/" .claude/ 2>/dev/null || {
         mkdir -p .claude
         echo '{}' > .claude/settings.local.json
     }

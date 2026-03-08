@@ -87,7 +87,7 @@ async def create_worktree(
     Args:
         branch: Branch name for the worktree
         base: Base ref to create from (default: develop)
-        path: Worktree path (default: .claude/worktrees/{branch})
+        path: Worktree path (default: ../.worktrees/{project}-NN)
 
     Returns:
         Dictionary with keys: worktree_path, branch, created (bool)
