@@ -62,7 +62,8 @@ projects:
 ### Resolution workflow
 
 1. Detect the current repo: `gh repo view --json name --jq .name`
-2. Read `~/.claude/memory/github-reviewers-config.yaml`
+2. Read and parse the config file using `yq`:
+   `yq '.projects["REPO_NAME"]' ~/.claude/memory/github-reviewers-config.yaml`
 3. Look up the repo name in `projects`:
    - **Found with `skip: true`** → print "Skipping review request
      for {repo}" and stop

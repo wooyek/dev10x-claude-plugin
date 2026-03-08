@@ -10,6 +10,7 @@ Files matching: `skills/**`
 ## Required Reading
 
 - `.claude/rules/skill-naming.md` — naming convention
+- `.claude/rules/skill-patterns.md` — skill architecture patterns (script vs orchestration)
 - `references/task-orchestration.md` — orchestration patterns and formatting
 
 ## Checklist
@@ -23,11 +24,16 @@ Files matching: `skills/**`
    naming violation if `name:` is correct (see `skill-naming.md`)
 3. **Description quality** — `description:` must explain when to
    trigger the skill; vague descriptions reduce discoverability
-4. **Script references** — SKILL.md-referenced scripts must exist in the
-   directory. Check both `allowed-tools` entries AND inline code blocks.
-   Pay special attention when a path conversion corrects a typo (e.g.,
-   `skill:create` → `skill-create`) — the fix may reveal a pre-existing
-   missing script.
+4. **Script references** — (Script-based skills only; skip for orchestration-based)
+   SKILL.md-referenced scripts must exist in the directory. Check both
+   `allowed-tools` entries AND inline code blocks. Pay special attention when
+   a path conversion corrects a typo (e.g., `skill:create` → `skill-create`)
+   — the fix may reveal a pre-existing missing script.
+
+   **Pattern detection**: See `.claude/rules/skill-patterns.md`. If the skill
+   directory contains NO `scripts/` subdirectory AND the SKILL.md references
+   no local paths (only `~/.claude/tools/` or external binaries), it's
+   orchestration-based — Item 4 does not apply.
 5. **Executable permissions** — directly-invoked scripts must be
    executable; `git ls-files --stage <path>` mode `100644` = not executable.
 6. **Error handling** — scripts use `set -e`; handle missing dependencies
@@ -127,6 +133,11 @@ Files matching: `skills/**`
         priority, what happens when the file is absent)
     (c) state when and how the file is created (never, on-demand,
         always). Missing schema is WARNING; missing fallback is WARNING.
+
+    **False-positive prevention**: A note like "The config file is optional.
+    If it doesn't exist, the skill falls back to X" is sufficient for (b).
+    Do not require explicit "File Creation" heading if the fallback behavior
+    is clear from context.
 16. **Resolution-order completeness** — when SKILL.md documents a
     prioritized fallback/resolution list and also documents multiple
     variants of the same key (e.g., `persist: true` vs `persist: false`),
@@ -145,9 +156,11 @@ Files matching: `skills/**`
     after user edits without `--force`.
 19. **Decision gates enforcement** — when a PR adds/modifies a skill's
     documented blocking decision point (marked `REQUIRED: AskUserQuestion`),
-    verify: (a) enforcement marker is present in SKILL.md, (b) evals.json
-    includes assertions to detect plain-text substitution, (c) evals include
-    signals like `gate*-uses-tool` and `gate*-no-plain-text`.
+    verify: (a) enforcement marker is present in SKILL.md, (b) **`AskUserQuestion`
+    is declared in front matter `allowed-tools`**, (c) evals.json includes
+    assertions to detect plain-text substitution, (d) evals include signals
+    like `gate*-uses-tool` and `gate*-no-plain-text`. Missing the tool
+    declaration causes per-invocation approval prompts.
 
 ## Output Format
 
