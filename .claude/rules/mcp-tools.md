@@ -21,6 +21,7 @@ registration:
 | `gh` | `pr_comments()` | `mcp__plugin_Dev10x_gh__pr_comments` |
 | `git` | `get_commit_log()` | `mcp__plugin_Dev10x_git__get_commit_log` |
 | `db` | `list_tables()` | `mcp__plugin_Dev10x_db__list_tables` |
+| `utils` | `mktmp()` | `mcp__plugin_Dev10x_utils__mktmp` |
 
 ## Tool Declaration Pattern
 

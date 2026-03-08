@@ -28,6 +28,12 @@
       "env": {
         "PYTHONUNBUFFERED": "1"
       }
+    },
+    "utils": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/servers/utils_server.py",
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
     }
   }
 }

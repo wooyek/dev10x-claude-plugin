@@ -61,11 +61,11 @@ prompts or brittle command matching.
 - Check with `git rev-parse --show-toplevel` if unsure
 
 ### Temporary files
-- Use `/tmp/claude/bin/mktmp.sh <namespace> <prefix> [.ext]`
-- This stable `/tmp` path is installed at SessionStart to avoid
-  plugin-cache/version path permission friction
-- Never `mkdir -p && script` — `mktmp.sh` creates dirs automatically
-- Keep it as a standalone Bash call (no `&&` prefix setup)
+- **Preferred**: Use MCP tool `mcp__plugin_Dev10x_utils__mktmp`
+  with params `namespace`, `prefix`, `ext`, `directory`
+- **Fallback**: `/tmp/claude/bin/mktmp.sh <namespace> <prefix> [.ext]`
+  (requires `Bash()` allow rule in skills)
+- Never `mkdir -p && script` — both methods create dirs automatically
 
 ## Key Skills for Common Tasks
 
