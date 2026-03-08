@@ -82,6 +82,12 @@ Before raising any of these, **verify actual code**:
     has acknowledged a RECOMMENDED suggestion but not acted on it, do
     not re-raise it in later rounds. Repeating optional feedback the
     author consciously skipped is noise. Only REQUIRED issues block merge.
+19. **Hook changes without documentation** — if a PR adds a new security
+    hook pattern (regex check, blocked command), verify that session-guidance.md
+    or a rule file is updated with the same pattern, explanation, and
+    alternative. A hook without documentation is incomplete — the user sees
+    the block message but not the Why or How to recover. Do NOT skip the
+    docs check.
 
 ## Parameter Change Analysis
 

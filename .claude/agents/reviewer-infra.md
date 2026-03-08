@@ -46,6 +46,9 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
 12b. **SessionStart side-effects** — flag new file-copy, directory-creation,
      or tool-installation operations added to existing `SessionStart` scripts;
      verify the side-effect is documented and intentional (WARNING if undocumented).
+12c. **Hook error messages** — for PreToolUse blocks, verify the message
+     clearly states the problem, provides at least one alternative, documents
+     recovery action or alias, and is visible to user in systemMessage field.
 
 ## Design Intent
 

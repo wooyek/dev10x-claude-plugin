@@ -38,6 +38,10 @@ domain-specific reviewers).
    covers all code paths. For hooks that parse shell commands:
    confirm ALL pipe-chained segments are inspected, not just
    `command.split("|")[0]`.
+9b. **Hook guidance alignment** — when a new hook pattern is added,
+    verify that session-guidance.md or .claude/rules/* are updated
+    with the same pattern name, reason, and alternative. Mismatch
+    between code behavior and documentation causes user confusion.
 
 ## MCP Server Implementations
 
