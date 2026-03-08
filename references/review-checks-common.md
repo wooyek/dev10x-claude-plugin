@@ -40,7 +40,7 @@ Before raising any of these, **verify actual code**:
 3. **Return type already present**: read the actual signature
 4. **YAGNI**: accept author's "defer" judgment
 5. **Rule file paths**: verify path exists with Glob before citing;
-   correct paths listed in `.claude/rules/README.md`
+   correct paths listed in `.claude/rules/INDEX.md`
 6. **Intentional behavior removal**: when PR title/ticket states
    removal is intentional, external bots flagging it as a bug are
    false positives
