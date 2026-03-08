@@ -92,6 +92,12 @@ Before raising any of these, **verify actual code**:
     alternative. A hook without documentation is incomplete — the user sees
     the block message but not the Why or How to recover. Do NOT skip the
     docs check.
+21. **JTBD voice violations** — when a PR body, commit message, or issue
+    title contains a Job Story using objective voice (e.g., "the developer
+    wants to"), flag as REQUIRED. First-person ("I want to") or explicit
+    third-party ("so [person] can") are required. Objective voice breaks
+    release notes parsing and is explicitly listed as wrong in
+    `references/git-jtbd.md` lines 31–45.
 
 ## Parameter Change Analysis
 
