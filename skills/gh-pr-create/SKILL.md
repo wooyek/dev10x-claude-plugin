@@ -237,14 +237,17 @@ ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/generate-commit-list.sh PLACEH
 [`b3a015a8`](REPO_URL/pull/NUMBER/commits/FULL_HASH) ✨ PROJ-36 Enable feature
 [`fec49998`](REPO_URL/pull/NUMBER/commits/FULL_HASH) ♻️ PROJ-36 Refactor module
 
-Fixes: {FIXES_URL from detect-tracker.sh}
+Fixes {FIXES_URL from detect-tracker.sh}
 
 ---
 
 {.github/checklist.md contents with TICKET-ID substituted}
 ```
 
-If FIXES_URL is empty (unknown tracker), omit the `Fixes:` line entirely.
+**Important:** Use `Fixes URL` (no colon) so GitHub auto-closes the
+issue when the PR merges. `Fixes: URL` with a colon breaks auto-close.
+
+If FIXES_URL is empty (unknown tracker), omit the `Fixes` line entirely.
 
 ### Step 5: Run Pre-PR Checks
 

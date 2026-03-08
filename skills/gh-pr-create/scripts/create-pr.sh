@@ -11,7 +11,7 @@ FIXES_URL="${4:-}"
 
 FIXES_LINE=""
 if [ -n "$FIXES_URL" ]; then
-    FIXES_LINE=$(printf '\nFixes: %s\n' "$FIXES_URL")
+    FIXES_LINE=$(printf '\nFixes %s\n' "$FIXES_URL")
 fi
 
 BRANCH_NAME=$(git symbolic-ref --short HEAD)

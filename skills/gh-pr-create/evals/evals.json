@@ -4,7 +4,7 @@
     {
       "id": "body-format",
       "name": "PR Body Format",
-      "description": "Body starts with JTBD Job Story, contains linked commit list, Fixes: URL, and checklist template — compact for notification previews"
+      "description": "Body starts with JTBD Job Story, contains linked commit list, Fixes URL (no colon — enables GitHub auto-close), and checklist template — compact for notification previews"
     },
     {
       "id": "title",
@@ -14,7 +14,7 @@
     {
       "id": "tracker-integration",
       "name": "Issue Tracker Integration",
-      "description": "Detects tracker (GitHub/Linear/JIRA) from branch name, searches for existing Job Story in ticket, generates Fixes: link"
+      "description": "Detects tracker (GitHub/Linear/JIRA) from branch name, searches for existing Job Story in ticket, generates Fixes link (no colon)"
     },
     {
       "id": "safety",
@@ -60,9 +60,9 @@
         },
         {
           "id": "body-has-fixes-link",
-          "text": "PR body contains Fixes: link to the issue tracker",
+          "text": "PR body contains Fixes link to the issue tracker (no colon — enables auto-close)",
           "check": "output_contains",
-          "signals": ["Fixes:"]
+          "signals": ["Fixes "]
         },
         {
           "id": "created-as-draft",

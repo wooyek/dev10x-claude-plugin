@@ -210,7 +210,7 @@ Agent(subagent_type="Explore",
 After the initial fetch, scan all gathered text for references
 to other sources. Add them to the sources list and fetch:
 
-- **PR body** mentions `Fixes: GH-N` or `Fixes: TEAM-N` → fetch that ticket
+- **PR body** mentions `Fixes GH-N` or `Fixes TEAM-N` (with or without colon) → fetch that ticket
 - **Ticket body** contains Sentry URL → fetch that Sentry issue
 - **Ticket body** mentions PR `#N` or branch name → fetch that PR
 - **Linear ticket** has parent or relations → fetch related tickets
@@ -694,7 +694,7 @@ sources.
 
 **Phase 1:** Classify → `github-pr`, number=42
 
-**Phase 2:** Fetch PR. Body has `Fixes: GH-15` → fetch issue.
+**Phase 2:** Fetch PR. Body has `Fixes GH-15` → fetch issue.
 PR has 3 review comments → note them.
 
 **Phase 3:** Build plan:
