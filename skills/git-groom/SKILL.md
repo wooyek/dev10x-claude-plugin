@@ -75,7 +75,7 @@ the orchestrator batches it with other pending decisions.
 
 Mark the phase transition: `TaskUpdate(taskId=strategy_task, status="pending", metadata={"decision_needed": "Which restructuring strategy?", "options": ["Fixup", "Full restructure", "Mass rewrite", "Interactive rebase"]})`
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-restructuring-strategy.md](./tool-calls/ask-restructuring-strategy.md)).
 Options:
 - Fixup (Recommended) — Small targeted fixes to specific commits
 - Full restructure — Reset all commits, rebuild from scratch

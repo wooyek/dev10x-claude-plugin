@@ -45,7 +45,7 @@ Set sequential dependencies: each phase blocked by the previous.
 decision in task metadata. If no other tasks can advance, present
 the decision.
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-test-failure-recovery.md](./tool-calls/ask-test-failure-recovery.md)).
 Options:
 - Fix and retry (Recommended) — Adjust the test script and re-run
 - Skip failing test case — Mark as skipped, continue with passing tests

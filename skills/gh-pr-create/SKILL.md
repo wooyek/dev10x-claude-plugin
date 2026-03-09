@@ -38,7 +38,7 @@ Never pause between steps to ask "should I continue?".
 Set sequential dependencies: generate blocked by verify, checks
 blocked by generate, push blocked by checks.
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text) after
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-pr-preview.md](./tool-calls/ask-pr-preview.md)) after
 generating the PR body. This blocks execution until the user responds.
 Options:
 - Create PR (Recommended) — Push branch and create draft PR as shown

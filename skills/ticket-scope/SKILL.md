@@ -57,7 +57,7 @@ Set sequential dependencies: research blocked by fetch, design
 blocked by research, estimate blocked by design, format blocked by
 estimate, save blocked by format.
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text) after
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-scope-approval.md](./tool-calls/ask-scope-approval.md)) after
 presenting the scope. This blocks execution until the user responds.
 Options:
 - Approve (Recommended) — Save document and optionally update Linear

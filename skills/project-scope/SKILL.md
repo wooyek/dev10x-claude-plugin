@@ -80,7 +80,7 @@ comments, labels, related tickets) via Linear MCP or GitHub CLI.
 Run `${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/detect-tracker.sh`
 to determine the project's tracker backend.
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text) when
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-tracker-selection.md](./tool-calls/ask-tracker-selection.md)) when
 tracker cannot be detected automatically (e.g., free-text input
 with no branch context). Options:
 - Linear (Recommended) — Create Linear project with milestones
@@ -109,7 +109,7 @@ Tickets are intentionally high-level. Further refinement via
 
 ### 2.2 Present for Approval
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-scope-approval.md](./tool-calls/ask-scope-approval.md)).
 This blocks execution until the user responds. Options:
 - Approve (Recommended) — Create milestones and tickets as shown
 - Revise — I have corrections to the structure
@@ -138,7 +138,7 @@ create the parent ticket using the executive summary as description.
 
 ### 3.3 Create Project Entity (Optional)
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-project-entity.md](./tool-calls/ask-project-entity.md)).
 This blocks execution until the user responds. Options:
 - Create project entity (Recommended) — Enables roadmap views and project tracking
 - Skip — Just milestones and tickets, no project entity

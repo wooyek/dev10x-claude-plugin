@@ -34,7 +34,7 @@ Set sequential dependencies: each phase blocked by the previous.
 queue the split strategy decision in task metadata. If no other
 tasks can advance, present the decision.
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-split-strategy.md](./tool-calls/ask-split-strategy.md)).
 Options:
 - Approve split plan (Recommended) — Proceed with the proposed commit boundaries
 - Adjust boundaries — I want to change how the split is organized

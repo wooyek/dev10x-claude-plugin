@@ -547,7 +547,9 @@ Run them in parallel?
 | Worktree, matching feature branch | No action needed — branch already exists |
 
 If the Phase 1 workspace decision was deferred (local-only
-work), **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+work):
+
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-workspace-decision.md](./tool-calls/ask-workspace-decision.md)).
 Options:
 - Work here (Recommended) — Use current directory and branch
 - New worktree — Create an isolated worktree

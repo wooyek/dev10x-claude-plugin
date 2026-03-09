@@ -48,7 +48,7 @@ review of the proposed architecture before creating the
 implementation plan. If no other tasks are running, present
 immediately.
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-design-approval.md](./tool-calls/ask-design-approval.md)).
 Options:
 - Proceed to implementation plan (Recommended) — Design looks good, create actionable steps
 - Revise design — I have corrections to the architecture
