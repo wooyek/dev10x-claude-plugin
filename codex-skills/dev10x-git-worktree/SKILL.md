@@ -166,63 +166,25 @@ Husky overwrites `.git/hooks/` on every `yarn/npm install`. Writing to
 
 ### Template A: Python/uv
 
-```sh
-#!/bin/sh
-if [ "$1" = "0000000000000000000000000000000000000000" ]; then
-    echo "New worktree detected. Running setup..."
-    pwd
-    ORIGINAL_REPO=/work/<org>/<project-name>
-    cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
-    cp "$ORIGINAL_REPO/development.secrets.env" . 2>/dev/null || true
-    rsync -a --exclude=worktrees "$ORIGINAL_REPO/.claude/" .claude/ 2>/dev/null || {
-        mkdir -p .claude
-        echo '{}' > .claude/settings.local.json
-    }
-    cp -r "$ORIGINAL_REPO/.idea" . 2>/dev/null || true
-    command -v uv >/dev/null && uv sync
-fi
-```
+Source: [`templates/post-checkout-python-uv.sh`](./templates/post-checkout-python-uv.sh)
+
+Copies `.env`, `development.secrets.env`, `.claude/` (excluding WIP), `.idea/`,
+and runs `uv sync`.
 
 ### Template B: Node.js + Husky (write to `.husky/post-checkout`)
 
-```sh
-#!/bin/sh
-if [ "$1" = "0000000000000000000000000000000000000000" ]; then
-    echo "New worktree detected. Running setup..."
-    pwd
-    ORIGINAL_REPO=/work/<org>/<project-name>
-    cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
-    rsync -a --exclude=worktrees "$ORIGINAL_REPO/.claude/" .claude/ 2>/dev/null || {
-        mkdir -p .claude
-        echo '{}' > .claude/settings.local.json
-    }
-    command -v yarn >/dev/null && yarn install --frozen-lockfile
-fi
-```
+Source: [`templates/post-checkout-node-husky.sh`](./templates/post-checkout-node-husky.sh)
+
+Copies `.env`, `.claude/` (excluding WIP), and runs `yarn install --frozen-lockfile`.
 
 For monorepos (yarn workspaces), run `yarn install --frozen-lockfile` from
 the repo root — this installs all workspace packages in one pass.
 
 ### Template C: Node.js without Husky (write to `.git/hooks/post-checkout`)
 
-```sh
-#!/bin/sh
-if [ "$1" = "0000000000000000000000000000000000000000" ]; then
-    echo "New worktree detected. Running setup..."
-    pwd
-    ORIGINAL_REPO=/work/<org>/<project-name>
-    cp "$ORIGINAL_REPO/.env" . 2>/dev/null || echo "No .env found."
-    rsync -a --exclude=worktrees "$ORIGINAL_REPO/.claude/" .claude/ 2>/dev/null || {
-        mkdir -p .claude
-        echo '{}' > .claude/settings.local.json
-    }
-    if command -v yarn >/dev/null; then
-        yarn install --frozen-lockfile
-    elif command -v npm >/dev/null; then
-        npm ci
-    fi
-fi
-```
+Source: [`templates/post-checkout-node.sh`](./templates/post-checkout-node.sh)
+
+Copies `.env`, `.claude/` (excluding WIP), and runs `yarn install` or `npm ci`.
 
 Make executable: `chmod +x .git/hooks/post-checkout`
 
