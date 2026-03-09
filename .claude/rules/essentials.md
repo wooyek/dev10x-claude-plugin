@@ -5,7 +5,8 @@ Universal rules for every session. Detailed guides live in
 
 ## Branch & PR Targeting
 
-- **Feature PRs** target `develop` — always pass `--base develop`
+- **Feature PRs** target the detected base branch — `detect-base-branch.sh`
+  prefers `develop`/`development`, falls back to `main`/`master`/`trunk`
 - **Release PRs** target `main` only via merge from `develop`
 - Branch format: `username/TICKET-ID/short-description`
 - Worktree branch format: `username/TICKET-ID/worktree-name/short-description`

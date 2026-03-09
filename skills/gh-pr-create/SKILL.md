@@ -51,6 +51,7 @@ All multi-line commands live in `${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scrip
 
 | Script | Purpose |
 |--------|---------|
+| `detect-base-branch.sh` | Auto-detect base branch (develop → main fallback) |
 | `verify-state.sh` | Validate branch, commits, and base branch ancestry |
 | `generate-commit-list.sh` | Generate linked commit list for PR body |
 | `pre-pr-checks.sh` | Run ruff, black, mypy, pytest before push |
@@ -141,7 +142,7 @@ last incremental step, not the overall change. Instead:
 
 1. List all commit titles in the branch:
    ```bash
-   git log origin/develop..HEAD --reverse --format=%s
+   git log origin/$BASE_BRANCH..HEAD --reverse --format=%s
    ```
 2. Check if the JTBD "so I can" clause (from Step 3) suggests a
    better title — transform it to imperative form with the ticket's
@@ -189,7 +190,7 @@ pattern.
 If no Job Story found in the ticket:
 
 ```bash
-git log origin/develop..HEAD --format=%B
+git log origin/$BASE_BRANCH..HEAD --format=%B
 ```
 
 **Step 3d: Generate a new one**
@@ -264,7 +265,7 @@ This script:
 
 ### Step 7: Mark N/A Checklist Items in PR Body
 
-Analyze `git diff origin/develop..HEAD` to determine which checklist items
+Analyze `git diff origin/$BASE_BRANCH..HEAD` to determine which checklist items
 don't apply to this PR, then update the PR body with strikethroughs:
 
 **N/A detection heuristics:**
@@ -309,8 +310,10 @@ Next steps:
 ## Important Notes
 
 - Always create PRs as drafts initially
-- **Always target `develop`** — the `--base develop` flag is mandatory
-  in `create-pr.sh` and enforced by a PreToolUse hook
+- **Base branch is auto-detected** — `detect-base-branch.sh` checks for
+  `develop`/`development` first, falls back to `main`/`master`/`trunk`.
+  Pass `--force` to `verify-state.sh` to override when a dev branch exists
+  but you intentionally target a different base.
 - Ensure branch is pushed before creating PR
 - Handle existing PR case gracefully
 - Link to issue tracker ticket in PR body (when FIXES_URL is available)

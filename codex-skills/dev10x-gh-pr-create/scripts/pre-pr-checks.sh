@@ -3,8 +3,16 @@
 # Skip if diff contains only non-Python files.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BASE_BRANCH="${1:-}"
+
+if [ -z "$BASE_BRANCH" ]; then
+    # shellcheck source=detect-base-branch.sh
+    source "$SCRIPT_DIR/detect-base-branch.sh"
+fi
+
 # Check if any Python files changed
-PYTHON_FILES=$(git diff origin/develop..HEAD --name-only | grep '\.py$' || true)
+PYTHON_FILES=$(git diff "origin/$BASE_BRANCH..HEAD" --name-only | grep '\.py$' || true)
 if [ -z "$PYTHON_FILES" ]; then
     echo "⏭️  No Python files changed — skipping pre-PR checks."
     exit 0
