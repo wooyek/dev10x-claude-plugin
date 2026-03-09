@@ -10,7 +10,7 @@ Files matching: `.claude/rules/**/*.md`, `.claude/agents/**/*.md`,
 
 ## Required Reading
 
-- `.claude/rules/README.md` — size budgets, split policy, tables
+- `.claude/rules/INDEX.md` — size budgets, split policy, tables
 
 ## Checklist
 
@@ -25,9 +25,9 @@ Files matching: `.claude/rules/**/*.md`, `.claude/agents/**/*.md`,
 2.5. **Override detection** — when a file exceeds budget:
    - Flag with [OVERRIDE DETECTED]
    - Verify the author has provided explicit justification in PR comments or CLAUDE.md
-   - Confirm a split plan exists (or is conditional per Budget Overrides section in .claude/rules/README.md)
+   - Confirm a split plan exists (or is conditional per Budget Overrides section in .claude/rules/INDEX.md)
    - If absent, request justification before approval
-3. **Table consistency** — verify README.md Rules/Agents tables
+3. **Table consistency** — verify INDEX.md Rules/Agents tables
    and CLAUDE.md Code Review table match actual files on disk
 4. **Pruning hygiene** — new entries should contain trade-off
    reasoning, not PR# attribution. Provenance belongs in git
