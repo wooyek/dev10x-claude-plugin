@@ -50,3 +50,22 @@ Determine which pattern applies:
 3. Check if SKILL.md references external binaries or `~/.claude/tools/` only
    - Yes + no `scripts/` → Orchestration-based; Items 4, 5 do NOT apply
    - No → Ambiguous; flag as INFO for author clarification
+
+## Pattern 3: Template Files
+
+When inline script code blocks exceed ~40 lines, extract them into separate
+template files while keeping SKILL.md readable.
+
+**Characteristics**:
+- SKILL.md contains reference links with brief descriptions
+- Actual implementation in `templates/`, `scripts/`, or `examples/`
+- Each template includes header comments explaining goals and usage
+- Cross-synchronized across `skills/` and `codex-skills/` directories
+
+**Reviewer expectations** (from `reviewer-skill.md`):
+- Template files must have clear, actionable header comments (goals, mechanism, extension points)
+- Reference links in SKILL.md must use consistent formatting
+- If templates are meant to be copy-pasted, permissions `100644` is correct
+- If templates are internally executed, verify permissions `100755` and shebangs
+
+**Examples**: `git-worktree/templates/post-checkout-*.sh`

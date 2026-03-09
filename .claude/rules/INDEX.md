@@ -76,6 +76,7 @@ Internal review-only agents (≤ 50 lines each).
 | `reviewer-generic.md` | `**/*.py`, `**/*.sh` | `references/review-checks-common.md` |
 | `reviewer-infra.md` | `Makefile`, `**/*.sh`, `bin/**`, `.github/workflows/**` | `references/review-checks-common.md` |
 | `reviewer-docs.md` | `docs/**`, `.claude/**/*.md` | `references/review-checks-common.md` |
+| `reviewer-pr-metadata.md` | All PRs | `references/git-pr.md`, `references/git-commits.md` |
 | `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | (self-contained) |
 | `reviewer-skill.md` | `skills/**` | `.claude/rules/skill-naming.md` |
 

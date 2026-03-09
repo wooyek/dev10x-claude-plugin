@@ -109,3 +109,9 @@ marker guidance, and examples. Review checklist item 14a enforces this.
 Multi-agent architecture with domain-routed reviewers.
 See `.claude/rules/INDEX.md` for the routing table and
 `references/rules-architecture.md` for the full architecture.
+
+## Review Feedback Severity
+
+- **REQUIRED**: Must fix before merge.
+- **RECOMMENDED**: Suggested improvement; author may skip. Once acknowledged,
+  do not re-raise — repeating optional feedback is noise.
