@@ -17,12 +17,11 @@ invocation-name: dev10x:park
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Defer work item",
-    activeForm="Deferring item")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Defer work item", activeForm="Deferring item")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ## Overview
 

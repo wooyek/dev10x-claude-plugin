@@ -20,12 +20,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Post PR session bookmark",
-    activeForm="Bookmarking PR")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Post PR session bookmark", activeForm="Bookmarking PR")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ## Overview
 

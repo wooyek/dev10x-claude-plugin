@@ -32,23 +32,13 @@ Set sequential dependencies: each phase blocked by the previous.
 
 **Split strategy decision (Phase 1):** After analyzing the commit,
 queue the split strategy decision in task metadata. If no other
-tasks can advance, present via AskUserQuestion:
+tasks can advance, present the decision.
 
-```
-AskUserQuestion(questions=[{
-    question: "Proposed split into N commits. Approve?",
-    header: "Split Strategy",
-    options: [
-        {label: "Approve split plan (Recommended)",
-         description: "Proceed with the proposed commit boundaries"},
-        {label: "Adjust boundaries",
-         description: "I want to change how the split is organized"},
-        {label: "Abort",
-         description: "Keep the original monolithic commit"}
-    ],
-    multiSelect: false
-}])
-```
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+Options:
+- Approve split plan (Recommended) — Proceed with the proposed commit boundaries
+- Adjust boundaries — I want to change how the split is organized
+- Abort — Keep the original monolithic commit
 
 ## Core Principles
 

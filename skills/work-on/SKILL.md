@@ -547,20 +547,10 @@ Run them in parallel?
 | Worktree, matching feature branch | No action needed — branch already exists |
 
 If the Phase 1 workspace decision was deferred (local-only
-work), ask at the start of Phase 4:
-```
-AskUserQuestion(questions=[{
-    question: "Where should we work?",
-    header: "Workspace",
-    options: [
-        {label: "Work here (Recommended)",
-         description: "Use current directory and branch"},
-        {label: "New worktree",
-         description: "Create an isolated worktree"}
-    ],
-    multiSelect: false
-}])
-```
+work), **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+Options:
+- Work here (Recommended) — Use current directory and branch
+- New worktree — Create an isolated worktree
 
 **Job Story drafting:**
 - MUST invoke `Skill(dev10x:jtbd)` explicitly — never draft inline

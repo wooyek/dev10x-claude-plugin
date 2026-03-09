@@ -186,9 +186,7 @@ If no unaddressed comments found → report "No unaddressed comments" and stop.
 
 ### Step 2: Triage all comments (parallel)
 
-```
-TaskUpdate(taskId=triage_task, status="in_progress")
-```
+Mark phase transition: `TaskUpdate(taskId=triage_task, status="in_progress")`
 
 Dispatch parallel triage subagents — up to 4 concurrent. Each
 subagent receives only its comment context (not the full PR diff)
@@ -212,9 +210,7 @@ Agent(description=f"Triage r{id4} on {path4}", ..., run_in_background=true)
 Collect results as notifications arrive. If more than 4 comments,
 dispatch the next batch as agents complete.
 
-```
-TaskUpdate(taskId=triage_task, status="completed")
-```
+Mark phase transition: `TaskUpdate(taskId=triage_task, status="completed")`
 
 Present the full plan to the user as a table:
 
@@ -245,9 +241,7 @@ reviewer").
 
 ### Step 4: Execute approved responses
 
-```
-TaskUpdate(taskId=execute_task, status="in_progress")
-```
+Mark phase transition: `TaskUpdate(taskId=execute_task, status="in_progress")`
 
 For each approved comment:
 
@@ -262,10 +256,7 @@ For each approved comment:
 
 Report progress after each comment is processed.
 
-```
-TaskUpdate(taskId=execute_task, status="completed")
-TaskUpdate(taskId=resolve_task, status="in_progress")
-```
+Mark phase transition: `TaskUpdate(taskId=execute_task, status="completed")` then `TaskUpdate(taskId=resolve_task, status="in_progress")`
 
 ### Step 5: Thread resolution confirmation
 

@@ -21,12 +21,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Schedule Slack reminder",
-    activeForm="Scheduling reminder")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Schedule Slack reminder", activeForm="Scheduling reminder")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ## Overview
 

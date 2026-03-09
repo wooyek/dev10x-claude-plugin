@@ -14,12 +14,11 @@ user-invocable: false
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Plan database query",
-    activeForm="Planning query")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Plan database query", activeForm="Planning query")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 Schema-first query construction for safe, accurate database queries.
 

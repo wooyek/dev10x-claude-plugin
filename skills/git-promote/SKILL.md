@@ -20,12 +20,11 @@ This skill automates the process of converting an existing git commit into a tra
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Promote commits to tickets",
-    activeForm="Promoting commits")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Promote commits to tickets", activeForm="Promoting commits")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ## Prerequisites Check
 

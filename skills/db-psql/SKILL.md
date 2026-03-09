@@ -17,12 +17,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Execute safe database query",
-    activeForm="Querying database")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Execute safe database query", activeForm="Querying database")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 Safe read-only psql wrapper with two layers of protection:
 

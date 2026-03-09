@@ -115,15 +115,17 @@ Files matching: `skills/**`
     (b) constraint appears in Important Notes section;
     (c) scripts or calling code are consistent with the constraint.
     Do NOT flag strong imperative language as "over-emphasis".
-14a. **Orchestration list formatting** — if Orchestration section contains
-    multiple `TaskCreate` calls, verify they are in a numbered list (not
-    a fenced code block) and each item includes `REQUIRED:` or enforcement
-    language. Numbered lists read as instructions; code blocks read as
-    examples. See `.claude/rules/skill-orchestration-format.md`.
-    **False-positive prevention**: Do NOT flag `TaskCreate` or `AskUserQuestion`
-    calls appearing in "Example" or "Anti-pattern" subsections even if inside
-    fenced code blocks — these are illustrative only. Only enforce the
-    formatting rule for the main Orchestration section.
+14a. **Orchestration list formatting** — verify that ALL mandatory tool
+    invocations (`TaskCreate`, `TaskUpdate`, `AskUserQuestion`, `Agent`,
+    `Skill`) in the Orchestration section and decision gate sections use
+    **numbered lists with enforcement markers** (`REQUIRED:`, `MANDATORY:`,
+    `DO NOT SKIP`), not fenced code blocks. Agents treat code blocks as
+    illustrative examples and may skip them silently.
+    See `.claude/rules/skill-orchestration-format.md`.
+    **False-positive prevention**: Do NOT flag tool calls appearing in
+    "Example", "Anti-pattern", or "Output Format" subsections even if
+    inside fenced code blocks — these are illustrative only. Only enforce
+    the formatting rule for Orchestration and decision gate sections.
 
 15. **Config file schema** — when a skill reads or writes a structured
     config file (YAML, JSON, TOML), SKILL.md must:

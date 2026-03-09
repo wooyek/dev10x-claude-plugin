@@ -16,12 +16,11 @@ invocation-name: dev10x:session-tasks
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Track session work items",
-    activeForm="Tracking items")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Track session work items", activeForm="Tracking items")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ## Overview
 

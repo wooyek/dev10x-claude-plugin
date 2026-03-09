@@ -20,12 +20,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Configure UV for Python",
-    activeForm="Configuring UV")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Configure UV for Python", activeForm="Configuring UV")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 Detect UV installation status, guide installation from official docs, and
 migrate legacy `#!/usr/bin/env python3` scripts to self-executing UV scripts

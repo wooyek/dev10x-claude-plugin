@@ -349,6 +349,19 @@ instead of calling the tool, classify it as:
 - **DEVIATED** with assessment **regression** — plain text
   questions don't block execution and lack structured options
 
+**Orchestration formatting check:** For each invoked skill, scan its
+SKILL.md for mandatory tool calls (`TaskCreate`, `TaskUpdate`,
+`AskUserQuestion`, `Agent`, `Skill`) that appear inside fenced code
+blocks in the Orchestration or decision gate sections. Per
+`skill-orchestration-format.md`, code blocks are treated as examples
+and agents may skip them. If the session shows missing task tracking
+or bypassed decision gates, check whether the SKILL.md formatting is
+the root cause. Classify as:
+- **DEVIATED** with assessment **regression** if the code-block
+  formatting caused the agent to skip a mandatory step
+- **GAP** if the formatting is wrong but the agent happened to
+  execute correctly anyway (lucky compliance, not guaranteed)
+
 ---
 
 #### Phase 4: Permission Friction Analysis

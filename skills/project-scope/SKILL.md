@@ -82,21 +82,9 @@ to determine the project's tracker backend.
 
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text) when
 tracker cannot be detected automatically (e.g., free-text input
-with no branch context):
-
-```
-AskUserQuestion(questions=[{
-    question: "Which tracker should we use for this project?",
-    header: "Tracker",
-    options: [
-        {label: "Linear (Recommended)",
-         description: "Create Linear project with milestones"},
-        {label: "JIRA",
-         description: "Create JIRA epic with sub-tasks"}
-    ],
-    multiSelect: false
-}])
-```
+with no branch context). Options:
+- Linear (Recommended) — Create Linear project with milestones
+- JIRA — Create JIRA epic with sub-tasks
 
 ### 1.4 Research Codebase
 
@@ -122,23 +110,10 @@ Tickets are intentionally high-level. Further refinement via
 ### 2.2 Present for Approval
 
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
-This blocks execution until the user responds:
-
-```
-AskUserQuestion(questions=[{
-    question: "Approve this project structure?",
-    header: "Scope Review",
-    options: [
-        {label: "Approve (Recommended)",
-         description: "Create milestones and tickets as shown"},
-        {label: "Revise",
-         description: "I have corrections to the structure"},
-        {label: "More research needed",
-         description: "Need to explore additional areas"}
-    ],
-    multiSelect: false
-}])
-```
+This blocks execution until the user responds. Options:
+- Approve (Recommended) — Create milestones and tickets as shown
+- Revise — I have corrections to the structure
+- More research needed — Need to explore additional areas
 
 If "Revise": incorporate feedback and re-present.
 If "More research": return to Phase 1.4 with user guidance.
@@ -164,21 +139,9 @@ create the parent ticket using the executive summary as description.
 ### 3.3 Create Project Entity (Optional)
 
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
-This blocks execution until the user responds:
-
-```
-AskUserQuestion(questions=[{
-    question: "Create a project-level entity in the tracker?",
-    header: "Project",
-    options: [
-        {label: "Create project entity (Recommended)",
-         description: "Enables roadmap views and project tracking"},
-        {label: "Skip",
-         description: "Just milestones and tickets, no project entity"}
-    ],
-    multiSelect: false
-}])
-```
+This blocks execution until the user responds. Options:
+- Create project entity (Recommended) — Enables roadmap views and project tracking
+- Skip — Just milestones and tickets, no project entity
 
 ### 3.4 Create Milestones
 

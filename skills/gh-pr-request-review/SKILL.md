@@ -15,12 +15,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Request PR review",
-    activeForm="Requesting review")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Request PR review", activeForm="Requesting review")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 Request reviews on GitHub pull requests from teams or individual users.
 Auto-resolves reviewers from per-project config when available.

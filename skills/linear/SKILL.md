@@ -27,12 +27,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Linear issue operation",
-    activeForm="Operating on Linear issue")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Linear issue operation", activeForm="Operating on Linear issue")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 Documentation-only skill centralizing Linear MCP tool references.
 No scripts — all operations use MCP tools directly.

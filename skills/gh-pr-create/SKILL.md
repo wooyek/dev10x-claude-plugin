@@ -38,23 +38,12 @@ Never pause between steps to ask "should I continue?".
 Set sequential dependencies: generate blocked by verify, checks
 blocked by generate, push blocked by checks.
 
-**Decision gate via AskUserQuestion** after generating the PR body:
-
-```
-AskUserQuestion(questions=[{
-    question: "Create PR with this title and body?",
-    header: "PR Preview",
-    options: [
-        {label: "Create PR (Recommended)",
-         description: "Push branch and create draft PR as shown"},
-        {label: "Edit title/body",
-         description: "I want to revise before creating"},
-        {label: "Abort",
-         description: "Cancel PR creation"}
-    ],
-    multiSelect: false
-}])
-```
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text) after
+generating the PR body. This blocks execution until the user responds.
+Options:
+- Create PR (Recommended) — Push branch and create draft PR as shown
+- Edit title/body — I want to revise before creating
+- Abort — Cancel PR creation
 
 ## Scripts
 

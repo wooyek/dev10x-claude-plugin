@@ -28,12 +28,11 @@ to pre-approve the scripts without per-call prompts.
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Safe git push",
-    activeForm="Pushing safely")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Safe git push", activeForm="Pushing safely")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ## Safe Push
 

@@ -19,12 +19,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Create git worktree",
-    activeForm="Creating worktree")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Create git worktree", activeForm="Creating worktree")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 **Announce:** "Using dev10x:git-worktree skill to create an isolated workspace."
 

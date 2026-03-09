@@ -57,23 +57,12 @@ Set sequential dependencies: research blocked by fetch, design
 blocked by research, estimate blocked by design, format blocked by
 estimate, save blocked by format.
 
-**Decision gate via AskUserQuestion** after presenting the scope:
-
-```
-AskUserQuestion(questions=[{
-    question: "Approve this scoping document?",
-    header: "Scope Review",
-    options: [
-        {label: "Approve (Recommended)",
-         description: "Save document and optionally update Linear"},
-        {label: "Revise",
-         description: "I have corrections to the scope"},
-        {label: "More research needed",
-         description: "Need to explore additional areas"}
-    ],
-    multiSelect: false
-}])
-```
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text) after
+presenting the scope. This blocks execution until the user responds.
+Options:
+- Approve (Recommended) — Save document and optionally update Linear
+- Revise — I have corrections to the scope
+- More research needed — Need to explore additional areas
 
 ## Prerequisites
 

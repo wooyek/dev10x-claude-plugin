@@ -43,23 +43,13 @@ Set sequential dependencies: each phase blocked by the previous.
 
 **Error recovery gate (Phase 3):** When tests fail, queue the
 decision in task metadata. If no other tasks can advance, present
-via AskUserQuestion:
+the decision.
 
-```
-AskUserQuestion(questions=[{
-    question: "Playwright tests failed. How to proceed?",
-    header: "Test Failure Recovery",
-    options: [
-        {label: "Fix and retry (Recommended)",
-         description: "Adjust the test script and re-run"},
-        {label: "Skip failing test case",
-         description: "Mark as skipped, continue with passing tests"},
-        {label: "Abort",
-         description: "Stop QA execution entirely"}
-    ],
-    multiSelect: false
-}])
-```
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+Options:
+- Fix and retry (Recommended) — Adjust the test script and re-run
+- Skip failing test case — Mark as skipped, continue with passing tests
+- Abort — Stop QA execution entirely
 
 ## Prerequisites
 

@@ -46,23 +46,13 @@ test expectations) — collect results before moving to Phase 2.
 **Decision gate after Phase 2:** Queue a decision for supervisor
 review of the proposed architecture before creating the
 implementation plan. If no other tasks are running, present
-immediately via AskUserQuestion:
+immediately.
 
-```
-AskUserQuestion(questions=[{
-    question: "Architecture design complete. Proceed?",
-    header: "Design",
-    options: [
-        {label: "Proceed to implementation plan (Recommended)",
-         description: "Design looks good, create actionable steps"},
-        {label: "Revise design",
-         description: "I have corrections to the architecture"},
-        {label: "More research needed",
-         description: "Need to explore additional patterns"}
-    ],
-    multiSelect: false
-}])
-```
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+Options:
+- Proceed to implementation plan (Recommended) — Design looks good, create actionable steps
+- Revise design — I have corrections to the architecture
+- More research needed — Need to explore additional patterns
 
 ## Core Scoping Workflow
 
@@ -133,11 +123,7 @@ Document what exists vs. what's needed:
 | **Models** | List existing | List new |
 | **APIs** | List existing | List new |
 
-Mark context gathering task completed, auto-advance:
-```
-TaskUpdate(taskId=gather_task, status="completed")
-TaskUpdate(taskId=design_task, status="in_progress")
-```
+Mark phase transition: `TaskUpdate(taskId=gather_task, status="completed")` then `TaskUpdate(taskId=design_task, status="in_progress")`
 
 ### Phase 2: Solution Design
 
@@ -185,10 +171,7 @@ Dependencies: [What it needs injected]
 After design, queue the approval decision (see Orchestration
 section above). Auto-advance to Phase 3 after approval.
 
-```
-TaskUpdate(taskId=design_task, status="completed")
-TaskUpdate(taskId=plan_task, status="in_progress")
-```
+Mark phase transition: `TaskUpdate(taskId=design_task, status="completed")` then `TaskUpdate(taskId=plan_task, status="in_progress")`
 
 ### Phase 3: Implementation Planning
 
@@ -220,10 +203,7 @@ Each step should include:
 
 **Mitigation strategies** for each risk.
 
-```
-TaskUpdate(taskId=plan_task, status="completed")
-TaskUpdate(taskId=doc_task, status="in_progress")
-```
+Mark phase transition: `TaskUpdate(taskId=plan_task, status="completed")` then `TaskUpdate(taskId=doc_task, status="in_progress")`
 
 ### Phase 4: Documentation
 
@@ -249,10 +229,7 @@ For significant decisions, document:
 - **Consequences:** What becomes easier/harder
 - **Alternatives:** What we considered and rejected
 
-```
-TaskUpdate(taskId=doc_task, status="completed")
-TaskUpdate(taskId=validate_task, status="in_progress")
-```
+Mark phase transition: `TaskUpdate(taskId=doc_task, status="completed")` then `TaskUpdate(taskId=validate_task, status="in_progress")`
 
 ### Phase 5: Review and Iterate
 

@@ -73,36 +73,14 @@ After analysis, queue the strategy decision in task metadata.
 If no other tasks are running, present immediately. Otherwise
 the orchestrator batches it with other pending decisions.
 
-```
-TaskUpdate(taskId=strategy_task, status="pending",
-    metadata={"decision_needed": "Which restructuring strategy?",
-              "options": ["Fixup", "Full restructure",
-                          "Mass rewrite", "Interactive rebase"]})
-```
+Mark the phase transition: `TaskUpdate(taskId=strategy_task, status="pending", metadata={"decision_needed": "Which restructuring strategy?", "options": ["Fixup", "Full restructure", "Mass rewrite", "Interactive rebase"]})`
 
-When the decision arrives via `AskUserQuestion`, use previews
-so the supervisor sees the commands each strategy runs:
-
-```
-AskUserQuestion(questions=[{
-    question: "Which restructuring strategy for N commits?",
-    header: "Strategy",
-    options: [
-        {label: "Fixup (Recommended)",
-         description: "Small targeted fixes to specific commits",
-         preview: "git commit --fixup=<sha>\nGIT_SEQUENCE_EDITOR=true git rebase -i --autosquash"},
-        {label: "Full restructure",
-         description: "Reset all commits, rebuild from scratch",
-         preview: "git reset --soft <base>\ngit reset HEAD\ngit add -p"},
-        {label: "Mass rewrite",
-         description: "Non-interactive message rewrite from JSON",
-         preview: "mass-rewrite.py --config rewrite.json"},
-        {label: "Interactive rebase",
-         description: "Full manual control over commit order"}
-    ],
-    multiSelect: false
-}])
-```
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+Options:
+- Fixup (Recommended) — Small targeted fixes to specific commits
+- Full restructure — Reset all commits, rebuild from scratch
+- Mass rewrite — Non-interactive message rewrite from JSON
+- Interactive rebase — Full manual control over commit order
 
 After selection, update the execute task description with the
 chosen strategy and auto-advance into Phase 3.
@@ -244,12 +222,7 @@ Commands in interactive rebase:
 
 ### Phase 3: Push Changes
 
-Mark the execute task completed, auto-advance to push:
-
-```
-TaskUpdate(taskId=execute_task, status="completed")
-TaskUpdate(taskId=push_task, status="in_progress")
-```
+Mark phase transition: `TaskUpdate(taskId=execute_task, status="completed")` then `TaskUpdate(taskId=push_task, status="in_progress")`
 
 ```bash
 # Force push with lease (safer than --force)
@@ -270,10 +243,7 @@ contain stale commit hashes.
 
 This step is only needed when an open PR exists for the branch.
 
-After completing, mark all tasks done:
-```
-TaskUpdate(taskId=push_task, status="completed")
-```
+After completing, mark all tasks done: `TaskUpdate(taskId=push_task, status="completed")`
 
 ## Common Scenarios
 

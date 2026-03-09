@@ -22,12 +22,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Create or improve skill",
-    activeForm="Working on skill")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Create or improve skill", activeForm="Working on skill")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 **Announce:** "Using dev10x:skill-create to [create/improve] the `<name>` skill."
 

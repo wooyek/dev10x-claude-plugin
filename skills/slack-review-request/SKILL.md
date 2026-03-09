@@ -14,12 +14,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Post Slack review request",
-    activeForm="Posting review request")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Post Slack review request", activeForm="Posting review request")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 Post a review notification to the project's configured Slack channel
 with appropriate team and user mentions.

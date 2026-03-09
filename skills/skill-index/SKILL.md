@@ -18,12 +18,11 @@ allowed-tools:
 This skill follows `references/task-orchestration.md` patterns.
 Create a task at invocation, mark completed when done:
 
-```
-TaskCreate(subject="Generate skill index",
-    activeForm="Generating index")
-# ... do work ...
-TaskUpdate(taskId, status="completed")
-```
+**REQUIRED: Create a task at invocation.** Execute at startup:
+
+1. `TaskCreate(subject="Generate skill index", activeForm="Generating index")`
+
+Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ## Instructions
 
