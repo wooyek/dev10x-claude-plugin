@@ -115,9 +115,11 @@ Report success: channel ID, thread timestamp (if available).
 
 ## Integration
 
-This skill is invoked by `dev10x:gh-pr-monitor` Phase 3 (after GitHub
-reviewer assignment) to post the Slack notification. It handles only
-Slack posting — no GitHub API calls.
+This skill is invoked by:
+- `dev10x:request-review` — combined review request orchestrator
+- `dev10x:gh-pr-monitor` Phase 2.7 (re-review notification)
+
+It handles only Slack posting — no GitHub API calls.
 
 For re-review notifications (Phase 2.7 in `dev10x:gh-pr-monitor`), the
 calling skill composes a custom message (e.g., "@reviewer please take
