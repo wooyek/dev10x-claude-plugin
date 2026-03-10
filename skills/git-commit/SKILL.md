@@ -4,6 +4,7 @@ description: Create a properly formatted git commit following project convention
 user-invocable: true
 invocation-name: dev10x:git-commit
 allowed-tools:
+  - AskUserQuestion
   - Bash(/tmp/claude/bin/mktmp.sh:*)
   - Write(/tmp/claude/git/**)
 ---
@@ -49,58 +50,33 @@ Never pause between steps to ask "should I continue?".
 Set sequential dependencies: draft blocked by gather, review blocked
 by draft, create blocked by review.
 
-**Decision gates via AskUserQuestion:**
+**Decision gates — REQUIRED: Call `AskUserQuestion`** (do NOT
+use plain text) at each of these points:
 
 - **Staging approval** (when unstaged changes exist):
-  ```
-  AskUserQuestion(questions=[{
-      question: "Stage these changes for commit?",
-      header: "Staging",
-      options: [
-          {label: "Stage all (Recommended)",
-           description: "git add -A"},
-          {label: "Stage specific files",
-           description: "I'll specify which files to include"},
-          {label: "Abort",
-           description: "Cancel commit"}
-      ],
-      multiSelect: false
-  }])
-  ```
+  **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text,
+  call spec: [ask-staging.md](./tool-calls/ask-staging.md)).
+  Options:
+  - Stage all (Recommended) — git add -A
+  - Stage specific files — user specifies which files
+  - Abort — cancel commit
 
 - **Commit type selection** (gitmoji):
-  ```
-  AskUserQuestion(questions=[{
-      question: "What type of change is this?",
-      header: "Commit type",
-      options: [
-          {label: "Feature", description: "New functionality"},
-          {label: "Fix", description: "Bug fix"},
-          {label: "Refactor", description: "Code restructuring"},
-          {label: "Test", description: "Adding or updating tests"},
-          {label: "Docs", description: "Documentation changes"},
-          {label: "Other", description: "Choose a different gitmoji"}
-      ],
-      multiSelect: false
-  }])
-  ```
+  **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text,
+  call spec: [ask-commit-type.md](./tool-calls/ask-commit-type.md)).
+  Options:
+  - Feature — new functionality
+  - Fix — bug fix
+  - Refactor — code restructuring
+  - Test — adding or updating tests
 
 - **Message preview approval**:
-  ```
-  AskUserQuestion(questions=[{
-      question: "Commit with this message?",
-      header: "Preview",
-      options: [
-          {label: "Commit (Recommended)",
-           description: "Create the commit as shown"},
-          {label: "Edit message",
-           description: "I want to change the message"},
-          {label: "Abort",
-           description: "Cancel commit"}
-      ],
-      multiSelect: false
-  }])
-  ```
+  **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text,
+  call spec: [ask-message-preview.md](./tool-calls/ask-message-preview.md)).
+  Options:
+  - Commit (Recommended) — create the commit as shown
+  - Edit message — revise before creating
+  - Abort — cancel commit
 
 ## Prerequisites Check
 
