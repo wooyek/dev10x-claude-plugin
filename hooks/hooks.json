@@ -66,6 +66,11 @@
             "type": "command",
             "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-sql.py",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-pr-base.sh",
+            "timeout": 5
           }
         ]
       },
