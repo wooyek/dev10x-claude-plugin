@@ -8,7 +8,7 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/*:*)
   - Bash(gh:*)
   - Skill(dev10x:qa-scope)
-  - Skill(dev10x:slack-review-request)
+  - Skill(dev10x:request-review)
 ---
 
 # PR Review Monitor (Background Agent)
@@ -341,32 +341,20 @@ Use `AskUserQuestion`:
 
 ### Step 3: Execute (if user approves)
 
-If user approves, execute three delegated steps in sequence:
+If user approves, execute two delegated steps in sequence:
 
-**Step 3a: Assign GitHub reviewers**
-
-```
-Skill("dev10x:gh-pr-request-review", args="--pr {pr_number} --repo {repo}")
-```
-
-The dev10x:gh-pr-request-review skill will:
-- Read the project's GitHub config for default reviewers
-- Assign them via `gh pr edit --add-reviewer`
-- Report results back to the agent
-
-**Step 3b: Post Slack review notification**
+**Step 3a: Request review (GitHub + Slack)**
 
 ```
-Skill("dev10x:slack-review-request", args="--pr {pr_number} --repo {repo}")
+Skill("dev10x:request-review", args="--pr {pr_number} --repo {repo}")
 ```
 
-The dev10x:slack-review-request skill will:
-- Read the project's Slack config (channel, mentions)
-- Format the review notification message
-- Post to the configured Slack channel
-- Report results back to the agent
+The dev10x:request-review skill will:
+- Assign GitHub reviewers from project config
+- Post Slack review notification from project config
+- Each step may skip independently based on per-project config
 
-**Step 3c: Update PR checklist**
+**Step 3b: Update PR checklist**
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
@@ -375,7 +363,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
 ```
 
 This call runs checklist-only mode — no Slack posting, no reviewer
-assignment (those were handled by the delegated skills above).
+assignment (those were handled by the delegated skill above).
 
 ### Step 4: Execute (if user declines)
 
@@ -418,8 +406,8 @@ reviewers assigned, Slack notification posted.
 2. **dev10x:ticket-jtbd** — Delegated to by the agent in Phase 0
 3. **dev10x:gh-pr-respond** — Delegated to by the agent for review comments (Phase 2)
 4. **dev10x:qa-scope** — Delegated to by the agent for QA risk assessment (Phase 2.5)
-5. **dev10x:gh-pr-request-review** — Delegated to by the agent in Phase 3 (GitHub reviewer assignment)
-6. **dev10x:slack-review-request** — Delegated to by the agent in Phase 2.7 and Phase 3 (Slack notifications)
+5. **dev10x:request-review** — Delegated to by the agent in Phase 3 (combined GitHub + Slack review request)
+6. **dev10x:slack-review-request** — Delegated to by the agent in Phase 2.7 (re-review notification)
 7. **pr-notify.py** — Phase 3 helper script (checklist update only)
 
 ## Delegation Pattern
@@ -447,8 +435,7 @@ reviewers assigned, Slack notification posted.
         │
         └── Phase 3: Notification (initial review request)
                 ├── AskUserQuestion → confirm message
-                └── If approved, execute three delegated steps:
-                    ├── Skill("dev10x:gh-pr-request-review") → assign GitHub reviewers
-                    ├── Skill("dev10x:slack-review-request") → post Slack notification
+                └── If approved, execute two delegated steps:
+                    ├── Skill("dev10x:request-review") → assign GitHub reviewers + post Slack
                     └── pr-notify.py send (checklist-only mode)
 ```
