@@ -30,7 +30,7 @@ The code review system uses a **multi-agent architecture**:
 | `Makefile`, `bin/**`, `hooks/**`, `*.sh` | `reviewer-infra` | `references/review-checks-common.md` |
 | `docs/**`, `.claude/**/*.md`, `README.md` | `reviewer-docs` | `references/review-checks-common.md` |
 | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | `reviewer-rules-maintenance` | (self-contained) |
-| `skills/**` | `reviewer-skill` | `.claude/rules/skill-naming.md`, `references/skill-invocation.md`, `references/eval-schema.md` |
+| `skills/**` | `reviewer-skill`, `reviewer-skill-behavior` | `.claude/rules/skill-naming.md`, `references/skill-invocation.md`, `references/eval-schema.md` |
 
 ## Loading Strategy
 
@@ -78,6 +78,7 @@ Internal review-only agents (≤ 50 lines each).
 | `reviewer-docs.md` | `docs/**`, `.claude/**/*.md` | `references/review-checks-common.md` |
 | `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | (self-contained) |
 | `reviewer-skill.md` | `skills/**` | `.claude/rules/skill-naming.md` |
+| `reviewer-skill-behavior.md` | `skills/**` | `references/task-orchestration.md`, `.claude/rules/skill-gates.md` |
 
 ## Plugin-Distributed Sub-Agents (`agents/`)
 
@@ -118,10 +119,9 @@ Examples:
 - `references/task-orchestration.md` (367 lines) exceeds the 200-line
   budget because 7 orchestration patterns form a unified framework that
   43+ skills reference atomically.
-- `.claude/agents/reviewer-skill.md` (151 lines) exceeds the 50-line
-  budget because skill review spans 19 distinct checklist items. If
-  the file exceeds 170 lines, split into `reviewer-skill-paths.md`
-  (items 7-8g) and `reviewer-skill-behavior.md` (items 14-19).
+- `.claude/agents/reviewer-skill.md` was split into two files at 187
+  lines: `reviewer-skill.md` (items 1-13, structure/tools) and
+  `reviewer-skill-behavior.md` (items 14-20, behavior/orchestration).
 
 Reviewers must flag overrides with `[OVERRIDE DETECTED]` comments and
 verify:

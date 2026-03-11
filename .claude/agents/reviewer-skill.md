@@ -1,7 +1,8 @@
-# Skill Reviewer
+# Skill Reviewer — Structure & Tools
 
 Review skill definitions for structure, naming convention, and
-completeness.
+completeness. For behavioral and orchestration checks, see
+`reviewer-skill-behavior.md`.
 
 ## Trigger
 
@@ -11,7 +12,6 @@ Files matching: `skills/**`
 
 - `.claude/rules/skill-naming.md` — naming convention
 - `.claude/rules/skill-patterns.md` — skill architecture patterns (script vs orchestration)
-- `references/task-orchestration.md` — orchestration patterns and formatting
 
 ## Checklist
 
@@ -26,9 +26,7 @@ Files matching: `skills/**`
    trigger the skill; vague descriptions reduce discoverability
 4. **Script references** — (Script-based skills only; skip for orchestration-based)
    SKILL.md-referenced scripts must exist in the directory. Check both
-   `allowed-tools` entries AND inline code blocks. Pay special attention when
-   a path conversion corrects a typo (e.g., `skill:create` → `skill-create`)
-   — the fix may reveal a pre-existing missing script.
+   `allowed-tools` entries AND inline code blocks.
 
    **Pattern detection**: See `.claude/rules/skill-patterns.md`. If the skill
    directory contains NO `scripts/` subdirectory AND the SKILL.md references
@@ -39,148 +37,55 @@ Files matching: `skills/**`
 6. **Error handling** — scripts use `set -e`; handle missing dependencies
 7. **No hardcoded paths** — scripts should use relative paths or
    environment variables, not absolute user-specific paths.
-   Applies equally to shell code blocks in SKILL.md workflow
-   descriptions and `references/` documents, not just deployed scripts.
    For external binaries (yq, jq, gh, etc.) the preferred resolution
    pattern is: `TOOL="${TOOL:-$(command -v tool 2>/dev/null || echo "/fallback/path/tool")}"`.
-   Flag bare absolute paths without this pattern.
 8. **`allowed-tools` coverage** — if SKILL.md calls external scripts,
    front matter must declare matching `Bash(...)` entries (missing entries
-   cause per-invocation approval prompts). Plugin-distributed scripts must
-   use relative paths; `~/.claude/tools/` or `~/.claude/skills/` paths
-   are accepted for user-tool delegation, not portability violations.
+   cause per-invocation approval prompts).
+   **Built-in tools** (`AskUserQuestion`, `TaskCreate`, `TaskUpdate`,
+   `Skill()`, `Read`, `Write`, `Edit`, `Glob`, `Grep`) are implicitly
+   available — do NOT flag them as missing from `allowed-tools`.
+   Only **MCP tools** and **Bash script paths** require declaration.
 8b. **`allowed-tools` sync** — when a PR adds `mktmp.sh <ns> ...` calls,
-    verify BOTH entries are present: `Bash(/tmp/claude/bin/mktmp.sh:*)`
-    (covers the mktmp call) AND `Write(/tmp/claude/<ns>/**)` (covers writing
-    the returned path). For other Bash calls to external scripts, confirm a
-    matching `Bash(<path>:*)` entry exists. Missing either causes WARNING.
-8e. **Shared helper propagation** — applies to `bin/` helpers accessed via
-    `${CLAUDE_PLUGIN_ROOT}/bin/<script>`; excludes session-installed helpers
-    like `mktmp.sh` (covered by 8b). When a PR propagates such a helper,
-    enumerate ALL changed SKILL.md files and verify each has a matching
-    `Bash(${CLAUDE_PLUGIN_ROOT}/bin/<script>:*)` entry in `allowed-tools`.
-    Do not rely on spotting individual occurrences — grep across the diff.
-8f. **Memory file Write coverage** — when a skill conditionally writes
-    to `~/.claude/projects/<project>/memory/<file>`, verify
-    `allowed-tools:` includes a matching `Write(~/.claude/projects/**/<file>)`
-    or `Write(~/.claude/projects/**/**)` entry. Missing entry causes a
-    per-invocation approval prompt on every persistence operation (WARNING).
-8g. **Cross-skill delegation compatibility** — when a skill delegates to
-    another skill via `Skill()`, verify:
-    (a) delegated skill's `allowed-tools` includes `Read()` for the findings file path
-    (b) both skills declare compatible temp namespace in `allowed-tools`
-        (e.g., both use `/tmp/claude/skill-audit/**` for findings exchange)
-    (c) findings file path is deterministic (no session-unique uuids)
-    Missing Read coverage causes per-invocation approval (WARNING).
+    verify BOTH entries: `Bash(/tmp/claude/bin/mktmp.sh:*)` AND
+    `Write(/tmp/claude/<ns>/**)`. Missing either causes WARNING.
 8c. **Plugin directory existence** — for every `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`
     entry in `allowed-tools`, verify `skills/<name>/` exists using
-    Glob(`skills/<name>/SKILL.md`). A missing directory means the skill is
-    user-level; the path must stay as `~/.claude/skills/<name>/`.
+    Glob(`skills/<name>/SKILL.md`).
 8d. **Skill porting pattern** — when a PR converts `~/.claude/skills/<name>/`
-    to `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`, systematically verify:
-    (a) all scripts have mode `100755` (`git ls-files --stage`)
-    (b) all `allowed-tools:` entries cover every script invocation,
-        including cross-skill delegations to other plugin skill directories
-    (c) no hardcoded absolute paths — use `${VAR:-/default/path}`
+    to `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`, verify:
+    (a) all scripts have mode `100755`
+    (b) all `allowed-tools:` entries cover every script invocation
+    (c) no hardcoded absolute paths
+8e. **Shared helper propagation** — when a PR propagates a `bin/` helper,
+    enumerate ALL changed SKILL.md files and verify each has a matching
+    `Bash(${CLAUDE_PLUGIN_ROOT}/bin/<script>:*)` entry.
+8f. **Memory file Write coverage** — when a skill writes to
+    `~/.claude/projects/<project>/memory/<file>`, verify `allowed-tools:`
+    includes a matching `Write(~/.claude/projects/**/<file>)` entry.
+8g. **Cross-skill delegation** — when a skill delegates via `Skill()`:
+    (a) delegated skill's `allowed-tools` includes `Read()` for findings
+    (b) both skills declare compatible temp namespace
+    (c) findings file path is deterministic (no session-unique uuids)
 9. **Template consistency** — YAML code blocks containing a `name:` field
    must follow `skill-naming.md`, not ad-hoc examples.
-9a. **Skill tool invocation syntax** — when SKILL.md or inline code blocks
-    use the `Skill()` tool (inter-skill delegation), verify named parameters:
-    `Skill(skill="dev10x:target-name", args="...")`, not positional syntax
-    like `Skill(dev10x:target-name, args="...")`. See `references/skill-invocation.md`.
+9a. **Skill tool invocation syntax** — `Skill()` calls must use named
+    parameters: `Skill(skill="dev10x:target-name", args="...")`.
+    See `references/skill-invocation.md`.
 10. **Reference doc consistency** — cross-check `references/` documents
     against any matching `.claude/rules/` file.
-10b. **Inline table consistency** — when SKILL.md contains a reference
-     table (e.g., "Aliases Configured"), cross-check documented values
-     against the script; mismatches are a reliable bug signal.
+10b. **Inline table consistency** — cross-check SKILL.md reference tables
+     against script implementations; mismatches are bug signals.
 11. **Embedded shell templates** — POSIX-compatible, no silent `|| true`,
-    `<>` placeholder markers for user-replaceable values. Flag `{VALUE}`
-    curly-brace notation — ambiguous with shell variable expansion.
-11b. **Embedded Python templates** — Python code blocks inside SKILL.md that
-     are generated into scripts must pass the same quality checks:
-     - No duplicate imports (ruff F811)
-     - No f-strings without expressions (ruff F541)
-     - `os.environ[...]` for credentials, never hardcoded values
+    `<>` placeholder markers for user-replaceable values.
+11b. **Embedded Python templates** — must pass ruff checks (F811, F541),
+     use `os.environ[...]` for credentials, never hardcoded values.
 12. **Self-contained content** — no ephemeral references ("see Memory note",
     "as discussed"); all constraints documented inline.
 13. **Bundled binaries** — if `skills/<name>/bin/` contains a non-script
-    binary (`.jar`, `.exe`, compiled binary):
-    - Verify license is compatible with the plugin's license
-    - Flag size if > 1 MB (INFO severity)
-    - Suggest README or SKILL.md install instructions as an alternative
-      when the binary is publicly available and stable
-14. **Behavioral constraint language** — when a PR upgrades soft language
-    to mandatory ("This is mandatory", "ALWAYS", "never skip"), verify:
-    (a) rationale is stated (why is it mandatory?);
-    (b) constraint appears in Important Notes section;
-    (c) scripts or calling code are consistent with the constraint.
-    Do NOT flag strong imperative language as "over-emphasis".
-14a. **Orchestration list formatting** — verify that ALL mandatory tool
-    invocations (`TaskCreate`, `TaskUpdate`, `AskUserQuestion`, `Agent`,
-    `Skill`) in the Orchestration section and decision gate sections use
-    **numbered lists with enforcement markers** (`REQUIRED:`, `MANDATORY:`,
-    `DO NOT SKIP`), not fenced code blocks. Agents treat code blocks as
-    illustrative examples and may skip them silently.
-    See `.claude/rules/skill-orchestration-format.md`.
-    **False-positive prevention**: Do NOT flag tool calls appearing in
-    "Example", "Anti-pattern", or "Output Format" subsections even if
-    inside fenced code blocks — these are illustrative only. Only enforce
-    the formatting rule for Orchestration and decision gate sections.
-14b. **Bundled call spec references** — when an `AskUserQuestion` gate
-    has complex parameters (multiple options, previews, metadata), verify
-    (a) a `tool-calls/ask-<purpose>.md` file exists with the full call
-    spec in a code block, (b) the REQUIRED line references it inline as
-    `(call spec: [file.md](./tool-calls/file.md))`. Do NOT require
-    bundled files for trivial one-line calls (`TaskUpdate`, simple
-    `TaskCreate`). See `.claude/rules/skill-orchestration-format.md`.
-
-15. **Config file schema** — when a skill reads or writes a structured
-    config file (YAML, JSON, TOML), SKILL.md must:
-    (a) show a concrete schema example with all supported keys and
-        value types
-    (b) document the full resolution/fallback order (which keys take
-        priority, what happens when the file is absent)
-    (c) state when and how the file is created (never, on-demand,
-        always). Missing schema is WARNING; missing fallback is WARNING.
-
-    **False-positive prevention**: A note like "The config file is optional.
-    If it doesn't exist, the skill falls back to X" is sufficient for (b).
-    Do not require explicit "File Creation" heading if the fallback behavior
-    is clear from context.
-16. **Resolution-order completeness** — when SKILL.md documents a
-    prioritized fallback/resolution list and also documents multiple
-    variants of the same key (e.g., `persist: true` vs `persist: false`),
-    verify every variant appears as a distinct step in the resolution
-    order. A variant that is documented but never checked is a logic bug
-    (WARNING).
-17. **Conditional steps** — when a task has a branch that produces no
-    artifact (e.g., "done" / "skip" / "abort"), the immediately following
-    step must either be absent from that branch or marked conditional
-    (e.g., "(if PR created)"). An unconditional step after a branch-point
-    is INFO severity.
-18. **Config-file cache coverage** — when a script uses a skip/cache
-    pattern (`[[ "${1:-}" != "--force" ]]`), verify that ALL external
-    config files read by the script are included in the staleness check
-    alongside source files. Missing config files cause stale output
-    after user edits without `--force`.
-19. **Decision gates enforcement** — when a PR adds/modifies a skill's
-    documented blocking decision point (marked `REQUIRED: AskUserQuestion`),
-    verify: (a) enforcement marker is present in SKILL.md, (b) **`AskUserQuestion`
-    is declared in front matter `allowed-tools`**, (c) evals.json includes
-    assertions to detect plain-text substitution, (d) evals include signals
-    like `gate*-uses-tool` and `gate*-no-plain-text`. Missing the tool
-    declaration causes per-invocation approval prompts.
-20. **Task dependency cross-validation for orchestration skills** — when a
-    skill uses numbered TaskCreate lists with documented dependencies (wave
-    structure), verify each phase's documented inputs match its dependency
-    list: If Phase X reads output from Phase Y, task Y must appear in task
-    X's dependency comment. False-positive prevention: Skip for script-based
-    skills (Pattern 1); skip for orchestration skills without explicit
-    dependency comments; only apply when orchestration-based + contains
-    numbered TaskCreate lists + includes dependency annotations.
+    binary, verify license compatibility and flag size > 1 MB (INFO).
 
 ## Output Format
 
-Apply to ALL `skills/**` files in the diff, including same-PR additions
-(new checklist items are not retroactively applied to them otherwise).
+Apply to ALL `skills/**` files in the diff, including same-PR additions.
 For each issue: **File** · **Severity** (CRITICAL/WARNING/INFO) · **Issue**
