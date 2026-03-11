@@ -10,8 +10,8 @@ invocation-name: dev10x:work-on
 allowed-tools:
   - Bash(~/.claude/skills/gh/scripts/*:*)
   - Bash(~/.claude/skills/jira/scripts/*:*)
-  - Read(~/.claude/projects/**/memory/work-plans.yaml)
-  - Read(${CLAUDE_PLUGIN_ROOT}/skills/work-plan/references/work-plans-schema.yaml)
+  - Read(~/.claude/projects/**/memory/playbooks/work-on.yaml)
+  - Read(${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml)
   - Write(~/.claude/projects/**/**)
 ---
 
@@ -258,27 +258,26 @@ template.
 
 ### Generating the Plan
 
-Plan templates are loaded from a user-customizable YAML file.
-Each work type has a default template with parent-child steps
+Play templates are loaded from the `dev10x:playbook` system.
+Each work type has a default play with parent-child steps
 that can be overridden per project.
 
-**Plan source** (resolved in order):
-1. `~/.claude/projects/<project>/memory/work-plans.yaml` —
-   check `overrides` for matching `work_type` first, then
-   `defaults[work_type].steps`
-2. Hardcoded defaults in this skill (see Example Plans below)
+**Play source** (resolved in order):
+1. `~/.claude/projects/<project>/memory/playbooks/work-on.yaml` —
+   check `overrides` for matching play first, then defaults
+2. `${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml`
 
-**Plan file schema:** See the `dev10x:work-plan` skill's
-`references/work-plans-schema.yaml` for the full schema with
-all 5 work types. Users can customize plans interactively
-via `/dev10x:work-plan edit <type>`.
+**Playbook schema:** See the `dev10x:playbook` skill's
+`references/playbook.yaml` for the full schema with all 5 plays.
+Users can customize plays interactively via
+`/dev10x:playbook edit work-on <play>`.
 
-Each plan type has:
-- `prompt` — heuristic guidance for when this plan applies and
+Each play has:
+- `prompt` — heuristic guidance for when this play applies and
   how to adapt it based on gathered context (optional)
-- `steps` — ordered list of plan steps
+- `steps` — ordered list of play steps
 
-Each step in the plan has:
+Each step in the play has:
 - `subject` — task title (required)
 - `type` — `detailed` or `epic` (required)
 - `prompt` — expansion guidance for the agent executing this
@@ -288,10 +287,12 @@ Each step in the plan has:
 - `steps` — child steps for pre-templated epic expansion (optional)
 - `condition` — hint for conditional execution (optional)
 
-**Loading the plan:**
+**Loading the play:**
 1. Determine the `work_type` from gathered context (see table below)
-2. Read the user's plan file; if absent, read the schema from
-   `${CLAUDE_PLUGIN_ROOT}/skills/work-plan/references/work-plans-schema.yaml`
+2. Read the user's playbook at
+   `~/.claude/projects/<project>/memory/playbooks/work-on.yaml`;
+   if absent, read from
+   `${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml`
 3. Resolve: overrides first (same as acceptance-criteria), then
    defaults, then schema fallback
 4. For each step, create a `TaskCreate` with the step's `subject`,
@@ -395,12 +396,12 @@ time"). Update the YAML file accordingly:
 - `persist: false` → add with `persist: false`; the skill
   removes consumed one-time overrides after use
 
-### Example Plans (Defaults)
+### Example Plays (Defaults)
 
-These are the built-in default plans. Full YAML definitions
-with pre-templated epic children are managed by the
-`dev10x:work-plan` skill. Users can customize these via
-`/dev10x:work-plan edit <type>`.
+These are the built-in default plays. Full YAML definitions
+with pre-templated epic children live in the `dev10x:playbook`
+skill. Users can customize these via
+`/dev10x:playbook edit work-on <play>`.
 
 **Feature from ticket** (subtasks of Phase 4):
 ```
@@ -560,11 +561,11 @@ After completing a detailed task, mark it `completed` via
 When reaching an epic task:
 
 1. **Read the step prompt** — if the task metadata contains a
-   `prompt` field (from work-plans.yaml), use it as guidance
+   `prompt` field (from playbook.yaml), use it as guidance
    for how to execute or expand the step. The prompt may
    contain heuristics for adapting the step to context.
 2. **Check for pre-templated children** — if the task metadata
-   contains `steps` (from the work-plans.yaml template), use
+   contains `steps` (from the playbook.yaml template), use
    those as the sub-task list instead of generating from scratch.
    Each child step may also have its own `prompt` for guidance.
    This gives users control over epic expansion via YAML.

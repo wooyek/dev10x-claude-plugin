@@ -29,7 +29,7 @@ families:
     description: "Scope → branch → implement → PR"
     skills:
       - ticket:work-on
-      - dev10x:work-plan
+      - dev10x:playbook
       - ticket:scope
       - ticket:create
       - ticket:branch
