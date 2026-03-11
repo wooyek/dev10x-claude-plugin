@@ -7,6 +7,8 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
   - Bash(gh issue create:*)
   - mcp__claude_ai_Linear__save_issue
+  - mcp__claude_ai_Linear__get_issue
+  - mcp__claude_ai_Linear__list_projects
   - Bash(secret-tool lookup:*)
   - Bash(curl:*atlassian.net*)
 ---
@@ -151,12 +153,21 @@ gh issue create --repo "$REPO" --title "$TITLE" --body "$DESCRIPTION" --label "$
 ```
 
 **Linear:**
+
+If a `project` parameter was provided by the caller, resolve the
+project UUID first via `list_projects(team: "TEAM_UUID")` — never
+pass a display name (name matching is exact and fails silently).
+After creation, verify linkage with `get_issue(id)` and confirm
+`projectId` matches the expected UUID. See `dev10x:linear`
+§ Project Assignment.
+
 ```
 mcp__claude_ai_Linear__save_issue(
     team: "TEAM_UUID",
     title: TITLE,
     description: DESCRIPTION,
-    labels: [LABELS]
+    labels: [LABELS],
+    project: "PROJECT_UUID"  # optional — resolved UUID only
 )
 ```
 

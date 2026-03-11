@@ -8,6 +8,7 @@ allowed-tools:
   - mcp__claude_ai_Linear__save_issue
   - mcp__claude_ai_Linear__save_project
   - mcp__claude_ai_Linear__get_project
+  - mcp__claude_ai_Linear__list_projects
   - mcp__claude_ai_Linear__save_milestone
   - mcp__claude_ai_Linear__list_milestones
   - mcp__claude_ai_Linear__list_issue_statuses
@@ -143,6 +144,12 @@ This blocks execution until the user responds. Options:
 - Create project entity (Recommended) — Enables roadmap views and project tracking
 - Skip — Just milestones and tickets, no project entity
 
+**After creating or selecting a project**, resolve its UUID
+immediately via `list_projects(team: "TEAM_UUID")` and store
+it for all subsequent calls. Never pass a project name or slug
+to `save_issue` — name matching is exact and fails silently.
+See `dev10x:linear` § Project Assignment for the full pattern.
+
 ### 3.4 Create Milestones
 
 Create milestones sequentially (tickets reference them by ID).
@@ -152,6 +159,7 @@ duplicates.
 ### 3.5 Create Tickets
 
 Create all tickets with milestone and project assignments.
+Use the project UUID resolved in 3.3 — never pass a display name.
 Batch creation is possible since all milestones exist at this point.
 Check for existing tickets by title before creating.
 
@@ -167,12 +175,14 @@ Execute in parallel.
 
 ## Phase 4: Verify & Report
 
-### 4.1 Re-Fetch Entities
+### 4.1 Re-Fetch and Verify Linkage
 
 Re-fetch all created entities to verify:
 - Milestones are assigned correctly
 - Blocking chains are intact
-- Project links are set
+- Project links are set — for each ticket, call
+  `get_issue(id)` and confirm `projectId` matches the
+  expected UUID. Report any mismatches as failures in 4.3.
 
 ### 4.2 Structured Summary
 

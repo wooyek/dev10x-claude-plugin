@@ -87,6 +87,31 @@ Before using Linear MCP tools, verify availability:
    ```
 3. Do not proceed if Linear MCP is unavailable
 
+## Project Assignment
+
+**CRITICAL: Always resolve project UUID before assignment.**
+The `save_issue` `project` parameter accepts a name, ID, or slug —
+but name matching is exact and **fails silently** on mismatch.
+`"tt-pos-mcp"` vs `"tt-pos mcp"` will succeed without error but
+leave the ticket unlinked.
+
+### Resolution Steps
+
+1. **Resolve UUID first** — call `list_projects(team: "TEAM_UUID")`
+   and match by display name (case-insensitive, normalize hyphens
+   to spaces)
+2. **Use the UUID** in all subsequent `save_issue` calls:
+   `save_issue(id: "TEAM-133", project: "PROJECT_UUID")`
+3. **Verify linkage** — after `save_issue`, call
+   `get_issue(id: "TEAM-133")` and confirm the response contains
+   the expected `projectId`
+
+### Batch Assignment Verification
+
+After assigning multiple tickets to a project, verify all were
+linked by calling `list_issues(project: "PROJECT_UUID")` and
+checking that every expected ticket ID appears in the results.
+
 ## Searching for JTBD in Ticket
 
 To find an existing Job Story on a Linear ticket:
