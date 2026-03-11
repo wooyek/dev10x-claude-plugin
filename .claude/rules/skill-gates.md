@@ -27,6 +27,16 @@ This blocks execution until the user responds. Options:
 This replaces soft guidance ("Use AskUserQuestion") which allows agents to
 substitute plain text instead.
 
+## Checklist for Skill Authors
+
+Before submitting a skill with decision gates, verify all three:
+
+1. ✓ SKILL.md documents gate with **`REQUIRED: Call AskUserQuestion`** marker
+2. ✓ Front matter `allowed-tools:` includes `AskUserQuestion` entry
+3. ✓ `evals.json` includes assertions for gate enforcement
+
+Missing any step causes per-invocation approval prompts on every skill run.
+
 ## Why This Matters
 
 Plain text questions:

@@ -268,6 +268,59 @@ Agent(description="Triage comment r104", prompt="...", run_in_background=true)
 
 Collect results as notifications arrive. Update tasks accordingly.
 
+### Subagent Dispatch Patterns: Wave-Based Orchestration
+
+When orchestrating multiple independent analysis phases, structure
+work into logical waves with explicit task dependencies:
+
+**Wave structure:**
+1. **Setup (sequential)**: Create tasks, detect context, initialize state
+2. **Wave 1 (parallel)**: Independent analysis phases with no inter-phase dependencies
+3. **Wave 2 (parallel)**: Analysis phases dependent on Wave 1 output
+4. **Synthesis (sequential)**: Consolidate findings, present decisions to user
+
+**Task dependency annotation:**
+```markdown
+Set dependencies:
+- Task 1→2→3: Sequential setup chain (prerequisite context)
+- Task 4 and 5: Blocked by task 3 (Wave 1 — independent, run in parallel)
+- Task 6, 7, 8: All blocked by task 4 (Wave 2 — run in parallel after Phase 1 output)
+- Task 9: Blocked by tasks 4, 5, 6, 7, 8 (Synthesis — depends on all analysis)
+```
+
+**When to use wave-based orchestration:**
+- Multiple independent analysis phases (e.g., 5+ parallel subagents)
+- Partial dependencies between phases (some are independent, others depend on earlier outputs)
+- Long-running workflows where parallelization saves significant time
+- Example: `dev10x:skill-audit` with 5 parallel analysis phases + dependency on Phase 1 output
+
+**Phase reference pattern:**
+Create a "Phase Reference" section in SKILL.md that documents each phase's
+inputs, outputs, and instructions. This section can be pasted verbatim into
+subagent prompts without modification:
+
+```markdown
+## Phase Reference
+
+### Phase 1 (Output file: <PHASE1_OUTPUT>)
+[Phase 1 instructions and acceptance criteria]
+
+### Phase 2 (Output file: <PHASE2_OUTPUT>)
+[Phase 2 instructions and acceptance criteria]
+
+## Synthesis (Phase 6)
+[Synthesis instructions]
+Read all output files from phases 1-5 to synthesize findings.
+```
+
+Subagents receive only the relevant phase section, reducing prompt size and
+improving focus.
+
+**Cross-phase dependency handling:**
+When a synthesis phase reads output from earlier phases, verify the dependency
+list includes all upstream phase tasks. Example: If synthesis reads `<PHASE1_OUTPUT>`,
+task 4 (Phase 1) must be in the synthesis task's `blockedBy` list.
+
 ## Pattern 5: Teams for Heavy Parallelism
 
 Use `TeamCreate` when multiple agents need to coordinate on

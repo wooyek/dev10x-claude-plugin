@@ -170,6 +170,14 @@ Files matching: `skills/**`
     assertions to detect plain-text substitution, (d) evals include signals
     like `gate*-uses-tool` and `gate*-no-plain-text`. Missing the tool
     declaration causes per-invocation approval prompts.
+20. **Task dependency cross-validation for orchestration skills** — when a
+    skill uses numbered TaskCreate lists with documented dependencies (wave
+    structure), verify each phase's documented inputs match its dependency
+    list: If Phase X reads output from Phase Y, task Y must appear in task
+    X's dependency comment. False-positive prevention: Skip for script-based
+    skills (Pattern 1); skip for orchestration skills without explicit
+    dependency comments; only apply when orchestration-based + contains
+    numbered TaskCreate lists + includes dependency annotations.
 
 ## Output Format
 
