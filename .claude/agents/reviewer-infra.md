@@ -41,6 +41,11 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
     shebangs like `uv` or `pipenv`), and all scripts reside in
     `hooks/scripts/` not `skills/` (cross-dir references break when a
     skill is removed)
+11d. **Hook error handling** — for PreToolUse hooks that parse input
+     (JSON, commands, etc.), verify: parsing failures are caught
+     explicitly (not via silent defaults like `// ""`), empty/null values
+     don't drive branching logic without validation, and all error paths
+     have user-visible systemMessage output.
 12. **Hook JSON output fields** — for `hooks/scripts/*.sh`: `SessionStart`
     must use `hookSpecificOutput.additionalContext`; flag `additional_context`.
 12b. **SessionStart side-effects** — flag new file-copy, directory-creation,
