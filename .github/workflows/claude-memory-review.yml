@@ -197,7 +197,7 @@ jobs:
             4. **Budget gate**: Count the target file's current line count.
                If adding the change would exceed the budget, SKIP. Do NOT
                create overflow — the budget is a hard cap, not advisory.
-               Budgets: CLAUDE.md ≤ 100, agent specs ≤ 100, rules ≤ 200,
+               Budgets: CLAUDE.md ≤ 100, agent specs ≤ 50, rules ≤ 200,
                references ≤ 200.
 
             **Minimum threshold**: If fewer than 2 items survive filtering,
