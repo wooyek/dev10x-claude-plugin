@@ -1,15 +1,16 @@
-# work-plans.yaml — User-customizable work plan templates
-# Location: ~/.claude/projects/<project>/memory/work-plans.yaml
-# Maintained by dev10x:work-on skill.
+# playbook.yaml — Reusable play templates for orchestration skills
+# Default location: ${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml
+# User overrides: ~/.claude/projects/<project>/memory/playbooks/<skill-key>.yaml
+# Managed by dev10x:playbook skill.
 #
 # Structure:
-#   defaults   — per work-type plan templates with parent-child steps
+#   defaults   — per play-type templates with parent-child steps
 #   overrides  — user customizations (persist: true = reuse)
 #
-# Plan-level fields:
-#   prompt — heuristic guidance for when this plan type applies
+# Play-level fields:
+#   prompt — heuristic guidance for when this play type applies
 #            and how to adapt it based on gathered context
-#   steps  — ordered list of plan steps
+#   steps  — ordered list of play steps
 #
 # Each step has:
 #   subject   — task title (required)
@@ -21,7 +22,7 @@
 #   steps     — child steps for pre-templated epic expansion (optional)
 #   condition — hint for conditional execution (optional)
 #
-# Work types match Phase 1 classification:
+# Play names match Phase 1 classification (for work-on):
 #   feature, bugfix, pr-continuation, local-only, investigation
 
 defaults:
