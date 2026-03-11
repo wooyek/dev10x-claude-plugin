@@ -106,22 +106,36 @@ jobs:
             - Look at human responses for reasoning
             - Note patterns in accepted vs rejected suggestions
 
-            ### Step 3: Identify Improvements
+            ### Step 3: Identify Improvements (with deduplication)
+            For each potential improvement:
+            1. Read the target file where the change would go
+            2. Check if the concept is already covered (even in different words)
+            3. Only recommend changes that add genuinely NEW guidance
+
             Organized by domain:
-            - **CLAUDE.md**: patterns, architectural decisions, clarifications
-            - **Agent specs**: checklist additions/removals, false positive sources
-            - **Rules files**: new patterns, rules that produced false positives
-            - **Orchestrator**: domain routing improvements
+            - **Agent specs**: checklist additions fixing verified false positives
+            - **Rules files**: new patterns not covered by existing rules
+            - **CLAUDE.md**: only if a fundamental convention is missing
+
+            Skip recommendations that:
+            - Rephrase existing guidance in different words
+            - Address one-off issues unlikely to recur
+            - Would push a target file over its size budget
 
             ### Step 4: Create Report
             Write to `${{ github.workspace }}/.claude-output/lessons_learned_report.md`
             with: Summary, Statistics, Feedback Analysis, Identified Improvements,
             and prioritized Action Items (High/Medium/Low).
 
+            For each Action Item, include:
+            - Target file path and current line count
+            - Whether the concept already exists in the file (yes/no)
+            - Recurrence evidence (which PRs showed this pattern)
+
             IMPORTANT:
             - Be specific with file paths and line numbers
             - Quote actual code when referencing
-            - Distinguish between definite improvements and discussion items
+            - Mark items as "already covered" if target file has similar guidance
 
           claude_args: '--model haiku --allowed-tools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh api:*),Read,Glob,Grep,Write"'
 
@@ -144,9 +158,8 @@ jobs:
             has been written to:
             ${{ github.workspace }}/.claude-output/lessons_learned_report.md
 
-            Your task: implement the **mechanical, low-risk improvements** from the
-            "Action Items" section of that report, then open a draft PR for human
-            review. Do NOT merge anything.
+            Your task: evaluate the lessons for genuine value, implement only
+            high-quality improvements, then open a draft PR. Do NOT merge.
 
             ## Hard Constraints (NON-NEGOTIABLE)
 
@@ -161,103 +174,99 @@ jobs:
             - `.github/workflows/` (CI config — would create infinite loops)
             - `bin/`, `hooks/`, `commands/`, or any other file
 
-            If a recommendation targets files outside this scope, skip it and note
-            why in the PR body.
+            ## Value Filter (MANDATORY — apply before ANY implementation)
+
+            For each proposed change from the report, apply these checks
+            in order. **Skip the item** if any check fails:
+
+            1. **Deduplication**: Read the target file. Search for the
+               concept being proposed. If the guidance already exists
+               (even in different words), SKIP. Rephrasing existing rules
+               adds bloat without value.
+
+            2. **Recurrence test**: Does this address a pattern that has
+               occurred in 2+ PRs, or is it a one-off observation? One-off
+               observations are not worth adding to permanent rules. SKIP
+               items that say "PR #N showed..." without evidence of recurrence.
+
+            3. **Actionability test**: Would a reviewer use this guidance to
+               make a different decision? If it is general advice ("be careful
+               with X") rather than a concrete check ("verify X exists in Y"),
+               SKIP.
+
+            4. **Budget gate**: Count the target file's current line count.
+               If adding the change would exceed the budget, SKIP. Do NOT
+               create overflow — the budget is a hard cap, not advisory.
+               Budgets: CLAUDE.md ≤ 100, agent specs ≤ 100, rules ≤ 200,
+               references ≤ 200.
+
+            **Minimum threshold**: If fewer than 2 items survive filtering,
+            write "none" to `${{ github.workspace }}/.claude-output/docs_pr_url.txt`
+            and STOP. One marginal improvement is not worth a PR.
 
             ## Writing Style for Insights
 
-            Write insights as distilled trade-off reasoning without PR# attribution:
+            Write as distilled trade-off reasoning without PR# attribution:
             - GOOD: "Skills with vague descriptions get skipped by the router"
             - BAD: "PR #42 showed that skill descriptions matter"
 
-            ## Size Budget Enforcement
-
-            After applying changes, verify modified files stay within limits:
-            - Rule files ≤ 200 lines
-            - Agent specs ≤ 50 lines
-            - `review-checks-common.md` ≤ 100 lines
-            - CLAUDE.md ≤ 100 lines
-
-            If a file would exceed its budget, either prune existing content
-            or note the overflow in the PR body for human review.
-
             ## PR & Commit Convention (MANDATORY)
 
-            This project uses JTBD (Jobs To Be Done) outcome-focused titles.
-            Read `references/git-jtbd.md` and `references/git-pr.md`
-            before writing titles or PR bodies.
+            Read `references/git-jtbd.md` and `references/git-pr.md` first.
 
-            - Commit and PR titles must describe **what reviewers/contributors
-              can now do**, not what was changed in the code.
-            - BAD: "🤖 Apply lessons learned from PR #23"
-            - GOOD: "🤖 Strengthen skill review checks from PR #23 feedback"
-            - Use `🤖` (robot emoji) — this is a bot-generated PR. Never use
-              📝, ♻️, or any other gitmoji meant for human-authored commits.
-            - The PR body must start with a JTBD Job Story as the **first
-              paragraph** (required for release notes parsing):
-              **When** ..., **I want to** ..., **so** ...
+            - Titles describe **what reviewers/contributors can now do**
+            - Use `🤖` emoji prefix — never other gitmoji
+            - PR body starts with JTBD Job Story as first paragraph
 
             ## Steps
 
             1. Read `.claude-output/lessons_learned_report.md`
 
-            2. From the "Action Items" section, collect **High** and **Medium**
-               priority items that target CLAUDE.md, .claude/rules/, or
-               .claude/agents/ only. Skip anything else.
+            2. From "Action Items", collect **High** and **Medium** items
+               targeting allowed files only.
 
-            3. For each selected item, read the target file, then apply the
-               minimal precise change (add/update a rule, checklist item, or
-               example). Do not refactor surrounding content.
+            3. Apply the Value Filter to each item. Log which items were
+               skipped and why (include in PR body under "Filtered items").
 
-            4. If there are no implementable changes, write the text "none" to
-               the file `${{ github.workspace }}/.claude-output/docs_pr_url.txt`
-               and stop — do NOT create an empty PR.
+            4. If fewer than 2 items survive, write "none" to
+               `${{ github.workspace }}/.claude-output/docs_pr_url.txt`
+               and stop.
 
-            5. Configure git identity:
+            5. For each surviving item, read the target file, then apply
+               the minimal precise change. Do not refactor surrounding
+               content.
+
+            6. Configure git identity:
                git config user.email "github-actions[bot]@users.noreply.github.com"
                git config user.name "github-actions[bot]"
-            6. Create branch from develop:
+
+            7. Create branch from develop:
                git checkout develop
                git pull origin develop
                git checkout -B "claude/lessons-pr-$PR_NUMBER"
 
-            7. Stage only allowed paths and commit:
-               git add CLAUDE.md .claude/
+            8. Stage only allowed paths and commit:
+               git add CLAUDE.md .claude/ references/
+               git commit -m "🤖 <outcome-focused title, max 72 chars>"
 
-               Generate an outcome-focused commit message:
-               - Gitmoji: 🤖 (robot — bot-generated commit, not human-authored)
-               - Title: `🤖 <what the lessons prevent or enable>` (max 72 chars)
-                 Match the same outcome focus as the PR title, e.g.:
-                 "🤖 Strengthen skill review checks from PR #42 feedback"
-                 NOT: "🤖 Apply lessons learned from PR #N" (implementation)
-
-               git commit -m "🤖 <generated outcome-focused title>"
-
-            8. Push and open a DRAFT PR targeting develop:
+            9. Push and open a DRAFT PR targeting develop:
                git push origin "claude/lessons-pr-$PR_NUMBER"
-
-               Generate the PR title and body based on what you actually changed:
-               - Title: `🤖 <outcome-focused description of what the changes enable>`
-               - Body MUST start with a JTBD Job Story as the first paragraph:
-                 `**When** [situation that triggered the lessons], **I want to**
-                 [apply them automatically], **so I can** [prevent same issues].`
-                 The release-notes parser locates Job Stories by position — place
-                 it before any commit list or change summary.
-
                gh pr create --draft \
-                 --title "🤖 <generated outcome-focused title>" \
+                 --title "🤖 <outcome-focused title>" \
                  --label "rules-maintenance" \
-                 --body "<JTBD Job Story as first paragraph>
+                 --body "<JTBD Job Story>
 
                ## Changes applied
-               <bullet list of what was changed and why>
+               <bullet list of surviving items>
+
+               ## Filtered items (skipped)
+               <bullet list with skip reason for each>
 
                Based on: ${{ github.event.pull_request.html_url }}" \
                  --base develop
 
-            9. **CRITICAL**: After creating the PR, write the PR URL to the file
-               `${{ github.workspace }}/.claude-output/docs_pr_url.txt`
-               so the Slack notification step can link to it.
+            10. Write the PR URL to
+                `${{ github.workspace }}/.claude-output/docs_pr_url.txt`
 
           claude_args: '--model haiku --allowed-tools "Read,Write,Edit,Glob,Grep,Bash(git config:*),Bash(git checkout:*),Bash(git pull:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr create:*)"'
 
