@@ -1,0 +1,221 @@
+"""Validator: command prefix friction patterns.
+
+Consolidates detect-and-chaining.py and block-alias-covered-commands.py.
+
+Blocks patterns that shift the effective command prefix, breaking
+allow-rule matching:
+  1. && chaining with setup commands (mkdir, cd, export, etc.)
+  2. ENV=value git ... prefix
+  3. $(git merge-base ...) subshells
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+from dataclasses import dataclass, field
+
+from bash_validators._types import HookInput, HookResult
+
+SETUP_TOKENS = frozenset(
+    ["mkdir", "cd", "export", "source", ".", "pushd", "popd", "touch", "unset"]
+)
+
+PATH_PREFIXES = (
+    os.path.expanduser("~/.claude/skills/"),
+    os.path.expanduser("~/.claude/tools/"),
+    os.path.expanduser("~/.claude/hooks/"),
+    "~/.claude/skills/",
+    "~/.claude/tools/",
+    "~/.claude/hooks/",
+)
+
+SETTINGS_FILES = [
+    os.path.expanduser("~/.claude/settings.local.json"),
+    os.path.expanduser("~/.claude/settings.json"),
+]
+
+ENV_PREFIX_GIT_RE = re.compile(r"^[A-Z_]+=\S*\s+git\b")
+MERGE_BASE_RE = re.compile(r"\$\(git\s+merge-base\s+(\w+)\s+HEAD\)")
+GIT_SUBCOMMAND_RE = re.compile(r"\bgit\s+(log|diff|rebase)\b")
+
+AND_CHAIN_ADVICE = """\
+\u26a0\ufe0f  && chaining detected \u2014 permission friction risk.
+
+The setup command before && shifts the effective command prefix away from
+the path-based command that has its own allow rule. The allow rule for the
+path-based command won't fire.
+
+Fix this by finding or creating a wrapper:
+
+  1. Existing fish functions:
+       ls ~/.config/fish/functions/
+
+  2. Existing git aliases:
+       git config --list | grep alias\\.
+
+  3. Existing Claude tools / skill scripts:
+       ls ~/.claude/tools/
+       find ~/.claude/skills -name '*.sh' | head -20
+
+  4. If no wrapper exists, create ~/.claude/tools/<name>.sh that
+     handles both the setup and the command internally, then add:
+       Bash(~/.claude/tools/<name>:*)   to settings.local.json allow rules
+
+  5. For independent steps, use separate Bash tool calls instead of &&.
+
+Rewrite the command and resubmit."""
+
+ENV_PREFIX_MSG = (
+    "\u26a0\ufe0f  ENV=value prefix before `git` blocked \u2014 permission friction risk.\n\n"
+    "The env-var prefix shifts the effective command prefix, breaking\n"
+    "allow-rule matching and causing unnecessary permission prompts.\n\n"
+    "Solutions:\n"
+    "  \u2022 Drop the prefix if unnecessary:\n"
+    "      {bare_command}\n"
+    "  \u2022 For rebase operations, use aliases:\n"
+    "      git develop-rebase    \u2014 interactive rebase onto develop\n"
+    "  \u2022 For rebase --continue, no env prefix is needed:\n"
+    "      git rebase --continue\n\n"
+    "If aliases are missing, run: /dev10x:git-alias-setup"
+)
+
+MERGE_BASE_MSG = (
+    "\u26a0\ufe0f  $(git merge-base ...) subshell blocked \u2014 permission friction risk.\n\n"
+    "The subshell shifts the effective command prefix, breaking allow-rule\n"
+    "matching and causing unnecessary permission prompts.\n\n"
+    "Use the git alias instead:\n"
+    "    git {alias}\n\n"
+    "Available aliases:\n"
+    "    git {{branch}}-log       \u2014 log since diverging from branch\n"
+    "    git {{branch}}-diff      \u2014 diff since diverging from branch\n"
+    "    git {{branch}}-rebase    \u2014 interactive rebase onto branch\n\n"
+    "If aliases are missing, run: /dev10x:git-alias-setup"
+)
+
+
+def _load_all_allow_patterns() -> list[str]:
+    patterns: list[str] = []
+    for path in SETTINGS_FILES:
+        try:
+            with open(path) as f:
+                data = json.load(f)
+            for rule in data.get("permissions", {}).get("allow", []):
+                m = re.match(r"^Bash\((.+?)(?::\*)?\)$", rule)
+                if m:
+                    patterns.append(m.group(1))
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+    return patterns
+
+
+def _split_on_and(command: str) -> list[str]:
+    return [s.strip() for s in re.split(r"\s*&&\s*", command) if s.strip()]
+
+
+def _first_token(segment: str) -> str:
+    tokens = segment.split()
+    return tokens[0] if tokens else ""
+
+
+def _is_path_based(segment: str) -> bool:
+    expanded = os.path.expanduser(segment)
+    return any(expanded.startswith(p) or segment.startswith(p) for p in PATH_PREFIXES)
+
+
+def _matches_allow_rule(
+    segment: str,
+    patterns: list[str],
+) -> str | None:
+    expanded_seg = os.path.expanduser(segment)
+    for pattern in patterns:
+        expanded_pat = os.path.expanduser(pattern)
+        if expanded_seg.startswith(expanded_pat) or segment.startswith(pattern):
+            return pattern
+    return None
+
+
+def _extract_bare_command(command: str) -> str:
+    match = re.match(r"^[A-Z_]+=\S*\s+(.*)", command)
+    return match.group(1) if match else command
+
+
+def _suggest_alias(*, branch: str, subcommand: str | None) -> str:
+    if subcommand and branch:
+        return f"{branch}-{subcommand}"
+    if branch:
+        return f"{branch}-log"
+    return "{branch}-{action}"
+
+
+@dataclass
+class PrefixFrictionValidator:
+    name: str = "prefix-friction"
+    _allow_patterns: list[str] | None = field(default=None, repr=False)
+
+    def should_run(self, inp: HookInput) -> bool:
+        cmd = inp.command
+        return (
+            "&&" in cmd
+            or ENV_PREFIX_GIT_RE.match(cmd) is not None
+            or "merge-base" in cmd
+        )
+
+    def validate(self, inp: HookInput) -> HookResult | None:
+        result = self._check_env_prefix_git(command=inp.command)
+        if result:
+            return result
+
+        result = self._check_merge_base(command=inp.command)
+        if result:
+            return result
+
+        return self._check_and_chaining(command=inp.command)
+
+    def _check_env_prefix_git(self, *, command: str) -> HookResult | None:
+        if ENV_PREFIX_GIT_RE.match(command):
+            bare = _extract_bare_command(command=command)
+            return HookResult(message=ENV_PREFIX_MSG.format(bare_command=bare))
+        return None
+
+    def _check_merge_base(self, *, command: str) -> HookResult | None:
+        merge_match = MERGE_BASE_RE.search(command)
+        if not merge_match:
+            return None
+        branch = merge_match.group(1)
+        sub_match = GIT_SUBCOMMAND_RE.search(command)
+        subcommand = sub_match.group(1) if sub_match else None
+        alias = _suggest_alias(branch=branch, subcommand=subcommand)
+        return HookResult(message=MERGE_BASE_MSG.format(alias=alias))
+
+    def _check_and_chaining(self, *, command: str) -> HookResult | None:
+        if "&&" not in command:
+            return None
+
+        segments = _split_on_and(command)
+        if len(segments) < 2:
+            return None
+
+        setup_token = _first_token(segments[0])
+        if setup_token not in SETUP_TOKENS:
+            return None
+
+        if self._allow_patterns is None:
+            self._allow_patterns = _load_all_allow_patterns()
+
+        for i, seg in enumerate(segments[1:], start=2):
+            if _is_path_based(seg):
+                matched = _matches_allow_rule(seg, self._allow_patterns)
+                rule_hint = (
+                    f"Bash({matched}:*)" if matched else "a path-based allow rule"
+                )
+                detail = (
+                    f"segment {i} '{seg[:70]}' would be approved by {rule_hint} "
+                    f"but the command starts with '{setup_token}'"
+                )
+                return HookResult(
+                    message=AND_CHAIN_ADVICE + "\nDetected: " + detail,
+                )
+
+        return None

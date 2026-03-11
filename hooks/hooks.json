@@ -44,38 +44,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/detect-and-chaining.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-bash-security.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/block-alias-covered-commands.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/block-python3-inline.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-commit-jtbd.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-sql.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-pr-base.sh",
-            "timeout": 5
+            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-bash-command.py",
+            "timeout": 10
           }
         ]
       },
@@ -84,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-bash-security.py",
+            "command": "python3 $CLAUDE_PLUGIN_ROOT/hooks/scripts/validate-edit-security.py",
             "timeout": 5
           },
           {

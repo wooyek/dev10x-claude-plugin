@@ -1,23 +1,21 @@
-#!/usr/bin/env python3
-"""PreToolUse hook: enforce JTBD outcome-focused commit titles.
+"""Validator: JTBD outcome-focused commit titles.
+
+Ported from validate-commit-jtbd.py.
 
 Intercepts `git commit` commands, extracts the title line, strips
 gitmoji + ticket prefix, and blocks if the description starts with
 an implementation-focused verb (Add, Update, Remove, etc.).
 
 Skips: fixup!/squash! commits, --amend, merge commits.
-
-Exit codes:
-  0 — allow
-  2 — block
 """
 
 from __future__ import annotations
 
-import json
 import re
-import sys
+from dataclasses import dataclass
 from pathlib import Path
+
+from bash_validators._types import HookInput, HookResult
 
 _VERB_BASES = [
     "Add",
@@ -62,6 +60,32 @@ _VERB_BASES = [
     "Wrap",
 ]
 
+JTBD_VERBS = (
+    "Enable, Allow, Support, Prevent, Ensure, Simplify, Improve, "
+    "Optimize, Resolve, Streamline, Protect, Enforce, Automate, "
+    "Unblock, Accelerate, Stabilize, Surface, Centralize, "
+    "Decouple, Isolate, Harden, Standardize"
+)
+
+BLOCK_MSG = (
+    "JTBD violation: commit title is implementation-focused.\n"
+    "\n"
+    "  Title: {title}\n"
+    '  Problem: starts with "{verb}" \u2014 describes what changed, '
+    "not what it enables.\n"
+    "\n"
+    "Rewrite to describe the user-facing outcome:\n"
+    '  Bad:  "Add retry logic to payment service"\n'
+    '  Good: "Enable automatic retry on payment failure"\n'
+    "\n"
+    "Outcome-focused verbs: {jtbd_verbs}\n"
+    "\n"
+    "Update the commit message in the temp file and retry."
+)
+
+GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b")
+TICKET_RE = re.compile(r"^[A-Z]+-\d+\s+")
+
 
 def _expand_verbs(bases: list[str]) -> list[str]:
     expanded: list[str] = []
@@ -87,33 +111,8 @@ VERB_RE = re.compile(
     re.IGNORECASE,
 )
 
-TICKET_RE = re.compile(r"^[A-Z]+-\d+\s+")
 
-JTBD_VERBS = (
-    "Enable, Allow, Support, Prevent, Ensure, Simplify, Improve, "
-    "Optimize, Resolve, Streamline, Protect, Enforce, Automate, "
-    "Unblock, Accelerate, Stabilize, Surface, Centralize, "
-    "Decouple, Isolate, Harden, Standardize"
-)
-
-BLOCK_MSG = (
-    "JTBD violation: commit title is implementation-focused.\n"
-    "\n"
-    "  Title: {title}\n"
-    '  Problem: starts with "{verb}" — describes what changed, '
-    "not what it enables.\n"
-    "\n"
-    "Rewrite to describe the user-facing outcome:\n"
-    '  Bad:  "Add retry logic to payment service"\n'
-    '  Good: "Enable automatic retry on payment failure"\n'
-    "\n"
-    "Outcome-focused verbs: {jtbd_verbs}\n"
-    "\n"
-    "Update the commit message in the temp file and retry."
-)
-
-
-def extract_title_from_file(path: str) -> str | None:
+def _extract_title_from_file(path: str) -> str | None:
     try:
         first_line = Path(path).read_text().splitlines()[0]
         return first_line.strip()
@@ -121,10 +120,10 @@ def extract_title_from_file(path: str) -> str | None:
         return None
 
 
-def extract_title(command: str) -> str | None:
+def _extract_title(command: str) -> str | None:
     match = re.search(r"-F\s+(\S+)", command)
     if match:
-        return extract_title_from_file(match.group(1))
+        return _extract_title_from_file(match.group(1))
 
     match = re.search(r"""-m\s+(['"])(.*?)\1""", command)
     if match:
@@ -137,7 +136,7 @@ def extract_title(command: str) -> str | None:
     return None
 
 
-def strip_prefix(title: str) -> str:
+def _strip_prefix(title: str) -> str:
     i = 0
     while i < len(title) and not title[i].isascii():
         i += 1
@@ -146,59 +145,42 @@ def strip_prefix(title: str) -> str:
     return desc
 
 
-def check_jtbd(title: str) -> tuple[bool, str]:
-    desc = strip_prefix(title)
+def _check_jtbd(title: str) -> tuple[bool, str]:
+    desc = _strip_prefix(title)
     match = VERB_RE.match(desc)
     if match:
         return False, match.group(1)
     return True, ""
 
 
-def block(message: str) -> None:
-    result = {
-        "hookSpecificOutput": {"permissionDecision": "deny"},
-        "systemMessage": message,
-    }
-    print(json.dumps(result), file=sys.stderr)
-    sys.exit(2)
+@dataclass
+class CommitJtbdValidator:
+    name: str = "commit-jtbd"
 
+    def should_run(self, inp: HookInput) -> bool:
+        return GIT_COMMIT_RE.search(inp.command) is not None
 
-def main() -> None:
-    try:
-        data = json.load(sys.stdin)
-    except (json.JSONDecodeError, EOFError):
-        sys.exit(0)
+    def validate(self, inp: HookInput) -> HookResult | None:
+        command = inp.command
 
-    if data.get("tool_name") != "Bash":
-        sys.exit(0)
+        if "--amend" in command or "--fixup" in command:
+            return None
 
-    command = data.get("tool_input", {}).get("command", "")
+        title = _extract_title(command)
+        if not title:
+            return None
 
-    if not re.search(r"\bgit\s+commit\b", command):
-        sys.exit(0)
+        if title.startswith(("fixup!", "squash!", "Merge ")):
+            return None
 
-    if "--amend" in command or "--fixup" in command:
-        sys.exit(0)
-
-    title = extract_title(command)
-    if not title:
-        sys.exit(0)
-
-    if title.startswith(("fixup!", "squash!", "Merge ")):
-        sys.exit(0)
-
-    is_ok, verb = check_jtbd(title)
-    if not is_ok:
-        block(
-            BLOCK_MSG.format(
-                title=title,
-                verb=verb,
-                jtbd_verbs=JTBD_VERBS,
+        is_ok, verb = _check_jtbd(title)
+        if not is_ok:
+            return HookResult(
+                message=BLOCK_MSG.format(
+                    title=title,
+                    verb=verb,
+                    jtbd_verbs=JTBD_VERBS,
+                )
             )
-        )
 
-    sys.exit(0)
-
-
-if __name__ == "__main__":
-    main()
+        return None
