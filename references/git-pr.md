@@ -93,6 +93,10 @@ The body should be **compact** to avoid cluttering Slack previews.
 
 ### Examples
 
+**VOICE REQUIREMENT**: The "I want to" form is mandatory—never use objective
+voice like "wants to" or "the developer wants to". See
+`references/git-jtbd.md` § Voice Requirement (lines 35-50).
+
 **WRONG** — Header before JTBD (breaks release notes parsing):
 ```markdown
 ## Summary
