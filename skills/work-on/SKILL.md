@@ -11,6 +11,7 @@ allowed-tools:
   - Bash(~/.claude/skills/gh/scripts/*:*)
   - Bash(~/.claude/skills/jira/scripts/*:*)
   - Read(~/.claude/projects/**/memory/work-plans.yaml)
+  - Read(${CLAUDE_PLUGIN_ROOT}/skills/work-plan/references/work-plans-schema.yaml)
   - Write(~/.claude/projects/**/**)
 ---
 
@@ -267,8 +268,10 @@ that can be overridden per project.
    `defaults[work_type].steps`
 2. Hardcoded defaults in this skill (see Example Plans below)
 
-**Plan file schema:** See `references/work-plans-schema.yaml`
-for the full schema with all 5 work types.
+**Plan file schema:** See the `dev10x:work-plan` skill's
+`references/work-plans-schema.yaml` for the full schema with
+all 5 work types. Users can customize plans interactively
+via `/dev10x:work-plan edit <type>`.
 
 Each plan type has:
 - `prompt` — heuristic guidance for when this plan applies and
@@ -287,9 +290,10 @@ Each step in the plan has:
 
 **Loading the plan:**
 1. Determine the `work_type` from gathered context (see table below)
-2. Read the plan file; if absent, use hardcoded defaults
+2. Read the user's plan file; if absent, read the schema from
+   `${CLAUDE_PLUGIN_ROOT}/skills/work-plan/references/work-plans-schema.yaml`
 3. Resolve: overrides first (same as acceptance-criteria), then
-   defaults, then hardcoded fallback
+   defaults, then schema fallback
 4. For each step, create a `TaskCreate` with the step's `subject`,
    `type` in metadata, and `skills` in metadata if present
 5. If a step has child `steps`, store them in metadata for
@@ -391,12 +395,12 @@ time"). Update the YAML file accordingly:
 - `persist: false` → add with `persist: false`; the skill
   removes consumed one-time overrides after use
 
-### Example Plans (Hardcoded Defaults)
+### Example Plans (Defaults)
 
-These are the built-in fallback plans when no user-space
-`work-plans.yaml` exists. Full YAML definitions with
-pre-templated epic children are in
-`references/work-plans-schema.yaml`.
+These are the built-in default plans. Full YAML definitions
+with pre-templated epic children are managed by the
+`dev10x:work-plan` skill. Users can customize these via
+`/dev10x:work-plan edit <type>`.
 
 **Feature from ticket** (subtasks of Phase 4):
 ```
@@ -695,8 +699,8 @@ branch naming, Sentry integration patterns.
 **Phase 2:** Fetch issue. Body mentions Sentry URL → fetch Sentry
 issue. Body mentions PR #42 → fetch PR. Produce context summary.
 
-**Phase 3:** Load `feature` plan template from work-plans.yaml
-(or hardcoded default). Build subtasks of Phase 4:
+**Phase 3:** Load `feature` plan template (user overrides →
+defaults → schema). Build subtasks of Phase 4:
 ```
 4.1  [detailed] Set up workspace          → dev10x:ticket-branch
 4.2  [detailed] Draft Job Story           → dev10x:jtbd
@@ -728,8 +732,8 @@ decision is needed.
 Sentry issue → fetch that too. Produce context summary with 4
 sources.
 
-**Phase 3:** Load `bugfix` plan template (Sentry issue detected).
-The plan-level prompt says "Always include a reproduction step":
+**Phase 3:** Load `bugfix` plan template (Sentry issue detected):
+
 ```
 4.1  [detailed] Set up workspace          → dev10x:ticket-branch
 4.2  [detailed] Reproduce the issue
