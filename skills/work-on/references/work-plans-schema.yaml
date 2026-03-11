@@ -1,0 +1,375 @@
+# work-plans.yaml — User-customizable work plan templates
+# Location: ~/.claude/projects/<project>/memory/work-plans.yaml
+# Maintained by dev10x:work-on skill.
+#
+# Structure:
+#   defaults   — per work-type plan templates with parent-child steps
+#   overrides  — user customizations (persist: true = reuse)
+#
+# Plan-level fields:
+#   prompt — heuristic guidance for when this plan type applies
+#            and how to adapt it based on gathered context
+#   steps  — ordered list of plan steps
+#
+# Each step has:
+#   subject   — task title (required)
+#   type      — "detailed" or "epic" (required)
+#   prompt    — expansion guidance for the agent executing this step;
+#               describes what to do, what to look for, or how to
+#               adapt the step based on context (optional)
+#   skills    — list of skills to delegate to (optional)
+#   steps     — child steps for pre-templated epic expansion (optional)
+#   condition — hint for conditional execution (optional)
+#
+# Work types match Phase 1 classification:
+#   feature, bugfix, pr-continuation, local-only, investigation
+
+defaults:
+  feature:
+    prompt: >
+      Use when a ticket describes new functionality or enhancement.
+      If the ticket is small (single file, < 50 lines), collapse
+      Design and Implement into one epic. If the ticket spans
+      multiple bounded contexts, expand Implement into one epic
+      per context.
+    steps:
+      - subject: Set up workspace
+        type: detailed
+        prompt: >
+          Create a feature branch from develop. Skip if a matching
+          branch already exists. In a worktree with a generic
+          branch, create a work-specific branch.
+        skills: [dev10x:ticket-branch]
+      - subject: Draft Job Story
+        type: detailed
+        prompt: >
+          Invoke in attended mode. Pass gathered context to avoid
+          redundant API calls. If approved, write back to the
+          ticket as a comment.
+        skills: [dev10x:jtbd]
+      - subject: Design implementation approach
+        type: epic
+        prompt: >
+          Understand the codebase areas affected by this change.
+          For small changes (single file, < 50 lines), collapse
+          into a single "read and propose" step. For large changes,
+          produce an approach summary before implementing.
+        steps:
+          - subject: Read relevant code
+            type: detailed
+            prompt: >
+              Identify the files and modules that will be modified.
+              Read them to understand current structure, patterns,
+              and test coverage.
+          - subject: Identify affected components
+            type: detailed
+            prompt: >
+              Map which bounded contexts, services, or layers are
+              touched. Note any cross-cutting concerns (migrations,
+              serializers, permissions).
+          - subject: Propose approach
+            type: detailed
+            prompt: >
+              Summarize the implementation strategy. If multiple
+              valid approaches exist, present trade-offs and ask
+              for supervisor input.
+      - subject: Implement changes
+        type: epic
+        prompt: >
+          Execute the approved approach. Create atomic commits per
+          logical change. Follow project coding conventions and
+          patterns from existing code.
+      - subject: Verify
+        type: epic
+        prompt: >
+          Run the full test suite and linter. Fix any failures
+          before proceeding. Ensure 100% coverage on new code.
+        steps:
+          - subject: Run tests
+            type: detailed
+            prompt: Run pytest with coverage. Fix failures.
+            skills: [test]
+          - subject: Run lint
+            type: detailed
+            prompt: Run ruff check and black. Fix violations.
+      - subject: Create PR & ensure CI passes
+        type: epic
+        prompt: >
+          Create the pull request using the Job Story as the first
+          paragraph. Monitor CI and fix any failures.
+        skills: [dev10x:gh-pr-create, dev10x:gh-pr-monitor]
+      - subject: Apply fixups to review comments
+        type: epic
+        prompt: >
+          Address each review comment with a fixup commit. Validate
+          before replying. Do not auto-resolve threads.
+        skills: [dev10x:gh-pr-respond]
+      - subject: Groom commit history
+        type: detailed
+        prompt: >
+          Squash fixups, reorder for logical flow, ensure each
+          commit message follows gitmoji + JTBD conventions.
+        skills: [dev10x:git-groom]
+      - subject: Request review
+        type: detailed
+        prompt: >
+          Assign reviewers and post Slack notification per project
+          config.
+        skills: [dev10x:gh-pr-request-review]
+      - subject: Verify acceptance criteria
+        type: detailed
+        prompt: >
+          Check resolved acceptance criteria from
+          acceptance-criteria.yaml. Confirm all items are met
+          before declaring work complete.
+
+  bugfix:
+    prompt: >
+      Use when a ticket or Sentry issue describes broken behavior.
+      Always include a reproduction step and a regression test.
+      If the root cause is obvious from the Sentry stack trace,
+      collapse Investigate into a single step.
+    steps:
+      - subject: Set up workspace
+        type: detailed
+        prompt: >
+          Create a feature branch from develop. Skip if a matching
+          branch already exists.
+        skills: [dev10x:ticket-branch]
+      - subject: Reproduce the issue
+        type: detailed
+        prompt: >
+          Write a failing test or local reproduction that triggers
+          the bug. Use Sentry stack traces and error context to
+          guide reproduction. If the bug is environment-specific,
+          document the conditions.
+      - subject: Investigate root cause
+        type: epic
+        prompt: >
+          Trace the execution path that leads to the failure.
+          Identify the specific code that produces the wrong
+          behavior. If root cause is already clear from Sentry,
+          skip sub-steps and go straight to the fix.
+        steps:
+          - subject: Analyze error traces
+            type: detailed
+            prompt: >
+              Review Sentry stack traces, log output, and error
+              messages. Map the error to specific code locations.
+          - subject: Identify failing code path
+            type: detailed
+            prompt: >
+              Read the code path from entry point to failure.
+              Identify the exact condition or data that triggers
+              the bug.
+      - subject: Implement fix
+        type: epic
+        prompt: >
+          Fix the root cause. Prefer minimal, targeted changes
+          over broad refactoring. Ensure the fix addresses the
+          underlying cause, not just the symptom.
+      - subject: Verify fix
+        type: epic
+        prompt: >
+          Run the full test suite. The reproduction test from
+          earlier must now pass. Add a regression test if one
+          does not already exist.
+        steps:
+          - subject: Run existing tests
+            type: detailed
+            prompt: Run pytest with coverage. Ensure no regressions.
+            skills: [test]
+          - subject: Add regression test
+            type: detailed
+            prompt: >
+              Write a test that specifically covers the bug
+              scenario. It should fail without the fix and pass
+              with it.
+      - subject: Create PR & ensure CI passes
+        type: epic
+        prompt: >
+          Create the pull request. Include the bug description
+          and root cause in the PR body.
+        skills: [dev10x:gh-pr-create, dev10x:gh-pr-monitor]
+      - subject: Apply fixups to review comments
+        type: epic
+        prompt: >
+          Address each review comment with a fixup commit.
+        skills: [dev10x:gh-pr-respond]
+      - subject: Groom commit history
+        type: detailed
+        prompt: >
+          Squash fixups, ensure commit messages follow conventions.
+        skills: [dev10x:git-groom]
+      - subject: Request review
+        type: detailed
+        prompt: Assign reviewers and notify via Slack.
+        skills: [dev10x:gh-pr-request-review]
+      - subject: Verify acceptance criteria
+        type: detailed
+        prompt: >
+          Confirm regression test exists, CI passes, and fix
+          addresses the original bug report.
+
+  pr-continuation:
+    prompt: >
+      Use when the input is an existing PR with review comments.
+      No workspace setup needed — the branch already exists.
+      Focus on addressing feedback and getting to merge.
+    steps:
+      - subject: Fetch PR and review context
+        type: detailed
+        prompt: >
+          Read the PR diff, review comments, and any linked
+          tickets. Understand what reviewers are asking for
+          and prioritize blocking comments.
+      - subject: Address review comments
+        type: epic
+        prompt: >
+          Work through each review comment. Validate the
+          feedback against the codebase before implementing.
+          Create one fixup commit per comment thread.
+      - subject: Apply fixups to unaddressed comments
+        type: epic
+        prompt: >
+          Batch-process remaining unaddressed comments using
+          the gh-pr-respond skill.
+        skills: [dev10x:gh-pr-respond]
+      - subject: Verify changes pass CI
+        type: epic
+        prompt: >
+          Push changes and monitor CI. Fix any failures
+          introduced by the fixups.
+        skills: [dev10x:gh-pr-monitor]
+      - subject: Groom commit history
+        type: detailed
+        prompt: Squash fixups into their parent commits.
+        skills: [dev10x:git-groom]
+      - subject: Request re-review
+        type: detailed
+        prompt: >
+          Notify reviewers that feedback has been addressed
+          and request re-review.
+        skills: [dev10x:gh-pr-request-review]
+      - subject: Verify acceptance criteria
+        type: detailed
+        prompt: >
+          Confirm all review comments are addressed, CI passes,
+          and the PR is ready for merge.
+
+  local-only:
+    prompt: >
+      Use when there is no ticket and no PR — just free-text
+      work description. The decision to create a PR is deferred
+      until after implementation. Steps with condition
+      "if-pr-decided" only execute if the user chooses to
+      create a PR.
+    steps:
+      - subject: Summarize the work from gathered context
+        type: detailed
+        prompt: >
+          Synthesize all gathered context (notes, Slack threads,
+          etc.) into a clear work summary. Identify scope and
+          expected deliverables.
+      - subject: Implement changes
+        type: epic
+        prompt: >
+          Execute the work described in the summary. Create
+          atomic commits as you go.
+      - subject: Verify
+        type: epic
+        prompt: Run tests and lint to confirm changes are clean.
+        steps:
+          - subject: Run tests
+            type: detailed
+            prompt: Run pytest with coverage. Fix failures.
+            skills: [test]
+          - subject: Run lint
+            type: detailed
+            prompt: Run ruff check and black. Fix violations.
+      - subject: "Decide: create ticket, create PR, or done"
+        type: detailed
+        prompt: >
+          Present the user with a decision gate. Options:
+          create a ticket and PR, create just a PR, or mark
+          the work as done locally.
+      - subject: Create PR & ensure CI passes
+        type: epic
+        skills: [dev10x:gh-pr-create, dev10x:gh-pr-monitor]
+        condition: if-pr-decided
+        prompt: Create PR and monitor CI if user decided to ship.
+      - subject: Apply fixups to review comments
+        type: epic
+        skills: [dev10x:gh-pr-respond]
+        condition: if-pr-decided
+        prompt: Address review feedback if PR was created.
+      - subject: Groom commit history
+        type: detailed
+        skills: [dev10x:git-groom]
+        condition: if-pr-decided
+        prompt: Clean up commits before merge.
+      - subject: Request review
+        type: detailed
+        skills: [dev10x:gh-pr-request-review]
+        condition: if-pr-decided
+        prompt: Assign reviewers if PR was created.
+      - subject: Verify acceptance criteria
+        type: detailed
+        prompt: >
+          Confirm work is complete per the acceptance criteria
+          for the chosen outcome (local or PR).
+
+  investigation:
+    prompt: >
+      Use when the goal is understanding, not fixing. Typical
+      inputs are Sentry issues or Slack questions where the
+      answer is not yet known. No branch or PR is created
+      unless the investigation reveals a fix worth shipping.
+    steps:
+      - subject: Summarize findings from gathered context
+        type: detailed
+        prompt: >
+          Compile what is already known from Sentry, Slack,
+          and ticket context. Identify knowledge gaps that
+          need codebase investigation.
+      - subject: Investigate in codebase
+        type: epic
+        prompt: >
+          Trace the relevant code paths to understand the
+          behavior. Check logs, error patterns, and related
+          test coverage.
+        steps:
+          - subject: Trace relevant code paths
+            type: detailed
+            prompt: >
+              Read the code from entry point to the area of
+              interest. Map the execution flow and identify
+              key decision points.
+          - subject: Check logs and error patterns
+            type: detailed
+            prompt: >
+              Query logs or Sentry for patterns. Check if the
+              behavior is intermittent or consistent. Note any
+              environmental factors.
+      - subject: Document findings and next steps
+        type: detailed
+        prompt: >
+          Write a clear summary of what was found, the root
+          cause (if identified), and recommended next steps.
+          Post as a ticket comment or Slack reply.
+      - subject: "Decide: create ticket, fix now, or done"
+        type: detailed
+        prompt: >
+          Present the user with options based on findings.
+          If a fix is warranted, offer to switch to a bugfix
+          plan. If more investigation is needed, suggest
+          creating a follow-up ticket.
+
+# User overrides — added when user customizes a plan.
+# persist: true = reuse across sessions; false = one-time.
+# Example:
+#   - work_type: feature
+#     steps: [...]
+#     persist: true
+#     added: 2026-03-11
+overrides: []

@@ -10,6 +10,7 @@ invocation-name: dev10x:work-on
 allowed-tools:
   - Bash(~/.claude/skills/gh/scripts/*:*)
   - Bash(~/.claude/skills/jira/scripts/*:*)
+  - Read(~/.claude/projects/**/memory/work-plans.yaml)
   - Write(~/.claude/projects/**/**)
 ---
 
@@ -256,31 +257,57 @@ template.
 
 ### Generating the Plan
 
-Examine the gathered context and construct a task list. Use these
-heuristics to decide which tasks to include:
+Plan templates are loaded from a user-customizable YAML file.
+Each work type has a default template with parent-child steps
+that can be overridden per project.
 
-**Always include (if a ticket was found and branch is needed per
-Phase 1 workspace decision):**
-- Set up workspace (branch or worktree) — detailed. Skip if
-  Phase 1 detected a matching feature branch already exists.
-- Draft Job Story — detailed
+**Plan source** (resolved in order):
+1. `~/.claude/projects/<project>/memory/work-plans.yaml` —
+   check `overrides` for matching `work_type` first, then
+   `defaults[work_type].steps`
+2. Hardcoded defaults in this skill (see Example Plans below)
 
-**Include based on context:**
+**Plan file schema:** See `references/work-plans-schema.yaml`
+for the full schema with all 5 work types.
 
-| Context signal | Tasks to add |
-|---------------|-------------|
-| Ticket with implementation work | Design approach (epic), Implement (epic), Verify (epic) |
-| Sentry issue found | Reproduce issue (detailed), Investigate root cause (epic) |
-| PR already exists | Fetch PR context (detailed), Address review comments (epic) |
-| Multiple related tickets | Synthesize requirements (detailed) |
-| Slack thread with discussion | Summarize key decisions (detailed) |
+Each plan type has:
+- `prompt` — heuristic guidance for when this plan applies and
+  how to adapt it based on gathered context (optional)
+- `steps` — ordered list of plan steps
 
-**Always include at the end:**
-- Create PR & ensure CI passes — epic
-- Apply fixups to review comments — epic
-- Groom commit history — detailed
-- Request review — detailed
-- Verify acceptance criteria met — detailed (see below)
+Each step in the plan has:
+- `subject` — task title (required)
+- `type` — `detailed` or `epic` (required)
+- `prompt` — expansion guidance for the agent executing this
+  step; describes what to do, what to look for, or how to
+  adapt the step based on context (optional)
+- `skills` — list of skills to delegate to (optional)
+- `steps` — child steps for pre-templated epic expansion (optional)
+- `condition` — hint for conditional execution (optional)
+
+**Loading the plan:**
+1. Determine the `work_type` from gathered context (see table below)
+2. Read the plan file; if absent, use hardcoded defaults
+3. Resolve: overrides first (same as acceptance-criteria), then
+   defaults, then hardcoded fallback
+4. For each step, create a `TaskCreate` with the step's `subject`,
+   `type` in metadata, and `skills` in metadata if present
+5. If a step has child `steps`, store them in metadata for
+   expansion when the epic is reached (Phase 4)
+
+**Work type classification:**
+
+| Context | Work type |
+|---------|-----------|
+| Ticket with implementation | `feature` |
+| Sentry/bug ticket | `bugfix` |
+| PR with review comments | `pr-continuation` |
+| No ticket, no PR | `local-only` |
+| Sentry/Slack only, no fix planned | `investigation` |
+
+**Workspace step adjustment:** If Phase 1 detected a matching
+feature branch already exists, skip the "Set up workspace" step.
+If running in a worktree with a generic branch, keep it.
 
 These plan steps become subtasks of the Phase 4 top-level task.
 The last subtask is always acceptance criteria verification.
@@ -364,45 +391,59 @@ time"). Update the YAML file accordingly:
 - `persist: false` → add with `persist: false`; the skill
   removes consumed one-time overrides after use
 
-### Example Plans
+### Example Plans (Hardcoded Defaults)
+
+These are the built-in fallback plans when no user-space
+`work-plans.yaml` exists. Full YAML definitions with
+pre-templated epic children are in
+`references/work-plans-schema.yaml`.
 
 **Feature from ticket** (subtasks of Phase 4):
 ```
-4.1  [detailed] Set up workspace (branch, worktree)
-4.2  [detailed] Draft Job Story
+4.1  [detailed] Set up workspace          → dev10x:ticket-branch
+4.2  [detailed] Draft Job Story           → dev10x:jtbd
 4.3  [epic]     Design implementation approach
+       ├─ Read relevant code
+       ├─ Identify affected components
+       └─ Propose approach
 4.4  [epic]     Implement changes
-4.5  [epic]     Verify (tests, lint)
-4.6  [epic]     Create PR & ensure CI passes
-4.7  [epic]     Apply fixups to review comments
-4.8  [detailed] Groom commit history
-4.9  [detailed] Request review
-4.10 [detailed] Verify acceptance criteria met
+4.5  [epic]     Verify
+       ├─ Run tests                       → test
+       └─ Run lint
+4.6  [epic]     Create PR & ensure CI     → dev10x:gh-pr-create, dev10x:gh-pr-monitor
+4.7  [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.8  [detailed] Groom commit history      → dev10x:git-groom
+4.9  [detailed] Request review            → dev10x:gh-pr-request-review
+4.10 [detailed] Verify acceptance criteria
 ```
 
 **Bug fix from Sentry + ticket:**
 ```
-4.1  [detailed] Set up workspace
-4.2  [detailed] Reproduce the issue locally
+4.1  [detailed] Set up workspace          → dev10x:ticket-branch
+4.2  [detailed] Reproduce the issue
 4.3  [epic]     Investigate root cause
+       ├─ Analyze error traces
+       └─ Identify failing code path
 4.4  [epic]     Implement fix
-4.5  [epic]     Verify fix (tests, regression)
-4.6  [epic]     Create PR & ensure CI passes
-4.7  [epic]     Apply fixups to review comments
-4.8  [detailed] Groom commit history
-4.9  [detailed] Request review
-4.10 [detailed] Verify acceptance criteria met
+4.5  [epic]     Verify fix
+       ├─ Run existing tests              → test
+       └─ Add regression test
+4.6  [epic]     Create PR & ensure CI     → dev10x:gh-pr-create, dev10x:gh-pr-monitor
+4.7  [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.8  [detailed] Groom commit history      → dev10x:git-groom
+4.9  [detailed] Request review            → dev10x:gh-pr-request-review
+4.10 [detailed] Verify acceptance criteria
 ```
 
 **PR continuation:**
 ```
 4.1  [detailed] Fetch PR and review context
 4.2  [epic]     Address review comments
-4.3  [epic]     Apply fixups to unaddressed comments
-4.4  [epic]     Verify changes pass CI
-4.5  [detailed] Groom commit history
-4.6  [detailed] Request re-review
-4.7  [detailed] Verify acceptance criteria met
+4.3  [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.4  [epic]     Verify changes pass CI    → dev10x:gh-pr-monitor
+4.5  [detailed] Groom commit history      → dev10x:git-groom
+4.6  [detailed] Request re-review         → dev10x:gh-pr-request-review
+4.7  [detailed] Verify acceptance criteria
 ```
 
 **Local-only work (no ticket, no PR):**
@@ -410,12 +451,24 @@ time"). Update the YAML file accordingly:
 4.1  [detailed] Summarize the work from gathered context
 4.2  [epic]     Implement changes
 4.3  [epic]     Verify
+       ├─ Run tests                       → test
+       └─ Run lint
 4.4  [detailed] Decide: create ticket, create PR, or done
-4.5  [epic]     Create PR & ensure CI passes (if decided)
-4.6  [epic]     Apply fixups to review comments (if PR)
-4.7  [detailed] Groom commit history (if PR)
-4.8  [detailed] Request review (if PR)
-4.9  [detailed] Verify acceptance criteria met
+4.5  [epic]     Create PR & ensure CI     → (if-pr-decided)
+4.6  [epic]     Apply fixups              → (if-pr-decided)
+4.7  [detailed] Groom commit history      → (if-pr-decided)
+4.8  [detailed] Request review            → (if-pr-decided)
+4.9  [detailed] Verify acceptance criteria
+```
+
+**Investigation (no fix planned):**
+```
+4.1  [detailed] Summarize findings from gathered context
+4.2  [epic]     Investigate in codebase
+       ├─ Trace relevant code paths
+       └─ Check logs and error patterns
+4.3  [detailed] Document findings and next steps
+4.4  [detailed] Decide: create ticket, fix now, or done
 ```
 
 ### Supervisor Approval Gate
@@ -477,7 +530,10 @@ Return to the blocked task once the blocker resolves.
 
 ### Executing Detailed Tasks
 
-Run the task directly. Common detailed tasks delegate to skills:
+Run the task directly. If the task has a `prompt` in metadata,
+use it as execution guidance. If the task has `skills` in
+metadata, delegate to those skills in order. Common skill
+delegations:
 
 | Task | Delegated to |
 |------|-------------|
@@ -499,23 +555,35 @@ After completing a detailed task, mark it `completed` via
 
 When reaching an epic task:
 
-1. **Read the epic description** and the gathered context
-2. **Generate sub-tasks** — break the epic into detailed steps.
-   This may involve:
+1. **Read the step prompt** — if the task metadata contains a
+   `prompt` field (from work-plans.yaml), use it as guidance
+   for how to execute or expand the step. The prompt may
+   contain heuristics for adapting the step to context.
+2. **Check for pre-templated children** — if the task metadata
+   contains `steps` (from the work-plans.yaml template), use
+   those as the sub-task list instead of generating from scratch.
+   Each child step may also have its own `prompt` for guidance.
+   This gives users control over epic expansion via YAML.
+3. **If no pre-templated children**, generate sub-tasks from
+   context. This may involve:
    - Reading code to understand scope
    - `AskUserQuestion` for A/B decisions (e.g., "approach X
      vs approach Y?") — but only when the choice genuinely
      cannot be inferred from context
    - Follow-up information gathering
-3. **Present sub-tasks** briefly (inline, not a new approval
+4. **Delegate to listed skills** — if the task or sub-task has
+   `skills` in metadata, invoke those skills in order. Multiple
+   skills on one step run sequentially (each may depend on the
+   previous).
+5. **Present sub-tasks** briefly (inline, not a new approval
    gate) and begin executing immediately. Only ask for
    approval if the expansion reveals unexpected scope or
    trade-offs the supervisor should weigh in on.
-4. **Check for parallelism** — if sub-tasks are independent,
+6. **Check for parallelism** — if sub-tasks are independent,
    ask the supervisor before launching parallel agents
-5. **Execute sub-tasks**, marking each completed as they finish.
+7. **Execute sub-tasks**, marking each completed as they finish.
    Auto-advance between sub-tasks (same rule as top-level).
-6. **Mark the epic completed** when all sub-tasks are done
+8. **Mark the epic completed** when all sub-tasks are done
 
 ### Parallelism Policy
 
@@ -627,18 +695,19 @@ branch naming, Sentry integration patterns.
 **Phase 2:** Fetch issue. Body mentions Sentry URL → fetch Sentry
 issue. Body mentions PR #42 → fetch PR. Produce context summary.
 
-**Phase 3:** Build plan (subtasks of Phase 4):
+**Phase 3:** Load `feature` plan template from work-plans.yaml
+(or hardcoded default). Build subtasks of Phase 4:
 ```
-4.1  [detailed] Set up workspace
-4.2  [detailed] Draft Job Story
-4.3  [epic]     Design implementation approach
+4.1  [detailed] Set up workspace          → dev10x:ticket-branch
+4.2  [detailed] Draft Job Story           → dev10x:jtbd
+4.3  [epic]     Design implementation approach (3 children)
 4.4  [epic]     Implement changes
-4.5  [epic]     Verify
-4.6  [epic]     Create PR & ensure CI passes
-4.7  [epic]     Apply fixups to review comments
-4.8  [detailed] Groom commit history
-4.9  [detailed] Request review
-4.10 [detailed] Verify acceptance criteria met
+4.5  [epic]     Verify (2 children)
+4.6  [epic]     Create PR & ensure CI     → dev10x:gh-pr-create, dev10x:gh-pr-monitor
+4.7  [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.8  [detailed] Groom commit history      → dev10x:git-groom
+4.9  [detailed] Request review            → dev10x:gh-pr-request-review
+4.10 [detailed] Verify acceptance criteria
 ```
 Supervisor approves.
 
@@ -659,20 +728,19 @@ decision is needed.
 Sentry issue → fetch that too. Produce context summary with 4
 sources.
 
-**Phase 3:** Build plan (adapted — Sentry issue means
-"Reproduce" task added):
+**Phase 3:** Load `bugfix` plan template (Sentry issue detected).
+The plan-level prompt says "Always include a reproduction step":
 ```
-4.1  [detailed] Set up workspace
-4.2  [detailed] Reproduce the Sentry error locally
-4.3  [detailed] Draft Job Story
-4.4  [epic]     Investigate root cause
-4.5  [epic]     Implement fix
-4.6  [epic]     Verify fix
-4.7  [epic]     Create PR & ensure CI passes
-4.8  [epic]     Apply fixups to review comments
-4.9  [detailed] Groom commit history
-4.10 [detailed] Request review
-4.11 [detailed] Verify acceptance criteria met
+4.1  [detailed] Set up workspace          → dev10x:ticket-branch
+4.2  [detailed] Reproduce the issue
+4.3  [epic]     Investigate root cause (2 children)
+4.4  [epic]     Implement fix
+4.5  [epic]     Verify fix (2 children)
+4.6  [epic]     Create PR & ensure CI     → dev10x:gh-pr-create, dev10x:gh-pr-monitor
+4.7  [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.8  [detailed] Groom commit history      → dev10x:git-groom
+4.9  [detailed] Request review            → dev10x:gh-pr-request-review
+4.10 [detailed] Verify acceptance criteria
 ```
 
 ### Example 3: PR Continuation
@@ -684,15 +752,15 @@ sources.
 **Phase 2:** Fetch PR. Body has `Fixes: GH-15` → fetch issue.
 PR has 3 review comments → note them.
 
-**Phase 3:** Build plan:
+**Phase 3:** Load `pr-continuation` plan template:
 ```
-4.1  [detailed] Fetch review comments and understand feedback
+4.1  [detailed] Fetch PR and review context
 4.2  [epic]     Address review comments
-4.3  [epic]     Apply fixups to unaddressed comments
-4.4  [epic]     Verify CI passes
-4.5  [detailed] Groom commit history
-4.6  [detailed] Request re-review
-4.7  [detailed] Verify acceptance criteria met
+4.3  [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.4  [epic]     Verify changes pass CI    → dev10x:gh-pr-monitor
+4.5  [detailed] Groom commit history      → dev10x:git-groom
+4.6  [detailed] Request re-review         → dev10x:gh-pr-request-review
+4.7  [detailed] Verify acceptance criteria
 ```
 
 ### Example 4: Mid-Workflow Pause
