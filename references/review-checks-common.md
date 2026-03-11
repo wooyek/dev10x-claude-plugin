@@ -152,7 +152,9 @@ instructions, code examples):
   Also flag `2>/dev/null` on any command whose stdout is captured into a
   variable (`var=$(cmd 2>/dev/null)`) when that variable drives branching
   logic — an empty string from a silenced failure produces misleading errors
-  downstream.
+  downstream. **Also flag implicit defaults** (e.g., `jq '.field // ""'`)
+  when the default value drives subsequent branching; validate explicitly
+  instead: `[[ -z "$VAR" ]] && { error; exit 1; }`.
 - **Pipe segment completeness in security hooks**: when a hook script
   parses a shell command to detect a pattern (e.g., `psql`, `python3 -c`),
   it must inspect ALL segments — both pipe-delimited (`|`) AND
