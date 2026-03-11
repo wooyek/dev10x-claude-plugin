@@ -5,13 +5,24 @@ set -euo pipefail
 
 SKILLS_MENU="${HOME}/.claude/.skills-menu.txt"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-FAMILIES_FILE="${SCRIPT_DIR}/families.yaml"
-HIDDEN_FILE="${SCRIPT_DIR}/hidden.yaml"
+USER_CONFIG_DIR="${HOME}/.claude/skill-index"
 BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/bin"
 # shellcheck source=../../../bin/require-tool.sh
 source "$BIN_DIR/require-tool.sh"
 require_tool yq
 require_tool jq
+
+# ── Resolve config files (user-space overrides plugin defaults) ──
+# families.yaml: user file replaces plugin default entirely
+if [[ -f "${USER_CONFIG_DIR}/families.yaml" ]]; then
+    FAMILIES_FILE="${USER_CONFIG_DIR}/families.yaml"
+else
+    FAMILIES_FILE="${SCRIPT_DIR}/families.yaml"
+fi
+
+# hidden.yaml: user file merges with plugin default (additive)
+HIDDEN_FILE="${SCRIPT_DIR}/hidden.yaml"
+USER_HIDDEN_FILE="${USER_CONFIG_DIR}/hidden.yaml"
 
 # ── Resolve skill source directories ────────────────────────────
 LOCAL_DIR="${HOME}/.claude/skills"
@@ -73,13 +84,14 @@ if [[ -n "$DEV10X_DIR" && -d "$DEV10X_DIR" ]]; then
     done
 fi
 
-# ── Load hidden list ────────────────────────────────────────────
+# ── Load hidden list (merged: plugin defaults + user additions) ─
 declare -A HIDDEN
-if [[ -f "$HIDDEN_FILE" ]]; then
+for hf in "$HIDDEN_FILE" "$USER_HIDDEN_FILE"; do
+    [[ -f "$hf" ]] || continue
     while IFS= read -r h; do
         [[ -n "$h" ]] && HIDDEN["$h"]=1
-    done < <(yq '.hidden[]' "$HIDDEN_FILE")
-fi
+    done < <(yq '.hidden[]' "$hf")
+done
 
 # ── Filter: remove hidden skills ────────────────────────────────
 VISIBLE_KEYS=()
