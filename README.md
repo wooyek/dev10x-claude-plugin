@@ -60,14 +60,14 @@ their phone:
 
 | Step | Skill | Output |
 |------|-------|--------|
-| Scope | `dev10x:ticket-scope` | Architecture research, ticket update |
-| Branch | `dev10x:work-on` | Named branch, gathered context |
-| Commit | `dev10x:git-commit` | Atomic commits with benefit-focused titles |
-| Groom | `dev10x:git-groom` | Clean history, no fixup commits |
-| PR | `dev10x:gh-pr-create` | Job Story description, ticket links |
-| Monitor | `dev10x:gh-pr-monitor` | Background CI + review watch |
-| Respond | `dev10x:gh-pr-respond` | Batched review responses, minimal noise |
-| Review | `dev10x:gh-pr-review` | Domain-routed review across 5 agents |
+| Scope | [`dev10x:ticket-scope`](skills/ticket-scope/SKILL.md) | Architecture research, ticket update |
+| Branch | [`dev10x:work-on`](skills/work-on/SKILL.md) | Named branch, gathered context |
+| Commit | [`dev10x:git-commit`](skills/git-commit/SKILL.md) | Atomic commits with benefit-focused titles |
+| Groom | [`dev10x:git-groom`](skills/git-groom/SKILL.md) | Clean history, no fixup commits |
+| PR | [`dev10x:gh-pr-create`](skills/gh-pr-create/SKILL.md) | Job Story description, ticket links |
+| Monitor | [`dev10x:gh-pr-monitor`](skills/gh-pr-monitor/SKILL.md) | Background CI + review watch |
+| Respond | [`dev10x:gh-pr-respond`](skills/gh-pr-respond/SKILL.md) | Batched review responses, minimal noise |
+| Review | [`dev10x:gh-pr-review`](skills/gh-pr-review/SKILL.md) | Domain-routed review across 5 agents |
 
 No step produces wall-of-text. Each output is sized for a Slack
 preview, a PR comment, or a task list glance.
@@ -101,15 +101,15 @@ review comment) is concise enough to evaluate in seconds.
 
 | Family | Skills | What it automates |
 |--------|--------|-------------------|
-| **Git** | `git-commit`, `git-commit-split`, `git-fixup`, `git-groom`, `git-promote`, `git-worktree`, `git`, `git-alias-setup` | Atomic commits, clean history, workspace isolation |
-| **PR** | `gh-pr-create`, `gh-pr-review`, `gh-pr-respond`, `gh-pr-monitor`, `gh-pr-triage`, `gh-pr-fixup`, `gh-pr-request-review`, `gh-pr-bookmark`, `gh-context` | Full PR lifecycle, domain-routed review |
-| **Tickets** | `ticket-create`, `ticket-branch`, `ticket-scope`, `ticket-jtbd`, `work-on`, `linear` | Issue tracker integration, ticket scoping |
-| **Park** | `park`, `park-todo`, `park-remind`, `park-discover` | Deferred work parking |
-| **Scoping** | `scope`, `jtbd`, `adr` | Architecture decisions, Job Story format |
-| **QA** | `qa-scope`, `qa-self`, `playwright` | Test planning, self-review, browser testing |
-| **Session** | `session-tasks`, `wrap-up` | In-session work tracking |
-| **Tooling** | `py-uv`, `slack` | Python packaging, Slack notifications |
-| **Meta** | `skill-create`, `skill-audit`, `skill-index` | Create, audit, and discover skills |
+| **Git** | [`git-commit`](skills/git-commit/SKILL.md), [`git-commit-split`](skills/git-commit-split/SKILL.md), [`git-fixup`](skills/git-fixup/SKILL.md), [`git-groom`](skills/git-groom/SKILL.md), [`git-promote`](skills/git-promote/SKILL.md), [`git-worktree`](skills/git-worktree/SKILL.md), [`git`](skills/git/SKILL.md), [`git-alias-setup`](skills/git-alias-setup/SKILL.md) | Atomic commits, clean history, workspace isolation |
+| **PR** | [`gh-pr-create`](skills/gh-pr-create/SKILL.md), [`gh-pr-review`](skills/gh-pr-review/SKILL.md), [`gh-pr-respond`](skills/gh-pr-respond/SKILL.md), [`gh-pr-monitor`](skills/gh-pr-monitor/SKILL.md), [`gh-pr-triage`](skills/gh-pr-triage/SKILL.md), [`gh-pr-fixup`](skills/gh-pr-fixup/SKILL.md), [`gh-pr-request-review`](skills/gh-pr-request-review/SKILL.md), [`gh-pr-bookmark`](skills/gh-pr-bookmark/SKILL.md), [`gh-context`](skills/gh-context/SKILL.md) | Full PR lifecycle, domain-routed review |
+| **Tickets** | [`ticket-create`](skills/ticket-create/SKILL.md), [`ticket-branch`](skills/ticket-branch/SKILL.md), [`ticket-scope`](skills/ticket-scope/SKILL.md), [`ticket-jtbd`](skills/ticket-jtbd/SKILL.md), [`work-on`](skills/work-on/SKILL.md), [`linear`](skills/linear/SKILL.md) | Issue tracker integration, ticket scoping |
+| **Park** | [`park`](skills/park/SKILL.md), [`park-todo`](skills/park-todo/SKILL.md), [`park-remind`](skills/park-remind/SKILL.md), [`park-discover`](skills/park-discover/SKILL.md) | Deferred work parking |
+| **Scoping** | [`scope`](skills/scope/SKILL.md), [`jtbd`](skills/jtbd/SKILL.md), [`adr`](skills/adr/SKILL.md) | Architecture decisions, Job Story format |
+| **QA** | [`qa-scope`](skills/qa-scope/SKILL.md), [`qa-self`](skills/qa-self/SKILL.md), [`playwright`](skills/playwright/SKILL.md) | Test planning, self-review, browser testing |
+| **Session** | [`session-tasks`](skills/session-tasks/SKILL.md), [`session-wrap-up`](skills/session-wrap-up/SKILL.md) | In-session work tracking |
+| **Tooling** | [`py-uv`](skills/py-uv/SKILL.md), [`slack`](skills/slack/SKILL.md) | Python packaging, Slack notifications |
+| **Meta** | [`skill-create`](skills/skill-create/SKILL.md), [`skill-audit`](skills/skill-audit/SKILL.md), [`skill-index`](skills/skill-index/SKILL.md) | Create, audit, and discover skills |
 
 All skills use the `dev10x:` prefix — type `/dev10x:git-commit` in the Claude
 Code CLI to run it. Run `/dev10x:skill-index` for the full reference.
