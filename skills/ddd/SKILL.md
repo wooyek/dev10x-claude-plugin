@@ -1,5 +1,5 @@
 ---
-name: ddd-workshop
+name: dev10x:ddd-workshop
 description: >
   Run or continue a DDD Event Storming workshop to explore, model, and
   stress-test domain architecture. Use when the user mentions DDD,
