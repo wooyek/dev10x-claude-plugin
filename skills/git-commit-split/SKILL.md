@@ -4,6 +4,7 @@ description: Split monolithic git commits into atomic, cohesive commits followin
 user-invocable: true
 invocation-name: dev10x:git-commit-split
 allowed-tools:
+  - AskUserQuestion
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git-commit-split/scripts/*:*)
 ---
 

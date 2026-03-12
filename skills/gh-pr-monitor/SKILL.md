@@ -4,6 +4,8 @@ description: Launch a background agent to monitor PR CI checks and review commen
 user-invocable: true
 invocation-name: dev10x:gh-pr-monitor
 allowed-tools:
+  - Agent
+  - AskUserQuestion
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/*:*)
   - Bash(gh:*)

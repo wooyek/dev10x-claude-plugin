@@ -47,10 +47,11 @@ Internal review-only agents (≤ 50 lines each).
 | File | Trigger | References |
 |------|---------|------------|
 | `reviewer-generic.md` | `**/*.py`, `**/*.sh` | `references/review-checks-common.md` |
-| `reviewer-infra.md` | `Makefile`, `**/*.sh`, `bin/**` | `references/review-checks-common.md` |
-| `reviewer-docs.md` | `docs/**`, `.claude/**/*.md` | `references/review-checks-common.md` |
-| `reviewer-rules-maintenance.md` | `.claude/rules/**`, `agents/**` | (self-contained) |
-| `reviewer-skill.md` | `skills/**` | `.claude/rules/skill-naming.md` |
+| `reviewer-infra.md` | `Makefile`, `**/*.sh`, `bin/**`, `.github/workflows/**` | `references/review-checks-common.md` |
+| `reviewer-docs.md` | `docs/**`, `.claude/**/*.md`, `README.md` | `references/review-checks-common.md` |
+| `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | (self-contained) |
+| `reviewer-skill.md` | `skills/**` | `.claude/rules/skill-naming.md`, `references/skill-invocation.md`, `references/eval-schema.md` |
+| `reviewer-skill-behavior.md` | `skills/**` | `references/task-orchestration.md`, `.claude/rules/skill-gates.md` |
 
 ## Plugin-Distributed Sub-Agents (`agents/`)
 
@@ -83,9 +84,8 @@ Budgets are guidelines to prevent sprawl. Exceptions permitted when:
 Current overrides:
 - `references/task-orchestration.md` (367 lines) — 7 orchestration
   patterns form a unified framework that 43+ skills reference atomically
-- `.claude/agents/reviewer-skill.md` (151 lines) — 19 checklist items
-  spanning naming, scripting, tooling, behavior. Split plan: if >170
-  lines, extract `reviewer-skill-paths.md` and
-  `reviewer-skill-behavior.md`
+- `.claude/agents/reviewer-skill.md` — split completed into
+  `reviewer-skill.md` (structure/tools) and
+  `reviewer-skill-behavior.md` (behavior/orchestration)
 
 Reviewers must flag overrides with `[OVERRIDE DETECTED]` comments.

@@ -4,8 +4,8 @@ description: Create a GitHub pull request for the current branch with issue trac
 user-invocable: true
 invocation-name: dev10x:gh-pr-create
 allowed-tools:
+  - AskUserQuestion
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/*:*)
-  # TODO: gh-context moved to fundamentals plugin — cross-plugin script ref needs resolution
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
 ---
 

@@ -4,6 +4,7 @@ description: Validate and respond to PR review comments. Handles single comment 
 user-invocable: true
 invocation-name: dev10x:gh-pr-respond
 allowed-tools:
+  - AskUserQuestion
   - Bash(gh:*)
   - Skill(dev10x:gh-pr-triage)
   - Skill(dev10x:gh-pr-fixup)
