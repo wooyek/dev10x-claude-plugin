@@ -283,6 +283,7 @@ Each step in the play has:
 - `prompt` — expansion guidance for the agent executing this
   step; describes what to do, what to look for, or how to
   adapt the step based on context (optional)
+- `agent` — agent name to invoke when executing this step (optional)
 - `skills` — list of skills to delegate to (optional)
 - `steps` — child steps for pre-templated epic expansion (optional)
 - `condition` — hint for conditional execution (optional)
@@ -296,7 +297,7 @@ Each step in the play has:
 3. Resolve: overrides first (same as acceptance-criteria), then
    defaults, then schema fallback
 4. For each step, create a `TaskCreate` with the step's `subject`,
-   `type` in metadata, and `skills` in metadata if present
+   `type` in metadata, and `agent`/`skills` in metadata if present
 5. If a step has child `steps`, store them in metadata for
    expansion when the epic is reached (Phase 4)
 
@@ -415,11 +416,15 @@ skill. Users can customize these via
 4.5  [epic]     Verify
        ├─ Run tests                       → test
        └─ Run lint
-4.6  [epic]     Create PR & ensure CI     → dev10x:gh-pr-create, dev10x:gh-pr-monitor
-4.7  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.8  [detailed] Groom commit history      → dev10x:git-groom
-4.9  [detailed] Request review            → dev10x:gh-pr-request-review
-4.10 [detailed] Verify acceptance criteria
+4.6  [detailed] Code review               → code-reviewer agent
+4.7  [detailed] Commit outstanding changes → dev10x:git-commit
+4.8  [detailed] Create draft PR           → dev10x:gh-pr-create (--unattended)
+4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
+4.10 [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.11 [detailed] Groom commit history      → dev10x:git-groom
+4.12 [detailed] Update PR description     → dev10x:gh-pr-create (update mode)
+4.13 [detailed] Request review            → dev10x:gh-pr-request-review
+4.14 [detailed] Verify acceptance criteria
 ```
 
 **Bug fix from Sentry + ticket:**
@@ -433,11 +438,15 @@ skill. Users can customize these via
 4.5  [epic]     Verify fix
        ├─ Run existing tests              → test
        └─ Add regression test
-4.6  [epic]     Create PR & ensure CI     → dev10x:gh-pr-create, dev10x:gh-pr-monitor
-4.7  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.8  [detailed] Groom commit history      → dev10x:git-groom
-4.9  [detailed] Request review            → dev10x:gh-pr-request-review
-4.10 [detailed] Verify acceptance criteria
+4.6  [detailed] Code review               → code-reviewer agent
+4.7  [detailed] Commit outstanding changes → dev10x:git-commit
+4.8  [detailed] Create draft PR           → dev10x:gh-pr-create (--unattended)
+4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
+4.10 [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.11 [detailed] Groom commit history      → dev10x:git-groom
+4.12 [detailed] Update PR description     → dev10x:gh-pr-create (update mode)
+4.13 [detailed] Request review            → dev10x:gh-pr-request-review
+4.14 [detailed] Verify acceptance criteria
 ```
 
 **PR continuation:**
@@ -445,10 +454,13 @@ skill. Users can customize these via
 4.1  [detailed] Fetch PR and review context
 4.2  [epic]     Address review comments
 4.3  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.4  [epic]     Verify changes pass CI    → dev10x:gh-pr-monitor
-4.5  [detailed] Groom commit history      → dev10x:git-groom
-4.6  [detailed] Request re-review         → dev10x:gh-pr-request-review
-4.7  [detailed] Verify acceptance criteria
+4.4  [detailed] Code review               → code-reviewer agent
+4.5  [detailed] Commit outstanding changes → dev10x:git-commit
+4.6  [detailed] Monitor CI                → dev10x:gh-pr-monitor
+4.7  [detailed] Groom commit history      → dev10x:git-groom
+4.8  [detailed] Update PR description     → dev10x:gh-pr-create (update mode)
+4.9  [detailed] Request re-review         → dev10x:gh-pr-request-review
+4.10 [detailed] Verify acceptance criteria
 ```
 
 **Local-only work (no ticket, no PR):**
@@ -459,11 +471,15 @@ skill. Users can customize these via
        ├─ Run tests                       → test
        └─ Run lint
 4.4  [detailed] Decide: create ticket, create PR, or done
-4.5  [epic]     Create PR & ensure CI     → (if-pr-decided)
-4.6  [epic]     Apply fixups              → (if-pr-decided)
-4.7  [detailed] Groom commit history      → (if-pr-decided)
-4.8  [detailed] Request review            → (if-pr-decided)
-4.9  [detailed] Verify acceptance criteria
+4.5  [detailed] Code review               → code-reviewer agent (if-pr-decided)
+4.6  [detailed] Commit outstanding changes → dev10x:git-commit (if-pr-decided)
+4.7  [detailed] Create draft PR           → dev10x:gh-pr-create (if-pr-decided)
+4.8  [detailed] Monitor CI                → dev10x:gh-pr-monitor (if-pr-decided)
+4.9  [epic]     Apply fixups              → dev10x:gh-pr-respond (if-pr-decided)
+4.10 [detailed] Groom commit history      → dev10x:git-groom (if-pr-decided)
+4.11 [detailed] Update PR description     → dev10x:gh-pr-create (if-pr-decided)
+4.12 [detailed] Request review            → dev10x:gh-pr-request-review (if-pr-decided)
+4.13 [detailed] Verify acceptance criteria
 ```
 
 **Investigation (no fix planned):**
@@ -503,6 +519,17 @@ See `references/task-orchestration.md` for the full pattern.
 between tasks to ask "should I continue?" or wait for the user
 to say "go" / "next" / "continue". The approved plan is the
 authorization to proceed.
+
+**Auto-advance on commits:** After creating a commit, immediately
+proceed to the next task. Never pause to show the commit or ask
+for confirmation — the commit is done, move on.
+
+**Auto-advance on draft PR creation:** Create the draft PR and
+immediately proceed. Do not block on PR preview approval when
+executing the shipping pipeline — the PR body and title can
+always be updated later via the "Update PR description" step.
+When delegating to `dev10x:gh-pr-create`, pass
+`args="--unattended"` to skip the preview gate.
 
 **Batched Decision Queue:** When a task hits a genuine A/B
 decision, do NOT interrupt the user immediately. Instead:
@@ -547,10 +574,13 @@ delegations:
 | Draft Job Story | `dev10x:jtbd` skill (attended mode) |
 | Update ticket status | Linear MCP (see references/team-info.md) |
 | Fetch PR context | `gh pr view` + `gh pr diff` |
-| Create PR | `dev10x:gh-pr-create` skill |
+| Code review | `code-reviewer` agent (via Agent tool) |
+| Commit changes | `dev10x:git-commit` skill |
+| Create draft PR | `dev10x:gh-pr-create` skill (`--unattended`) |
 | Monitor CI | `dev10x:gh-pr-monitor` skill |
 | Apply fixups to review | `dev10x:gh-pr-respond` skill |
 | Groom commit history | `dev10x:git-groom` skill |
+| Update PR description | `dev10x:gh-pr-create` skill (update mode) |
 | Request review | `dev10x:gh-pr-request-review` skill |
 
 After completing a detailed task, mark it `completed` via
@@ -708,11 +738,15 @@ defaults → schema). Build subtasks of Phase 4:
 4.3  [epic]     Design implementation approach (3 children)
 4.4  [epic]     Implement changes
 4.5  [epic]     Verify (2 children)
-4.6  [epic]     Create PR & ensure CI     → dev10x:gh-pr-create, dev10x:gh-pr-monitor
-4.7  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.8  [detailed] Groom commit history      → dev10x:git-groom
-4.9  [detailed] Request review            → dev10x:gh-pr-request-review
-4.10 [detailed] Verify acceptance criteria
+4.6  [detailed] Code review               → code-reviewer agent
+4.7  [detailed] Commit outstanding changes → dev10x:git-commit
+4.8  [detailed] Create draft PR           → dev10x:gh-pr-create
+4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
+4.10 [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.11 [detailed] Groom commit history      → dev10x:git-groom
+4.12 [detailed] Update PR description     → dev10x:gh-pr-create
+4.13 [detailed] Request review            → dev10x:gh-pr-request-review
+4.14 [detailed] Verify acceptance criteria
 ```
 Supervisor approves.
 
@@ -741,11 +775,15 @@ sources.
 4.3  [epic]     Investigate root cause (2 children)
 4.4  [epic]     Implement fix
 4.5  [epic]     Verify fix (2 children)
-4.6  [epic]     Create PR & ensure CI     → dev10x:gh-pr-create, dev10x:gh-pr-monitor
-4.7  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.8  [detailed] Groom commit history      → dev10x:git-groom
-4.9  [detailed] Request review            → dev10x:gh-pr-request-review
-4.10 [detailed] Verify acceptance criteria
+4.6  [detailed] Code review               → code-reviewer agent
+4.7  [detailed] Commit outstanding changes → dev10x:git-commit
+4.8  [detailed] Create draft PR           → dev10x:gh-pr-create
+4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
+4.10 [epic]     Apply fixups              → dev10x:gh-pr-respond
+4.11 [detailed] Groom commit history      → dev10x:git-groom
+4.12 [detailed] Update PR description     → dev10x:gh-pr-create
+4.13 [detailed] Request review            → dev10x:gh-pr-request-review
+4.14 [detailed] Verify acceptance criteria
 ```
 
 ### Example 3: PR Continuation
@@ -762,10 +800,13 @@ PR has 3 review comments → note them.
 4.1  [detailed] Fetch PR and review context
 4.2  [epic]     Address review comments
 4.3  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.4  [epic]     Verify changes pass CI    → dev10x:gh-pr-monitor
-4.5  [detailed] Groom commit history      → dev10x:git-groom
-4.6  [detailed] Request re-review         → dev10x:gh-pr-request-review
-4.7  [detailed] Verify acceptance criteria
+4.4  [detailed] Code review               → code-reviewer agent
+4.5  [detailed] Commit outstanding changes → dev10x:git-commit
+4.6  [detailed] Monitor CI                → dev10x:gh-pr-monitor
+4.7  [detailed] Groom commit history      → dev10x:git-groom
+4.8  [detailed] Update PR description     → dev10x:gh-pr-create
+4.9  [detailed] Request re-review         → dev10x:gh-pr-request-review
+4.10 [detailed] Verify acceptance criteria
 ```
 
 ### Example 4: Mid-Workflow Pause
