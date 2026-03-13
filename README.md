@@ -1,6 +1,7 @@
 # Dev10x Claude Plugin
 
 Stop babysitting your AI. Start supervising it.
+Join the community: [Dev10x.guru](http://Dev10x.guru)
 
 ---
 
