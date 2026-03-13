@@ -283,6 +283,7 @@ Each step in the play has:
 - `prompt` — expansion guidance for the agent executing this
   step; describes what to do, what to look for, or how to
   adapt the step based on context (optional)
+- `agent` — agent name to invoke when executing this step (optional)
 - `skills` — list of skills to delegate to (optional)
 - `steps` — child steps for pre-templated epic expansion (optional)
 - `condition` — hint for conditional execution (optional)
@@ -296,7 +297,7 @@ Each step in the play has:
 3. Resolve: overrides first (same as acceptance-criteria), then
    defaults, then schema fallback
 4. For each step, create a `TaskCreate` with the step's `subject`,
-   `type` in metadata, and `skills` in metadata if present
+   `type` in metadata, and `agent`/`skills` in metadata if present
 5. If a step has child `steps`, store them in metadata for
    expansion when the epic is reached (Phase 4)
 
