@@ -296,6 +296,92 @@ mutation($threadId: ID!) {
 - A resolved thread can be re-opened by the reviewer
 - Use `isResolved` field to check current state before resolving
 
+## Hiding (Minimizing) Comments (GraphQL API)
+
+GitHub's `minimizeComment` mutation hides a comment's body and shows
+a placeholder like "This comment was marked as outdated." This is
+distinct from resolving a thread — minimizing hides the content,
+resolving collapses the conversation.
+
+### Minimize a Comment
+
+```bash
+gh api graphql -f query='
+mutation($id: ID!, $classifier: ReportedContentClassifiers!) {
+  minimizeComment(input: {
+    subjectId: $id,
+    classifier: $classifier
+  }) {
+    minimizedComment {
+      isMinimized
+      minimizedReason
+    }
+  }
+}' -f id='{node_id}' -f classifier='OUTDATED'
+```
+
+**Parameters:**
+- `subjectId` — The `node_id` of the comment (e.g., `PRRC_kwDO...`),
+  NOT the numeric `id`. Get it from the comment's `node_id` field in
+  the REST API response.
+- `classifier` — One of: `OUTDATED`, `OFF_TOPIC`, `RESOLVED`,
+  `SPAM`, `ABUSE`, `DUPLICATE`
+
+### Batch Minimize: Find and Hide Resolved Comments
+
+```bash
+# Step 1: Get resolved thread root comment node_ids
+COMMENT_IDS=$(gh api graphql -f query='
+query($owner: String!, $repo: String!, $pr: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pr) {
+      reviewThreads(first: 100) {
+        nodes {
+          isResolved
+          comments(first: 1) {
+            nodes {
+              id
+              databaseId
+            }
+          }
+        }
+      }
+    }
+  }
+}' -f owner='{owner}' -f repo='{repo}' -F pr={pr_number} \
+  --jq '.data.repository.pullRequest.reviewThreads.nodes[]
+        | select(.isResolved)
+        | .comments.nodes[0].id')
+
+# Step 2: Minimize each comment
+echo "$COMMENT_IDS" | while read -r NODE_ID; do
+  gh api graphql -f query='
+  mutation($id: ID!, $classifier: ReportedContentClassifiers!) {
+    minimizeComment(input: {
+      subjectId: $id, classifier: $classifier
+    }) {
+      minimizedComment { isMinimized minimizedReason }
+    }
+  }' -f id="$NODE_ID" -f classifier='OUTDATED'
+done
+```
+
+### Recommended Classifiers by Context
+
+| Context | Classifier | When to use |
+|---------|-----------|-------------|
+| Addressed review feedback | `OUTDATED` | Comment was addressed by a fixup commit |
+| Resolved misunderstanding | `RESOLVED` | Comment was based on incorrect assumption |
+| Unrelated to PR | `OFF_TOPIC` | Comment was out of scope |
+
+### Notes
+
+- Minimizing requires **write access** to the repository
+- The comment author and repo admins can always un-minimize
+- Minimized comments show a clickable "Show comment" link
+- Use `isMinimized` field to check current state before minimizing
+- The `node_id` field from REST API maps to GraphQL's `ID` type
+
 ## Additional Resources
 
 - [GitHub REST API - Pull Request Review Comments](https://docs.github.com/en/rest/pulls/comments)

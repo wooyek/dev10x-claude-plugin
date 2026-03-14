@@ -34,6 +34,7 @@ Never pause to ask "should I continue?" between steps.
 2. `TaskCreate(subject=f"Triage {N} comments", activeForm="Triaging comments")`
 3. `TaskCreate(subject="Execute approved responses", activeForm="Executing responses")`
 4. `TaskCreate(subject="Resolve threads", activeForm="Resolving threads")`
+5. `TaskCreate(subject="Hide obsolete comments", activeForm="Hiding comments")`
 
 Set dependencies and update status as each completes.
 
@@ -45,9 +46,21 @@ reply.
 **Batched decisions:** Thread resolution decisions are queued
 and presented as a batch after all responses are posted.
 
+## Playbook
+
+This skill is playbook-powered. The workflow steps are defined in
+`references/playbook.yaml` with two plays: `single` (Mode A) and
+`batch` (Mode B).
+
+**Loading order:**
+1. User overrides: `~/.claude/projects/<project>/memory/playbooks/gh-pr-respond.yaml`
+2. Defaults: `${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-respond/references/playbook.yaml`
+
+Customize with `/dev10x:playbook edit gh-pr-respond <play>`.
+
 ## Decision Gates
 
-This skill has 5 **blocking decision gates** where execution
+This skill has 6 **blocking decision gates** where execution
 MUST pause for user input via the `AskUserQuestion` tool.
 
 **Plain text questions are NOT acceptable** — they don't block
@@ -61,6 +74,7 @@ structured decision flow the user relies on.
 | 3 | Mode B, Step 3 | Approve / review / skip batch |
 | 4 | Mode B, Step 5 | Resolve threads confirmation |
 | 5 | Post-Response Continuation | Groom + push + monitor / Push only / Stop |
+| 6 | Mode B, Step 5b / Mode A, Step 1c | Hide obsolete comments |
 
 Each gate is marked with **REQUIRED: `AskUserQuestion`** in the
 step description. If you see that marker, you MUST call the
@@ -140,6 +154,33 @@ Resolve this thread?
 This blocks execution until the user responds. Options:
 - **"Resolve"** — Resolve the thread via GraphQL
 - **"Leave open"** — Keep the thread open (reply already posted)
+
+### Step 1c: Hide obsolete comment (optional)
+
+If the thread was resolved in Step 1b, offer to minimize the root
+comment to reduce PR conversation noise:
+
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+Options:
+- **"Hide"** — Minimize the comment via GraphQL `minimizeComment`
+  with classifier `OUTDATED`
+- **"Skip"** — Leave the comment visible
+
+**Skip this gate** if the thread was left open in Step 1b.
+
+When hiding, use the comment's `node_id` (not numeric `id`):
+```bash
+gh api graphql -f query='
+mutation($id: ID!, $classifier: ReportedContentClassifiers!) {
+  minimizeComment(input: {
+    subjectId: $id, classifier: $classifier
+  }) {
+    minimizedComment { isMinimized minimizedReason }
+  }
+}' -f id='{node_id}' -f classifier='OUTDATED'
+```
+
+See `references/github_api.md` § Hiding (Minimizing) Comments.
 
 ### Step 2: Check for remaining comments
 
@@ -306,6 +347,79 @@ Options: "Resolve" / "Leave open"
 
 **After confirmation**, resolve only the user-approved threads via GraphQL.
 
+### Step 5b: Hide obsolete comments (optional)
+
+After resolving threads, offer to minimize the resolved comments
+to reduce PR conversation noise. This hides comment bodies on
+GitHub, showing "This comment was marked as outdated" instead.
+
+**Skip this step** if no threads were resolved in Step 5.
+
+Collect all resolved threads' root comment `node_id` values:
+
+```bash
+gh api graphql -f query='
+query($owner: String!, $repo: String!, $pr: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pr) {
+      reviewThreads(first: 100) {
+        nodes {
+          isResolved
+          comments(first: 1) {
+            nodes { id databaseId }
+          }
+        }
+      }
+    }
+  }
+}' -f owner='{owner}' -f repo='{repo}' -F pr={pr_number} \
+  --jq '[.data.repository.pullRequest.reviewThreads.nodes[]
+        | select(.isResolved)
+        | .comments.nodes[0]]'
+```
+
+Present the resolved comments:
+
+```
+{N} resolved thread(s) can be hidden:
+
+1. r{databaseId} on {path}:{line} — "{first_line_of_body}..."
+2. r{databaseId} on {path}:{line} — "{first_line_of_body}..."
+
+Hide these comments?
+```
+
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+Options:
+- **"Hide all resolved" (Recommended)** — Minimize all resolved
+  thread root comments with classifier `OUTDATED`
+- **"Review one-by-one"** — Confirm each comment individually
+- **"Skip"** — Leave all comments visible
+
+**If "Review one-by-one":** For each comment, present:
+```
+r{databaseId} on {path}:{line}
+  Body: "{body_excerpt}"
+  Thread: resolved ✅
+
+Hide this comment?
+```
+Options: "Hide" / "Skip"
+
+**After confirmation**, minimize approved comments via GraphQL:
+```bash
+gh api graphql -f query='
+mutation($id: ID!, $classifier: ReportedContentClassifiers!) {
+  minimizeComment(input: {
+    subjectId: $id, classifier: $classifier
+  }) {
+    minimizedComment { isMinimized minimizedReason }
+  }
+}' -f id='{node_id}' -f classifier='OUTDATED'
+```
+
+See `references/github_api.md` § Hiding (Minimizing) Comments.
+
 ### Step 6: Summary
 
 After all comments are processed, report:
@@ -317,6 +431,7 @@ Batch complete: {N} comments processed
 - {z} QUESTION (answered)
 - {w} OUT_OF_SCOPE (acknowledged)
 - {r} threads resolved (user-confirmed)
+- {h} comments hidden (minimized)
 - {u} threads left open
 ```
 
@@ -369,6 +484,7 @@ Input URL
     │       ├── dev10x:gh-pr-triage → verdict
     │       ├── if VALID → dev10x:gh-pr-fixup
     │       ├── if not VALID → reply posted, ask user to resolve
+    │       ├── if resolved → offer to hide (minimize) comment
     │       ├── check remaining
     │       └── offer: next / batch / stop
     │
@@ -380,6 +496,7 @@ Input URL
             ├── get user approval
             ├── execute approved responses (reply only, no resolve)
             ├── collect non-VALID threads → ask user to confirm resolution
+            ├── hide resolved comments → ask user to confirm hiding
             └── summary
 ```
 
