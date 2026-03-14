@@ -36,9 +36,24 @@ SETTINGS_FILES = [
     os.path.expanduser("~/.claude/settings.json"),
 ]
 
+GIT_C_RE = re.compile(r"\bgit\s+-C\s+(\S+)")
 ENV_PREFIX_GIT_RE = re.compile(r"^[A-Z_]+=\S*\s+git\b")
 MERGE_BASE_RE = re.compile(r"\$\(git\s+merge-base\s+(\w+)\s+HEAD\)")
 GIT_SUBCOMMAND_RE = re.compile(r"\bgit\s+(log|diff|rebase)\b")
+
+CD_NOOP_RE = re.compile(r"^cd\s+(\S+)\s*&&\s*(.*)")
+
+CD_NOOP_MSG = (
+    "\u26a0\ufe0f  `cd {path}` is redundant — CWD is already `{cwd}`.\n\n"
+    "Drop the `cd ... &&` prefix and run the command directly:\n"
+    "    {bare_command}"
+)
+
+GIT_C_NOOP_MSG = (
+    "\u26a0\ufe0f  `git -C {path}` is redundant — CWD is already `{cwd}`.\n\n"
+    "Drop the `-C` flag and run the command directly:\n"
+    "    {bare_command}"
+)
 
 AND_CHAIN_ADVICE = """\
 \u26a0\ufe0f  && chaining detected \u2014 permission friction risk.
@@ -160,9 +175,14 @@ class PrefixFrictionValidator:
             "&&" in cmd
             or ENV_PREFIX_GIT_RE.match(cmd) is not None
             or "merge-base" in cmd
+            or "git -C" in cmd
         )
 
     def validate(self, inp: HookInput) -> HookResult | None:
+        result = self._check_git_c_noop(command=inp.command, cwd=inp.cwd)
+        if result:
+            return result
+
         result = self._check_env_prefix_git(command=inp.command)
         if result:
             return result
@@ -171,7 +191,59 @@ class PrefixFrictionValidator:
         if result:
             return result
 
+        result = self._check_cd_noop_chain(command=inp.command, cwd=inp.cwd)
+        if result:
+            return result
+
         return self._check_and_chaining(command=inp.command)
+
+    def _check_git_c_noop(
+        self,
+        *,
+        command: str,
+        cwd: str,
+    ) -> HookResult | None:
+        if not cwd:
+            return None
+        match = GIT_C_RE.search(command)
+        if not match:
+            return None
+        target = os.path.normpath(os.path.expanduser(match.group(1)))
+        normalized_cwd = os.path.normpath(cwd)
+        if target != normalized_cwd:
+            return None
+        bare = GIT_C_RE.sub("git", command, count=1).strip()
+        return HookResult(
+            message=GIT_C_NOOP_MSG.format(
+                path=match.group(1),
+                cwd=cwd,
+                bare_command=bare,
+            ),
+        )
+
+    def _check_cd_noop_chain(
+        self,
+        *,
+        command: str,
+        cwd: str,
+    ) -> HookResult | None:
+        if not cwd:
+            return None
+        match = CD_NOOP_RE.match(command)
+        if not match:
+            return None
+        target = os.path.normpath(os.path.expanduser(match.group(1)))
+        normalized_cwd = os.path.normpath(cwd)
+        if target != normalized_cwd:
+            return None
+        bare = match.group(2).strip()
+        return HookResult(
+            message=CD_NOOP_MSG.format(
+                path=match.group(1),
+                cwd=cwd,
+                bare_command=bare,
+            ),
+        )
 
     def _check_env_prefix_git(self, *, command: str) -> HookResult | None:
         if ENV_PREFIX_GIT_RE.match(command):

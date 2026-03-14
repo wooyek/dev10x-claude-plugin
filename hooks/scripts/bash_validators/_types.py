@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from dataclasses import dataclass
 from typing import Any, NoReturn
@@ -13,6 +14,7 @@ class HookInput:
     tool_name: str
     command: str
     raw: dict[str, Any]
+    cwd: str = ""
 
     @classmethod
     def from_stdin(cls) -> HookInput:
@@ -24,6 +26,7 @@ class HookInput:
             tool_name=data.get("tool_name", ""),
             command=data.get("tool_input", {}).get("command", ""),
             raw=data,
+            cwd=os.getcwd(),
         )
 
     @classmethod
