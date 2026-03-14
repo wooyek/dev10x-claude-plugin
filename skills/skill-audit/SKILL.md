@@ -235,6 +235,21 @@ Create a temp file for each analysis phase's output:
 Store the returned paths — subagents write their findings here
 and the main agent reads them in Phase 6.
 
+**Subagent write permissions:** Subagents dispatched via `Agent()`
+do not inherit this skill's `allowed-tools`. The user must have
+these rules in their `settings.local.json` or approve the writes
+when prompted:
+- `Write(/tmp/claude/skill-audit/**)`
+- `Read(/tmp/claude/skill-audit/**)`
+
+To avoid per-invocation prompts, add these to
+`~/.claude/settings.local.json` under `permissions.allow`:
+```json
+["Write", {"glob": "/tmp/claude/skill-audit/**"}],
+["Read", {"glob": "/tmp/claude/skill-audit/**"}],
+["Edit", {"glob": "/tmp/claude/skill-audit/**"}]
+```
+
 ### Step 6: Wave 1 — dispatch parallel subagents
 
 **REQUIRED: Launch both subagents in a single message** so they
@@ -247,9 +262,14 @@ Include the full text of each phase's instructions from the Phase
 Reference section in the subagent prompt. Replace `<PLACEHOLDERS>`
 with actual paths from previous steps.
 
-1. `Agent(subagent_type="general-purpose", description="Phase 1: Action inventory", prompt="You are running Phase 1 (Action Inventory) of a skill audit. Read the session transcript at: <TRANSCRIPT_PATH>. Skills directory: <SKILLS_DIR>. [Include full Phase 1: Action Inventory instructions from the Phase Reference section]. Write your complete findings (markdown table) to: <PHASE1_OUTPUT>.")`
+**REQUIRED: Include this permission note in every subagent prompt:**
+"You have permission to write to /tmp/claude/skill-audit/ paths.
+Use the Write tool to save your findings to the output file path
+provided."
 
-2. `Agent(subagent_type="general-purpose", description="Phase 4: Permission friction", prompt="You are running Phase 4 (Permission Friction Analysis) of a skill audit. Read the session transcript at: <TRANSCRIPT_PATH>. Project settings: ~/.claude/settings.local.json. Skills directory: <SKILLS_DIR>. [Include full Phase 4: Permission Friction Analysis instructions from the Phase Reference section, all sub-steps 4a through 4g]. Write your complete findings to: <PHASE4_OUTPUT>.")`
+1. `Agent(subagent_type="general-purpose", description="Phase 1: Action inventory", prompt="You are running Phase 1 (Action Inventory) of a skill audit. You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Read the session transcript at: <TRANSCRIPT_PATH>. Skills directory: <SKILLS_DIR>. [Include full Phase 1: Action Inventory instructions from the Phase Reference section]. Write your complete findings (markdown table) to: <PHASE1_OUTPUT>.")`
+
+2. `Agent(subagent_type="general-purpose", description="Phase 4: Permission friction", prompt="You are running Phase 4 (Permission Friction Analysis) of a skill audit. You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Read the session transcript at: <TRANSCRIPT_PATH>. Project settings: ~/.claude/settings.local.json. Skills directory: <SKILLS_DIR>. [Include full Phase 4: Permission Friction Analysis instructions from the Phase Reference section, all sub-steps 4a through 4g]. Write your complete findings to: <PHASE4_OUTPUT>.")`
 
 Wait for both subagents to complete. Mark tasks 4 and 5 as
 `completed` as each returns.
@@ -263,11 +283,11 @@ that Phases 2, 3, and 5 need.
 they run concurrently. Include the full text of each phase's
 instructions from the Phase Reference section in each prompt.
 
-1. `Agent(subagent_type="general-purpose", description="Phase 2: Skill coverage", prompt="You are running Phase 2 (Skill Coverage Analysis). Phase 1 action inventory: <PHASE1_OUTPUT>. Skills directory: <SKILLS_DIR>. Read the Phase 1 output, then [include full Phase 2: Skill Coverage Analysis instructions from the Phase Reference section]. Write findings to: <PHASE2_OUTPUT>.")`
+1. `Agent(subagent_type="general-purpose", description="Phase 2: Skill coverage", prompt="You are running Phase 2 (Skill Coverage Analysis). You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Phase 1 action inventory: <PHASE1_OUTPUT>. Skills directory: <SKILLS_DIR>. Read the Phase 1 output, then [include full Phase 2: Skill Coverage Analysis instructions from the Phase Reference section]. Write findings to: <PHASE2_OUTPUT>.")`
 
-2. `Agent(subagent_type="general-purpose", description="Phase 3: Compliance check", prompt="You are running Phase 3 (Compliance Check). Phase 1 action inventory: <PHASE1_OUTPUT>. Session transcript: <TRANSCRIPT_PATH>. Skills directory: <SKILLS_DIR>. Read the Phase 1 output, then [include full Phase 3: Compliance Check instructions from the Phase Reference section]. Write findings to: <PHASE3_OUTPUT>.")`
+2. `Agent(subagent_type="general-purpose", description="Phase 3: Compliance check", prompt="You are running Phase 3 (Compliance Check). You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Phase 1 action inventory: <PHASE1_OUTPUT>. Session transcript: <TRANSCRIPT_PATH>. Skills directory: <SKILLS_DIR>. Read the Phase 1 output, then [include full Phase 3: Compliance Check instructions from the Phase Reference section]. Write findings to: <PHASE3_OUTPUT>.")`
 
-3. `Agent(subagent_type="general-purpose", description="Phase 5: Lessons learned", prompt="You are running Phase 5 (Lessons Learned Extraction). Phase 1 action inventory: <PHASE1_OUTPUT>. Session transcript: <TRANSCRIPT_PATH>. Memory directory: <MEMORY_DIR>. Read the Phase 1 output, then [include full Phase 5: Lessons Learned Extraction instructions from the Phase Reference section]. Write findings to: <PHASE5_OUTPUT>.")`
+3. `Agent(subagent_type="general-purpose", description="Phase 5: Lessons learned", prompt="You are running Phase 5 (Lessons Learned Extraction). You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Phase 1 action inventory: <PHASE1_OUTPUT>. Session transcript: <TRANSCRIPT_PATH>. Memory directory: <MEMORY_DIR>. Read the Phase 1 output, then [include full Phase 5: Lessons Learned Extraction instructions from the Phase Reference section]. Write findings to: <PHASE5_OUTPUT>.")`
 
 Wait for all three subagents to complete. Mark tasks 6, 7, 8
 as `completed` as each returns.

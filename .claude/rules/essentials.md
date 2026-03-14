@@ -46,6 +46,13 @@ Mark every decision gate in SKILL.md with:
 Plain text questions allow agents to silently substitute default answers,
 breaking skill orchestration. See `.claude/rules/skill-gates.md` for pattern.
 
+This rule applies **globally** — not only inside loaded skills. When
+presenting A/B design choices, architectural trade-offs, or strategy
+options between skill invocations, use `AskUserQuestion` with structured
+options. Queue decisions per `references/task-orchestration.md` (Batched
+Decision Queue pattern) and present them in a single batch when all
+tasks are blocked.
+
 ## Reference Documents
 
 | Document | Topic | Loaded by |

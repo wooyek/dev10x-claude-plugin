@@ -76,3 +76,10 @@ Skip tool calls for:
 - Optional preferences (user can proceed with defaults)
 
 Reserve gates for choices that **change execution path**.
+
+## Global Scope
+
+This pattern applies **globally** — not only inside loaded skills.
+When presenting A/B design choices between skill invocations (e.g.,
+architectural trade-offs, strategy options), use `AskUserQuestion`
+with structured options. See `essentials.md` § Decision Gates.

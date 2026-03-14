@@ -141,7 +141,8 @@ Detection cascade:
 | 1 | `GH-` prefix | `TRACKER=github`, builds `FIXES_URL` from current repo |
 | 2 | Prefix matches a GitHub autolink with `linear.app` URL | `TRACKER=linear` |
 | 3 | Prefix matches a GitHub autolink with `atlassian.net` URL | `TRACKER=jira` |
-| 4 | No match | `TRACKER=unknown`, `FIXES_URL` empty |
+| 4 | `LINEAR_API_KEY` set and Linear API confirms the ticket exists | `TRACKER=linear` |
+| 5 | No match | `TRACKER=unknown`, `FIXES_URL` empty |
 
 Output (KEY=VALUE lines, same convention as `gh-pr-detect.sh`):
 

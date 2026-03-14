@@ -65,6 +65,31 @@ if [[ -n "$REPO" ]]; then
     fi
 fi
 
+# --- Heuristic 3: Query Linear API for team prefix validation ---
+# Use validated prefix + number to build the identifier safely
+SAFE_ID="${PREFIX}-${NUMBER}"
+if command -v curl >/dev/null 2>&1 && [[ -n "${LINEAR_API_KEY:-}" ]] && [[ -n "$PREFIX" ]] && [[ -n "$NUMBER" ]]; then
+    LINEAR_RESPONSE=$(curl -s -X POST https://api.linear.app/graphql \
+        -H "Content-Type: application/json" \
+        -H "Authorization: $LINEAR_API_KEY" \
+        -d "{\"query\": \"{ issue(identifier: \\\"${SAFE_ID}\\\") { team { key } } organization { urlKey } }\"}" \
+        2>/dev/null)
+
+    LINEAR_TEAM=$(echo "$LINEAR_RESPONSE" | jq -r '.data.issue.team.key // empty' 2>/dev/null)
+
+    if [[ -n "$LINEAR_TEAM" ]]; then
+        LINEAR_ORG=$(echo "$LINEAR_RESPONSE" | jq -r '.data.organization.urlKey // empty' 2>/dev/null)
+        if [[ -n "$LINEAR_ORG" ]]; then
+            FIXES_URL="https://linear.app/${LINEAR_ORG}/issue/${SAFE_ID}"
+        else
+            FIXES_URL=""
+        fi
+        printf 'TRACKER=linear\nTICKET_ID=%s\nTICKET_NUMBER=%s\nFIXES_URL=%s\n' \
+            "$TICKET_ID" "$NUMBER" "$FIXES_URL"
+        exit 0
+    fi
+fi
+
 # --- Fallback: unknown ---
 printf 'TRACKER=unknown\nTICKET_ID=%s\nTICKET_NUMBER=%s\nFIXES_URL=\n' \
     "$TICKET_ID" "$NUMBER"
