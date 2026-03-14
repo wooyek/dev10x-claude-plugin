@@ -8,9 +8,11 @@ Thumbs.db
 *.swp
 *.swo
 
-# Python bytecode (for scripts)
+# Python
 __pycache__/
 *.pyc
+.venv/
+*.egg-info/
 
 # Claude Code local settings
 .claude/settings.local.json
