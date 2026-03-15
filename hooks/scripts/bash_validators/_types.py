@@ -49,3 +49,17 @@ class HookResult:
         }
         print(json.dumps(result), file=sys.stderr)
         sys.exit(2)
+
+
+@dataclass(frozen=True)
+class HookAllow:
+    message: str = ""
+
+    def emit(self) -> NoReturn:
+        result: dict[str, Any] = {
+            "hookSpecificOutput": {"permissionDecision": "allow"},
+        }
+        if self.message:
+            result["systemMessage"] = self.message
+        print(json.dumps(result), file=sys.stderr)
+        sys.exit(0)

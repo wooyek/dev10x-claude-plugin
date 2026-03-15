@@ -45,3 +45,21 @@ class TestHookResult:
         with pytest.raises(SystemExit) as exc_info:
             result.emit()
         assert exc_info.value.code == 2
+
+
+class TestHookAllow:
+    def test_emit_exits_with_code_0(self) -> None:
+        from bash_validators._types import HookAllow
+
+        allow = HookAllow()
+        with pytest.raises(SystemExit) as exc_info:
+            allow.emit()
+        assert exc_info.value.code == 0
+
+    def test_emit_with_message_exits_0(self) -> None:
+        from bash_validators._types import HookAllow
+
+        allow = HookAllow(message="auto-approved")
+        with pytest.raises(SystemExit) as exc_info:
+            allow.emit()
+        assert exc_info.value.code == 0

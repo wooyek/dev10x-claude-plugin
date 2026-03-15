@@ -1,6 +1,6 @@
 ---
 name: dev10x:project-scope
-description: Scope a multi-ticket project with milestones, blocking relationships, and tracker integration. Accepts a parent ticket URL/ID or free-text description and creates the full project structure in Linear or JIRA.
+description: Scope a multi-ticket project with milestones, blocking relationships, and tracker integration. Accepts a parent ticket URL/ID or free-text description and creates the full project structure in Linear, JIRA, or GitHub Issues.
 user-invocable: true
 invocation-name: dev10x:project-scope
 allowed-tools:
@@ -13,6 +13,10 @@ allowed-tools:
   - mcp__claude_ai_Linear__list_milestones
   - mcp__claude_ai_Linear__list_issue_statuses
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
+  - Bash(gh issue create:*)
+  - Bash(gh label create:*)
+  - Bash(gh api repos/:*)
+  - Bash(/tmp/claude/bin/mktmp.sh:*)
   - Skill(dev10x:ticket-create)
 ---
 
@@ -86,6 +90,7 @@ tracker cannot be detected automatically (e.g., free-text input
 with no branch context). Options:
 - Linear (Recommended) — Create Linear project with milestones
 - JIRA — Create JIRA epic with sub-tasks
+- GitHub Issues — Create milestones and issues via `gh` CLI
 
 ### 1.4 Research Codebase
 
@@ -123,12 +128,13 @@ If "More research": return to Phase 1.4 with user guidance.
 
 ### 3.1 Tracker Dispatch
 
-| Operation | Linear | JIRA |
-|-----------|--------|------|
-| Create project | `save_project` (optional) | Epic via `dev10x:jira` |
-| Create milestone | `save_milestone` | Sprint/Fix Version via `dev10x:jira` |
-| Create ticket | `save_issue` + milestone + project | via `dev10x:jira` |
-| Set blocking | `save_issue` blockedBy/blocks | Link via `dev10x:jira` |
+| Operation | Linear | JIRA | GitHub Issues |
+|-----------|--------|------|---------------|
+| Create project | `save_project` (optional) | Epic via `dev10x:jira` | N/A (use milestones) |
+| Create milestone | `save_milestone` | Sprint/Fix Version via `dev10x:jira` | `gh api repos/{owner}/{repo}/milestones --method POST` |
+| Create label | (via `save_issue`) | (via `dev10x:jira`) | `gh label create` |
+| Create ticket | `save_issue` + milestone + project | via `dev10x:jira` | `gh issue create --milestone --label --body-file` |
+| Set blocking | `save_issue` blockedBy/blocks | Link via `dev10x:jira` | Cross-reference in issue body (no native blocking) |
 
 ### 3.2 Create/Resolve Parent Ticket
 
@@ -162,6 +168,36 @@ Create all tickets with milestone and project assignments.
 Use the project UUID resolved in 3.3 — never pass a display name.
 Batch creation is possible since all milestones exist at this point.
 Check for existing tickets by title before creating.
+
+**GitHub Issues batch pattern (10+ issues):**
+
+When creating many issues, use a sidecar metadata pattern to keep
+issue bodies clean and reduce permission friction:
+
+1. Create a temp directory for the batch:
+   ```bash
+   BATCH_DIR=$(/tmp/claude/bin/mktmp.sh -d gh-issues batch)
+   ```
+2. For each issue, write two files via the Write tool:
+   - `$BATCH_DIR/NNN-slug.md` — clean body content only
+   - `$BATCH_DIR/NNN-slug.env` — metadata:
+     ```bash
+     TITLE="Ticket title here"
+     MILESTONE="Milestone Name"
+     LABELS="enhancement,area/payments"
+     ```
+3. Create issues by iterating inline (no temp script):
+   ```bash
+   for env in $BATCH_DIR/*.env; do
+     source "$env"
+     body="${env%.env}.md"
+     gh issue create --repo "$REPO" --title "$TITLE" \
+       --body-file "$body" --milestone "$MILESTONE" --label "$LABELS"
+   done
+   ```
+
+This pattern was discovered in a session creating 36 issues — a single
+loop approval replaced 36 individual `gh issue create` approvals.
 
 ### 3.6 Set Blocking Relationships
 

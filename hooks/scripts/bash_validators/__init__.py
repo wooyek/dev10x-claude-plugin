@@ -3,6 +3,9 @@
 Single-dispatcher architecture: one Python process validates all Bash
 commands by iterating a registry of Validator implementations. Each
 validator has a fast `should_run` predicate and a `validate` method.
+
+Ordering matters: allow-validators run before deny-validators so safe
+patterns get auto-approved before a deny-validator would block them.
 """
 
 from __future__ import annotations
@@ -12,9 +15,11 @@ from bash_validators.commit_jtbd import CommitJtbdValidator
 from bash_validators.execution_safety import ExecutionSafetyValidator
 from bash_validators.pr_base import PrBaseValidator
 from bash_validators.prefix_friction import PrefixFrictionValidator
+from bash_validators.safe_subshell import SafeSubshellValidator
 from bash_validators.sql_safety import SqlSafetyValidator
 
 VALIDATORS: list[Validator] = [
+    SafeSubshellValidator(),
     PrefixFrictionValidator(),
     ExecutionSafetyValidator(),
     CommitJtbdValidator(),

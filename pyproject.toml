@@ -1,6 +1,6 @@
 [project]
 name = "dev10x-ai"
-version = "0.26.0.dev0"
+version = "0.27.0.dev0"
 description = "Claude Code plugin providing reusable skills, hooks, and commands"
 requires-python = ">=3.12"
 dependencies = []
