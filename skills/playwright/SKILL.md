@@ -1,5 +1,6 @@
 ---
 name: dev10x:playwright
+invocation-name: dev10x:playwright
 description: >
   Run Playwright Python scripts against TireTutor staging safely.
   Use when writing or executing a Playwright automation script for self-QA

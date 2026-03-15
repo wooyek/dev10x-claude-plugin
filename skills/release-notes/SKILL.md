@@ -2,7 +2,7 @@
 name: dev10x:release-notes
 description: Generate JTBD-driven release notes from git commits between releases. Playbook-powered workflow with configurable ticket patterns, output targets, and categories.
 user-invocable: true
-invocation-name: release-notes
+invocation-name: dev10x:release-notes
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/release-notes/scripts/collect-prs.py:*)
   - Bash(gh pr view:*)

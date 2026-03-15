@@ -32,9 +32,6 @@ completion and directory listings.
 
 ## Invocation Name (SKILL.md `name:` field)
 
-**Deprecated:** The `dx:` prefix was superseded by `dev10x:` as of commit 44c0dd8.
-All new skills must use the `dev10x:` namespace; old `dx:` references are no longer recognized.
-
 Use the `dev10x:<feature-name>` format in the SKILL.md front matter.
 
 **Good:**
@@ -50,9 +47,21 @@ name: git-worktree
 name: skill-audit
 ```
 
-*Why?* The `dev10x:` namespace prefix identifies this plugin's skills
-at invocation time. Without it, skills could collide with skills
-from other plugins or built-in commands.
+*Why?* This is an intentional **branding decision**. Claude Code
+auto-constructs `<PluginName>:<dir-name>` identifiers for the
+system-reminder listing (e.g., `Dev10x:git-commit`), so the prefix
+is technically redundant for skill resolution. However, we include
+it explicitly in `name:` for:
+- **Brand consistency** — the `dev10x:` prefix is visible in MOTD
+  listings and `Skill()` invocations across all projects
+- **Collision avoidance** — explicit prefix prevents ambiguity when
+  multiple plugins define similarly-named skills
+- **Self-documenting** — skill identity is clear without needing
+  plugin context
+
+Note: official plugins (superpowers, svelte, hookify) omit the
+prefix and rely on auto-construction. Our explicit prefix is a
+deliberate divergence for branding.
 
 ## Family Naming
 
@@ -74,19 +83,18 @@ Skills use family prefixes for tab-completion discoverability:
 Other skills use the full directory name: `dev10x:git-worktree`,
 `dev10x:skill-audit`, `dev10x:skill-create`.
 
-## `invocation-name` vs `name`
+## `invocation-name` field
 
-`name:` is the canonical plugin-registered invocation and MUST use the
-`dev10x:` prefix. `invocation-name:` is an optional alias and MAY use an
-alternative namespace when the skill bridges to an external skill family:
+**Required on every skill.** The `invocation-name:` field makes
+skills available for invocation. By default it MUST match `name:`:
 
-| `name:`           | `invocation-name:` | Use case                             |
-|-------------------|--------------------|--------------------------------------|
-| `dev10x:ticket-jtbd`  | `ticket:jtbd`      | Cross-family alias for ticket skills |
-| `dev10x:git-promote`  | `dev10x:git-promote`   | Redundant (harmless)                 |
+```yaml
+name: dev10x:git-commit
+invocation-name: dev10x:git-commit
+```
 
-Do NOT flag `invocation-name:` with a non-`dev10x:` prefix as a naming
-violation when `name:` already carries the correct `dev10x:` prefix.
+The `invocation-name:` MUST match `name:` — no exceptions. Both
+fields carry the `dev10x:` prefix for brand consistency.
 
 ## Eval Criteria Files
 
@@ -114,6 +122,7 @@ They do not require executable permissions or script references.
 ## Rationale Summary
 
 - **Directory**: plain name → clean filesystem, no redundant prefix
-- **Invocation**: `dev10x:` prefix → namespace isolation at call time
+- **Invocation**: `dev10x:` prefix → branding + namespace isolation
+- **`invocation-name:`**: required on every skill, matches `name:` by default
 - **Families**: prefix groups for tab-completion discoverability
 - **Evals**: structured JSON placed in fixed directory with prefixed `skill_name`

@@ -1,5 +1,6 @@
 ---
 name: dev10x:review
+invocation-name: dev10x:review
 description: Use when reviewing your own branch changes before creating a PR. Reviews diff against base branch, runs automated checks, and produces structured findings with severity, file, line, and suggested fix. Works in attended (pick findings) or unattended (auto-advance to fixer) mode.
 user-invocable: true
 allowed-tools:

@@ -50,10 +50,10 @@ Active namespaces: `my:`, `dev10x:`, `ticket:`, `pr:`, `commit:`
 
 ```yaml
 ---
-name: my-skill-name
+name: dev10x:my-skill-name
+invocation-name: dev10x:my-skill-name
 description: Use when [situation trigger] so [what the user gains or stops suffering]
 user-invocable: true          # include for user-invocable skills
-invocation-name: skill-name   # short alias, no namespace prefix
 allowed-tools:                # pre-approve bash commands (removes prompts)
   - Bash(git commit:*)
   - Bash(~/.claude/skills/<name>/scripts/*:*)
@@ -62,8 +62,9 @@ allowed-tools:                # pre-approve bash commands (removes prompts)
 
 | Field | When to use |
 |---|---|
+| `name` | Canonical identifier; MUST use `dev10x:` prefix |
+| `invocation-name` | Required on every skill; matches `name:` by default, or shorter alias |
 | `user-invocable: true` | Skill appears in MOTD and is callable via Skill tool |
-| `invocation-name` | Short alias users type (e.g. `skill-create` → `/skill-create`) |
 | `allowed-tools` | Pre-approve bash commands Claude needs; use `:*` for any args |
 
 ## Writing for User Gains (JTBD-influenced)

@@ -1,5 +1,6 @@
 ---
 name: dev10x:db
+invocation-name: dev10x:db
 description: >
   Safe database query planning for Claude Code. When querying any
   database, ensures schema-first construction and read-only safety

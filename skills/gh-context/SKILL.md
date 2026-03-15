@@ -1,5 +1,6 @@
 ---
 name: dev10x:gh-context
+invocation-name: dev10x:gh-context
 description: Use when detecting PR context (number, repo, URL, branch) from a URL, PR number, or current branch — so skills like dev10x:gh-pr-monitor always get the correct target PR even in multi-worktree setups
 user-invocable: false
 allowed-tools:

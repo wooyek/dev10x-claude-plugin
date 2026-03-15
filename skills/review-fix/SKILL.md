@@ -1,5 +1,6 @@
 ---
 name: dev10x:review-fix
+invocation-name: dev10x:review-fix
 description: Use when dev10x:review has produced structured findings that need fixup commits. Consumes a findings JSON file and creates one standalone fixup! commit per finding via dev10x:git-fixup.
 user-invocable: false
 allowed-tools:

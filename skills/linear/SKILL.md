@@ -1,5 +1,6 @@
 ---
 name: dev10x:linear
+invocation-name: dev10x:linear
 description: Linear issue tracker operations via MCP tools. Get, create, update issues and list comments. Documentation-only skill — no scripts.
 user-invocable: false
 allowed-tools:

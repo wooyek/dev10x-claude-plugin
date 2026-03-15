@@ -2,7 +2,7 @@
 name: dev10x:update-permission-paths
 description: Use when the dev10x plugin version changes, or when worktree permissions need merging back — so all projects stay in sync instead of drifting one session at a time
 user-invocable: true
-invocation-name: update-permission-paths
+invocation-name: dev10x:update-permission-paths
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/update-permission-paths/scripts/*:*)
 ---
