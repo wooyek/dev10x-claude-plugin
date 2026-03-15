@@ -128,6 +128,7 @@ This validates:
 - No uncommitted changes
 - Has commits ahead of develop
 - Branch does not include master-only commits (would cause PR to target master)
+- No merge conflicts with base branch (requires Git 2.38+; suggests rebase if conflicts found)
 
 On success, outputs `BRANCH_NAME=<name>` and `ISSUE=<ticket-id>`.
 

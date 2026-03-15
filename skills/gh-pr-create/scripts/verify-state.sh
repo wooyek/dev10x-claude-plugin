@@ -62,6 +62,22 @@ if [ -n "$DEV_BRANCH" ]; then
     fi
 fi
 
+# Check for merge conflicts with base branch (requires Git 2.38+)
+git fetch origin "$BASE_BRANCH" --quiet 2>/dev/null || {
+    echo "⚠️  Failed to fetch $BASE_BRANCH. Conflict check may use stale ref." >&2
+}
+if git merge-tree --write-tree --help >/dev/null 2>&1; then
+    MERGE_TREE_EXIT=0
+    git merge-tree --write-tree HEAD "origin/$BASE_BRANCH" >/dev/null 2>&1 || MERGE_TREE_EXIT=$?
+    if [ "$MERGE_TREE_EXIT" -eq 1 ]; then
+        echo "⚠️  Branch has merge conflicts with origin/$BASE_BRANCH." >&2
+        echo "Rebase first: git rebase origin/$BASE_BRANCH" >&2
+        exit 1
+    fi
+else
+    echo "⚠️  Skipping conflict check (requires Git 2.38+)." >&2
+fi
+
 # Extract ticket ID from branch name (username/TICKET-ID/[worktree/]description)
 ISSUE=$(echo "$BRANCH_NAME" | cut -d'/' -f2)
 

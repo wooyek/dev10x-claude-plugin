@@ -185,18 +185,27 @@ The PR body **must** start with a JTBD Job Story as its first paragraph.
 
 Repeat until all CI checks pass:
 
-1. Check CI status:
+1. Check for merge conflicts:
+   ```bash
+   gh pr view {pr_number} --repo {repo} --json mergeable -q '.mergeable'
+   ```
+   - `MERGEABLE` → continue to CI check
+   - `CONFLICTING` → rebase onto base branch and force-push (see
+     Conflict Handling below)
+   - `UNKNOWN` → wait 10 seconds, re-check (GitHub is still computing)
+
+2. Check CI status:
    ```bash
    gh pr checks {pr_number}
    ```
 
-2. Parse results:
+3. Parse results:
    - ALL PASSING → mark PR ready (`gh pr ready {pr_number}`) and go
      to Phase 2
    - PENDING → wait 30 seconds via `sleep 30`, then re-check
    - FAILURES → analyze and fix (see CI Failure Handling below)
 
-3. After fixing CI failures, push and wait 30 seconds before
+4. After fixing CI failures, push and wait 30 seconds before
    re-checking.
 
 ### CI Failure Handling
@@ -217,6 +226,32 @@ For each CI fix:
 - Create fixup commit targeting the appropriate original commit
 - Push: `git push origin HEAD`
 
+### Conflict Handling
+
+When `gh pr view` reports `mergeable: CONFLICTING`:
+
+1. Fetch latest base branch:
+   ```bash
+   gh pr view {pr_number} --repo {repo} --json baseRefName -q '.baseRefName'
+   git fetch origin {base_branch}
+   ```
+
+2. Rebase onto the base branch:
+   ```bash
+   git rebase origin/{base_branch}
+   ```
+
+3. If rebase succeeds, force-push:
+   ```bash
+   git push --force-with-lease origin {branch}
+   ```
+
+4. If rebase has conflicts that cannot be auto-resolved, stop the
+   monitor and report the conflicting files to the user.
+
+5. After force-push, wait 30 seconds for GitHub to re-compute
+   mergeability and re-run CI, then restart the Phase 1 loop.
+
 ---
 
 ## Phase 2: Review Comment Monitoring Loop
@@ -225,7 +260,7 @@ Repeat until no unaddressed comments remain:
 
 1. Delegate to `dev10x:gh-pr-respond` in **batch mode** with the PR URL:
    ```
-   Use the Skill tool: skill="dev10x:gh-pr-respond", args="{pr_url}"
+   Skill(skill="dev10x:gh-pr-respond", args="{pr_url}")
    ```
 
 2. After all comments are addressed, return to Phase 1 (CI may re-run
@@ -250,7 +285,7 @@ This phase runs ONCE when Phase 2 completes. It delegates to the
 
 1. Invoke the dev10x:qa-scope skill:
    ```
-   Use the Skill tool: skill="dev10x:qa-scope", args="{pr_number}"
+   Skill(skill="dev10x:qa-scope", args="{pr_number}")
    ```
 
    The dev10x:qa-scope skill will:
@@ -301,13 +336,12 @@ Options: "Post re-review notification" / "Skip".
 
 ### Step 4: Post the notification
 
-If user approves, invoke `Skill("dev10x:slack-review-request")` with the
-composed message. The skill reads the project's Slack config and posts
-to the configured channel.
+If user approves, invoke the skill with the composed message. The skill
+reads the project's Slack config and posts to the configured channel.
 
 Example invocation:
 ```
-Skill("dev10x:slack-review-request", args="--pr {pr_number} --repo {repo} --message '@{reviewer} please take another look'")
+Skill(skill="dev10x:slack-review-request", args="--pr {pr_number} --repo {repo} --message '@{reviewer} please take another look'")
 ```
 
 The dev10x:slack-review-request skill will:
@@ -348,7 +382,7 @@ If user approves, execute two delegated steps in sequence:
 **Step 3a: Request review (GitHub + Slack)**
 
 ```
-Skill("dev10x:request-review", args="--pr {pr_number} --repo {repo}")
+Skill(skill="dev10x:request-review", args="--pr {pr_number} --repo {repo}")
 ```
 
 The dev10x:request-review skill will:
@@ -395,7 +429,8 @@ reviewers assigned, Slack notification posted.
 - **Poll interval**: Wait 30 seconds between CI checks and comment checks.
 - **Max CI retries**: If CI fails 5 times in a row on the same issue,
   stop and report the problem.
-- **Never force push**: Always use regular `git push origin HEAD`.
+- **No regular force push**: Use `git push origin HEAD` for normal pushes.
+  Exception: after conflict rebase, use `git push --force-with-lease`.
 - **Working directory**: Use `gh pr view {pr_number} --repo {repo}
   --json headRefName` to get the branch. Never hardcode a working
   directory — the PR branch may live in a different worktree.
@@ -421,23 +456,23 @@ reviewers assigned, Slack notification posted.
         │
         ├── Phase 0: JTBD Job Story check
         │       ├── Fetch PR body, check first paragraph
-        │       └── If missing → Skill("dev10x:ticket-jtbd") to generate
+        │       └── If missing → Skill(skill="dev10x:ticket-jtbd") to generate
         │
         ├── Phase 1: CI monitoring (handled directly by agent)
         │
         ├── Phase 2: Comment monitoring
-        │       └── Skill("dev10x:gh-pr-respond", args="{pr_url}") — batch mode
+        │       └── Skill(skill="dev10x:gh-pr-respond", args="{pr_url}") — batch mode
         │
         ├── Phase 2.5: QA scope assessment
-        │       └── Skill("dev10x:qa-scope")
+        │       └── Skill(skill="dev10x:qa-scope")
         │
         ├── Phase 2.7: Re-review notification (after comments addressed)
         │       ├── AskUserQuestion → confirm notification
-        │       └── Skill("dev10x:slack-review-request") → post to Slack
+        │       └── Skill(skill="dev10x:slack-review-request") → post to Slack
         │
         └── Phase 3: Notification (initial review request)
                 ├── AskUserQuestion → confirm message
                 └── If approved, execute two delegated steps:
-                    ├── Skill("dev10x:request-review") → assign GitHub reviewers + post Slack
+                    ├── Skill(skill="dev10x:request-review") → assign GitHub reviewers + post Slack
                     └── pr-notify.py send (checklist-only mode)
 ```

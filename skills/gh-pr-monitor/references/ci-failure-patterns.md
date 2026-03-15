@@ -105,6 +105,20 @@ ERROR: failed to solve: process "/bin/sh -c pip install -r requirements.txt" did
 - Ensure requirements file is valid
 - Check for dependency conflicts
 
+## Merge Conflicts
+
+**Pattern:**
+```
+This branch has conflicts that must be resolved
+```
+or `gh pr view` reports `mergeable: CONFLICTING`.
+
+**Fix:**
+- Fetch latest base: `git fetch origin {base_branch}`
+- Rebase: `git rebase origin/{base_branch}`
+- Resolve conflicts manually if auto-rebase fails
+- Force-push: `git push --force-with-lease origin {branch}`
+
 ## Coverage Failures
 
 **Pattern:**
