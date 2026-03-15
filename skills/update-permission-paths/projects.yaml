@@ -1,0 +1,16 @@
+# Project roots to scan for .claude/settings.local.json
+# Each root is scanned recursively for settings files containing
+# versioned plugin paths. Worktree directories (.worktrees/) are
+# included automatically.
+#
+# Copy this file to ~/.claude/skills/dev10x:update-permission-paths/
+# and customize with your own project roots:
+#   update-paths.py --init
+
+plugin_cache: ~/.claude/plugins/cache/WooYek/Dev10x
+
+roots: []
+#  - /work/my-projects
+#  - /work/team-repos
+
+include_user_settings: true
