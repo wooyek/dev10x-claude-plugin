@@ -6,6 +6,7 @@ invocation-name: dev10x:ticket-create
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
   - Bash(gh issue create:*)
+  - Bash(/tmp/claude/bin/mktmp.sh:*)
   - mcp__claude_ai_Linear__save_issue
   - mcp__claude_ai_Linear__get_issue
   - mcp__claude_ai_Linear__list_projects
@@ -148,8 +149,14 @@ Select appropriate labels based on the context:
 Dispatch to the detected tracker:
 
 **GitHub Issues:**
+
+Write the description to a temp file first (inline `--body` strings
+break shell quoting on markdown tables and long descriptions):
 ```bash
-gh issue create --repo "$REPO" --title "$TITLE" --body "$DESCRIPTION" --label "$LABELS"
+# Generate temp path via mktmp.sh, then write body via Write tool
+BODY_FILE=$(/tmp/claude/bin/mktmp.sh gh-issue body .md)
+# Write description content to $BODY_FILE via the Write tool
+gh issue create --repo "$REPO" --title "$TITLE" --body-file "$BODY_FILE" --label "$LABELS"
 ```
 
 **Linear:**
