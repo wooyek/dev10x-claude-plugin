@@ -253,9 +253,68 @@
         },
         {
           "id": "still-shows-preview",
-          "text": "Still shows preview for approval even when auto-generated (Step 9 is mandatory)",
+          "text": "Still shows preview for approval even when auto-generated (Step 9 is mandatory in attended mode)",
           "check": "tool_called",
           "signals": ["AskUserQuestion", "Preview"]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "unattended-orchestrated-commit",
+      "prompt": "Skill(dev10x:git-commit)",
+      "description": "When invoked by an orchestrating skill with an active task list, all interactive gates should be bypassed: auto-stage, auto-select commit type, auto-generate message, skip preview, and return control immediately.",
+      "setup": {
+        "branch": "janusz/PAY-500/new-feature",
+        "staged_changes": false,
+        "unstaged_changes": true,
+        "prior_context": "Implemented new feature as part of work-on plan step. Commit type is clearly Feature (new .py files). Problem and solution known from session.",
+        "orchestrator": "dev10x:work-on",
+        "active_task_list": true
+      },
+      "dimensions": ["workflow"],
+      "assertions": [
+        {
+          "id": "no-staging-prompt",
+          "text": "Does NOT call AskUserQuestion for staging — auto-stages all changes",
+          "check": "output_absent",
+          "signals": ["AskUserQuestion", "Staging", "Stage"]
+        },
+        {
+          "id": "no-commit-type-prompt",
+          "text": "Does NOT call AskUserQuestion for commit type — auto-selects from context",
+          "check": "output_absent",
+          "signals": ["AskUserQuestion", "Commit type"]
+        },
+        {
+          "id": "no-preview-prompt",
+          "text": "Does NOT call AskUserQuestion for message preview — skips gate",
+          "check": "output_absent",
+          "signals": ["AskUserQuestion", "Preview"]
+        },
+        {
+          "id": "no-description-prompt",
+          "text": "Does NOT ask for commit description — auto-generates from context",
+          "check": "output_absent",
+          "signals": ["Short description", "will be title line"]
+        },
+        {
+          "id": "no-solution-prompt",
+          "text": "Does NOT ask for solution points — auto-generates from diff",
+          "check": "output_absent",
+          "signals": ["Solution points", "what did you change"]
+        },
+        {
+          "id": "no-next-steps-prompt",
+          "text": "Does NOT ask 'what next?' — returns control to orchestrator",
+          "check": "output_absent",
+          "signals": ["What would you like to do", "Next steps:", "Continue working"]
+        },
+        {
+          "id": "commit-still-created",
+          "text": "A commit IS created despite skipping interactive gates",
+          "check": "command_contains",
+          "signals": ["git commit -F"]
         }
       ]
     }

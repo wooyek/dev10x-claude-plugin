@@ -50,8 +50,29 @@ Never pause between steps to ask "should I continue?".
 Set sequential dependencies: draft blocked by gather, review blocked
 by draft, create blocked by review.
 
-**Decision gates — REQUIRED: Call `AskUserQuestion`** (do NOT
-use plain text) at each of these points:
+**Unattended mode:** When this skill is invoked by an
+orchestrating skill (e.g., `dev10x:work-on`, `test:fix-flaky`,
+`dev10x:git-promote`) and the orchestrator has already approved
+the work plan, all interactive decision gates are bypassed:
+- Staging → auto-stage all changes
+- Commit type → auto-select from context
+- Problem/solution → auto-generate from session context
+- Preview → skip (orchestrator already approved the plan)
+- Next steps → return control to orchestrator immediately
+
+Detection: unattended mode activates when **both** conditions
+are met:
+1. The skill is invoked via `Skill(dev10x:git-commit)` (not
+   directly by the user via `/dev10x:git-commit`)
+2. The caller is executing a plan step with an active task
+   list (i.e., an orchestrating skill like `work-on`)
+
+When either condition is absent, default to **attended mode**
+with all interactive gates. When in doubt, default to attended.
+
+**Decision gates (attended mode) — REQUIRED: Call
+`AskUserQuestion`** (do NOT use plain text) at each of these
+points. In unattended mode, these gates are skipped:
 
 - **Staging approval** (when unstaged changes exist):
   **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text,
@@ -174,12 +195,11 @@ Job Story was already sourced from the Linear ticket earlier in this session
 
 ### Step 3: Determine Commit Type
 
-**Orchestrated mode:** When this skill is invoked by an orchestrating skill
-(e.g., `test:fix-flaky`, `dev10x:git-promote`) and the commit type is
-unambiguous from context, auto-select the type and description without
-interactive prompts. Present the result in the preview (Step 9) for review.
+**Unattended mode:** Auto-select the commit type from context
+(e.g., changed file types, session history, orchestrator hints).
+Skip the interactive prompt entirely.
 
-**Ask user to select commit type:**
+**Attended mode — ask user to select commit type:**
 ```
 What type of change is this?
 
@@ -211,7 +231,11 @@ Select number (1-10):
 
 ### Step 4: Get Commit Description
 
-**Ask user:**
+**Unattended mode:** Auto-generate the description from session
+context (ticket title, changed files, commit type). Apply JTBD
+self-check automatically and proceed without prompting.
+
+**Attended mode — ask user:**
 ```
 Short description (will be title line):
 [User types description]
@@ -249,12 +273,13 @@ Simplify, Improve, Resolve, Streamline, Protect, Stabilize, Automate**.
 
 **If the problem and solution are already known from prior context** in the
 session (e.g., from a preceding scope, code review, or ticket investigation),
-auto-generate Steps 5-6 rather than asking redundant questions. Present the
-pre-filled content in the preview (Step 9) for user review.
+auto-generate Steps 5-6 rather than asking redundant questions.
 
-**Important:** Auto-generation applies only to Steps 5 and 6. Step 9
-(preview + confirm) is **always** shown to the user, even when the
-commit message was fully auto-generated from session context.
+**Attended mode:** Present the pre-filled content in the preview
+(Step 9) for user review.
+
+**Unattended mode:** Auto-generate and proceed directly to
+staging and commit — no preview gate.
 
 **Otherwise, ask user:**
 ```
@@ -279,7 +304,11 @@ or percentages were generated as zero by Faker.
 
 ### Step 6: Get Solution Points
 
-**Ask user:**
+**Unattended mode:** Auto-generate solution points from the
+staged diff and session context. Summarize what changed in
+2-4 bullet points without prompting.
+
+**Attended mode — ask user:**
 ```
 Solution points (what did you change?):
 Enter each point on a new line. Type 'done' when finished.
@@ -349,6 +378,13 @@ echo "$COMMIT_MESSAGE" | awk '
 ```
 
 **If any line exceeds 72 characters:**
+
+**Unattended mode:** Auto-wrap or shorten the offending lines
+(split long bullets, abbreviate paths, use shorter synonyms).
+Re-validate and proceed without prompting. If auto-fix is not
+possible, surface the error back to the orchestrator.
+
+**Attended mode:**
 1. Show which line(s) are too long with character count
 2. Ask user to shorten the offending line(s)
 3. Re-validate until all lines pass
@@ -374,8 +410,14 @@ Suggestion: Split into two lines or shorten:
 
 ### Step 9: Show Preview and Confirm
 
-**This step is mandatory — never skip it, even when Steps 5-6 were
-auto-generated from session context.**
+**Unattended mode:** Skip this gate entirely. The orchestrator
+has already approved the work plan, and the commit message was
+auto-generated from session context. Proceed directly to
+staging (Step 10) and commit creation (Step 11).
+
+**Attended mode — this step is mandatory.** Never skip it when
+invoked directly by the user, even when Steps 5-6 were
+auto-generated from session context.
 
 **Display formatted message:**
 ```
@@ -397,7 +439,11 @@ Create this commit? (y/n/edit)
 
 ### Step 10: Stage Files (if needed)
 
-**If unstaged changes exist:**
+**Unattended mode:** Auto-stage all changes (`git add -A`)
+without prompting. The orchestrator's approved plan implies
+all current changes are intended for this commit.
+
+**Attended mode — if unstaged changes exist:**
 ```bash
 # Show what will be staged
 git status --short
@@ -466,7 +512,11 @@ fi
 
 ### Step 12: Next Steps
 
-**Ask user:**
+**Unattended mode:** Return control to the orchestrator
+immediately after a successful commit. Do not show next-step
+options or ask "what next?".
+
+**Attended mode — ask user:**
 ```
 Commit created successfully!
 
