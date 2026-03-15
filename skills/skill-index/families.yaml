@@ -23,6 +23,7 @@ display_map:
   dev10x:investigate: investigate
   triage-sentry: triage-sentry
   tt-db: tt:db
+  release-notes: dev10x:release-notes
 
 families:
   - label: Pipeline
