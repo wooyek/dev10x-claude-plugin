@@ -64,7 +64,9 @@ Frame concerns as "consider whether..." not "this is wrong."
 
 For `.claude-plugin/plugin.json` MCP server entries:
 - Commands use `${CLAUDE_PLUGIN_ROOT}` variable (not hardcoded paths)
-- All referenced command paths exist and are executable
+- All referenced command paths exist and are executable (`+x` bit set)
+- New or modified `servers/*_server.py` files have execute permission;
+  the shebang (`#!/usr/bin/env -S uv run --script`) requires it
 - Server names don't conflict with existing tools or skills
 - MCP server names match corresponding `servers/*_server.py` files
 
