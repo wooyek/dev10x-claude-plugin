@@ -128,6 +128,28 @@ Use this skill when:
 
 ### Step 1: Verify Git State
 
+**CWD safety check — resolve worktree root first:**
+
+Before any git commands, verify CWD is the repository/worktree
+root. Prior commands in the session (e.g., `pnpm test`) may
+have left CWD in a subdirectory, causing `git add` to interpret
+repo-root-relative paths as CWD-relative — producing broken
+double-nested paths like `apps/web/apps/web/src/...`.
+
+```bash
+git rev-parse --show-prefix
+```
+
+If the output is non-empty, CWD is a subdirectory. Reset to
+the worktree root before proceeding:
+
+```bash
+cd "$(git rev-parse --show-toplevel)"
+```
+
+This is the ONE exception to the "avoid `cd`" rule — it
+prevents path misinterpretation in all subsequent git commands.
+
 **Check repository status:**
 ```bash
 # Verify in git repo
@@ -549,9 +571,9 @@ What would you like to do? (1/2/3/done)
 - **Gitmoji format:** Use emoji character, not :code:
 - **Footer:** Always include `Fixes: TICKET-ID`
 - **Spacing:** One space after gitmoji, one space after ticket ID
-- **Never `git -C <path>`**: Always use plain `git` from the session
-  CWD. `git -C` breaks allow-rule matching in `settings.local.json`
-  and forces permission prompts after every fresh session start.
+- **Never `git -C <path>`**: `git -C` breaks allow-rule matching
+  in `settings.local.json`. If CWD has drifted to a subdirectory,
+  use `cd "$(git rev-parse --show-toplevel)"` first (see Step 1).
 - **Never chain `git add && git commit`**: Use two separate Bash tool
   calls — one to stage, one to commit. Same rule applies to
   `git add && git rebase --continue`. Each call must stand alone.
