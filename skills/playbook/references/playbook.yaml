@@ -38,10 +38,10 @@ fragments:
     - subject: Code review
       type: detailed
       prompt: >
-        Run the code-reviewer agent on the current branch to
-        catch issues before creating the PR. Fix any findings
-        before proceeding.
-      agent: code-reviewer
+        Self-review the current branch to catch issues before
+        creating the PR. In unattended mode, auto-fix all
+        findings. In attended mode, present findings for approval.
+      skills: [dev10x:review, dev10x:review-fix]
     - subject: Commit outstanding changes
       type: detailed
       prompt: >
@@ -98,9 +98,9 @@ fragments:
     - subject: Code review
       type: detailed
       prompt: >
-        Run the code-reviewer agent on changes to catch issues
-        before pushing. Fix any findings.
-      agent: code-reviewer
+        Self-review changes to catch issues before pushing.
+        Fix any findings before proceeding.
+      skills: [dev10x:review, dev10x:review-fix]
     - subject: Commit outstanding changes
       type: detailed
       prompt: >

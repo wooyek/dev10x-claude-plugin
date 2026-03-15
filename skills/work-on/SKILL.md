@@ -422,7 +422,7 @@ skill. Users can customize these via
 4.5  [epic]     Verify
        ├─ Run tests                       → test
        └─ Run lint
-4.6  [detailed] Code review               → code-reviewer agent
+4.6  [detailed] Code review               → dev10x:review + dev10x:review-fix
 4.7  [detailed] Commit outstanding changes → dev10x:git-commit
 4.8  [detailed] Create draft PR           → dev10x:gh-pr-create (--unattended)
 4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
@@ -444,7 +444,7 @@ skill. Users can customize these via
 4.5  [epic]     Verify fix
        ├─ Run existing tests              → test
        └─ Add regression test
-4.6  [detailed] Code review               → code-reviewer agent
+4.6  [detailed] Code review               → dev10x:review + dev10x:review-fix
 4.7  [detailed] Commit outstanding changes → dev10x:git-commit
 4.8  [detailed] Create draft PR           → dev10x:gh-pr-create (--unattended)
 4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
@@ -460,7 +460,7 @@ skill. Users can customize these via
 4.1  [detailed] Fetch PR and review context
 4.2  [epic]     Address review comments
 4.3  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.4  [detailed] Code review               → code-reviewer agent
+4.4  [detailed] Code review               → dev10x:review + dev10x:review-fix
 4.5  [detailed] Commit outstanding changes → dev10x:git-commit
 4.6  [detailed] Monitor CI                → dev10x:gh-pr-monitor
 4.7  [detailed] Groom commit history      → dev10x:git-groom
@@ -477,7 +477,7 @@ skill. Users can customize these via
        ├─ Run tests                       → test
        └─ Run lint
 4.4  [detailed] Decide: create ticket, create PR, or done
-4.5  [detailed] Code review               → code-reviewer agent (if-pr-decided)
+4.5  [detailed] Code review               → dev10x:review + dev10x:review-fix (if-pr-decided)
 4.6  [detailed] Commit outstanding changes → dev10x:git-commit (if-pr-decided)
 4.7  [detailed] Create draft PR           → dev10x:gh-pr-create (if-pr-decided)
 4.8  [detailed] Monitor CI                → dev10x:gh-pr-monitor (if-pr-decided)
@@ -580,7 +580,7 @@ delegations:
 | Draft Job Story | `dev10x:jtbd` skill (attended mode) |
 | Update ticket status | Linear MCP (see references/team-info.md) |
 | Fetch PR context | `gh pr view` + `gh pr diff` |
-| Code review | `code-reviewer` agent (via Agent tool) |
+| Code review | `dev10x:review` + `dev10x:review-fix` skills |
 | Commit changes | `dev10x:git-commit` skill |
 | Create draft PR | `dev10x:gh-pr-create` skill (`--unattended`) |
 | Monitor CI | `dev10x:gh-pr-monitor` skill |
@@ -744,7 +744,7 @@ defaults → schema). Build subtasks of Phase 4:
 4.3  [epic]     Design implementation approach (3 children)
 4.4  [epic]     Implement changes
 4.5  [epic]     Verify (2 children)
-4.6  [detailed] Code review               → code-reviewer agent
+4.6  [detailed] Code review               → dev10x:review + dev10x:review-fix
 4.7  [detailed] Commit outstanding changes → dev10x:git-commit
 4.8  [detailed] Create draft PR           → dev10x:gh-pr-create
 4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
@@ -781,7 +781,7 @@ sources.
 4.3  [epic]     Investigate root cause (2 children)
 4.4  [epic]     Implement fix
 4.5  [epic]     Verify fix (2 children)
-4.6  [detailed] Code review               → code-reviewer agent
+4.6  [detailed] Code review               → dev10x:review + dev10x:review-fix
 4.7  [detailed] Commit outstanding changes → dev10x:git-commit
 4.8  [detailed] Create draft PR           → dev10x:gh-pr-create
 4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
@@ -806,7 +806,7 @@ PR has 3 review comments → note them.
 4.1  [detailed] Fetch PR and review context
 4.2  [epic]     Address review comments
 4.3  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.4  [detailed] Code review               → code-reviewer agent
+4.4  [detailed] Code review               → dev10x:review + dev10x:review-fix
 4.5  [detailed] Commit outstanding changes → dev10x:git-commit
 4.6  [detailed] Monitor CI                → dev10x:gh-pr-monitor
 4.7  [detailed] Groom commit history      → dev10x:git-groom

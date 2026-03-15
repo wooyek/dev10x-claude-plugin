@@ -26,8 +26,8 @@ Accepts one of:
 - Reviewing any PR where you want findings posted to GitHub
 - When asked to "review PR #N" or given a PR URL
 
-**Not for self-review** — use `/review` to review your own branch
-before creating a PR.
+**Not for self-review** — use `dev10x:review` to review your own
+branch before creating a PR.
 
 ## Orchestration
 
@@ -203,6 +203,6 @@ dev10x:gh-pr-review
 ```
 
 Complements:
-- `/review` — self-review before PR creation (no GitHub posting)
-- `/dev10x:gh-pr-respond` — respond to review comments on YOUR PR
-- `/dev10x:gh-pr-triage` — validate a single review comment
+- `dev10x:review` — self-review before PR creation (no GitHub posting)
+- `dev10x:gh-pr-respond` — respond to review comments on YOUR PR
+- `dev10x:gh-pr-triage` — validate a single review comment
