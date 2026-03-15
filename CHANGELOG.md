@@ -3,14 +3,13 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.27.0] - 2026-03-15 — Self-Healing Code Review
+## 0.27.0 — Self-Healing Code Review
 
-> The shipping pipeline now fixes its own review findings autonomously.
+Released 2026-03-15
 
-### Highlights
-
-Self-healing code review in work-on, GitHub Issues support in project-scope,
-and auto-approval for safe subshell commands.
+The shipping pipeline now fixes its own review findings autonomously.
+Also: GitHub Issues support in project-scope and auto-approval for safe
+subshell commands.
 
 ### Features
 
@@ -35,9 +34,13 @@ and auto-approval for safe subshell commands.
 
 - Prevent path errors when CWD drifts during session ([GH-251])
 
-## [0.26.0] - 2026-03-15 — Release Notes as a Skill
+## 0.26.0 — Release Notes as a Skill
 
-> Track what you ship with playbook-powered release notes.
+Released 2026-03-15
+
+Track what you ship with playbook-powered release notes — configurable
+ticket patterns, output targets (stdout/GitHub/Slack), and release/hotfix
+plays.
 
 ### Features
 
@@ -45,13 +48,14 @@ and auto-approval for safe subshell commands.
   with configurable ticket patterns, output targets (stdout/GitHub/Slack),
   and release/hotfix plays
 
-## [0.25.0] - 2026-03-15 — Unattended Shipping
+## 0.25.0 — Unattended Shipping
 
-> Skills can now commit, format, and ship without human intervention.
+Released 2026-03-15
 
-### Highlights
-
-Playbook fragments, unattended git-commit, and automated ruff formatting.
+Skills can now commit, format, and ship without human intervention.
+Playbook fragments eliminate duplication, unattended git-commit bypasses
+all interactive gates, and ruff formatting runs automatically on every
+Python edit.
 
 ### Features
 
@@ -78,9 +82,12 @@ Playbook fragments, unattended git-commit, and automated ruff formatting.
   scope, Linear API fallback for non-autolinked prefixes ([GH-227])
 - Ensure release script stages pyproject.toml after bump
 
-## [0.24.0] - 2026-03-14 — Auto-Advance Pipeline
+## 0.24.0 — Auto-Advance Pipeline
 
-> The shipping pipeline no longer blocks on preview approval.
+Released 2026-03-14
+
+The shipping pipeline no longer blocks on preview approval. Commits and
+draft PR creation proceed automatically with a code-reviewer agent step.
 
 ### Features
 
@@ -88,9 +95,12 @@ Playbook fragments, unattended git-commit, and automated ruff formatting.
   without blocking on preview approval, with code-reviewer agent step ([GH-213])
 - Community link added to README
 
-## [0.23.0] - 2026-03-12 — Domain-Driven Design Workshops
+## 0.23.0 — Domain-Driven Design Workshops
 
-> Explore and model domain architecture with Event Storming.
+Released 2026-03-12
+
+Explore and model domain architecture with Event Storming directly from
+Claude Code sessions.
 
 ### Features
 
@@ -102,14 +112,13 @@ Playbook fragments, unattended git-commit, and automated ruff formatting.
 - Declare missing `allowed-tools` in 6 skills to eliminate per-invocation
   approval prompts ([GH-70])
 
-## [0.22.0] - 2026-03-12 — Playbook Architecture
+## 0.22.0 — Playbook Architecture
 
-> Work plans become reusable, customizable playbooks. Hook overhead drops 80%.
+Released 2026-03-12
 
-### Highlights
-
-Playbook architecture, consolidated hook dispatcher, and user-space
-config overrides. The biggest architectural release to date.
+The biggest architectural release to date. Work plans become reusable,
+customizable playbooks. The hook dispatcher consolidates 7 processes into
+one with ~80% overhead reduction. User-space config overrides ship.
 
 ### Features
 
@@ -137,9 +146,12 @@ config overrides. The biggest architectural release to date.
 - Trim CLAUDE.md to stay within 100-line budget
 - Prefer jq and yq over manual JSON/YAML parsing ([GH-196])
 
-## [0.21.0] - 2026-03-11 — One-Command Review Requests
+## 0.21.0 — One-Command Review Requests
 
-> Assign GitHub reviewers and notify Slack in a single skill.
+Released 2026-03-11
+
+Assign GitHub reviewers and notify Slack in a single skill invocation.
+PR creation now works in repos without a develop branch.
 
 ### Features
 
@@ -156,14 +168,12 @@ config overrides. The biggest architectural release to date.
 
 - Prevent silent project linkage failures in Linear ([GH-153])
 
-## [0.20.0] - 2026-03-09 — Reliable Skill Orchestration
+## 0.20.0 — Reliable Skill Orchestration
 
-> Numbered lists replace code blocks so decision gates actually fire.
+Released 2026-03-09
 
-### Highlights
-
-Enforce tool call formatting across all skills to ensure decision gates
-and orchestration steps execute reliably.
+Numbered lists replace code blocks across 39 skills so decision gates and
+orchestration steps actually fire instead of being skipped as examples.
 
 ### Features
 
@@ -174,15 +184,13 @@ and orchestration steps execute reliably.
   (not code blocks) for mandatory TaskCreate/AskUserQuestion calls ([GH-179])
 - Centralize rules documentation into INDEX.md
 
-## [0.19.0] - 2026-03-08 — MCP Tools & Project Scoping
+## 0.19.0 — MCP Tools & Project Scoping
 
-> Native MCP server tools replace Bash wrappers. Multi-ticket projects
-> get first-class scoping.
+Released 2026-03-08
 
-### Highlights
-
-Massive quality and reliability release. MCP tools, project-scope skill,
-eval criteria, and dozens of enforcement fixes.
+Native MCP server tools replace fragile Bash wrappers. Multi-ticket
+projects get first-class scoping with Linear, JIRA, and GitHub Issues.
+Dozens of enforcement fixes improve skill reliability.
 
 ### Features
 
@@ -213,19 +221,19 @@ eval criteria, and dozens of enforcement fixes.
 - Exclude .claude/worktrees/ from hook copies ([GH-144])
 - Allow bare fixup commits from humans ([GH-159])
 
-## [0.18.0] - 2026-03-07 — Documentation
+## 0.18.0 — Documentation
 
-### Documentation
+Released 2026-03-07
 
-- Updated README with installation instructions
+Updated README with installation instructions.
 
-## [0.17.0] - 2026-03-07 — Task Orchestration Everywhere
+## 0.17.0 — Task Orchestration Everywhere
 
-> Every skill now tracks progress with structured tasks.
+Released 2026-03-07
 
-### Highlights
-
-Task orchestration retrofitted across the entire skill catalog.
+Every skill now tracks progress with structured tasks. Orchestration
+patterns (auto-advance, batched decisions, tier-based complexity)
+retrofitted across the entire skill catalog.
 
 ### Features
 
@@ -237,15 +245,18 @@ Task orchestration retrofitted across the entire skill catalog.
 - Retrofit orchestration into 4 flagship skills, Tier Full, Tier Standard,
   and PR lifecycle skills
 
-## [0.16.0] - 2026-03-06 — Documentation
+## 0.16.0 — Documentation
 
-### Documentation
+Released 2026-03-06
 
-- Document external tool dependencies in README
+Document external tool dependencies in README.
 
-## [0.15.0] - 2026-03-06 — Cross-Platform Skills
+## 0.15.0 — Cross-Platform Skills
 
-> Skills now work in OpenAI Codex alongside Claude Code.
+Released 2026-03-06
+
+Skills now work in OpenAI Codex alongside Claude Code via a compatible
+skill pack and install tooling.
 
 ### Features
 
@@ -258,13 +269,12 @@ Task orchestration retrofitted across the entire skill catalog.
 - Clarify PR title gitmoji mapping and JTBD third-party variants
 - Clarify self-motivated work conventions
 
-## [0.14.0] - 2026-03-05 — The Great Consolidation
+## 0.14.0 — The Great Consolidation
 
-> 11 sub-plugins merged into one unified Dev10x plugin.
+Released 2026-03-05
 
-### Highlights
-
-Consolidate 11 sub-plugins into a single unified Dev10x plugin.
+11 sub-plugins merged into one unified Dev10x plugin with a consistent
+`dev10x:` namespace and cross-script compatible directory resolution.
 
 ### Refactoring
 
@@ -274,20 +284,25 @@ Consolidate 11 sub-plugins into a single unified Dev10x plugin.
 - Remove unused session-start-git-aliases hook
 - Clarify hook-blocked and advisory patterns in session guidance
 
-## [0.13.0] - 2026-03-04 — Convention Polish
+## 0.13.0 — Convention Polish
+
+Released 2026-03-04
+
+Surface @mentions at start of Slack review messages and establish
+conventions for agent directories and skill naming.
 
 ### Refactoring
 
 - Surface @mentions at start of Slack review messages
 - Establish conventions for agent directories and skill naming
 
-## [0.12.0] - 2026-03-04 — Namespace Unification
+## 0.12.0 — Namespace Unification
 
-> Every skill gets the `dev10x:` prefix. Multi-plugin architecture ships.
+Released 2026-03-04
 
-### Highlights
-
-Namespace standardization — all skills now use the `dev10x:` prefix.
+Every skill gets the `dev10x:` prefix. Skills are isolated into 11
+domain-specific sub-plugins with distributed hooks and marketplace
+discovery.
 
 ### Refactoring
 
@@ -298,9 +313,12 @@ Namespace standardization — all skills now use the `dev10x:` prefix.
   py, skills, slack, qa) with distributed hooks
 - Enable marketplace to discover all sub-plugins
 
-## [0.11.0] - 2026-03-04 — Permission Auditing
+## 0.11.0 — Permission Auditing
 
-> Systematically audit Claude Code permission settings for security gaps.
+Released 2026-03-04
+
+Systematically audit Claude Code permission settings for security gaps.
+Config-driven Slack notifications and dual-format skill index also ship.
 
 ### Features
 
@@ -317,9 +335,13 @@ Namespace standardization — all skills now use the `dev10x:` prefix.
 - Delegate Slack and reviewer steps from pr-monitor to dedicated skills
 - Stabilize test suite with proper dependencies
 
-## [0.10.0] - 2026-03-03 — Database Access & Session Guidance
+## 0.10.0 — Database Access & Session Guidance
 
-> Safe database querying and intelligent session-start recommendations.
+Released 2026-03-03
+
+Safe database querying with SQL validation hooks and intelligent
+session-start recommendations. Family-grouped skill index and acceptance
+criteria verification round out the release.
 
 ### Features
 
@@ -340,21 +362,23 @@ Namespace standardization — all skills now use the `dev10x:` prefix.
 - Detect `psql` in chained commands
 - Stabilize mktmp.sh and groom script paths
 
-## [0.9.0] - 2026-03-02 — Release Stability
+## 0.9.0 — Release Stability
+
+Released 2026-03-02
+
+Prevent version number skipping in releases.
 
 ### Bug Fixes
 
 - Prevent version number skipping in releases
 
-## [0.6.0] - 2026-03-02 — Ticket Management & QA Automation
+## 0.6.0 — Ticket Management & QA Automation
 
-> Full ticket lifecycle from branch creation to technical scoping.
-> QA test execution as a portable plugin skill.
+Released 2026-03-02
 
-### Highlights
-
-Major feature expansion — ticket management, QA automation, ADR creation,
-and context-aware rule loading.
+Full ticket lifecycle from branch creation to technical scoping. QA test
+execution as a portable plugin skill. Context-aware rule loading reduces
+always-loaded token overhead.
 
 ### Features
 
@@ -375,19 +399,18 @@ and context-aware rule loading.
 
 - Prevent review workflow self-cancellation
 
-## [0.4.0] - 2026-03-02 — Cleanup
+## 0.4.0 — Cleanup
 
-### Maintenance
+Released 2026-03-02
 
-- Remove obsolete docs plans
+Remove obsolete docs plans.
 
-## [0.2.0] - 2026-03-02 — Genesis
+## 0.2.0 — Genesis
 
-> 40+ skills covering the full development lifecycle ship in a single plugin.
+Released 2026-03-02
 
-### Highlights
-
-Initial release with 40+ skills covering the full development lifecycle.
+Initial release with 40+ skills covering the full development lifecycle
+in a single plugin.
 
 ### Features
 
@@ -416,7 +439,7 @@ Initial release with 40+ skills covering the full development lifecycle.
   the plugin
 - **Self-executing Python** — UV-based script execution ([GH-17])
 - **Self-improving review system** — lessons from PR reviews automatically
-  strengthen review checks (🤖 commits)
+  strengthen review checks
 
 ---
 
