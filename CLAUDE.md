@@ -38,6 +38,20 @@ done
 
 MCP migration: shell scripts → MCP tools. See `.claude/rules/mcp-tools.md`.
 
+## External Tool Declarations
+
+All skills that invoke external scripts (shell, Python, etc.) must declare
+them in SKILL.md front matter under `allowed-tools:`:
+
+```yaml
+allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/<name>/scripts/*:*)
+```
+
+Missing declarations cause per-invocation approval friction — users cannot
+invoke the skill without approving tool access each time. See
+`.claude/rules/mcp-tools.md` for MCP vs. direct script trade-offs.
+
 ## Coding Style
 
 - **Python scripts**: ruff + black (line-length 99)

@@ -50,3 +50,12 @@ Determine which pattern applies:
 3. Check if SKILL.md references external binaries or `~/.claude/tools/` only
    - Yes + no `scripts/` → Orchestration-based; Items 4, 5 do NOT apply
    - No → Ambiguous; flag as INFO for author clarification
+
+## Permission Friction Prevention
+
+Skills invoking external tools (scripts, MCP servers) must declare them in
+`allowed-tools:` front matter. Missing declarations trigger per-invocation
+approval prompts on **every run**, breaking skill usability. See
+`mcp-tools.md` "Common Mistakes" section and `reviewer-skill.md` item 8 for
+prevention patterns. CLAUDE.md § External Tool Declarations has detailed
+requirements.
