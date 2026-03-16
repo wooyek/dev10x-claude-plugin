@@ -8,6 +8,7 @@ description: >
 user-invocable: true
 invocation-name: dev10x:work-on
 allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/work-on/scripts/*:*)
   - Bash(~/.claude/skills/gh/scripts/*:*)
   - Bash(~/.claude/skills/jira/scripts/*:*)
   - Read(~/.claude/projects/**/memory/playbooks/work-on.yaml)
@@ -115,14 +116,10 @@ it affects Phase 3 planning.
 **Detect current workspace state:**
 
 ```bash
-# Is CWD a worktree?
-if [ -f .git ]; then
-  WORKSPACE="worktree"
-  WT_BRANCH=$(git symbolic-ref --short HEAD)
-else
-  WORKSPACE="main-repo"
-fi
+${CLAUDE_PLUGIN_ROOT}/skills/work-on/scripts/detect-workspace.sh
 ```
+
+Parse `WORKSPACE` and `BRANCH` from output.
 
 **Worktree branch check:** If the CWD is a worktree and the
 current branch is a generic worktree branch (e.g., `wt/<name>`
@@ -502,7 +499,15 @@ skill. Users can customize these via
 
 Present the plan as a numbered list.
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+**Implicit approval bypass:** If the user's original input to
+`work-on` contains a complete implementation plan (with deliverables,
+implementation order, and verification steps), treat approval as
+implicit — skip `AskUserQuestion` and proceed directly to Phase 4
+execution. The user already defined the plan; re-presenting it for
+approval adds no value.
+
+**REQUIRED: Call `AskUserQuestion`** when the plan was
+agent-generated (do NOT use plain text).
 
 1. `AskUserQuestion(questions=[{question: "How would you like to proceed with the work plan?", header: "Plan", options: [{label: "Approve (Recommended)", description: "Start execution immediately"}, {label: "Edit", description: "Describe what to change (add/remove/reorder steps)"}], multiSelect: false}])`
 
