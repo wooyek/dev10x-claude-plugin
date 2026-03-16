@@ -61,5 +61,11 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
     rm -f "$DIRTY_LIST"
 
     # ── Post-copy setup ─────────────────────────────────────────────
-    command -v yarn >/dev/null && yarn install --frozen-lockfile
+    if command -v yarn >/dev/null; then
+        if [ -f .yarnrc.yml ]; then
+            yarn install --immutable
+        else
+            yarn install --frozen-lockfile
+        fi
+    fi
 fi

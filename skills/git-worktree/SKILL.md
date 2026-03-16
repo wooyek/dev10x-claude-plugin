@@ -68,6 +68,33 @@ template from the **Hook Templates** section below. Present to the user for
 approval before writing. The hook must always ensure `.claude` exists —
 either by copying from the source repo or creating an empty scaffold.
 
+### Step A1b: Detect Husky Version and Bootstrap ~/.huskyrc
+
+When the project uses Husky, detect the version before creating
+the worktree:
+
+- **Husky v4**: `package.json` contains `"husky": { "hooks": ... }`
+- **Husky v5+**: `.husky/_/husky.sh` exists
+
+For **Husky v4** projects, worktrees lack `node_modules` until
+`yarn install` completes, causing git hooks to fail. Check
+`~/.huskyrc` and create it if missing:
+
+```sh
+# ~/.huskyrc — bootstrap for Husky v4 in worktrees
+if [ ! -d "node_modules" ]; then
+    echo "huskyrc: node_modules missing, skipping husky hook"
+    exit 0
+fi
+```
+
+For **Husky v5+** projects, no `~/.huskyrc` is needed.
+
+**After writing any hook file**, always set executable permissions:
+```sh
+chmod +x .husky/post-checkout   # or .git/hooks/post-checkout
+```
+
 ### Step A2: Create Worktree (native tool)
 
 Call the native `EnterWorktree` tool:
@@ -230,3 +257,20 @@ git worktree remove <path>
 git worktree remove --force <path>  # if dirty
 git worktree list                   # list all worktrees
 ```
+
+## Troubleshooting
+
+### EnterWorktree Failure Recovery
+
+If `EnterWorktree` fails (e.g., due to a hook error), it may leave
+a partial worktree and orphan branch. Clean up manually:
+
+```bash
+git worktree remove <worktree-path> --force
+git branch -D <worktree-branch>
+```
+
+Common failure causes:
+- Husky v4 hooks require `node_modules` (see Step A1b)
+- Yarn Berry needs `--immutable` not `--frozen-lockfile`
+- Hook file not executable (ensure `chmod +x` after writing)
