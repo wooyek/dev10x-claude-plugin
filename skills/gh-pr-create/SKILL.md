@@ -46,12 +46,47 @@ with description "Auto-skipped: non-Python project" (or the
 appropriate reason). This preserves supervisor visibility into
 the full workflow.
 
-**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-pr-preview.md](./tool-calls/ask-pr-preview.md)) after
-generating the PR body. This blocks execution until the user responds.
-Options:
-- Create PR (Recommended) — Push branch and create draft PR as shown
-- Edit title/body — I want to revise before creating
-- Abort — Cancel PR creation
+**Unattended mode:** When this skill is invoked by an
+orchestrating skill (e.g., `dev10x:work-on`, `dev10x:git-promote`,
+`test:fix-flaky`) and the orchestrator has already approved the
+work plan, all interactive decision gates are bypassed:
+- PR preview gate → skip (orchestrator already approved the plan)
+- Title → auto-generate from commit(s) (single-commit: use
+  title; multi-commit: derive from JTBD "so I can" clause)
+- Job Story → auto-generate inline for simple changes; reuse
+  session context for complex ones (skip full `dev10x:jtbd` skill)
+- Pre-PR checks → still run (safety gate, not interactive)
+- Browser open → skip
+- Next steps → return control to orchestrator immediately
+
+**Task reduction in unattended mode:** Reduce `TaskCreate` calls
+to at most 1 task (`"Create PR"`) instead of decomposing into
+the full 4-task sequence. The orchestrator already tracks
+high-level progress.
+
+Detection: unattended mode activates when **both** conditions
+are met:
+1. The skill is invoked via `Skill(dev10x:gh-pr-create)` (not
+   directly by the user via `/dev10x:gh-pr-create`)
+2. The caller is executing a plan step with an active task
+   list (i.e., an orchestrating skill like `work-on`)
+
+When either condition is absent, default to **attended mode**
+with all interactive gates. When in doubt, default to attended.
+
+**Decision gates (attended mode) — REQUIRED: Call
+`AskUserQuestion`** (do NOT use plain text) at each of these
+points. In unattended mode, these gates are skipped:
+
+- **PR preview approval:**
+  **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text,
+  call spec: [ask-pr-preview.md](./tool-calls/ask-pr-preview.md))
+  after generating the PR body. This blocks execution until the
+  user responds.
+  Options:
+  - Create PR (Recommended) — Push branch and create draft PR as shown
+  - Edit title/body — I want to revise before creating
+  - Abort — Cancel PR creation
 
 ## Scripts
 
