@@ -95,7 +95,7 @@ git add <files>
 git commit --fixup=<target-commit-sha>
 
 # Simple autosquash (fixup commits only, no reordering):
-GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base develop HEAD)
+git autosquash-develop
 
 # Custom sequence (reordering, message rewrites, splits):
 # 1. Create unique seq file: /tmp/claude/bin/mktmp.sh git rebase-seq .txt
@@ -103,7 +103,7 @@ GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base develop HEA
 # 3. Run: ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh <path> develop
 ```
 
-**Key insight:** For pure autosquash (squashing fixup commits into their targets), use `GIT_SEQUENCE_EDITOR=true` directly — it accepts git's auto-generated todo as-is. The rebase script (`git-rebase-groom.sh`) replaces the todo with your sequence file, so commits not listed in the file are dropped. Only use the script when you need custom sequence control.
+**Key insight:** For pure autosquash (squashing fixup commits into their targets), use `git autosquash-develop` — an alias that wraps `GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base develop HEAD)` internally, avoiding env-prefix and subshell permission friction. The rebase script (`git-rebase-groom.sh`) replaces the todo with your sequence file, so commits not listed in the file are dropped. Only use the script when you need custom sequence control.
 
 #### Strategy B: Full Restructure (for major reorganization)
 
@@ -422,7 +422,7 @@ of commits remain in history.
 script entirely:
 
 ```bash
-GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base develop HEAD)
+git autosquash-develop
 ```
 
 Use `git-rebase-groom.sh` only when you need custom sequence

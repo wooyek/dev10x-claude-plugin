@@ -114,6 +114,8 @@ prompt: <see "Agent Prompt Template" below, with variables filled in>
 
 ### Step 4: Report to user
 
+**DO NOT SKIP this step in any mode (full agent or poll).**
+
 Tell the user:
 - PR monitor is running in the background
 - Show the output file path from the Task result
