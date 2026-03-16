@@ -62,7 +62,11 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
 
     # ── Post-copy setup ─────────────────────────────────────────────
     if command -v yarn >/dev/null; then
-        yarn install --frozen-lockfile
+        if [ -f .yarnrc.yml ]; then
+            yarn install --immutable
+        else
+            yarn install --frozen-lockfile
+        fi
     elif command -v npm >/dev/null; then
         npm ci
     fi
