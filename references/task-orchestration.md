@@ -89,6 +89,19 @@ TaskCreate(subject="Configure git aliases",
 TaskUpdate(taskId, status="completed")
 ```
 
+### Delegated Invocation Exception
+
+When a skill is invoked as a subtask of a parent orchestrator (e.g.,
+`dev10x:work-on`), internal `TaskCreate` calls MAY be skipped. The
+parent orchestrator owns the task lifecycle and has already created
+tasks that track the child skill's progress. Duplicate `TaskCreate`
+calls would clutter the task list with redundant entries.
+
+**Detection:** A skill is delegated when invoked via the `Skill` tool
+from within another skill's orchestration flow. When running as a
+top-level invocation (user types `/skill-name`), TaskCreate is
+mandatory as documented above.
+
 ### Startup Gate (Full and Standard tiers)
 
 Skills that list multiple `TaskCreate` calls in their
