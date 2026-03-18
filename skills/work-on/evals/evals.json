@@ -30,6 +30,11 @@
       "id": "workspace",
       "name": "Early Workspace Decision",
       "description": "Phase 1 determines workspace state (main repo vs worktree, generic vs feature branch) and whether a branch is needed. Worktrees with generic WT branches get a work-specific branch created."
+    },
+    {
+      "id": "orchestration-guardrails",
+      "name": "Orchestration Guardrails",
+      "description": "Verifies that the agent follows the skill's own orchestration (TaskCreate, AskUserQuestion) and never bypasses it via ExitPlanMode or task collapsing"
     }
   ],
   "evals": [
@@ -484,7 +489,7 @@
           "signals": ["last subtask", "acceptance criteria", "CI", "fixup", "groom", "review"]
         }
       ]
-    }
+    },
     {
       "id": 10,
       "name": "worktree-generic-branch",
@@ -576,6 +581,53 @@
           "text": "Plan does NOT include workspace setup subtask",
           "check": "task_absent",
           "signals": ["Set up workspace"]
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "orchestration-guardrails",
+      "prompt": "/dev10x:work-on add retry logic to the webhook handler",
+      "description": "Free-text input that tests orchestration guardrails: no ExitPlanMode, Phase 3 uses TaskCreate mechanically, AskUserQuestion at approval gate, 1:1 task-to-step mapping, and completion gate at end.",
+      "expected_output": "Creates 4 phase tasks, never calls ExitPlanMode, creates one TaskCreate per local-only play step (not fewer), presents plan via AskUserQuestion, and shows completion gate after last task",
+      "dimensions": ["orchestration-guardrails", "plan", "task-structure"],
+      "assertions": [
+        {
+          "id": "never-calls-exitplanmode",
+          "text": "ExitPlanMode is never called during the entire session",
+          "check": "tool_never_called",
+          "signals": ["ExitPlanMode"]
+        },
+        {
+          "id": "self-check-before-phase2",
+          "text": "Calls TaskList between Phase 1 and Phase 2 to verify phase tasks exist",
+          "check": "tool_called_before",
+          "signals": ["TaskList", "Phase 2"]
+        },
+        {
+          "id": "phase3-uses-taskcreate-not-plan-agent",
+          "text": "Phase 3 creates tasks via TaskCreate, never dispatches Agent(Plan) subagents",
+          "check": "behavioral",
+          "signals": ["TaskCreate", "no Agent(Plan)"]
+        },
+        {
+          "id": "one-task-per-play-step",
+          "text": "Phase 3 creates exactly one TaskCreate per play step (local-only has 13 steps), not fewer",
+          "check": "tool_called_count",
+          "signals": ["TaskCreate", ">=13"],
+          "note": "4 phase tasks + at least 13 play steps = 17+ total TaskCreate calls"
+        },
+        {
+          "id": "approval-gate-uses-askuserquestion",
+          "text": "Plan approval uses AskUserQuestion tool call, not plain text",
+          "check": "tool_called",
+          "signals": ["AskUserQuestion", "Approve"]
+        },
+        {
+          "id": "completion-gate-at-end",
+          "text": "After last task completes, AskUserQuestion is called with hand-over options",
+          "check": "tool_called",
+          "signals": ["AskUserQuestion", "hand over", "Add more tasks"]
         }
       ]
     }
