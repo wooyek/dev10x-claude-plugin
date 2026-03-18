@@ -11,6 +11,7 @@ patterns get auto-approved before a deny-validator would block them.
 from __future__ import annotations
 
 from bash_validators._base import Validator
+from bash_validators.command_substitution import CommandSubstitutionValidator
 from bash_validators.commit_jtbd import CommitJtbdValidator
 from bash_validators.execution_safety import ExecutionSafetyValidator
 from bash_validators.pr_base import PrBaseValidator
@@ -20,6 +21,7 @@ from bash_validators.sql_safety import SqlSafetyValidator
 
 VALIDATORS: list[Validator] = [
     SafeSubshellValidator(),
+    CommandSubstitutionValidator(),
     PrefixFrictionValidator(),
     ExecutionSafetyValidator(),
     CommitJtbdValidator(),
