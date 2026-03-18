@@ -168,12 +168,26 @@ for newly discovered sources.
 
 ### Subagent Dispatch
 
-Dispatch one Explore subagent per source in a single tool-call
-block. Each returns a structured summary, not raw API output:
+Dispatch one subagent per source in a single tool-call block.
+Choose the agent type based on the source's tool requirements:
+
+| Source type | Agent type | Why |
+|-------------|-----------|-----|
+| `github-issue` | `Explore` | `gh` CLI works in Explore agents |
+| `github-pr` | `Explore` | `gh` CLI works in Explore agents |
+| `linear-ticket` | `general-purpose` | Needs Linear MCP tools |
+| `jira-ticket` | `Explore` | Uses `jira-get.sh` CLI script |
+| `slack-thread` | `general-purpose` | Needs Slack MCP tools |
+| `sentry-issue` | `general-purpose` | Needs Sentry MCP tools |
+| `note` | (none) | Pass through as-is |
+
+**Do NOT use Explore agents for MCP-dependent fetches.** Explore
+agents lack access to MCP tools and `WebFetch`. If a source
+requires MCP tools (Linear, Slack, Sentry), use `general-purpose`.
 
 ```
 # Single tool-call block — all launch concurrently
-Agent(subagent_type="Explore",
+Agent(subagent_type=source_agent_type,  # see table above
     description=f"Fetch {source.type} {source.id}",
     prompt=f"""Fetch context for {source.type}: {source.id}
     {source_specific_instructions}
@@ -186,17 +200,20 @@ Agent(subagent_type="Explore",
     run_in_background=true)
 ```
 
+**Web URLs** (documentation, reference pages) should be fetched
+in the main session via `WebFetch`, not dispatched to subagents.
+
 ### Source-Specific Instructions
 
-| Source type | Subagent instructions |
-|-------------|----------------------|
-| `github-issue` | Run `gh-issue-get.sh "$NUMBER" "$REPO"`. Return title, status, labels, body summary, linked PRs. |
-| `github-pr` | Run `gh pr view --json title,body,headRefName,state,mergedAt,reviews`. Return title, status, branch, review comment count. |
-| `linear-ticket` | Call `mcp__claude_ai_Linear__get_issue(issueId)`. Return title, status, parent ID, relations, comment summaries. |
-| `jira-ticket` | Run `jira-get.sh "$ID"`. Return title, status, assignee, linked issues. |
-| `slack-thread` | Call `mcp__claude_ai_Slack__slack_read_thread(channelId, threadTs)`. Return message count, key decisions, action items. |
-| `sentry-issue` | Call `mcp__sentry__get_issue_details(issueId)`. Return error type, frequency, first/last seen, top stack frame. |
-| `note` | No subagent needed — pass through as-is. |
+| Source type | Agent type | Subagent instructions |
+|-------------|-----------|----------------------|
+| `github-issue` | Explore | Run `gh-issue-get.sh "$NUMBER" "$REPO"`. Return title, status, labels, body summary, linked PRs. |
+| `github-pr` | Explore | Run `gh pr view --json title,body,headRefName,state,mergedAt,reviews`. Return title, status, branch, review comment count. |
+| `linear-ticket` | general-purpose | Call `mcp__claude_ai_Linear__get_issue(issueId)`. Return title, status, parent ID, relations, comment summaries. |
+| `jira-ticket` | Explore | Run `jira-get.sh "$ID"`. Return title, status, assignee, linked issues. |
+| `slack-thread` | general-purpose | Call `mcp__claude_ai_Slack__slack_read_thread(channelId, threadTs)`. Return message count, key decisions, action items. |
+| `sentry-issue` | general-purpose | Call `mcp__sentry__get_issue_details(issueId)`. Return error type, frequency, first/last seen, top stack frame. |
+| `note` | (none) | No subagent needed — pass through as-is. |
 
 ### Cross-Reference Expansion (One Level)
 
