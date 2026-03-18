@@ -32,6 +32,8 @@ to add your project roots.
 
 ## Workflow
 
+### Update version paths
+
 1. Dry run first to preview changes:
 
 ```bash
@@ -42,6 +44,24 @@ ${CLAUDE_PLUGIN_ROOT}/skills/update-permission-paths/scripts/update-paths.py --d
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/update-permission-paths/scripts/update-paths.py
+```
+
+### Ensure base permissions
+
+Add missing base permissions (gh CLI, /tmp/claude paths, git ops, MCP
+tools) to all settings files. The base set is defined in `projects.yaml`
+under `base_permissions:`.
+
+1. Dry run:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/update-permission-paths/scripts/update-paths.py --ensure-base --dry-run
+```
+
+2. Apply:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/update-permission-paths/scripts/update-paths.py --ensure-base
 ```
 
 ## Configuration
@@ -84,6 +104,7 @@ reusable permissions are merged.
 | `--dry-run` | Preview changes without writing |
 | `--version X.Y.Z` | Target a specific version instead of latest |
 | `--init` | Copy plugin default config to userspace for customization |
+| `--ensure-base` | Add missing base permissions from projects.yaml |
 
 ### merge-worktree-permissions.py
 
