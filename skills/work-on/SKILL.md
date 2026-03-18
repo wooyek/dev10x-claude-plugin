@@ -137,6 +137,14 @@ before any commits:
 Store the workspace decision in the Phase 1 output so Phase 3
 can include or skip the workspace setup subtask.
 
+### Self-Check Before Phase 2
+
+**REQUIRED:** Before proceeding to Phase 2, call `TaskList` and
+verify that all 4 phase tasks exist. If they are missing, create
+them NOW before proceeding. If `TaskCreate` is unavailable (e.g.,
+`ToolSearch` returned it but calling fails), STOP and inform the
+user — do NOT proceed without the task list.
+
 ---
 
 ## Phase 2: Gather (Quick & Parallel via Subagents)
