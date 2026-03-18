@@ -262,13 +262,20 @@ severity if applicable, related context from Slack/Sentry]
 
 ## Phase 3: Plan (Lightweight Steps)
 
-Build a **high-level task list** using `TaskCreate`. **This is
-mandatory** — always create at least one task, even when the work
-seems trivial. The task list is the supervisor's interface for
-tracking progress and adding new tasks during the session.
+**Phase 3 is a MECHANICAL step, not a creative step.** Read the
+playbook YAML, find the matching play, and convert each step to a
+`TaskCreate` call. Do NOT generate a custom plan. Do NOT use
+`Agent(Plan)` subagents. The playbook IS the plan — your job is
+to instantiate it as tasks.
 
-The plan is adapted based on what was gathered — not a fixed
-template.
+**REQUIRED: Create exactly one `TaskCreate` per play step.** Do
+not collapse, merge, or abbreviate steps. Each step in the
+approved play template becomes one task — this is the supervisor's
+interface for tracking progress and adding work. Collapsing 14
+steps into 5 makes the remaining 9 invisible and unexecuted.
+
+The task list is the supervisor's interface for tracking progress
+and adding new tasks during the session.
 
 ### Step Types
 
