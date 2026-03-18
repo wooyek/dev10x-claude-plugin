@@ -538,6 +538,12 @@ implicit — skip `AskUserQuestion` and proceed directly to Phase 4
 execution. The user already defined the plan; re-presenting it for
 approval adds no value.
 
+**Natural language mapping:** User phrases like "prepare a draft",
+"for my approval", "let me review first", "show me the plan", or
+"what's the plan" all map to THIS gate. Present the plan via
+`AskUserQuestion` — do not write a document, create a plan file,
+or use Claude Code's built-in plan mode.
+
 **REQUIRED: Call `AskUserQuestion`** when the plan was
 agent-generated (do NOT use plain text).
 
