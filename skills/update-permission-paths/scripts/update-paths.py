@@ -131,6 +131,37 @@ def update_file(
     return count, messages
 
 
+def ensure_base_permissions(
+    path: Path,
+    base_permissions: list[str],
+    *,
+    dry_run: bool = False,
+) -> tuple[int, list[str]]:
+    content = path.read_text()
+    try:
+        data = json.loads(content)
+    except json.JSONDecodeError as e:
+        return 0, [f"  SKIP (invalid JSON): {e}"]
+
+    allow_list: list[str] = data.get("permissions", {}).get("allow", [])
+    existing = set(allow_list)
+    missing = [p for p in base_permissions if p not in existing]
+
+    if not missing:
+        return 0, []
+
+    if not dry_run:
+        if "permissions" not in data:
+            data["permissions"] = {}
+        if "allow" not in data["permissions"]:
+            data["permissions"]["allow"] = []
+        data["permissions"]["allow"].extend(missing)
+        path.write_text(json.dumps(data, indent=2) + "\n")
+
+    messages = [f"  + {p}" for p in missing]
+    return len(missing), messages
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Update Dev10x plugin version paths in settings files",
@@ -149,6 +180,11 @@ def main() -> int:
         action="store_true",
         help="Create userspace config from plugin default",
     )
+    parser.add_argument(
+        "--ensure-base",
+        action="store_true",
+        help="Add missing base permissions from projects.yaml to all settings files",
+    )
     args = parser.parse_args()
 
     if args.init:
@@ -157,6 +193,22 @@ def main() -> int:
     config_path = find_config()
     print(f"Config: {config_path}")
     config = load_config(config_path)
+
+    settings_files = find_settings_files(
+        roots=config.get("roots", []),
+        include_user=config.get("include_user_settings", True),
+    )
+
+    if not settings_files:
+        print("No settings files found.")
+        return 0
+
+    if args.ensure_base:
+        return _ensure_base(
+            config=config,
+            settings_files=settings_files,
+            dry_run=args.dry_run,
+        )
 
     cache_dir = Path(config["plugin_cache"]).expanduser()
     target = args.version or detect_latest_version(cache_dir)
@@ -168,15 +220,6 @@ def main() -> int:
     print(f"Target version: {target}")
     if args.dry_run:
         print("(dry run — no files will be modified)\n")
-
-    settings_files = find_settings_files(
-        roots=config.get("roots", []),
-        include_user=config.get("include_user_settings", True),
-    )
-
-    if not settings_files:
-        print("No settings files found.")
-        return 0
 
     total_changes = 0
     files_changed = 0
@@ -195,6 +238,46 @@ def main() -> int:
     else:
         verb = "Would update" if args.dry_run else "Updated"
         print(f"\n{verb} {total_changes} paths in {files_changed} files.")
+
+    return 0
+
+
+def _ensure_base(
+    *,
+    config: dict,
+    settings_files: list[Path],
+    dry_run: bool,
+) -> int:
+    base_permissions = config.get("base_permissions", [])
+    if not base_permissions:
+        print("No base_permissions defined in config.")
+        return 0
+
+    print(f"Base permissions: {len(base_permissions)} rules")
+    if dry_run:
+        print("(dry run — no files will be modified)\n")
+
+    total_added = 0
+    files_changed = 0
+
+    for path in sorted(settings_files):
+        count, messages = ensure_base_permissions(
+            path,
+            base_permissions,
+            dry_run=dry_run,
+        )
+        if count > 0:
+            print(f"\n{path}")
+            for msg in messages:
+                print(msg)
+            total_added += count
+            files_changed += 1
+
+    if total_added == 0:
+        print("\nAll files already have base permissions.")
+    else:
+        verb = "Would add" if dry_run else "Added"
+        print(f"\n{verb} {total_added} permissions across {files_changed} files.")
 
     return 0
 
