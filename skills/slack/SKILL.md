@@ -129,6 +129,16 @@ ${CLAUDE_PLUGIN_ROOT}/skills/slack/slack-notify.py \
   --delete MESSAGE_TS
 ```
 
+### Delete a file
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/slack/slack-notify.py \
+  --delete-file FILE_ID
+```
+
+Does not require `--channel`. Use the file ID returned by `--files`
+upload or visible in Slack URLs.
+
 ### Send a self-DM reminder
 
 ```bash

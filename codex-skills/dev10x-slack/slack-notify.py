@@ -11,6 +11,7 @@ Usage:
     slack-notify.py --channel CHANNEL_ID --files screenshot.png video.webm --message "Evidence"
     slack-notify.py --channel CHANNEL_ID --thread-ts 123.456 --files report.png
     slack-notify.py --remind "Follow up on PR #1234"
+    slack-notify.py --delete-file F0ALXGBAAUC
 
 Token resolution order:
     1. System keyring: secret-tool lookup service slack key bot_token
@@ -69,9 +70,9 @@ def get_token() -> str:
             return token
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
-    token = os.environ.get("SLACK_TOKEN")
-    if token:
-        return token
+    env_token = os.environ.get("SLACK_TOKEN")
+    if env_token:
+        return env_token
     raise RuntimeError("No Slack token found in system keyring or SLACK_TOKEN env")
 
 
@@ -138,9 +139,7 @@ def upload_slack_files(
             thread_ts=thread_ts,
         )
         files = result.get("files", [])
-        print(
-            f"✅ Uploaded {len(file_uploads)} file(s): {[f.get('id') for f in files]}"
-        )
+        print(f"✅ Uploaded {len(file_uploads)} file(s): {[f.get('id') for f in files]}")
         return files[0].get("id") if files else None
     except SlackApiError as ex:
         if ex.response.get("error") == "missing_scope":
@@ -155,7 +154,7 @@ def upload_slack_files(
 
 
 def _files_upload_v2(
-    client: "WebClient",
+    client: WebClient,
     file_uploads: list[dict],
     channel: str,
     initial_comment: str | None,
@@ -235,6 +234,19 @@ def delete_slack_message(channel: str, ts: str) -> bool:
         return False
 
 
+def delete_slack_file(file_id: str) -> bool:
+    try:
+        from slack_sdk import WebClient
+
+        token = get_token()
+        client = WebClient(token=token)
+        client.files_delete(file=file_id)
+        return True
+    except Exception as ex:
+        print(f"❌ Failed to delete Slack file: {ex}", file=sys.stderr)
+        return False
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Send Slack notifications",
@@ -274,6 +286,11 @@ def main() -> None:
         help="Delete a message by timestamp instead of sending",
     )
     parser.add_argument(
+        "--delete-file",
+        metavar="FILE_ID",
+        help="Delete a Slack file by ID (e.g., F0ALXGBAAUC)",
+    )
+    parser.add_argument(
         "--update",
         metavar="TS",
         help="Update an existing message by timestamp (requires --message or --message-file)",
@@ -308,6 +325,14 @@ def main() -> None:
         else:
             sys.exit(1)
 
+    if args.delete_file:
+        success = delete_slack_file(file_id=args.delete_file)
+        if success:
+            print(f"✅ Deleted file {args.delete_file}")
+            sys.exit(0)
+        else:
+            sys.exit(1)
+
     if not args.channel:
         print("❌ --channel is required", file=sys.stderr)
         sys.exit(1)
@@ -327,13 +352,9 @@ def main() -> None:
 
     if args.update:
         if not message:
-            print(
-                "❌ --message or --message-file required with --update", file=sys.stderr
-            )
+            print("❌ --message or --message-file required with --update", file=sys.stderr)
             sys.exit(1)
-        success = update_slack_message(
-            channel=args.channel, ts=args.update, message=message
-        )
+        success = update_slack_message(channel=args.channel, ts=args.update, message=message)
         if success:
             print(f"✅ Updated message {args.update}")
             sys.exit(0)

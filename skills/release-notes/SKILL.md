@@ -70,6 +70,24 @@ Each play has a `config` block with:
 3. Determine which play to use (release vs hotfix)
 4. Extract the `config` block for script args and formatting
 
+**Missing override detection:** After loading, check whether a
+project-specific override exists at
+`~/.claude/projects/<project>/memory/playbooks/release-notes.yaml`.
+If **no override exists** AND the resolved config has
+`output_target: stdout` with empty `ticket_links`:
+
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+Options:
+- **Use defaults as-is** — proceed with stdout output, no ticket links
+- **Save defaults as project override** — copy the default playbook
+  to the project memory directory for future customization
+- **Customize key settings now** — interactively set output target
+  (stdout / github-release / slack), Slack channel ID, and ticket
+  link prefixes, then save as project override
+
+This prevents silent fallback to unusable defaults, which was the
+root cause of 3/14 compliance deviations in a prior audit (GH-271).
+
 ### 2. Collect PRs
 
 Run the `collect-prs.py` script with configured ticket patterns:
