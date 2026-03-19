@@ -15,9 +15,17 @@ ALIASES=(
     "trunk-log:git log --oneline \$(git merge-base trunk HEAD)..HEAD"
     "trunk-diff:git diff \$(git merge-base trunk HEAD)..HEAD"
     "trunk-rebase:git rebase -i --autosquash \$(git merge-base trunk HEAD)"
+    "main-log:git log --oneline \$(git merge-base main HEAD)..HEAD"
+    "main-diff:git diff \$(git merge-base main HEAD)..HEAD"
+    "main-rebase:git rebase -i --autosquash \$(git merge-base main HEAD)"
+    "master-log:git log --oneline \$(git merge-base master HEAD)..HEAD"
+    "master-diff:git diff \$(git merge-base master HEAD)..HEAD"
+    "master-rebase:git rebase -i --autosquash \$(git merge-base master HEAD)"
     "autosquash-develop:GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash \$(git merge-base origin/develop HEAD)"
     "autosquash-development:GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash \$(git merge-base origin/development HEAD)"
     "autosquash-trunk:GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash \$(git merge-base origin/trunk HEAD)"
+    "autosquash-main:GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash \$(git merge-base origin/main HEAD)"
+    "autosquash-master:GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash \$(git merge-base origin/master HEAD)"
 )
 
 for entry in "${ALIASES[@]}"; do

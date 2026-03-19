@@ -56,6 +56,14 @@ Each base branch gets three comparison aliases (`{base}-log`, `{base}-diff`,
 | `git trunk-diff`     | `git diff $(git merge-base trunk HEAD)..HEAD`               |
 | `git trunk-rebase`   | `git rebase -i --autosquash $(git merge-base trunk HEAD)`   |
 | `git autosquash-trunk` | `GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base origin/trunk HEAD)` |
+| `git main-log`       | `git log --oneline $(git merge-base main HEAD)..HEAD`       |
+| `git main-diff`      | `git diff $(git merge-base main HEAD)..HEAD`                |
+| `git main-rebase`    | `git rebase -i --autosquash $(git merge-base main HEAD)`    |
+| `git autosquash-main` | `GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base origin/main HEAD)` |
+| `git master-log`     | `git log --oneline $(git merge-base master HEAD)..HEAD`     |
+| `git master-diff`    | `git diff $(git merge-base master HEAD)..HEAD`              |
+| `git master-rebase`  | `git rebase -i --autosquash $(git merge-base master HEAD)`  |
+| `git autosquash-master` | `GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base origin/master HEAD)` |
 
 ## When to Use
 
