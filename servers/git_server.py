@@ -8,6 +8,7 @@
 
 import json
 from pathlib import Path
+
 from mcp.server.fastmcp import FastMCP
 
 # Add lib directory to path for imports
@@ -15,7 +16,7 @@ lib_path = Path(__file__).parent / "lib"
 import sys
 
 sys.path.insert(0, str(lib_path))
-from subprocess_utils import run_script, parse_key_value_output
+from subprocess_utils import parse_key_value_output, run_script
 
 server = FastMCP(name="dev10x-git")
 
@@ -108,6 +109,116 @@ async def create_worktree(
         return json.loads(result.stdout)
     except json.JSONDecodeError:
         return parse_key_value_output(result.stdout)
+
+
+@server.tool()
+async def mass_rewrite(
+    config_path: str,
+) -> dict:
+    """Rewrite multiple commit messages in one unattended rebase pass.
+
+    Args:
+        config_path: Path to JSON config file with rewrite instructions.
+            Config format: {"base": "develop", "commits": {"sha": "new msg", ...}}
+
+    Returns:
+        Dictionary with keys: success (bool), output (str), error (str if failed)
+    """
+    result = run_script(
+        "skills/git-groom/scripts/mass-rewrite.py",
+        config_path,
+    )
+
+    if result.returncode != 0:
+        return {
+            "success": False,
+            "error": result.stderr.strip(),
+            "output": result.stdout.strip(),
+        }
+
+    return {"success": True, "output": result.stdout.strip()}
+
+
+@server.tool()
+async def start_split_rebase(
+    commit_hash: str,
+    base_branch: str = "develop",
+) -> dict:
+    """Start an interactive rebase to split a commit into multiple atomic commits.
+
+    Marks the specified commit for editing, then resets it to unstage all
+    changes so you can create multiple commits from the original.
+
+    Args:
+        commit_hash: The commit hash to split
+        base_branch: Base branch for the rebase (default: develop)
+
+    Returns:
+        Dictionary with keys: success (bool), output (str), error (str if failed)
+    """
+    result = run_script(
+        "skills/git-commit-split/scripts/start-split-rebase.sh",
+        commit_hash,
+        base_branch,
+    )
+
+    if result.returncode != 0:
+        return {
+            "success": False,
+            "error": result.stderr.strip(),
+            "output": result.stdout.strip(),
+        }
+
+    return {"success": True, "output": result.stdout.strip()}
+
+
+@server.tool()
+async def next_worktree_name(
+    base_dir: str | None = None,
+) -> dict:
+    """Calculate the next available worktree path.
+
+    Finds the highest existing worktree number for the current project
+    and returns the next incremented path.
+
+    Args:
+        base_dir: Override worktrees parent directory (default: ../.worktrees)
+
+    Returns:
+        Dictionary with keys: path (str)
+    """
+    args = [base_dir] if base_dir else []
+
+    result = run_script(
+        "skills/git-worktree/scripts/next-worktree-name.sh",
+        *args,
+    )
+
+    if result.returncode != 0:
+        return {"error": result.stderr.strip()}
+
+    return {"path": result.stdout.strip()}
+
+
+@server.tool()
+async def setup_aliases() -> dict:
+    """Set up global git aliases for branch comparison operations.
+
+    Configures aliases like git develop-log, git develop-diff, git develop-rebase
+    that wrap $(git merge-base ...) subshells into stable command prefixes.
+    Idempotent — safe to call multiple times.
+
+    Returns:
+        Dictionary with keys: success (bool), output (str)
+    """
+    result = run_script(
+        "skills/git-alias-setup/scripts/git-alias-setup.sh",
+    )
+
+    if result.returncode != 0:
+        return {"success": False, "error": result.stderr.strip()}
+
+    return {"success": True, "output": result.stdout.strip()}
 
 
 if __name__ == "__main__":
