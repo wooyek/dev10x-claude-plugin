@@ -8,9 +8,7 @@ description: >
 user-invocable: true
 invocation-name: dev10x:work-on
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/work-on/scripts/*:*)
-  - Bash(~/.claude/skills/gh/scripts/*:*)
-  - Bash(~/.claude/skills/jira/scripts/*:*)
+  - mcp__plugin_Dev10x_gh__*
   - Read(~/.claude/projects/**/memory/playbooks/work-on.yaml)
   - Read(${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml)
   - Write(~/.claude/projects/**/**)
@@ -89,11 +87,9 @@ argument is classified independently:
 | `#N` (bare number) | `github-pr` | Resolve against current repo |
 | Anything else | `note` | Store as free-text context |
 
-For ticket IDs, run the tracker detector (from `dev10x:gh` skill):
-```bash
-~/.claude/skills/gh/scripts/detect-tracker.sh "$TICKET_ID"
-```
-Parse `TRACKER`, `TICKET_NUMBER`, and `FIXES_URL` from output.
+For ticket IDs, call the tracker detector MCP tool:
+`mcp__plugin_Dev10x_gh__detect_tracker(ticket_id="$TICKET_ID")`
+Parse `tracker`, `ticket_number`, and `fixes_url` from the response.
 
 Each classified input becomes a **source** entry with its type and
 extracted identifiers. Collect all sources into a list for Phase 2.
@@ -113,13 +109,10 @@ it affects Phase 3 planning.
 | Local-only (free text) | Deferred | Decided in Phase 4 |
 | Investigation only | No | No code changes expected |
 
-**Detect current workspace state:**
-
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/work-on/scripts/detect-workspace.sh
-```
-
-Parse `WORKSPACE` and `BRANCH` from output.
+**Detect current workspace state** using git directly:
+- If `.git` is a **file** (not directory) → worktree
+- If `.git` is a **directory** → main repo
+- Current branch: `git symbolic-ref --short HEAD`
 
 **Worktree branch check:** If the CWD is a worktree and the
 current branch is a generic worktree branch (e.g., `wt/<name>`
@@ -184,7 +177,7 @@ Choose the agent type based on the source's tool requirements:
 | `github-issue` | `Explore` | `gh` CLI works in Explore agents |
 | `github-pr` | `Explore` | `gh` CLI works in Explore agents |
 | `linear-ticket` | `general-purpose` | Needs Linear MCP tools |
-| `jira-ticket` | `Explore` | Uses `jira-get.sh` CLI script |
+| `jira-ticket` | `Explore` | Uses `dev10x:jira` skill |
 | `slack-thread` | `general-purpose` | Needs Slack MCP tools |
 | `sentry-issue` | `general-purpose` | Needs Sentry MCP tools |
 | `note` | (none) | Pass through as-is |
@@ -215,10 +208,10 @@ in the main session via `WebFetch`, not dispatched to subagents.
 
 | Source type | Agent type | Subagent instructions |
 |-------------|-----------|----------------------|
-| `github-issue` | Explore | Run `gh-issue-get.sh "$NUMBER" "$REPO"`. Return title, status, labels, body summary, linked PRs. |
+| `github-issue` | Explore | Run `gh issue view "$NUMBER" --repo "$REPO" --json title,state,body,labels,assignees`. Return title, status, labels, body summary, linked PRs. |
 | `github-pr` | Explore | Run `gh pr view --json title,body,headRefName,state,mergedAt,reviews`. Return title, status, branch, review comment count. |
 | `linear-ticket` | general-purpose | Call `mcp__claude_ai_Linear__get_issue(issueId)`. Return title, status, parent ID, relations, comment summaries. |
-| `jira-ticket` | Explore | Run `jira-get.sh "$ID"`. Return title, status, assignee, linked issues. |
+| `jira-ticket` | Explore | Use `dev10x:jira` skill to fetch ticket. Return title, status, assignee, linked issues. |
 | `slack-thread` | general-purpose | Call `mcp__claude_ai_Slack__slack_read_thread(channelId, threadTs)`. Return message count, key decisions, action items. |
 | `sentry-issue` | general-purpose | Call `mcp__sentry__get_issue_details(issueId)`. Return error type, frequency, first/last seen, top stack frame. |
 | `note` | (none) | No subagent needed — pass through as-is. |
@@ -727,7 +720,7 @@ Options:
 |---------|-----------|
 | GitHub | `gh issue comment` |
 | Linear | Prepend to description via `save_issue` |
-| JIRA | `jira-update.sh` |
+| JIRA | `dev10x:jira` skill |
 
 **Ticket status update (Linear only):**
 1. Get statuses: `list_issue_statuses(teamId)` from
