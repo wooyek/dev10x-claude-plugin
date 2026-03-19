@@ -4,11 +4,14 @@ description: Restructure, polish, and clean up git commit history in the current
 user-invocable: true
 invocation-name: dev10x:git-groom
 allowed-tools:
+  - mcp__plugin_Dev10x_git__mass_rewrite
+  - mcp__plugin_Dev10x_git__rebase_groom
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git-groom/scripts/*:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
   - Bash(/tmp/claude/bin/mktmp.sh:*)
+  - mcp__plugin_Dev10x_utils__mktmp
   - Write(/tmp/claude/git/**)
 ---
 
