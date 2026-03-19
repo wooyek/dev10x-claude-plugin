@@ -26,14 +26,14 @@ Mark completed when done: `TaskUpdate(taskId, status="completed")`
 ## Overview
 
 Route a single deferred item to the right discovery context. Can be
-invoked standalone or called by `dev10x:wrap-up` for each open loop.
+invoked standalone or called by `dev10x:session-wrap-up` for each open loop.
 
 ## Workflow
 
 ### 1. Receive item
 
 Accept the item to defer. This is either:
-- Passed from `dev10x:wrap-up` (structured)
+- Passed from `dev10x:session-wrap-up` (structured)
 - Provided by user directly: `/dev10x:park "item description"`
 
 ### 2. Detect context
@@ -73,7 +73,7 @@ Conditionally available (include only when detected):
 |---|--------|-----------|
 | 4 | Issue tracker comment | Ticket ID found in branch |
 | 5 | PR comment | Open PR found for current branch |
-| 5b | PR session bookmark | Open PR + session end / wrap-up context |
+| 5b | PR session bookmark | Open PR + session end / session-wrap-up context |
 | 6 | Inline TODO/FIXME | User mentions a specific file |
 | 7 | Keep in session | User wants to finish later this session |
 
@@ -200,5 +200,5 @@ gh api repos/{owner}/{repo}/issues/comments/{comment_id} \
 
 ## Used By
 
-- `dev10x:wrap-up` — Phase 3 calls this for each deferred item
+- `dev10x:session-wrap-up` — Phase 3 calls this for each deferred item
 - `dev10x:gh-pr-bookmark` — thin wrapper that pre-selects PR session bookmark target

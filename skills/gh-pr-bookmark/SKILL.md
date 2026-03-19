@@ -65,4 +65,4 @@ confirmation.
 ## See Also
 
 - `dev10x:park` — full deferral router with all targets
-- `dev10x:wrap-up` — end-of-session orchestrator that may call this
+- `dev10x:session-wrap-up` — end-of-session orchestrator that may call this

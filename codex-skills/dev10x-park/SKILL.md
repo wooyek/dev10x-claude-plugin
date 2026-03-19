@@ -10,14 +10,14 @@ description: Use when a task should be saved for later — so deferred items lan
 ## Overview
 
 Route a single deferred item to the right discovery context. Can be
-invoked standalone or called by `dev10x:wrap-up` for each open loop.
+invoked standalone or called by `dev10x:session-wrap-up` for each open loop.
 
 ## Workflow
 
 ### 1. Receive item
 
 Accept the item to defer. This is either:
-- Passed from `dev10x:wrap-up` (structured)
+- Passed from `dev10x:session-wrap-up` (structured)
 - Provided by user directly: `dev10x-park "item description"`
 
 ### 2. Detect context
@@ -183,5 +183,5 @@ gh api repos/{owner}/{repo}/issues/comments/{comment_id} \
 
 ## Used By
 
-- `dev10x:wrap-up` — Phase 3 calls this for each deferred item
+- `dev10x:session-wrap-up` — Phase 3 calls this for each deferred item
 - `dev10x:gh-pr-bookmark` — thin wrapper that pre-selects PR session bookmark target

@@ -97,7 +97,7 @@ This provides context on what was being worked on.
 #### 2f. PR wrap-up reminders
 
 Check open PRs for automated session bookmark comments posted by
-`dev10x:wrap-up`. These are self-reminders left on PRs during
+`dev10x:session-wrap-up`. These are self-reminders left on PRs during
 previous sessions:
 
 ```bash
@@ -114,7 +114,7 @@ gh pr view {N} --json comments --jq '.comments[]
 ```
 
 The `🔖 **Session bookmark**` prefix is the standard marker set by
-`dev10x:wrap-up`. Include matching comments in the findings under
+`dev10x:session-wrap-up`. Include matching comments in the findings under
 "### PR Session Bookmarks".
 
 ### 3. Present findings

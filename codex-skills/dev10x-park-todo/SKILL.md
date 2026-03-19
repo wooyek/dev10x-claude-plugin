@@ -81,10 +81,10 @@ When invoked, auto-detect:
 
 If the user asks about **existing** deferred items (e.g., "what's deferred",
 "check for open items", "what do we have from yesterday"), invoke
-`dev10x:todo-review` instead of this skill. This skill is for *writing*
-deferrals; `dev10x:todo-review` is for *reading them back*.
+`dev10x:park-discover` instead of this skill. This skill is for *writing*
+deferrals; `dev10x:park-discover` is for *reading them back*.
 
 ## Used By
 
 - `dev10x:park` — when user picks "project TODO" or "inline code"
-- `dev10x:wrap-up` — Phase 1 scans `.claude/TODO.md` for existing items
+- `dev10x:session-wrap-up` — Phase 1 scans `.claude/TODO.md` for existing items

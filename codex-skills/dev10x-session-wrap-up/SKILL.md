@@ -3,9 +3,9 @@ name: dev10x-session-wrap-up
 description: Use at session end or when too many open loops pile up — so unfinished work is captured and routed to the right place instead of being lost when the session closes.
 ---
 
-# dev10x:wrap-up — Session End Orchestrator
+# dev10x:session-wrap-up — Session End Orchestrator
 
-**Announce:** "Using dev10x:wrap-up to capture open loops before
+**Announce:** "Using dev10x:session-wrap-up to capture open loops before
 closing this session."
 
 ## Overview
@@ -110,7 +110,7 @@ use this standard prefix so `dev10x:park-discover` §2f can discover it:
 ```markdown
 🔖 **Session bookmark**
 
-This is an automated self-reminder left by `dev10x:wrap-up` for the
+This is an automated self-reminder left by `dev10x:session-wrap-up` for the
 PR author to pick up in a future session.
 
 **Current state:** <brief summary of where the PR stands>

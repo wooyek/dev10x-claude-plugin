@@ -699,7 +699,7 @@
       },
       {
         "query": "let's wrap up for today and save my progress",
-        "rationale": "Wants session wrap-up (dev10x:wrap-up), opposite of starting work"
+        "rationale": "Wants session wrap-up (dev10x:session-wrap-up), opposite of starting work"
       }
     ]
   }

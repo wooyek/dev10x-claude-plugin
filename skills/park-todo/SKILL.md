@@ -103,4 +103,4 @@ deferrals; `dev10x:park-discover` is for *reading them back*.
 ## Used By
 
 - `dev10x:park` — when user picks "project TODO" or "inline code"
-- `dev10x:wrap-up` — Phase 1 scans `.claude/TODO.md` for existing items
+- `dev10x:session-wrap-up` — Phase 1 scans `.claude/TODO.md` for existing items

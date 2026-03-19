@@ -74,7 +74,7 @@ Skills use family prefixes for tab-completion discoverability:
 | `park-remind/`    | `dev10x:park-remind`     |
 | `park-discover/`  | `dev10x:park-discover`   |
 | `session-tasks/`  | `dev10x:session-tasks`   |
-| `session-wrap-up/`| `dev10x:wrap-up`         |
+| `session-wrap-up/`| `dev10x:session-wrap-up`  |
 | `ticket-branch/`  | `dev10x:ticket-branch`   |
 | `ticket-create/`  | `dev10x:ticket-create`   |
 | `ticket-jtbd/`    | `dev10x:ticket-jtbd`     |

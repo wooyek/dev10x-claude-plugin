@@ -12,6 +12,23 @@ description: Use when tracking in-session work items — so open loops are visib
 Thin wrapper around Claude's `TaskCreate`/`TaskUpdate`/`TaskList` tools
 for tracking work items within the current session.
 
+## Auto-Advance
+
+After creating tasks via this skill, **immediately start
+executing the first pending task**. Do not pause to ask
+"should I start?" or wait for the user to say "go". The act
+of creating the task list is the authorization to begin.
+
+```
+TaskCreate(subject="Task 1", ...)
+TaskCreate(subject="Task 2", ...)
+TaskUpdate(taskId=task1, status="in_progress")
+# Begin working on Task 1 immediately
+```
+
+This follows the universal auto-advance rule from
+`references/task-orchestration.md`.
+
 ## Commands
 
 ### Show tasks
@@ -41,4 +58,4 @@ Use `TaskUpdate` with the task ID and new `status`:
 ## Used By
 
 - `dev10x:park` — when user picks "keep for this session"
-- `dev10x:wrap-up` — Phase 1 auto-scan reads the task list
+- `dev10x:session-wrap-up` — Phase 1 auto-scan reads the task list

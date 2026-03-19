@@ -27,7 +27,7 @@ supervisor-approved work plan. It runs in four phases:
 4. **Execute** — work through tasks, expanding epics on demand
 
 The supervisor sees progress via `TaskList`, can approve/edit
-the plan, and can pause at any point with `dev10x:wrap-up`.
+the plan, and can pause at any point with `dev10x:session-wrap-up`.
 
 **Rule: ALWAYS use `TaskCreate`** — even for single-task work.
 The visible task list is the supervisor's interface for adding
@@ -736,16 +736,17 @@ Options:
 At any pause signal ("wrap up", "pause", "that's enough for
 today", end-of-session):
 
-1. Invoke `dev10x:wrap-up` — it reads `TaskList` and discovers all
-   open tasks automatically
-2. `dev10x:wrap-up` handles routing each open item (PR bookmark,
-   TODO.md, Slack DM, etc.)
+1. Invoke `dev10x:session-wrap-up` — it reads `TaskList` and
+   discovers all open tasks automatically
+2. `dev10x:session-wrap-up` handles routing each open item (PR
+   bookmark, TODO.md, Slack DM, etc.)
 3. The task list itself serves as resume context — when the user
-   resumes work, they can invoke `dev10x:discover` to find deferred
-   items and `dev10x:tasks` to see the saved task list
+   resumes work, they can invoke `dev10x:park-discover` to find
+   deferred items and `dev10x:session-tasks` to see the saved
+   task list
 
-No custom bookmarking needed — leverage existing `dev10x:wrap-up`
-and `dev10x:defer` infrastructure.
+No custom bookmarking needed — leverage existing
+`dev10x:session-wrap-up` and `dev10x:park` infrastructure.
 
 ---
 
@@ -875,9 +876,9 @@ PR has 3 review comments → note them.
 User is at task 4 of 7 and says "let's wrap up for today".
 
 1. Skill detects pause signal
-2. Invokes `dev10x:wrap-up`
-3. `dev10x:wrap-up` reads `TaskList` — sees 3 pending tasks
-4. Routes each via `dev10x:defer` (e.g., PR bookmark, TODO.md)
+2. Invokes `dev10x:session-wrap-up`
+3. `dev10x:session-wrap-up` reads `TaskList` — sees 3 pending tasks
+4. Routes each via `dev10x:park` (e.g., PR bookmark, TODO.md)
 5. Session ends with bookmark saved
 
 Next session: user runs `dev10x:discover` to find bookmarks and

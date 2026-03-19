@@ -46,4 +46,4 @@ dev10x-gh-pr-bookmark Wait for CI then merge   # bookmark with custom note
 ## See Also
 
 - `dev10x:park` — full deferral router with all targets
-- `dev10x:wrap-up` — end-of-session orchestrator that may call this
+- `dev10x:session-wrap-up` — end-of-session orchestrator that may call this
