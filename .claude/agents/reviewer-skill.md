@@ -16,12 +16,13 @@ Files matching: `skills/**`
 ## Checklist
 
 1. **SKILL.md exists** — every skill directory must contain a SKILL.md with
-   valid YAML front matter. Required: `name:`, `description:`. Optional:
-   `invocation-name:`, `allowed-tools:`, `user-invocable:`.
+   valid YAML front matter. Required: `name:`, `description:`, `invocation-name:`.
+   Optional: `allowed-tools:`, `user-invocable:`.
 2. **Naming convention** — directory uses plain name (no `dx-` prefix);
-   `name:` MUST use `dev10x:<feature>` format; `invocation-name:` MAY use
-   a non-`dev10x:` prefix for cross-family aliases — do NOT flag as a
-   naming violation if `name:` is correct (see `skill-naming.md`)
+   `name:` MUST use `dev10x:<feature>` format; `invocation-name:` MUST
+   match `name:` exactly — no shortened aliases, cross-family variants, or
+   non-`dev10x:` prefixes permitted. Both fields require the `dev10x:`
+   prefix (see `.claude/rules/skill-naming.md` lines 86-97)
 3. **Description quality** — `description:` must explain when to
    trigger the skill; vague descriptions reduce discoverability
 4. **Script references** — (Script-based skills only; skip for orchestration-based)
