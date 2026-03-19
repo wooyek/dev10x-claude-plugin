@@ -15,6 +15,9 @@ ALIASES=(
     "trunk-log:git log --oneline \$(git merge-base trunk HEAD)..HEAD"
     "trunk-diff:git diff \$(git merge-base trunk HEAD)..HEAD"
     "trunk-rebase:git rebase -i --autosquash \$(git merge-base trunk HEAD)"
+    "autosquash-develop:GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash \$(git merge-base origin/develop HEAD)"
+    "autosquash-development:GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash \$(git merge-base origin/development HEAD)"
+    "autosquash-trunk:GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash \$(git merge-base origin/trunk HEAD)"
 )
 
 for entry in "${ALIASES[@]}"; do

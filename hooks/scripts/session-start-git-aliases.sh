@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-ALIASES=(develop-log develop-diff develop-rebase development-log development-diff development-rebase trunk-log trunk-diff trunk-rebase)
+ALIASES=(develop-log develop-diff develop-rebase autosquash-develop development-log development-diff development-rebase autosquash-development trunk-log trunk-diff trunk-rebase autosquash-trunk)
 
 missing=()
 present=()
