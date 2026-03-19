@@ -54,6 +54,13 @@ supporting each tool:
 | Tool | Server | Introduced | Availability |
 |------|--------|------------|--------------|
 | `mktmp` | `utils` | PR #160 | Available in all current versions |
+| `detect_base_branch` | `gh` | GH-191 | v0.31.0+ |
+| `verify_pr_state` | `gh` | GH-191 | v0.31.0+ |
+| `pre_pr_checks` | `gh` | GH-191 | v0.31.0+ |
+| `create_pr` | `gh` | GH-191 | v0.31.0+ |
+| `generate_commit_list` | `gh` | GH-191 | v0.31.0+ |
+| `post_summary_comment` | `gh` | GH-191 | v0.31.0+ |
+| `pr_notify` | `gh` | GH-191 | v0.31.0+ |
 
 When adding a new tool, update this table and note any dependencies on
 specific CLI commands or external programs. Skills should declare required

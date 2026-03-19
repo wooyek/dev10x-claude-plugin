@@ -68,3 +68,9 @@ fi
 
 export BASE_BRANCH
 export DEV_BRANCH
+
+# When executed as a standalone script (not sourced), print key=value output
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "BASE_BRANCH=$BASE_BRANCH"
+    echo "DEV_BRANCH=$DEV_BRANCH"
+fi
