@@ -66,6 +66,7 @@ Always apply `references/review-checks-common.md`.
 | `eval-schema.md` | Evaluation assertions format for skills | `reviewer-skill.md` (item 19) | Decision gate validation |
 | `skill-invocation.md` | Skill() syntax, named parameters, delegation | `reviewer-skill.md` (items 8g, 9a) | Mandatory for skill reviews |
 | `task-orchestration.md` | Orchestration patterns, auto-advance, batched decisions | All skills (via `## Orchestration` section) | Referenced, not auto-loaded |
+| `code-sharing-patterns.md` | MCP imports, PEP 723 inlining, cross-context code | Review agents (false positive prevention) | Referenced, not auto-loaded |
 
 ## Agent Specs (`.claude/agents/`)
 
