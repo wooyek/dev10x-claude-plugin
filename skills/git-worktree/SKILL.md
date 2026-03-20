@@ -7,8 +7,8 @@ description: >
 user-invocable: true
 invocation-name: dev10x:git-worktree
 allowed-tools:
-  - mcp__plugin_Dev10x_git__next_worktree_name
-  - mcp__plugin_Dev10x_git__create_worktree
+  - mcp__plugin_Dev10x_cli__next_worktree_name
+  - mcp__plugin_Dev10x_cli__create_worktree
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/*:*)
   - Bash(git worktree list:*)
   - Bash(git worktree remove:*)

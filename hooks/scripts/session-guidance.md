@@ -61,7 +61,7 @@ prompts or brittle command matching.
 - Check with `git rev-parse --show-toplevel` if unsure
 
 ### Temporary files
-- **Preferred**: Use MCP tool `mcp__plugin_Dev10x_utils__mktmp`
+- **Preferred**: Use MCP tool `mcp__plugin_Dev10x_cli__mktmp`
   with params `namespace`, `prefix`, `ext`, `directory`
 - **Fallback**: `/tmp/claude/bin/mktmp.sh <namespace> <prefix> [.ext]`
   (requires `Bash()` allow rule in skills)

@@ -5,7 +5,7 @@ user-invocable: true
 invocation-name: dev10x:git-commit-split
 allowed-tools:
   - AskUserQuestion
-  - mcp__plugin_Dev10x_git__start_split_rebase
+  - mcp__plugin_Dev10x_cli__start_split_rebase
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git-commit-split/scripts/*:*)
 ---
 

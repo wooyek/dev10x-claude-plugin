@@ -5,7 +5,7 @@ description: Set up git aliases that reduce permission friction by wrapping
 user-invocable: true
 invocation-name: dev10x:git-alias-setup
 allowed-tools:
-  - mcp__plugin_Dev10x_git__setup_aliases
+  - mcp__plugin_Dev10x_cli__setup_aliases
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git-alias-setup/scripts/git-alias-setup.sh)
 ---
 
