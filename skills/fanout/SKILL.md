@@ -16,8 +16,7 @@ allowed-tools:
   - Skill(skill="dev10x:gh-pr-create")
   - Skill(skill="dev10x:ticket-branch")
   - Skill(skill="dev10x:session-wrap-up")
-  - mcp__plugin_Dev10x_gh__*
-  - mcp__plugin_Dev10x_git__*
+  - mcp__plugin_Dev10x_cli__*
 ---
 
 # dev10x:fanout — Parallel Work Stream Orchestrator
