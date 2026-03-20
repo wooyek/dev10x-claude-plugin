@@ -427,6 +427,11 @@ reviewers assigned, Slack notification posted.
 
 ## Important Rules
 
+- **Monitoring scope**: This skill monitors CI checks and review
+  comments up through review request (Phase 3). It does NOT
+  monitor through to merge. After Phase 3 completes, the agent
+  exits. To monitor post-approval activity or wait for merge,
+  re-invoke the skill or check manually.
 - **Autonomous execution**: Phase 1 and Phase 2 run without asking the
   user. Phase 2.5 (QA) and Phase 3 (notification) need confirmation.
 - **One fixup per comment**: Each review comment gets exactly one fixup

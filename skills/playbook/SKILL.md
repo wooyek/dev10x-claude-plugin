@@ -260,6 +260,12 @@ defaults:
         prompt: ... (optional — overrides prompt on all expanded steps)
 
 overrides: []  # populated by this skill when user customizes
+
+# User override files may also define fragments:
+# fragments:
+#   <fragment-name>:
+#     - subject: ... (same schema as default fragments)
+# These shadow default fragments with the same name.
 ```
 
 ### Fragment References
@@ -268,17 +274,23 @@ A step entry with `fragment: <name>` is replaced at resolution
 time by the steps from the named fragment. The reference may
 carry a `condition` override that applies to every expanded step.
 
+Fragments work in both default playbooks and user override files.
+User overrides can define their own `fragments:` section and
+reference those fragments (or default fragments) in their plays.
+
 **Resolution rules:**
-1. Load the `fragments` map from the playbook YAML
-2. Walk the step list; when `fragment: <name>` is found,
-   look up the name in the fragments map
-3. Copy fragment steps inline, applying `condition` from the
+1. Load the `fragments` map from the user override file (if present)
+2. Merge with fragments from the default playbook YAML; user
+   fragments shadow defaults with the same name
+3. Walk the step list; when `fragment: <name>` is found,
+   look up the name in the merged fragments map
+4. Copy fragment steps inline, applying `condition` from the
    reference to each expanded step
-4. `subject`, `type`, `skills`, `agent` from fragment steps
+5. `subject`, `type`, `skills`, `agent` from fragment steps
    are immutable — only `condition` and `prompt` can be
    overridden at the reference site
-5. Detect circular references (max depth 3)
-6. Missing fragment → clear error, do not silently skip
+6. Detect circular references (max depth 3)
+7. Missing fragment → clear error, do not silently skip
 
 See `references/playbook.yaml` for the full work-on playbook
 with all 5 plays as a reference implementation.

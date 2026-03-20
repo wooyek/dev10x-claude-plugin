@@ -117,9 +117,11 @@ permitted when:
    problematic, the team commits to splitting by [topic/pattern group]
 
 Examples:
-- `references/task-orchestration.md` (367 lines) exceeds the 200-line
-  budget because 7 orchestration patterns form a unified framework that
-  43+ skills reference atomically.
+- `references/task-orchestration.md` (514 lines) exceeds the 200-line
+  budget because 8 orchestration patterns form a unified framework that
+  43+ skills reference atomically. Split plan: group by universal
+  rules (patterns 1-3) vs. dispatch patterns (4-5) vs. templates
+  (6-8) if maintenance becomes problematic.
 - `.claude/agents/reviewer-skill.md` was split into two files at 187
   lines: `reviewer-skill.md` (items 1-13, structure/tools) and
   `reviewer-skill-behavior.md` (items 14-20, behavior/orchestration).

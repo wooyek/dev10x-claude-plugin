@@ -8,6 +8,11 @@
 #   defaults   — per play-type templates with parent-child steps
 #   overrides  — user customizations (persist: true = reuse)
 #
+# Fragment resolution order (for both defaults and overrides):
+#   1. fragments from the user override file (if present)
+#   2. fragments from this default playbook file
+#   User-defined fragments with the same name shadow defaults.
+#
 # Play-level fields:
 #   prompt — heuristic guidance for when this play type applies
 #            and how to adapt it based on gathered context

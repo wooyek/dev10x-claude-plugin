@@ -142,6 +142,13 @@ user — do NOT proceed without the task list.
 
 ## Phase 2: Gather (Quick & Parallel via Subagents)
 
+**Same-session continuity:** If the user already provided rich
+context in the current session (e.g., prior investigation, code
+exploration, or a detailed description that covers the same
+sources), skip redundant API fetches. Re-use context that is
+already in the conversation window. Only fetch sources whose
+data is not yet available in the session.
+
 Fetch context from all sources in parallel using subagents.
 Each subagent receives only its source identifiers and returns
 a structured summary — keeping the main session lean.
@@ -316,17 +323,23 @@ Each step in the play has:
    `~/.claude/projects/<project>/memory/playbooks/work-on.yaml`;
    if absent, read from
    `${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml`
-3. Resolve: overrides first (same as acceptance-criteria), then
+3. **REQUIRED: If both playbook paths fail to load (file missing or
+   unreadable), STOP and report the error to the user.** Do NOT
+   fall back to generating an ad-hoc plan. The playbook IS the
+   plan — without it, Phase 3 cannot produce a correct task list.
+4. Resolve: overrides first (same as acceptance-criteria), then
    defaults, then schema fallback
-4. **Resolve fragment references:** Walk the step list. When a
-   step has `fragment: <name>`, look up the name in the
-   `fragments` map (from the same YAML file). Replace the
-   reference with the fragment's steps, applying any `condition`
-   override from the reference to each expanded step. Error on
-   missing fragments; detect circular refs (max depth 3).
-5. For each step, create a `TaskCreate` with the step's `subject`,
+5. **Resolve fragment references:** Walk the step list. When a
+   step has `fragment: <name>`, look up the name first in the
+   user override file's `fragments` map, then in the default
+   playbook's `fragments` map (user fragments shadow defaults).
+   Replace the reference with the fragment's steps, applying
+   any `condition` override from the reference to each expanded
+   step. Error on missing fragments; detect circular refs
+   (max depth 3).
+6. For each step, create a `TaskCreate` with the step's `subject`,
    `type` in metadata, and `agent`/`skills` in metadata if present
-6. If a step has child `steps`, store them in metadata for
+7. If a step has child `steps`, store them in metadata for
    expansion when the epic is reached (Phase 4)
 
 **Work type classification:**
@@ -553,6 +566,14 @@ After approval, set task dependencies where appropriate (use
 Work through the approved task list. Update task status via
 `TaskUpdate` as work progresses.
 
+### Progress Compaction
+
+After completing each phase boundary (e.g., all gather subtasks,
+all implementation subtasks), compact completed tasks into a brief
+summary via `TaskUpdate` metadata. This frees context window for
+remaining work. See `references/task-orchestration.md` Pattern 8
+for the full compaction protocol.
+
 ### Auto-Advance Rule
 
 See `references/task-orchestration.md` for the full pattern.
@@ -618,8 +639,15 @@ The supervisor must explicitly sign off that work is done.
 
 Run the task directly. If the task has a `prompt` in metadata,
 use it as execution guidance. If the task has `skills` in
-metadata, delegate to those skills in order. Common skill
-delegations:
+metadata, delegate to those skills in order.
+
+**REQUIRED: When the playbook step lists `skills:`, you MUST
+invoke via `Skill()`. Do NOT perform actions directly.** Skill
+delegation ensures consistent behavior, proper tool declarations,
+and reusable orchestration. Bypassing delegation by inlining the
+skill's logic breaks these guarantees.
+
+Common skill delegations:
 
 | Task | Delegated to |
 |------|-------------|
@@ -691,6 +719,20 @@ Run them in parallel?
 - Yes, launch parallel agents (Recommended)
 - No, run sequentially
 ```
+
+**Worktree isolation limitation:** Agents dispatched with
+`isolation: "worktree"` cannot use the `Write` tool — Claude Code
+restricts Write access to the main session's working directory.
+Use `Bash(cat <<'EOF' > file)` or `Edit` as a workaround inside
+worktree-isolated agents. Alternatively, avoid `isolation: "worktree"`
+and use sequential tool calls in the main session instead.
+
+**`bypassPermissions` limitation:** The `bypassPermissions` flag
+does not propagate into worktree isolation contexts. If a task
+step requires unattended execution inside a worktree agent, use
+`mode: "dontAsk"` on the Agent call or avoid `isolation: "worktree"`
+for that step. Sequential tool calls in the main session are the
+safest fallback for permission-sensitive operations.
 
 ### Skill Delegation During Execution
 
@@ -771,6 +813,24 @@ No custom bookmarking needed — leverage existing
 - After completing work, use `dev10x:gh-pr-create` to create the PR
 - Do not modify ticket description or add comments unless the
   user explicitly approves (e.g., Job Story write-back)
+- **Batch data files must use `.json` format** — never `.env`.
+  Pre-tool-use hooks block `.env` file creation. When creating
+  temporary data files (e.g., batch issue lists, config), use
+  `.json` instead.
+
+### Known Limitations
+
+- **Worktree cleanup:** No skill currently handles worktree
+  teardown after work completes. Users must manually run
+  `git worktree remove <path>` when done.
+- **PR merge-to-completion lifecycle:** The `dev10x:gh-pr-monitor`
+  skill stops after CI passes and review is requested — it does
+  not monitor through to merge. Users must manually merge or
+  re-invoke monitoring after approval.
+- **Write tool in worktree agents:** See Parallelism Policy
+  section for the `isolation: "worktree"` Write tool limitation.
+- **`bypassPermissions` in worktree agents:** See Parallelism
+  Policy section for the propagation limitation and workarounds.
 
 ## Resources
 
