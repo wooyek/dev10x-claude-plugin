@@ -139,7 +139,7 @@ Never `@`-force-load another skill file — it consumes context immediately.
 ## Script Conventions
 
 All scripts in `scripts/` must be executable so they can be invoked directly
-and match the `Bash($HOME/.codex/skills/<name>/scripts/:*)` allow rule pattern.
+and match the `Bash($HOME/.codex/skills/<name>/scripts/*:*)` allow rule pattern.
 
 ### Making Scripts Executable
 
@@ -185,7 +185,7 @@ python3 $HOME/.codex/skills/<name>/scripts/my-script.py --arg value
 
 ### Why Direct Invocation Matters
 
-The `allowed-tools` entry `Bash($HOME/.codex/skills/<name>/scripts/:*)` only
+The `allowed-tools` entry `Bash($HOME/.codex/skills/<name>/scripts/*:*)` only
 pre-approves commands whose prefix is `$HOME/.codex/skills/...`. If the script
 is invoked with `python3` or `bash` prefix, the prefix becomes `python3` or
 `bash`, the allow rule doesn't match, and Claude prompts for approval on

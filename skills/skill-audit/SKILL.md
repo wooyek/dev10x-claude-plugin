@@ -14,7 +14,7 @@ allowed-tools:
   - Write(/tmp/claude/skill-audit/**)
   - Edit(~/.claude/**)
   - Edit(/tmp/claude/skill-audit/**)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-audit/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-audit/scripts/*:*)
   - Bash(ls -t ~/.claude/:*)
   - Bash(wc:*)
   - Bash(git config --list:*)
@@ -123,7 +123,7 @@ all `/` with `-`).
    inline, OR a session used a multi-step shell pipeline/heredoc that would need
    repeated approval. Inline scripts can't be pre-approved with a single allow
    rule; extracting them to a `scripts/` file under a skill lets the user grant
-   one `Bash(~/.claude/skills/<skill>/scripts/:*)` rule instead.
+   one `Bash(~/.claude/skills/<skill>/scripts/*:*)` rule instead.
 
 6. **Structural command friction** — You used `$()` subshells, `&&` chains,
    `git -C`, env var prefixes, or leading `#` comments that broke allow-rule
@@ -440,7 +440,7 @@ owns them.
 
 Classification:
 - **EXTRACT_TO_SKILL_SCRIPT**: Inline script is complex enough to warrant a
-  `scripts/` file; the parent skill should be updated + a `Bash(...scripts/:*)`
+  `scripts/` file; the parent skill should be updated + a `Bash(...scripts/*:*)`
   allow rule added
 - **EXTRACT_TO_NEW_SKILL**: The script logic is reusable but no skill owns it
   yet; suggest creating a skill with a `scripts/` directory
@@ -821,7 +821,7 @@ Bash(~/.claude/tools/gh-pr-comments.py:*)
 ```
 
 The second form is simpler, more specific, and follows the same
-pattern as skill scripts under `Bash(~/.claude/skills/<name>/scripts/:*)`.
+pattern as skill scripts under `Bash(~/.claude/skills/<name>/scripts/*:*)`.
 
 **Summary table format:**
 
@@ -950,7 +950,7 @@ completed after delegation returns.
   skill SKILL.md files and session Bash calls. For each `EXTRACT_TO_SKILL_SCRIPT`
   finding, propose: (1) moving the block to `~/.claude/skills/<skill>/scripts/`,
   (2) updating SKILL.md to call the script, (3) adding a
-  `Bash(~/.claude/skills/<skill>/scripts/:*)` allow rule so future runs need zero
+  `Bash(~/.claude/skills/<skill>/scripts/*:*)` allow rule so future runs need zero
   approval prompts. Reference `Dev10x:some-skill/scripts/triage.py` as the canonical
   example of a skill that already does this correctly.
 - **Structural before rule-based**: When analyzing permission friction, always

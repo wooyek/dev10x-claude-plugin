@@ -180,7 +180,7 @@ issue bodies clean and reduce permission friction:
    ```
 2. For each issue, write two files via the Write tool:
    - `$BATCH_DIR/NNN-slug.md` — clean body content only
-   - `$BATCH_DIR/NNN-slug.env` — metadata:
+   - `$BATCH_DIR/NNN-slug.vars` — metadata:
      ```bash
      TITLE="Ticket title here"
      MILESTONE="Milestone Name"
@@ -188,9 +188,9 @@ issue bodies clean and reduce permission friction:
      ```
 3. Create issues by iterating inline (no temp script):
    ```bash
-   for env in $BATCH_DIR/*.env; do
-     source "$env"
-     body="${env%.env}.md"
+   for vars in $BATCH_DIR/*.vars; do
+     source "$vars"
+     body="${vars%.vars}.md"
      gh issue create --repo "$REPO" --title "$TITLE" \
        --body-file "$body" --milestone "$MILESTONE" --label "$LABELS"
    done
@@ -198,6 +198,16 @@ issue bodies clean and reduce permission friction:
 
 This pattern was discovered in a session creating 36 issues — a single
 loop approval replaced 36 individual `gh issue create` approvals.
+
+**Anti-patterns to avoid (permission friction):**
+
+- Do NOT use command substitution in `gh` commands:
+  `gh issue edit --body "$(gh issue view ... | sed ...)"` — the `$()` breaks
+  allow-rule prefix matching. Instead, write the body to a temp file first
+  via Write tool, then `gh issue edit --body-file /tmp/file.md`.
+- Do NOT prefix `gh` commands with env var assignments:
+  `REPO="owner/repo" gh issue create ...` — the env prefix shifts the command
+  prefix. Use `--repo owner/repo` inline instead.
 
 ### 3.6 Set Blocking Relationships
 
