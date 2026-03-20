@@ -14,7 +14,7 @@ Usage:
     slack-notify.py --delete-file F0ALXGBAAUC
 
 Token resolution order:
-    1. System keyring: secret-tool lookup service slack key bot_token
+    1. System keyring (Linux: secret-tool, macOS: Keychain)
     2. SLACK_TOKEN environment variable
 
 Configuration:
@@ -57,19 +57,22 @@ def resolve_mentions(message: str) -> str:
     return message
 
 
-def get_token() -> str:
+def _keyring_lookup(*, service: str, key: str) -> str | None:
+    if sys.platform == "darwin":
+        cmd = ["security", "find-generic-password", "-s", service, "-a", key, "-w"]
+    else:
+        cmd = ["secret-tool", "lookup", "service", service, "key", key]
     try:
-        result = subprocess.run(
-            ["secret-tool", "lookup", "service", "slack", "key", "bot_token"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        token = result.stdout.strip()
-        if token:
-            return token
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return result.stdout.strip() or None
     except (subprocess.CalledProcessError, FileNotFoundError):
-        pass
+        return None
+
+
+def get_token() -> str:
+    token = _keyring_lookup(service="slack", key="bot_token")
+    if token:
+        return token
     env_token = os.environ.get("SLACK_TOKEN")
     if env_token:
         return env_token

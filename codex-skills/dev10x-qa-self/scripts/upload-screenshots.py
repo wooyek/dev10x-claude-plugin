@@ -29,15 +29,22 @@ import requests
 LINEAR_API = "https://api.linear.app/graphql"
 
 
+def _keyring_lookup(*, service: str, key: str) -> str | None:
+    if sys.platform == "darwin":
+        cmd = ["security", "find-generic-password", "-s", service, "-a", key, "-w"]
+    else:
+        cmd = ["secret-tool", "lookup", "service", service, "key", key]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return result.stdout.strip() or None
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
 def get_api_key() -> str:
     key = os.environ.get("LINEAR_API_KEY", "")
     if not key:
-        result = subprocess.run(
-            ["secret-tool", "lookup", "service", "linear", "key", "api_key"],
-            capture_output=True,
-            text=True,
-        )
-        key = result.stdout.strip()
+        key = _keyring_lookup(service="linear", key="api_key") or ""
     if not key:
         print("ERROR: No Linear API key found", file=sys.stderr)
         sys.exit(1)
@@ -108,9 +115,7 @@ def upload_file(api_key: str, filepath: str) -> str | None:
 
 def cmd_upload(args: list[str]) -> None:
     if not args:
-        print(
-            "Usage: upload-screenshots.py upload <file1> [file2 ...]", file=sys.stderr
-        )
+        print("Usage: upload-screenshots.py upload <file1> [file2 ...]", file=sys.stderr)
         sys.exit(1)
 
     api_key = get_api_key()

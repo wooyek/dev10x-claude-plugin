@@ -16,7 +16,7 @@
 | Tool | Used by |
 |------|---------|
 | [PostgreSQL client (`psql`)](https://www.postgresql.org/download/) | `dev10x:db-psql` — database queries |
-| [`libsecret` (`secret-tool`)](https://gitlab.gnome.org/GNOME/libsecret) | Keyring lookups for DB DSNs, Slack tokens, Linear API keys |
+| Linux: [`libsecret` (`secret-tool`)](https://gitlab.gnome.org/GNOME/libsecret); macOS: Keychain (built-in) | Keyring lookups for DB DSNs, Slack tokens, Linear API keys |
 | [`ffmpeg`](https://ffmpeg.org/download.html) | `dev10x:qa-self` — video evidence conversion |
 | [ImageMagick](https://imagemagick.org/script/download.php) (`convert`) | `dev10x:qa-self` — screenshot conversion |
 | [Playwright](https://playwright.dev/python/docs/intro#installing-playwright) | `dev10x:playwright` — browser QA (auto-installed via `uv`) |

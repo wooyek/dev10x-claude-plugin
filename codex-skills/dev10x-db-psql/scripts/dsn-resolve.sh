@@ -41,17 +41,27 @@ case "$BACKEND" in
       echo "ERROR: --service and --account required for backend=keyring" >&2
       exit 1
     fi
-    if ! command -v secret-tool &>/dev/null; then
-      echo "ERROR: secret-tool not found. Install libsecret-tools." >&2
-      exit 1
+    OS="$(uname -s)"
+    if [[ "$OS" == "Darwin" ]]; then
+      DSN=$(security find-generic-password -s "$KEYRING_SERVICE" -a "$KEYRING_ACCOUNT" -w) || {
+        echo "ERROR: No Keychain entry for service=$KEYRING_SERVICE account=$KEYRING_ACCOUNT" >&2
+        echo "Store it with:" >&2
+        echo "  security add-generic-password -s $KEYRING_SERVICE -a $KEYRING_ACCOUNT -w" >&2
+        exit 1
+      }
+    else
+      if ! command -v secret-tool &>/dev/null; then
+        echo "ERROR: secret-tool not found. Install libsecret-tools." >&2
+        exit 1
+      fi
+      DSN=$(secret-tool lookup service "$KEYRING_SERVICE" account "$KEYRING_ACCOUNT") || {
+        echo "ERROR: No keyring entry for service=$KEYRING_SERVICE account=$KEYRING_ACCOUNT" >&2
+        echo "Store it with:" >&2
+        echo "  secret-tool store --label \"$KEYRING_SERVICE $KEYRING_ACCOUNT\" \\" >&2
+        echo "    service $KEYRING_SERVICE account $KEYRING_ACCOUNT" >&2
+        exit 1
+      }
     fi
-    DSN=$(secret-tool lookup service "$KEYRING_SERVICE" account "$KEYRING_ACCOUNT") || {
-      echo "ERROR: No keyring entry for service=$KEYRING_SERVICE account=$KEYRING_ACCOUNT" >&2
-      echo "Store it with:" >&2
-      echo "  secret-tool store --label \"$KEYRING_SERVICE $KEYRING_ACCOUNT\" \\" >&2
-      echo "    service $KEYRING_SERVICE account $KEYRING_ACCOUNT" >&2
-      exit 1
-    }
     echo "$DSN"
     ;;
   *)
