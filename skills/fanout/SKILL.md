@@ -1,27 +1,27 @@
 ---
-name: dev10x:fanout
+name: Dev10x:fanout
 description: >
   Close multiple open loops in parallel — PRs waiting for review,
   issues ready for implementation, tickets needing attention. Honors
   dependencies, minimizes conflict risk, auto-advances by default.
 user-invocable: true
-invocation-name: dev10x:fanout
+invocation-name: Dev10x:fanout
 allowed-tools:
   - AskUserQuestion
-  - Skill(skill="dev10x:work-on")
-  - Skill(skill="dev10x:gh-pr-respond")
-  - Skill(skill="dev10x:gh-pr-monitor")
-  - Skill(skill="dev10x:git-groom")
-  - Skill(skill="dev10x:git-commit")
-  - Skill(skill="dev10x:gh-pr-create")
-  - Skill(skill="dev10x:ticket-branch")
-  - Skill(skill="dev10x:session-wrap-up")
+  - Skill(skill="Dev10x:work-on")
+  - Skill(skill="Dev10x:gh-pr-respond")
+  - Skill(skill="Dev10x:gh-pr-monitor")
+  - Skill(skill="Dev10x:git-groom")
+  - Skill(skill="Dev10x:git-commit")
+  - Skill(skill="Dev10x:gh-pr-create")
+  - Skill(skill="Dev10x:ticket-branch")
+  - Skill(skill="Dev10x:session-wrap-up")
   - mcp__plugin_Dev10x_cli__*
 ---
 
-# dev10x:fanout — Parallel Work Stream Orchestrator
+# Dev10x:fanout — Parallel Work Stream Orchestrator
 
-**Announce:** "Using dev10x:fanout to process [N] work items
+**Announce:** "Using Dev10x:fanout to process [N] work items
 in parallel."
 
 ## Overview
@@ -29,7 +29,7 @@ in parallel."
 This skill processes multiple independent work items
 concurrently, honoring dependency order and minimizing merge
 conflict risk. It is the multi-item counterpart to
-`dev10x:work-on` (which handles a single work item).
+`Dev10x:work-on` (which handles a single work item).
 
 **When to use fanout vs work-on:**
 - **work-on**: Single ticket, PR, or investigation
@@ -69,7 +69,7 @@ gh issue list --state open --json number,title,labels
 
 **With arguments**: Accept a space-separated list of URLs,
 issue numbers, or PR numbers. Classify each per
-`dev10x:work-on` Phase 1 rules.
+`Dev10x:work-on` Phase 1 rules.
 
 Create one subtask per discovered item under the Phase 1
 parent task.
@@ -141,12 +141,12 @@ Process items according to the approved plan.
 ### Processing PRs
 
 For each PR, execute the pr-continuation play from
-`dev10x:work-on`:
+`Dev10x:work-on`:
 
 1. Check out the PR branch (or work in existing worktree)
-2. If review comments exist → `dev10x:gh-pr-respond`
+2. If review comments exist → `Dev10x:gh-pr-respond`
 3. If conflicts with develop → rebase and resolve
-4. `dev10x:git-groom` to clean commit history
+4. `Dev10x:git-groom` to clean commit history
 5. Mark ready via `gh pr ready`
 6. Monitor CI — fix failures with fixup commits
 7. When CI passes and no new comments → merge via
@@ -164,7 +164,7 @@ cycle if the review is informational only.
 For each issue (or parallel group of issues):
 
 1. Create a worktree or branch per issue
-2. Delegate to `dev10x:work-on` with the issue URL
+2. Delegate to `Dev10x:work-on` with the issue URL
 3. Monitor the resulting PR through to merge
 4. After merge → update develop, rebase downstream items
 
@@ -180,7 +180,7 @@ Agent(subagent_type="general-purpose",
 **Known limitation:** Agents with `isolation: "worktree"`
 cannot use Write/Edit tools reliably. Use background agents
 without worktree isolation, or implement sequentially in the
-main session. See `dev10x:work-on` Phase 4 parallelism
+main session. See `Dev10x:work-on` Phase 4 parallelism
 policy for details.
 
 ### Post-Merge Rebase
@@ -226,7 +226,7 @@ Options:
 
 ## Pause/Resume
 
-At any pause signal, invoke `dev10x:session-wrap-up`.
+At any pause signal, invoke `Dev10x:session-wrap-up`.
 Active worktrees and in-progress PRs are bookmarked
 automatically.
 
@@ -234,7 +234,7 @@ automatically.
 
 ### Example 1: Close all open loops
 
-**User:** `/dev10x:fanout`
+**User:** `/Dev10x:fanout`
 
 Scans repo → finds 2 draft PRs and 5 open issues.
 Classifies: PRs have no conflicts, 3 issues share files.
@@ -243,14 +243,14 @@ Plan: merge both PRs first (parallel), then issues in
 
 ### Example 2: Specific items
 
-**User:** `/dev10x:fanout #42 #55 GH-10 GH-15 GH-20`
+**User:** `/Dev10x:fanout #42 #55 GH-10 GH-15 GH-20`
 
 Classifies the 5 items, builds conflict graph, presents
 plan, executes.
 
 ### Example 3: PRs only
 
-**User:** `/dev10x:fanout PRs`
+**User:** `/Dev10x:fanout PRs`
 
 Scans only open PRs. Processes each to merge — mark ready,
 monitor CI, fix comments, merge. Repeats until all merged.

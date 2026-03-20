@@ -1,11 +1,11 @@
-# dev10x-claude-plugin
+# Dev10x-claude-plugin
 
 Claude Code plugin providing reusable skills, hooks, and commands for
 development workflows.
 
 ## Directory Layout
 
-This repo is a **single unified `dev10x` plugin** (consolidated from 11
+This repo is a **single unified `Dev10x` plugin** (consolidated from 11
 separate plugin directories). All skills, hooks, and config are defined at
 the root level.
 
@@ -61,8 +61,8 @@ invoke the skill without approving tool access each time. See
 ## Skill Naming Convention
 
 - **Directory name**: plain feature name — `git-worktree/`, `skill-audit/`
-- **Invocation name** (`name:` in SKILL.md): `dev10x:<feature>` — `dev10x:git-worktree`
-- The `dev10x:` prefix identifies this plugin's skills at invocation time
+- **Invocation name** (`name:` in SKILL.md): `Dev10x:<feature>` — `Dev10x:git-worktree`
+- The `Dev10x:` prefix identifies this plugin's skills at invocation time
   without cluttering the filesystem
 - See `.claude/rules/skill-naming.md` for full convention
 - **Decision Gates**: Skills with blocking user choice points MUST use

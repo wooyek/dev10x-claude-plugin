@@ -1,8 +1,8 @@
 ---
-name: dev10x:qa-self
+name: Dev10x:qa-self
 description: Execute QA test cases on staging using headless Playwright, capture screenshot and video evidence, upload to Linear, and post structured results. Use when a QA ticket has test cases to execute against staging and you need to produce evidence.
 user-invocable: true
-invocation-name: dev10x:qa-self
+invocation-name: Dev10x:qa-self
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/*:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/qa-self/scripts/*:*)
@@ -17,7 +17,7 @@ Linear.
 **Use when:**
 - A QA ticket (e.g., QA-xxx) has test cases ready to execute
 - You need to verify a feature works on staging before closing a ticket
-- `dev10x:qa-scope` has created a QA sub-ticket and tests need running
+- `Dev10x:qa-scope` has created a QA sub-ticket and tests need running
 
 **Do NOT use when:**
 - The test requires real hardware (e.g., Square Terminal pairing)
@@ -53,7 +53,7 @@ Options:
 
 ## Prerequisites
 
-- Linear ticket with test cases (from `dev10x:qa-scope` or manual)
+- Linear ticket with test cases (from `Dev10x:qa-scope` or manual)
 - Headless Playwright: `uv run --with playwright python3 -m playwright install chromium`
 
 ## Workflow
@@ -532,8 +532,8 @@ If tests are blocked, leave in current status and note the blocker.
 ## Integration with Other Skills
 
 ```
-dev10x:qa-self
-├── Prereq: dev10x:qa-scope (creates the QA ticket with test cases)
+Dev10x:qa-self
+├── Prereq: Dev10x:qa-scope (creates the QA ticket with test cases)
 ├── Uses: Linear MCP (read ticket, post results)
 ├── Scripts:
 │   ├── upload-screenshots.py (upload images & video to Linear)

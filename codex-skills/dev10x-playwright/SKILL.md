@@ -1,9 +1,9 @@
 ---
-name: dev10x-playwright
+name: Dev10x-playwright
 description: Run Playwright Python scripts against TireTutor staging safely. Use when writing or executing a Playwright automation script for self-QA or browser testing on staging-dealers.tiretutor.com. Handles CF Access headers, credential injection, syntax validation before execution, and uv run wrapping — so secrets are never hardcoded in scripts.
 ---
 
-# dev10x:playwright
+# Dev10x:playwright
 
 ## Overview
 
@@ -126,7 +126,7 @@ time.sleep(2)  # after result appears
 
 To use `janusz_ai`, pass `--user janusz_ai` to the wrapper:
 ```bash
-$HOME/.codex/skills/dev10x-playwright/scripts/run-playwright.sh \
+$HOME/.codex/skills/Dev10x-playwright/scripts/run-playwright.sh \
   /tmp/claude/playwright/qa-xxx.py --user janusz_ai
 ```
 
@@ -134,13 +134,13 @@ $HOME/.codex/skills/dev10x-playwright/scripts/run-playwright.sh \
 
 ### Validate only (no browser)
 ```bash
-$HOME/.codex/skills/dev10x-playwright/scripts/run-playwright.sh \
+$HOME/.codex/skills/Dev10x-playwright/scripts/run-playwright.sh \
   /tmp/claude/playwright/qa-xxx.py --validate-only
 ```
 
 ### Execute
 ```bash
-$HOME/.codex/skills/dev10x-playwright/scripts/run-playwright.sh /tmp/claude/playwright/qa-xxx.py
+$HOME/.codex/skills/Dev10x-playwright/scripts/run-playwright.sh /tmp/claude/playwright/qa-xxx.py
 ```
 
 The wrapper:
@@ -169,8 +169,8 @@ uv run --with playwright python3 -m playwright install chromium
 ## Integration
 
 ```
-dev10x:playwright
-├── Called by: dev10x:qa-self (Phase 3 execution)
+Dev10x:playwright
+├── Called by: Dev10x:qa-self (Phase 3 execution)
 ├── Reads: /work/tt/tt-e2e/settings.secrets.env (credentials)
 ├── Scripts: run-playwright.sh (validate + inject + run)
 └── Output: /tmp/claude/playwright/  (screenshots, video)

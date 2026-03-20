@@ -1,6 +1,6 @@
 ---
-name: dev10x:ddd-workshop
-invocation-name: dev10x:ddd-workshop
+name: Dev10x:ddd-workshop
+invocation-name: Dev10x:ddd-workshop
 description: >
   Run or continue a DDD Event Storming workshop to explore, model, and
   stress-test domain architecture. Use when the user mentions DDD,

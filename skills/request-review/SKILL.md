@@ -1,12 +1,12 @@
 ---
-name: dev10x:request-review
-description: Request PR review — assigns GitHub reviewers and posts Slack notification in one command. Delegates to dev10x:gh-pr-request-review and dev10x:slack-review-request.
+name: Dev10x:request-review
+description: Request PR review — assigns GitHub reviewers and posts Slack notification in one command. Delegates to Dev10x:gh-pr-request-review and Dev10x:slack-review-request.
 user-invocable: true
-invocation-name: dev10x:request-review
+invocation-name: Dev10x:request-review
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
-  - Skill(dev10x:gh-pr-request-review)
-  - Skill(dev10x:slack-review-request)
+  - Skill(Dev10x:gh-pr-request-review)
+  - Skill(Dev10x:slack-review-request)
 ---
 
 ## Orchestration
@@ -25,7 +25,7 @@ Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ### Step 1: Detect PR context
 
-Use the `dev10x:gh-context` script to detect PR number and repo:
+Use the `Dev10x:gh-context` script to detect PR number and repo:
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
@@ -41,7 +41,7 @@ If detection fails, report the error and stop.
 Delegate to the GitHub reviewer assignment skill:
 
 ```
-Skill("dev10x:gh-pr-request-review", args="--pr {PR_NUMBER} --repo {REPO}")
+Skill("Dev10x:gh-pr-request-review", args="--pr {PR_NUMBER} --repo {REPO}")
 ```
 
 This skill reads `~/.claude/memory/github-reviewers-config.yaml`,
@@ -55,7 +55,7 @@ Capture the outcome (assigned / skipped / error) for the summary.
 Delegate to the Slack notification skill:
 
 ```
-Skill("dev10x:slack-review-request", args="--pr {PR_NUMBER} --repo {REPO}")
+Skill("Dev10x:slack-review-request", args="--pr {PR_NUMBER} --repo {REPO}")
 ```
 
 This skill reads `~/.claude/memory/slack-config-code-review-requests.yaml`,
@@ -79,11 +79,11 @@ Review request for PR #{PR_NUMBER}:
 - Steps 2 and 3 are independent — if one skips, the other still runs
 - Both skipping is valid (project may be configured to skip both)
 - Each sub-skill uses its own config file — no combined config needed
-- This skill is invoked by `dev10x:gh-pr-monitor` Phase 3 and
-  directly by users via `/dev10x:request-review`
+- This skill is invoked by `Dev10x:gh-pr-monitor` Phase 3 and
+  directly by users via `/Dev10x:request-review`
 
 ## See Also
 
-- `dev10x:gh-pr-request-review` — GitHub reviewer assignment
-- `dev10x:slack-review-request` — Slack notification
-- `dev10x:gh-pr-monitor` — calls this skill in Phase 3
+- `Dev10x:gh-pr-request-review` — GitHub reviewer assignment
+- `Dev10x:slack-review-request` — Slack notification
+- `Dev10x:gh-pr-monitor` — calls this skill in Phase 3

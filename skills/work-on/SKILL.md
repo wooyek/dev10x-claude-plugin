@@ -1,12 +1,12 @@
 ---
-name: dev10x:work-on
+name: Dev10x:work-on
 description: >
   Start work on any input — ticket URL, PR link, Slack thread,
   Sentry issue, or free text. Classifies inputs, gathers context
   in parallel, builds a supervisor-approved task list, and executes
   adaptively with pause/resume support.
 user-invocable: true
-invocation-name: dev10x:work-on
+invocation-name: Dev10x:work-on
 allowed-tools:
   - mcp__plugin_Dev10x_cli__*
   - Read(~/.claude/projects/**/memory/playbooks/work-on.yaml)
@@ -14,7 +14,7 @@ allowed-tools:
   - Write(~/.claude/projects/**/**)
 ---
 
-# dev10x:work-on — Adaptive Work Orchestrator
+# Dev10x:work-on — Adaptive Work Orchestrator
 
 ## Overview
 
@@ -27,7 +27,7 @@ supervisor-approved work plan. It runs in four phases:
 4. **Execute** — work through tasks, expanding epics on demand
 
 The supervisor sees progress via `TaskList`, can approve/edit
-the plan, and can pause at any point with `dev10x:session-wrap-up`.
+the plan, and can pause at any point with `Dev10x:session-wrap-up`.
 
 **Rule: ALWAYS use `TaskCreate`** — even for single-task work.
 The visible task list is the supervisor's interface for adding
@@ -52,7 +52,7 @@ fetched, Phase 4 creates subtasks per plan step.
 |------------|-------------|------|
 | GitHub CLI | GitHub issues, PRs | `gh` CLI |
 | Linear MCP | Linear tickets | `mcp__claude_ai_Linear__*` |
-| JIRA | JIRA tickets | `dev10x:jira` plugin + `JIRA_TENANT` env var + keyring |
+| JIRA | JIRA tickets | `Dev10x:jira` plugin + `JIRA_TENANT` env var + keyring |
 | Sentry MCP | Sentry issues | `mcp__sentry__*` |
 | Slack MCP | Slack threads | `mcp__claude_ai_Slack__*` |
 
@@ -184,7 +184,7 @@ Choose the agent type based on the source's tool requirements:
 | `github-issue` | `Explore` | `gh` CLI works in Explore agents |
 | `github-pr` | `Explore` | `gh` CLI works in Explore agents |
 | `linear-ticket` | `general-purpose` | Needs Linear MCP tools |
-| `jira-ticket` | `Explore` | Uses `dev10x:jira` skill |
+| `jira-ticket` | `Explore` | Uses `Dev10x:jira` skill |
 | `slack-thread` | `general-purpose` | Needs Slack MCP tools |
 | `sentry-issue` | `general-purpose` | Needs Sentry MCP tools |
 | `note` | (none) | Pass through as-is |
@@ -218,7 +218,7 @@ in the main session via `WebFetch`, not dispatched to subagents.
 | `github-issue` | Explore | Run `gh issue view "$NUMBER" --repo "$REPO" --json title,state,body,labels,assignees`. Return title, status, labels, body summary, linked PRs. |
 | `github-pr` | Explore | Run `gh pr view --json title,body,headRefName,state,mergedAt,reviews`. Return title, status, branch, review comment count. |
 | `linear-ticket` | general-purpose | Call `mcp__claude_ai_Linear__get_issue(issueId)`. Return title, status, parent ID, relations, comment summaries. |
-| `jira-ticket` | Explore | Use `dev10x:jira` skill to fetch ticket. Return title, status, assignee, linked issues. |
+| `jira-ticket` | Explore | Use `Dev10x:jira` skill to fetch ticket. Return title, status, assignee, linked issues. |
 | `slack-thread` | general-purpose | Call `mcp__claude_ai_Slack__slack_read_thread(channelId, threadTs)`. Return message count, key decisions, action items. |
 | `sentry-issue` | general-purpose | Call `mcp__sentry__get_issue_details(issueId)`. Return error type, frequency, first/last seen, top stack frame. |
 | `note` | (none) | No subagent needed — pass through as-is. |
@@ -287,7 +287,7 @@ and adding new tasks during the session.
 
 ### Generating the Plan
 
-Play templates are loaded from the `dev10x:playbook` system.
+Play templates are loaded from the `Dev10x:playbook` system.
 Each work type has a default play with parent-child steps
 that can be overridden per project.
 
@@ -296,10 +296,10 @@ that can be overridden per project.
    check `overrides` for matching play first, then defaults
 2. `${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml`
 
-**Playbook schema:** See the `dev10x:playbook` skill's
+**Playbook schema:** See the `Dev10x:playbook` skill's
 `references/playbook.yaml` for the full schema with all 5 plays.
 Users can customize plays interactively via
-`/dev10x:playbook edit work-on <play>`.
+`/Dev10x:playbook edit work-on <play>`.
 
 Each play has:
 - `prompt` — heuristic guidance for when this play applies and
@@ -441,14 +441,14 @@ time"). Update the YAML file accordingly:
 ### Example Plays (Defaults)
 
 These are the built-in default plays. Full YAML definitions
-with pre-templated epic children live in the `dev10x:playbook`
+with pre-templated epic children live in the `Dev10x:playbook`
 skill. Users can customize these via
-`/dev10x:playbook edit work-on <play>`.
+`/Dev10x:playbook edit work-on <play>`.
 
 **Feature from ticket** (subtasks of Phase 4):
 ```
-4.1  [detailed] Set up workspace          → dev10x:ticket-branch
-4.2  [detailed] Draft Job Story           → dev10x:jtbd
+4.1  [detailed] Set up workspace          → Dev10x:ticket-branch
+4.2  [detailed] Draft Job Story           → Dev10x:jtbd
 4.3  [epic]     Design implementation approach
        ├─ Read relevant code
        ├─ Identify affected components
@@ -457,20 +457,20 @@ skill. Users can customize these via
 4.5  [epic]     Verify
        ├─ Run tests                       → test
        └─ Run lint
-4.6  [detailed] Code review               → dev10x:review + dev10x:review-fix
-4.7  [detailed] Commit outstanding changes → dev10x:git-commit
-4.8  [detailed] Create draft PR           → dev10x:gh-pr-create (--unattended)
-4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
-4.10 [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.11 [detailed] Groom commit history      → dev10x:git-groom
-4.12 [detailed] Update PR description     → dev10x:gh-pr-create (update mode)
-4.13 [detailed] Request review            → dev10x:gh-pr-request-review
+4.6  [detailed] Code review               → Dev10x:review + Dev10x:review-fix
+4.7  [detailed] Commit outstanding changes → Dev10x:git-commit
+4.8  [detailed] Create draft PR           → Dev10x:gh-pr-create (--unattended)
+4.9  [detailed] Monitor CI                → Dev10x:gh-pr-monitor
+4.10 [epic]     Apply fixups              → Dev10x:gh-pr-respond
+4.11 [detailed] Groom commit history      → Dev10x:git-groom
+4.12 [detailed] Update PR description     → Dev10x:gh-pr-create (update mode)
+4.13 [detailed] Request review            → Dev10x:gh-pr-request-review
 4.14 [detailed] Verify acceptance criteria
 ```
 
 **Bug fix from Sentry + ticket:**
 ```
-4.1  [detailed] Set up workspace          → dev10x:ticket-branch
+4.1  [detailed] Set up workspace          → Dev10x:ticket-branch
 4.2  [detailed] Reproduce the issue
 4.3  [epic]     Investigate root cause
        ├─ Analyze error traces
@@ -479,14 +479,14 @@ skill. Users can customize these via
 4.5  [epic]     Verify fix
        ├─ Run existing tests              → test
        └─ Add regression test
-4.6  [detailed] Code review               → dev10x:review + dev10x:review-fix
-4.7  [detailed] Commit outstanding changes → dev10x:git-commit
-4.8  [detailed] Create draft PR           → dev10x:gh-pr-create (--unattended)
-4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
-4.10 [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.11 [detailed] Groom commit history      → dev10x:git-groom
-4.12 [detailed] Update PR description     → dev10x:gh-pr-create (update mode)
-4.13 [detailed] Request review            → dev10x:gh-pr-request-review
+4.6  [detailed] Code review               → Dev10x:review + Dev10x:review-fix
+4.7  [detailed] Commit outstanding changes → Dev10x:git-commit
+4.8  [detailed] Create draft PR           → Dev10x:gh-pr-create (--unattended)
+4.9  [detailed] Monitor CI                → Dev10x:gh-pr-monitor
+4.10 [epic]     Apply fixups              → Dev10x:gh-pr-respond
+4.11 [detailed] Groom commit history      → Dev10x:git-groom
+4.12 [detailed] Update PR description     → Dev10x:gh-pr-create (update mode)
+4.13 [detailed] Request review            → Dev10x:gh-pr-request-review
 4.14 [detailed] Verify acceptance criteria
 ```
 
@@ -494,13 +494,13 @@ skill. Users can customize these via
 ```
 4.1  [detailed] Fetch PR and review context
 4.2  [epic]     Address review comments
-4.3  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.4  [detailed] Code review               → dev10x:review + dev10x:review-fix
-4.5  [detailed] Commit outstanding changes → dev10x:git-commit
-4.6  [detailed] Monitor CI                → dev10x:gh-pr-monitor
-4.7  [detailed] Groom commit history      → dev10x:git-groom
-4.8  [detailed] Update PR description     → dev10x:gh-pr-create (update mode)
-4.9  [detailed] Request re-review         → dev10x:gh-pr-request-review
+4.3  [epic]     Apply fixups              → Dev10x:gh-pr-respond
+4.4  [detailed] Code review               → Dev10x:review + Dev10x:review-fix
+4.5  [detailed] Commit outstanding changes → Dev10x:git-commit
+4.6  [detailed] Monitor CI                → Dev10x:gh-pr-monitor
+4.7  [detailed] Groom commit history      → Dev10x:git-groom
+4.8  [detailed] Update PR description     → Dev10x:gh-pr-create (update mode)
+4.9  [detailed] Request re-review         → Dev10x:gh-pr-request-review
 4.10 [detailed] Verify acceptance criteria
 ```
 
@@ -512,14 +512,14 @@ skill. Users can customize these via
        ├─ Run tests                       → test
        └─ Run lint
 4.4  [detailed] Decide: create ticket, create PR, or done
-4.5  [detailed] Code review               → dev10x:review + dev10x:review-fix (if-pr-decided)
-4.6  [detailed] Commit outstanding changes → dev10x:git-commit (if-pr-decided)
-4.7  [detailed] Create draft PR           → dev10x:gh-pr-create (if-pr-decided)
-4.8  [detailed] Monitor CI                → dev10x:gh-pr-monitor (if-pr-decided)
-4.9  [epic]     Apply fixups              → dev10x:gh-pr-respond (if-pr-decided)
-4.10 [detailed] Groom commit history      → dev10x:git-groom (if-pr-decided)
-4.11 [detailed] Update PR description     → dev10x:gh-pr-create (if-pr-decided)
-4.12 [detailed] Request review            → dev10x:gh-pr-request-review (if-pr-decided)
+4.5  [detailed] Code review               → Dev10x:review + Dev10x:review-fix (if-pr-decided)
+4.6  [detailed] Commit outstanding changes → Dev10x:git-commit (if-pr-decided)
+4.7  [detailed] Create draft PR           → Dev10x:gh-pr-create (if-pr-decided)
+4.8  [detailed] Monitor CI                → Dev10x:gh-pr-monitor (if-pr-decided)
+4.9  [epic]     Apply fixups              → Dev10x:gh-pr-respond (if-pr-decided)
+4.10 [detailed] Groom commit history      → Dev10x:git-groom (if-pr-decided)
+4.11 [detailed] Update PR description     → Dev10x:gh-pr-create (if-pr-decided)
+4.12 [detailed] Request review            → Dev10x:gh-pr-request-review (if-pr-decided)
 4.13 [detailed] Verify acceptance criteria
 ```
 
@@ -591,7 +591,7 @@ for confirmation — the commit is done, move on.
 immediately proceed. Do not block on PR preview approval when
 executing the shipping pipeline — the PR body and title can
 always be updated later via the "Update PR description" step.
-When delegating to `dev10x:gh-pr-create`, pass
+When delegating to `Dev10x:gh-pr-create`, pass
 `args="--unattended"` to skip the preview gate.
 
 **Batched Decision Queue:** When a task hits a genuine A/B
@@ -651,19 +651,19 @@ Common skill delegations:
 
 | Task | Delegated to |
 |------|-------------|
-| Set up workspace (branch) | `dev10x:ticket-branch` skill |
-| Set up workspace (worktree) | `dev10x:git-worktree` skill |
-| Draft Job Story | `dev10x:jtbd` skill (attended mode) |
+| Set up workspace (branch) | `Dev10x:ticket-branch` skill |
+| Set up workspace (worktree) | `Dev10x:git-worktree` skill |
+| Draft Job Story | `Dev10x:jtbd` skill (attended mode) |
 | Update ticket status | Linear MCP (see references/team-info.md) |
 | Fetch PR context | `gh pr view` + `gh pr diff` |
-| Code review | `dev10x:review` + `dev10x:review-fix` skills |
-| Commit changes | `dev10x:git-commit` skill |
-| Create draft PR | `dev10x:gh-pr-create` skill (`--unattended`) |
-| Monitor CI | `dev10x:gh-pr-monitor` skill |
-| Apply fixups to review | `dev10x:gh-pr-respond` skill |
-| Groom commit history | `dev10x:git-groom` skill |
-| Update PR description | `dev10x:gh-pr-create` skill (update mode) |
-| Request review | `dev10x:gh-pr-request-review` skill |
+| Code review | `Dev10x:review` + `Dev10x:review-fix` skills |
+| Commit changes | `Dev10x:git-commit` skill |
+| Create draft PR | `Dev10x:gh-pr-create` skill (`--unattended`) |
+| Monitor CI | `Dev10x:gh-pr-monitor` skill |
+| Apply fixups to review | `Dev10x:gh-pr-respond` skill |
+| Groom commit history | `Dev10x:git-groom` skill |
+| Update PR description | `Dev10x:gh-pr-create` skill (update mode) |
+| Request review | `Dev10x:gh-pr-request-review` skill |
 
 After completing a detailed task, mark it `completed` via
 `TaskUpdate` and move to the next task.
@@ -740,9 +740,9 @@ safest fallback for permission-sensitive operations.
 
 | State | Action |
 |-------|--------|
-| Main repo, user wants worktree | Invoke `dev10x:git-worktree` (creates branch internally — do NOT call `dev10x:ticket-branch` first) |
-| Main repo, work here | Invoke `dev10x:ticket-branch` to create feature branch |
-| Worktree, generic WT branch | Invoke `dev10x:ticket-branch` to create work-specific branch from within the worktree |
+| Main repo, user wants worktree | Invoke `Dev10x:git-worktree` (creates branch internally — do NOT call `Dev10x:ticket-branch` first) |
+| Main repo, work here | Invoke `Dev10x:ticket-branch` to create feature branch |
+| Worktree, generic WT branch | Invoke `Dev10x:ticket-branch` to create work-specific branch from within the worktree |
 | Worktree, matching feature branch | No action needed — branch already exists |
 
 If the Phase 1 workspace decision was deferred (local-only
@@ -754,7 +754,7 @@ Options:
 - New worktree — Create an isolated worktree
 
 **Job Story drafting:**
-- MUST invoke `Skill(dev10x:jtbd)` explicitly — never draft inline
+- MUST invoke `Skill(Dev10x:jtbd)` explicitly — never draft inline
 - Pass gathered context to avoid redundant API calls
 - If approved, write back to the ticket:
 
@@ -762,7 +762,7 @@ Options:
 |---------|-----------|
 | GitHub | `gh issue comment` |
 | Linear | Prepend to description via `save_issue` |
-| JIRA | `dev10x:jira` skill |
+| JIRA | `Dev10x:jira` skill |
 
 **Ticket status update (Linear only):**
 1. Get statuses: `list_issue_statuses(teamId)` from
@@ -778,17 +778,17 @@ Options:
 At any pause signal ("wrap up", "pause", "that's enough for
 today", end-of-session):
 
-1. Invoke `dev10x:session-wrap-up` — it reads `TaskList` and
+1. Invoke `Dev10x:session-wrap-up` — it reads `TaskList` and
    discovers all open tasks automatically
-2. `dev10x:session-wrap-up` handles routing each open item (PR
+2. `Dev10x:session-wrap-up` handles routing each open item (PR
    bookmark, TODO.md, Slack DM, etc.)
 3. The task list itself serves as resume context — when the user
-   resumes work, they can invoke `dev10x:park-discover` to find
-   deferred items and `dev10x:session-tasks` to see the saved
+   resumes work, they can invoke `Dev10x:park-discover` to find
+   deferred items and `Dev10x:session-tasks` to see the saved
    task list
 
 No custom bookmarking needed — leverage existing
-`dev10x:session-wrap-up` and `dev10x:park` infrastructure.
+`Dev10x:session-wrap-up` and `Dev10x:park` infrastructure.
 
 ---
 
@@ -810,7 +810,7 @@ No custom bookmarking needed — leverage existing
 - Handle errors gracefully — if a fetch fails, continue with
   what was gathered and note the failure in the context summary
 - Linear team UUID is in `references/team-info.md` (template)
-- After completing work, use `dev10x:gh-pr-create` to create the PR
+- After completing work, use `Dev10x:gh-pr-create` to create the PR
 - Do not modify ticket description or add comments unless the
   user explicitly approves (e.g., Job Story write-back)
 - **Batch data files must use `.json` format** — never `.env`.
@@ -823,7 +823,7 @@ No custom bookmarking needed — leverage existing
 - **Worktree cleanup:** No skill currently handles worktree
   teardown after work completes. Users must manually run
   `git worktree remove <path>` when done.
-- **PR merge-to-completion lifecycle:** The `dev10x:gh-pr-monitor`
+- **PR merge-to-completion lifecycle:** The `Dev10x:gh-pr-monitor`
   skill stops after CI passes and review is requested — it does
   not monitor through to merge. Users must manually merge or
   re-invoke monitoring after approval.
@@ -845,7 +845,7 @@ branch naming, Sentry integration patterns.
 
 ### Example 1: Single Ticket URL
 
-**User:** `/dev10x:work-on https://github.com/org/repo/issues/15`
+**User:** `/Dev10x:work-on https://github.com/org/repo/issues/15`
 
 **Phase 1:** Classify → `github-issue`, repo=`org/repo`, number=15
 
@@ -855,19 +855,19 @@ issue. Body mentions PR #42 → fetch PR. Produce context summary.
 **Phase 3:** Load `feature` plan template (user overrides →
 defaults → schema). Build subtasks of Phase 4:
 ```
-4.1  [detailed] Set up workspace          → dev10x:ticket-branch
-4.2  [detailed] Draft Job Story           → dev10x:jtbd
+4.1  [detailed] Set up workspace          → Dev10x:ticket-branch
+4.2  [detailed] Draft Job Story           → Dev10x:jtbd
 4.3  [epic]     Design implementation approach (3 children)
 4.4  [epic]     Implement changes
 4.5  [epic]     Verify (2 children)
-4.6  [detailed] Code review               → dev10x:review + dev10x:review-fix
-4.7  [detailed] Commit outstanding changes → dev10x:git-commit
-4.8  [detailed] Create draft PR           → dev10x:gh-pr-create
-4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
-4.10 [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.11 [detailed] Groom commit history      → dev10x:git-groom
-4.12 [detailed] Update PR description     → dev10x:gh-pr-create
-4.13 [detailed] Request review            → dev10x:gh-pr-request-review
+4.6  [detailed] Code review               → Dev10x:review + Dev10x:review-fix
+4.7  [detailed] Commit outstanding changes → Dev10x:git-commit
+4.8  [detailed] Create draft PR           → Dev10x:gh-pr-create
+4.9  [detailed] Monitor CI                → Dev10x:gh-pr-monitor
+4.10 [epic]     Apply fixups              → Dev10x:gh-pr-respond
+4.11 [detailed] Groom commit history      → Dev10x:git-groom
+4.12 [detailed] Update PR description     → Dev10x:gh-pr-create
+4.13 [detailed] Request review            → Dev10x:gh-pr-request-review
 4.14 [detailed] Verify acceptance criteria
 ```
 Supervisor approves.
@@ -878,7 +878,7 @@ decision is needed.
 
 ### Example 2: Multiple Inputs
 
-**User:** `/dev10x:work-on TEAM-133 https://slack.com/archives/C123/p456 "check the retry logic"`
+**User:** `/Dev10x:work-on TEAM-133 https://slack.com/archives/C123/p456 "check the retry logic"`
 
 **Phase 1:** Classify →
 - `linear-ticket` TEAM-133
@@ -892,25 +892,25 @@ sources.
 **Phase 3:** Load `bugfix` plan template (Sentry issue detected):
 
 ```
-4.1  [detailed] Set up workspace          → dev10x:ticket-branch
+4.1  [detailed] Set up workspace          → Dev10x:ticket-branch
 4.2  [detailed] Reproduce the issue
 4.3  [epic]     Investigate root cause (2 children)
 4.4  [epic]     Implement fix
 4.5  [epic]     Verify fix (2 children)
-4.6  [detailed] Code review               → dev10x:review + dev10x:review-fix
-4.7  [detailed] Commit outstanding changes → dev10x:git-commit
-4.8  [detailed] Create draft PR           → dev10x:gh-pr-create
-4.9  [detailed] Monitor CI                → dev10x:gh-pr-monitor
-4.10 [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.11 [detailed] Groom commit history      → dev10x:git-groom
-4.12 [detailed] Update PR description     → dev10x:gh-pr-create
-4.13 [detailed] Request review            → dev10x:gh-pr-request-review
+4.6  [detailed] Code review               → Dev10x:review + Dev10x:review-fix
+4.7  [detailed] Commit outstanding changes → Dev10x:git-commit
+4.8  [detailed] Create draft PR           → Dev10x:gh-pr-create
+4.9  [detailed] Monitor CI                → Dev10x:gh-pr-monitor
+4.10 [epic]     Apply fixups              → Dev10x:gh-pr-respond
+4.11 [detailed] Groom commit history      → Dev10x:git-groom
+4.12 [detailed] Update PR description     → Dev10x:gh-pr-create
+4.13 [detailed] Request review            → Dev10x:gh-pr-request-review
 4.14 [detailed] Verify acceptance criteria
 ```
 
 ### Example 3: PR Continuation
 
-**User:** `/dev10x:work-on https://github.com/org/repo/pull/42`
+**User:** `/Dev10x:work-on https://github.com/org/repo/pull/42`
 
 **Phase 1:** Classify → `github-pr`, number=42
 
@@ -921,13 +921,13 @@ PR has 3 review comments → note them.
 ```
 4.1  [detailed] Fetch PR and review context
 4.2  [epic]     Address review comments
-4.3  [epic]     Apply fixups              → dev10x:gh-pr-respond
-4.4  [detailed] Code review               → dev10x:review + dev10x:review-fix
-4.5  [detailed] Commit outstanding changes → dev10x:git-commit
-4.6  [detailed] Monitor CI                → dev10x:gh-pr-monitor
-4.7  [detailed] Groom commit history      → dev10x:git-groom
-4.8  [detailed] Update PR description     → dev10x:gh-pr-create
-4.9  [detailed] Request re-review         → dev10x:gh-pr-request-review
+4.3  [epic]     Apply fixups              → Dev10x:gh-pr-respond
+4.4  [detailed] Code review               → Dev10x:review + Dev10x:review-fix
+4.5  [detailed] Commit outstanding changes → Dev10x:git-commit
+4.6  [detailed] Monitor CI                → Dev10x:gh-pr-monitor
+4.7  [detailed] Groom commit history      → Dev10x:git-groom
+4.8  [detailed] Update PR description     → Dev10x:gh-pr-create
+4.9  [detailed] Request re-review         → Dev10x:gh-pr-request-review
 4.10 [detailed] Verify acceptance criteria
 ```
 
@@ -936,10 +936,10 @@ PR has 3 review comments → note them.
 User is at task 4 of 7 and says "let's wrap up for today".
 
 1. Skill detects pause signal
-2. Invokes `dev10x:session-wrap-up`
-3. `dev10x:session-wrap-up` reads `TaskList` — sees 3 pending tasks
-4. Routes each via `dev10x:park` (e.g., PR bookmark, TODO.md)
+2. Invokes `Dev10x:session-wrap-up`
+3. `Dev10x:session-wrap-up` reads `TaskList` — sees 3 pending tasks
+4. Routes each via `Dev10x:park` (e.g., PR bookmark, TODO.md)
 5. Session ends with bookmark saved
 
-Next session: user runs `dev10x:discover` to find bookmarks and
+Next session: user runs `Dev10x:discover` to find bookmarks and
 resume where they left off.

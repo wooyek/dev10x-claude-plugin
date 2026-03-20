@@ -1,15 +1,15 @@
 ---
-name: dev10x:session-tasks
+name: Dev10x:session-tasks
 description: >
   Use when tracking in-session work items — so open loops are visible
   and triageable before session end without losing track of parallel work.
 user-invocable: true
-invocation-name: dev10x:session-tasks
+invocation-name: Dev10x:session-tasks
 ---
 
-# dev10x:session-tasks — In-Session Task Tracking
+# Dev10x:session-tasks — In-Session Task Tracking
 
-**Announce:** "Using dev10x:session-tasks to [show/add/update] session tasks."
+**Announce:** "Using Dev10x:session-tasks to [show/add/update] session tasks."
 
 ## Orchestration
 
@@ -72,5 +72,5 @@ Use `TaskUpdate` with the task ID and new `status`:
 
 ## Used By
 
-- `dev10x:park` — when user picks "keep for this session"
-- `dev10x:session-wrap-up` — Phase 1 auto-scan reads the task list
+- `Dev10x:park` — when user picks "keep for this session"
+- `Dev10x:session-wrap-up` — Phase 1 auto-scan reads the task list

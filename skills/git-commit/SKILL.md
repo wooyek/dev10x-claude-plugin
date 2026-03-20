@@ -1,8 +1,8 @@
 ---
-name: dev10x:git-commit
+name: Dev10x:git-commit
 description: Create a properly formatted git commit following project conventions (gitmoji, ticket reference, 72 char limit). Extracts ticket ID from branch name, prompts for description and solution points, stages changes, and creates the commit.
 user-invocable: true
-invocation-name: dev10x:git-commit
+invocation-name: Dev10x:git-commit
 allowed-tools:
   - AskUserQuestion
   - Bash(/tmp/claude/bin/mktmp.sh:*)
@@ -59,8 +59,8 @@ appropriate reason). This preserves supervisor visibility into
 the full workflow.
 
 **Unattended mode:** When this skill is invoked by an
-orchestrating skill (e.g., `dev10x:work-on`, `test:fix-flaky`,
-`dev10x:git-promote`) and the orchestrator has already approved
+orchestrating skill (e.g., `Dev10x:work-on`, `test:fix-flaky`,
+`Dev10x:git-promote`) and the orchestrator has already approved
 the work plan, all interactive decision gates are bypassed:
 - Staging → auto-stage all changes
 - Commit type → auto-select from context
@@ -70,8 +70,8 @@ the work plan, all interactive decision gates are bypassed:
 
 Detection: unattended mode activates when **both** conditions
 are met:
-1. The skill is invoked via `Skill(dev10x:git-commit)` (not
-   directly by the user via `/dev10x:git-commit`)
+1. The skill is invoked via `Skill(Dev10x:git-commit)` (not
+   directly by the user via `/Dev10x:git-commit`)
 2. The caller is executing a plan step with an active task
    list (i.e., an orchestrating skill like `work-on`)
 
@@ -202,12 +202,12 @@ fi
 ### Step 2.5: Optional JTBD Title Derivation
 
 This step activates when **any** of these conditions are met:
-- **Explicit request:** User passes "use dev10x:jtbd" (or similar) in `/dev10x:git-commit` args
+- **Explicit request:** User passes "use Dev10x:jtbd" (or similar) in `/Dev10x:git-commit` args
 - **First commit:** Ticket ID extracted, zero commits ahead of develop, and
   commit type is Feature (✨) or Bug (🐛)
 
 **Flow:**
-1. Invoke the `dev10x:jtbd` base skill in **unattended** mode with `ticket_id`
+1. Invoke the `Dev10x:jtbd` base skill in **unattended** mode with `ticket_id`
 2. Extract the "so I can" clause from the returned story
 3. Transform it to an imperative title (e.g., "so I can track Zelle transactions" → "Enable Zelle transaction tracking")
 4. Present as a suggestion:
@@ -553,13 +553,13 @@ Commit created successfully!
 Next steps:
 1. Continue working
 2. Create another commit
-3. Create PR (/dev10x:gh-pr-create)
+3. Create PR (/Dev10x:gh-pr-create)
 
 What would you like to do? (1/2/3/done)
 ```
 
 **If 3 (Create PR):**
-- Use `dev10x:gh-pr-create` skill
+- Use `Dev10x:gh-pr-create` skill
 - PR title will use this commit message
 
 ## Important Notes
@@ -581,10 +581,10 @@ What would you like to do? (1/2/3/done)
 ## Integration with Other Skills
 
 ```
-dev10x:git-commit
+Dev10x:git-commit
 ├── Used during development workflow
 ├── Output: Properly formatted commit
-└── Can be followed by: dev10x:gh-pr-create
+└── Can be followed by: Dev10x:gh-pr-create
 ```
 
 ## Example Usage
@@ -593,7 +593,7 @@ dev10x:git-commit
 
 **User request:**
 ```
-/dev10x:git-commit
+/Dev10x:git-commit
 ```
 
 **Current branch:** `janusz/PAY-310/fix-flaky-tests`
@@ -623,7 +623,7 @@ dev10x:git-commit
 
 **User request:**
 ```
-/dev10x:git-commit
+/Dev10x:git-commit
 ```
 
 **Current branch:** `janusz/PAY-133/fix-motor-timeout`
@@ -652,7 +652,7 @@ dev10x:git-commit
 
 **User request:**
 ```
-/dev10x:git-commit
+/Dev10x:git-commit
 ```
 
 **Current branch:** `feature/improve-search` (no ticket ID)
@@ -675,7 +675,7 @@ dev10x:git-commit
 
 **User request:**
 ```
-/dev10x:git-commit
+/Dev10x:git-commit
 ```
 
 **Current branch:** `fix-typo-in-readme`

@@ -1,11 +1,11 @@
 ---
-name: dev10x-park-discover
+name: Dev10x-park-discover
 description: Use when checking for deferred items across all sources — so nothing is missed when starting a session or picking up where you left off.
 ---
 
-# dev10x:park-discover — Gather Deferred Items
+# Dev10x:park-discover — Gather Deferred Items
 
-**Announce:** "Using dev10x:park-discover to check all deferral sources."
+**Announce:** "Using Dev10x:park-discover to check all deferral sources."
 
 ## When to Use
 
@@ -15,8 +15,8 @@ Invoke this skill when the user asks about existing deferred items:
 - "what do we have to pick up"
 - "check for deferrals"
 
-Do NOT use for writing new deferrals — use `dev10x:park-todo` or
-`dev10x:park` instead.
+Do NOT use for writing new deferrals — use `Dev10x:park-todo` or
+`Dev10x:park` instead.
 
 ## Workflow
 
@@ -66,7 +66,7 @@ mcp__claude_ai_Slack__slack_search_public_and_private
   limit: 20
 ```
 
-The `🔖` emoji is the standard prefix from `dev10x:park-remind`.
+The `🔖` emoji is the standard prefix from `Dev10x:park-remind`.
 
 If no results with `🔖`, broaden to:
 ```
@@ -97,7 +97,7 @@ This provides context on what was being worked on.
 #### 2f. PR wrap-up reminders
 
 Check open PRs for automated session bookmark comments posted by
-`dev10x:session-wrap-up`. These are self-reminders left on PRs during
+`Dev10x:session-wrap-up`. These are self-reminders left on PRs during
 previous sessions:
 
 ```bash
@@ -114,7 +114,7 @@ gh pr view {N} --json comments --jq '.comments[]
 ```
 
 The `🔖 **Session bookmark**` prefix is the standard marker set by
-`dev10x:session-wrap-up`. Include matching comments in the findings under
+`Dev10x:session-wrap-up`. Include matching comments in the findings under
 "### PR Session Bookmarks".
 
 ### 3. Present findings
@@ -151,5 +151,5 @@ If deferred items were found, ask:
 
 ## Used By
 
-- `dev10x:park-todo` — redirects here when user asks to review/check
+- `Dev10x:park-todo` — redirects here when user asks to review/check
   deferrals instead of write them

@@ -1,6 +1,6 @@
 ---
-name: dev10x:jtbd
-invocation-name: dev10x:jtbd
+name: Dev10x:jtbd
+invocation-name: Dev10x:jtbd
 description: Pure JTBD story drafting skill. Gathers context from issue tracker tickets, parent tickets, and PR diffs to craft a situation-driven Job Story with explicit actor and beneficiary. Returns the draft string with no side effects. Used as a foundation by ticket write layers, PR creation, release notes, and commit title derivation skills.
 user-invocable: false
 allowed-tools:
@@ -16,7 +16,7 @@ allowed-tools:
   - Bash(curl:*atlassian.net*)
 ---
 
-# dev10x:jtbd — Pure Job Story Drafting
+# Dev10x:jtbd — Pure Job Story Drafting
 
 ## Orchestration
 
@@ -245,27 +245,27 @@ if unclear (attended mode) or make best effort (unattended mode).
 This skill is designed to be composed by other skills:
 
 ### Ticket write layer
-The write layer. Invokes `dev10x:jtbd` in attended mode, then writes the
+The write layer. Invokes `Dev10x:jtbd` in attended mode, then writes the
 approved story to a target (PR description, issue tracker ticket).
 
 ### PR creation skill
-Sources an existing story or invokes `dev10x:jtbd` to generate one. The
+Sources an existing story or invokes `Dev10x:jtbd` to generate one. The
 story becomes the first paragraph of the PR body.
 
 ### Ticket work-on skill
-Invokes `dev10x:jtbd` in attended mode using ticket context already
+Invokes `Dev10x:jtbd` in attended mode using ticket context already
 gathered. If approved, prepends the story to the ticket description.
 
 ### Ticket scoping skill
-Invokes `dev10x:jtbd` in attended mode. The approved story is included
+Invokes `Dev10x:jtbd` in attended mode. The approved story is included
 in the scoping document under a `## Job Story` section.
 
 ### Release-notes skill
-Invokes `dev10x:jtbd` in **unattended** mode for PRs missing a story.
+Invokes `Dev10x:jtbd` in **unattended** mode for PRs missing a story.
 The caller batches multiple drafts and presents them all for approval.
 
 ### Commit skill
-Invokes `dev10x:jtbd` in **unattended** mode to derive an outcome-focused
+Invokes `Dev10x:jtbd` in **unattended** mode to derive an outcome-focused
 commit title from the "so X can" clause. Only for first commits on
 feature/bug branches.
 

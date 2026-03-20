@@ -1,8 +1,8 @@
 ---
-name: dev10x:audit-report
+name: Dev10x:audit-report
 description: File skill-audit findings as a GitHub issue at the Dev10x plugin repo. Invoked by skill-audit Phase 7 when the user opts in.
 user-invocable: true
-invocation-name: dev10x:audit-report
+invocation-name: Dev10x:audit-report
 allowed-tools:
   - Read(/tmp/claude/skill-audit/**)
   - Write(/tmp/claude/skill-audit/**)
@@ -14,18 +14,18 @@ allowed-tools:
 # Audit Report — File Findings Upstream
 
 Generate a structured GitHub issue from skill-audit findings
-and file it at `wooyek/dev10x-ai`.
+and file it at `wooyek/Dev10x-ai`.
 
 ## When to Use
 
-- Delegated by `dev10x:skill-audit` Phase 7 after the user
+- Delegated by `Dev10x:skill-audit` Phase 7 after the user
   approves upstream reporting
 - Can also be invoked standalone with a findings file
 
 ## Arguments
 
 One required argument: path to a findings markdown file
-produced by `dev10x:skill-audit`. The file contains:
+produced by `Dev10x:skill-audit`. The file contains:
 
 ```markdown
 ## Session Context
@@ -97,8 +97,8 @@ Build the issue body from the findings file:
 
 Use the primary skill name (most findings) as the title anchor:
 
-- Single skill: `skill-audit findings: dev10x:{skill}`
-- Multiple skills: `skill-audit findings: dev10x:{skill} (+N)`
+- Single skill: `skill-audit findings: Dev10x:{skill}`
+- Multiple skills: `skill-audit findings: Dev10x:{skill} (+N)`
 
 ### Step 5: Write body to temp file
 
@@ -111,7 +111,7 @@ Write the assembled body to that file using the Write tool.
 ### Step 6: File the issue
 
 ```bash
-gh issue create --repo wooyek/dev10x-ai \
+gh issue create --repo wooyek/Dev10x-ai \
   --title "{title}" \
   --body-file {temp-file-path} \
   --label "enhancement"

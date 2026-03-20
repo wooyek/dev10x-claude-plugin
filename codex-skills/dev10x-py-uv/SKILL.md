@@ -1,5 +1,5 @@
 ---
-name: dev10x-py-uv
+name: Dev10x-py-uv
 description: Guide UV installation and migrate Python scripts from legacy shebangs to UV inline metadata (PEP 723).
 ---
 
@@ -16,7 +16,7 @@ with PEP 723 inline metadata.
 Run the check script to assess current state:
 
 ```
-$HOME/.codex/skills/dev10x-py-uv/scripts/check-uv.sh
+$HOME/.codex/skills/Dev10x-py-uv/scripts/check-uv.sh
 ```
 
 Parse the structured output:

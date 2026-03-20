@@ -1,15 +1,15 @@
 ---
-name: dev10x:adr
+name: Dev10x:adr
 description: Create Architecture Decision Records (ADRs) following project conventions. Extends the base scope skill with ADR-specific format, numbering, diagram generation, and decision documentation. Use when documenting significant architectural decisions that affect the codebase.
 user-invocable: true
-invocation-name: dev10x:adr
+invocation-name: Dev10x:adr
 allowed-tools:
   - Bash(mkdir -p:*)
   - Bash(java -jar:*)
   - Bash(ls:*)
-  - Skill(dev10x:ticket-branch)
-  - Skill(dev10x:git-commit)
-  - Skill(dev10x:gh-pr-create)
+  - Skill(Dev10x:ticket-branch)
+  - Skill(Dev10x:git-commit)
+  - Skill(Dev10x:gh-pr-create)
   - Agent
   - WebFetch
   - Grep
@@ -33,7 +33,7 @@ Mark completed when done: `TaskUpdate(taskId, status="completed")`
 ## Overview
 
 This skill creates Architecture Decision Records (ADRs) following
-the project's established format. It extends the base `dev10x:scope`
+the project's established format. It extends the base `Dev10x:scope`
 skill with ADR-specific workflows.
 
 **Use when:**
@@ -58,7 +58,7 @@ Before invoking this skill, gather:
 
 ### Phase 1: Discovery (Uses base scope skill)
 
-Follow the base `dev10x:scope` skill for context gathering:
+Follow the base `Dev10x:scope` skill for context gathering:
 
 1. **Understand the problem space**
    - What are we trying to solve?
@@ -162,12 +162,12 @@ Common corrections include:
 
 #### 6.1 Create Branch
 
-Use `dev10x:ticket-branch` skill if a ticket exists, or
-`dev10x:git-worktree` for isolated workspace.
+Use `Dev10x:ticket-branch` skill if a ticket exists, or
+`Dev10x:git-worktree` for isolated workspace.
 
 #### 6.2 Commit ADR
 
-Use the `dev10x:git-commit` skill to commit:
+Use the `Dev10x:git-commit` skill to commit:
 - Stage `doc/adr/` directory
 - Gitmoji: 📝
 - Title: outcome-focused (e.g., "Document payment routing
@@ -175,7 +175,7 @@ Use the `dev10x:git-commit` skill to commit:
 
 #### 6.3 Create PR
 
-Use `dev10x:gh-pr-create` skill for PR creation.
+Use `Dev10x:gh-pr-create` skill for PR creation.
 
 ## ADR Quality Checklist
 
@@ -213,11 +213,11 @@ Before finalizing, verify:
 ## Integration with Other Skills
 
 ```
-dev10x:adr
-├── Extends: dev10x:scope (base scoping workflow)
-├── May use: dev10x:work-on (if ticket exists)
-├── Uses: dev10x:gh-pr-create (for PR creation)
-└── Uses: dev10x:git-commit (for commit formatting)
+Dev10x:adr
+├── Extends: Dev10x:scope (base scoping workflow)
+├── May use: Dev10x:work-on (if ticket exists)
+├── Uses: Dev10x:gh-pr-create (for PR creation)
+└── Uses: Dev10x:git-commit (for commit formatting)
 ```
 
 ## References

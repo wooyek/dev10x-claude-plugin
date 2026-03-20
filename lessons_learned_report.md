@@ -1,6 +1,6 @@
 # Lessons Learned: PR #136 Analysis
 
-**Repository**: wooyek/dev10x-ai
+**Repository**: wooyek/Dev10x-ai
 **PR Number**: 136
 **Title**: 🐛 GH-133 Enforce AskUserQuestion at decision gates
 **Author**: wooyek
@@ -114,7 +114,7 @@ This is a comprehensive evaluation framework with 4 dimensions and 3 test scenar
 **Eval 3: single-comment-valid-no-remaining**
 - Edge case: VALID verdict, no remaining comments
 - Validates that gates are **skipped appropriately** (not all gates fire every time)
-- Tests delegation to `dev10x:gh-pr-fixup`
+- Tests delegation to `Dev10x:gh-pr-fixup`
 
 #### Trigger Evals (Coverage)
 
@@ -128,11 +128,11 @@ The `trigger_evals` section defines when the skill **should** and **should NOT**
 - PR number only
 
 **Should NOT Trigger:**
-- Review creation requests (that's `dev10x:gh-pr-review`)
-- Direct fixup requests (that's `dev10x:gh-pr-fixup`)
-- Monitoring queries (that's `dev10x:gh-pr-monitor`)
+- Review creation requests (that's `Dev10x:gh-pr-review`)
+- Direct fixup requests (that's `Dev10x:gh-pr-fixup`)
+- Monitoring queries (that's `Dev10x:gh-pr-monitor`)
 - Thread resolution requests (not the full triage workflow)
-- Triage-only requests (that's `dev10x:gh-pr-triage`)
+- Triage-only requests (that's `Dev10x:gh-pr-triage`)
 
 ---
 
@@ -317,26 +317,26 @@ However, the **absence of feedback is itself instructive**:
 
 | # | Action | Owner | File | Estimated Impact |
 |---|--------|-------|------|------------------|
-| 1 | Document "Decision Gates" pattern in CLAUDE.md | dev10x | CLAUDE.md | High — Prevents future soft-guidance issues |
-| 2 | Add Decision Gate checklist to reviewer-skill.md | dev10x | .claude/agents/reviewer-skill.md | High — Prevents regression to soft guidance |
-| 3 | Create `.claude/rules/skill-gates.md` | dev10x | .claude/rules/skill-gates.md (new) | High — Establishes reusable pattern |
-| 4 | Clarify "plain text questions" anti-pattern | dev10x | .claude/rules/essentials.md | Medium — Educational, improves consistency |
+| 1 | Document "Decision Gates" pattern in CLAUDE.md | Dev10x | CLAUDE.md | High — Prevents future soft-guidance issues |
+| 2 | Add Decision Gate checklist to reviewer-skill.md | Dev10x | .claude/agents/reviewer-skill.md | High — Prevents regression to soft guidance |
+| 3 | Create `.claude/rules/skill-gates.md` | Dev10x | .claude/rules/skill-gates.md (new) | High — Establishes reusable pattern |
+| 4 | Clarify "plain text questions" anti-pattern | Dev10x | .claude/rules/essentials.md | Medium — Educational, improves consistency |
 
 ### Medium Priority (Implement in Next Review Cycle)
 
 | # | Action | Owner | File | Estimated Impact |
 |---|--------|-------|------|------------------|
-| 5 | Update reviewer-skill.md evaluation dimension checklist | dev10x | .claude/agents/reviewer-skill.md | Medium — Standardizes eval review |
-| 6 | Add skill-audit Phase 2 detection for missing evals | dev10x | skills/skill-audit/SKILL.md | Medium — Ensures compliance mechanisms exist |
-| 7 | Define minimal evals baseline for new skills | dev10x | CLAUDE.md | Low-Medium — Guidance for future skills |
-| 8 | Extract eval assertions into shared schema | dev10x | references/eval-schema.md (new) | Low — Future-proofs eval.json |
+| 5 | Update reviewer-skill.md evaluation dimension checklist | Dev10x | .claude/agents/reviewer-skill.md | Medium — Standardizes eval review |
+| 6 | Add skill-audit Phase 2 detection for missing evals | Dev10x | skills/skill-audit/SKILL.md | Medium — Ensures compliance mechanisms exist |
+| 7 | Define minimal evals baseline for new skills | Dev10x | CLAUDE.md | Low-Medium — Guidance for future skills |
+| 8 | Extract eval assertions into shared schema | Dev10x | references/eval-schema.md (new) | Low — Future-proofs eval.json |
 
 ### Low Priority (Discussion/Exploration)
 
 | # | Action | Owner | Notes |
 |---|--------|-------|-------|
-| 9 | Consider skill-audit as GitHub Actions pre-merge check | dev10x | Would require CI setup; good long-term investment |
-| 10 | Evaluate trigger-evals pattern applicability | dev10x | PR #136 introduces this in 1 skill; should we standardize? |
+| 9 | Consider skill-audit as GitHub Actions pre-merge check | Dev10x | Would require CI setup; good long-term investment |
+| 10 | Evaluate trigger-evals pattern applicability | Dev10x | PR #136 introduces this in 1 skill; should we standardize? |
 
 ---
 
@@ -377,7 +377,7 @@ The assertion is more precise and testable than any README description could be.
 **Insight**: The `trigger_evals.should_not_trigger` section is as important as `should_trigger`.
 
 Example from evals.json:
-- ✓ Should trigger: "review this PR and leave comments" → NO, that's dev10x:gh-pr-review
+- ✓ Should trigger: "review this PR and leave comments" → NO, that's Dev10x:gh-pr-review
 - ✓ Should NOT trigger: "review this PR and leave comments"
 
 This disambiguates overlapping intents and prevents the skill from mishandling adjacent workflows.

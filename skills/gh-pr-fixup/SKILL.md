@@ -1,8 +1,8 @@
 ---
-name: dev10x:gh-pr-fixup
+name: Dev10x:gh-pr-fixup
 description: Implement a fix for a validated PR review comment, create a fixup! commit, push, and reply with the commit reference. Creates ONE fixup commit per comment.
 user-invocable: true
-invocation-name: dev10x:gh-pr-fixup
+invocation-name: Dev10x:gh-pr-fixup
 allowed-tools:
   - Bash(~/.claude/tools/gh-pr-comments.py:*)
 ---
@@ -23,7 +23,7 @@ already been validated as needing a code change. It:
 **Critical rule: ONE fixup commit per PR comment.**
 
 **When to use this skill:**
-- Called by `dev10x:gh-pr-respond` after `dev10x:gh-pr-triage` returns `VALID`
+- Called by `Dev10x:gh-pr-respond` after `Dev10x:gh-pr-triage` returns `VALID`
 - Standalone when you already know a comment needs a fix
 
 ## Orchestration
@@ -52,7 +52,7 @@ by implement, push blocked by commit.
 
 **Optional additional context:**
 - User may provide extra context after the URL
-- Example: `/dev10x:gh-pr-fixup https://...#discussion_r456 The API now provides customer_url`
+- Example: `/Dev10x:gh-pr-fixup https://...#discussion_r456 The API now provides customer_url`
 
 ## Workflow
 
@@ -242,22 +242,22 @@ If the file has changed since the comment was made:
 ## Integration
 
 ```
-dev10x:gh-pr-monitor → dev10x:gh-pr-respond (orchestrator)
-                 ├── dev10x:gh-pr-triage
-                 └── dev10x:gh-pr-fixup  ← this skill
+Dev10x:gh-pr-monitor → Dev10x:gh-pr-respond (orchestrator)
+                 ├── Dev10x:gh-pr-triage
+                 └── Dev10x:gh-pr-fixup  ← this skill
                       └── commit:fixup
 ```
 
 **Standalone usage:**
 ```bash
-/dev10x:gh-pr-fixup https://github.com/owner/repo/pull/123#discussion_r456
+/Dev10x:gh-pr-fixup https://github.com/owner/repo/pull/123#discussion_r456
 ```
 
-**Called by dev10x:gh-pr-respond:**
+**Called by Dev10x:gh-pr-respond:**
 ```
-dev10x:gh-pr-respond receives comment URL
-  → delegates to dev10x:gh-pr-triage → verdict: VALID
-  → delegates to dev10x:gh-pr-fixup (this skill)
+Dev10x:gh-pr-respond receives comment URL
+  → delegates to Dev10x:gh-pr-triage → verdict: VALID
+  → delegates to Dev10x:gh-pr-fixup (this skill)
   → fix implemented, pushed, replied
 ```
 

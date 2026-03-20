@@ -1,5 +1,5 @@
 {
-  "skill_name": "dev10x:slack-setup",
+  "skill_name": "Dev10x:slack-setup",
   "eval_dimensions": [
     {
       "id": "state_detection",
@@ -26,7 +26,7 @@
     {
       "id": 1,
       "name": "fresh-setup",
-      "prompt": "/dev10x:slack-setup",
+      "prompt": "/Dev10x:slack-setup",
       "description": "Fresh setup with no existing config or token. Tests full happy-path workflow.",
       "assertions": [
         {
@@ -58,7 +58,7 @@
     {
       "id": 2,
       "name": "partial-setup-token-exists",
-      "prompt": "/dev10x:slack-setup",
+      "prompt": "/Dev10x:slack-setup",
       "description": "Token already in keyring but no config file. Should skip token setup steps.",
       "assertions": [
         {

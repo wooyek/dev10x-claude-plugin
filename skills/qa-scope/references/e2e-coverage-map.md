@@ -1,7 +1,7 @@
 # E2E Coverage Map
 
 Maps tt-pos source modules to tt-e2e feature files, tags, step definitions,
-and known coverage gaps. Used by `dev10x:qa-scope` Phase 3 to quickly assess coverage
+and known coverage gaps. Used by `Dev10x:qa-scope` Phase 3 to quickly assess coverage
 without searching the entire tt-e2e repo.
 
 **Last updated:** 2026-02-09

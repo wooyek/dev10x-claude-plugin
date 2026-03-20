@@ -1,7 +1,7 @@
-# playbook.yaml — Investigation workflow plays for dev10x:investigate
+# playbook.yaml — Investigation workflow plays for Dev10x:investigate
 # Default location: ${CLAUDE_PLUGIN_ROOT}/skills/investigate/references/playbook.yaml
 # User overrides: ~/.claude/projects/<project>/memory/playbooks/investigate.yaml
-# Managed by dev10x:playbook skill.
+# Managed by Dev10x:playbook skill.
 #
 # Play names match mode detection in SKILL.md:
 #   standard   — Slack thread with bug report or unexpected behaviour
@@ -67,9 +67,9 @@ defaults:
         type: detailed
         prompt: >
           Create when fix is not trivial, issue affects production/staging,
-          or user requests. Delegate to dev10x:ticket-create.
+          or user requests. Delegate to Dev10x:ticket-create.
         condition: fix-warrants-ticket
-        skills: [dev10x:ticket-create]
+        skills: [Dev10x:ticket-create]
       - subject: Mention the ticket in the thread
         type: detailed
         prompt: >

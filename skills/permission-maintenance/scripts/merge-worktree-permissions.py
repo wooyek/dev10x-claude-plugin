@@ -22,7 +22,7 @@ from pathlib import Path
 import yaml
 
 USERSPACE_CONFIG = (
-    Path.home() / ".claude" / "skills" / "dev10x:permission-maintenance" / "projects.yaml"
+    Path.home() / ".claude" / "skills" / "Dev10x:permission-maintenance" / "projects.yaml"
 )
 PLUGIN_CONFIG = Path(__file__).resolve().parent.parent / "projects.yaml"
 

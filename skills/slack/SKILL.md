@@ -1,17 +1,17 @@
 ---
-name: dev10x:slack
+name: Dev10x:slack
 description: >
   Send notifications to Slack channels with support for threads,
   file uploads, message updates, and user group mentions.
 user-invocable: true
-invocation-name: dev10x:slack
+invocation-name: Dev10x:slack
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/slack/slack-notify.py:*)
 ---
 
-# dev10x:slack — Slack Notifications
+# Dev10x:slack — Slack Notifications
 
-**Announce:** "Using dev10x:slack to send a Slack notification."
+**Announce:** "Using Dev10x:slack to send a Slack notification."
 
 ## Orchestration
 
@@ -193,8 +193,8 @@ To discover user IDs, use MCP `slack_search_users` tool.
 ## Integration with Other Skills
 
 This script is used by:
-- **dev10x:park-remind** — sends deferred-item DMs to yourself
-- **dev10x:gh-pr-monitor** — posts PR review notifications
+- **Dev10x:park-remind** — sends deferred-item DMs to yourself
+- **Dev10x:gh-pr-monitor** — posts PR review notifications
 
 For multi-line messages, use the Write tool to create a temp file,
 then pass via `--message-file` or `$(cat /tmp/msg.txt)`. Do NOT use

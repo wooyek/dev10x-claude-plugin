@@ -1,8 +1,8 @@
 ---
-name: dev10x:gh-pr-request-review
+name: Dev10x:gh-pr-request-review
 description: Request review on a GitHub PR from teams or users
 user-invocable: true
-invocation-name: dev10x:gh-pr-request-review
+invocation-name: Dev10x:gh-pr-request-review
 allowed-tools:
   - Bash(~/.claude/tools/gh-request-review.py:*)
   - Bash(gh repo view:*)
@@ -47,7 +47,7 @@ projects:
   tt-pos:
     reviewers:
       - tiretutorinc/backend-devs
-  dev10x-ai:
+  Dev10x-ai:
     skip: true
 ```
 
@@ -82,7 +82,7 @@ Invoke the skill without arguments. It reads the config, detects
 the current repo, and requests review from the configured reviewers:
 
 ```
-/dev10x:gh-pr-request-review
+/Dev10x:gh-pr-request-review
 ```
 
 ### Explicit reviewers (override config)

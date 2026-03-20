@@ -1,8 +1,8 @@
 ---
-name: dev10x:py-uv
+name: Dev10x:py-uv
 description: Guide UV installation and migrate Python scripts from legacy shebangs to UV inline metadata (PEP 723).
 user-invocable: true
-invocation-name: dev10x:py-uv
+invocation-name: Dev10x:py-uv
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/py-uv/scripts/:*)
   - WebFetch(https://docs.astral.sh/uv/getting-started/installation/:*)

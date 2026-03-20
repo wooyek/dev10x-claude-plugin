@@ -29,9 +29,9 @@ Install one or more skills directly from this repository:
 
 ```bash
 scripts/install-skill-from-github.py \
-  --repo wooyek/dev10x-ai \
-  --path codex-skills/dev10x-git-commit \
-  --path codex-skills/dev10x-gh-pr-create
+  --repo wooyek/Dev10x-ai \
+  --path codex-skills/Dev10x-git-commit \
+  --path codex-skills/Dev10x-gh-pr-create
 ```
 
 To install all skills from GitHub, pass every path under `codex-skills/`.

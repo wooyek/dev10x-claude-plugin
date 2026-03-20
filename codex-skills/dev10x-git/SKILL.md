@@ -1,11 +1,11 @@
 ---
-name: dev10x-git
+name: Dev10x-git
 description: Use before running git push or git rebase — so force-pushes to protected branches are blocked and non-interactive rebases run unattended without manual editor approval prompts.
 ---
 
-**Announce:** "Using dev10x:git to [push / groom commits]."
+**Announce:** "Using Dev10x:git to [push / groom commits]."
 
-# dev10x:git — Hardened Git Operations
+# Dev10x:git — Hardened Git Operations
 
 Provides hardened scripts for safe git push and non-interactive rebase.
 Add the `allowed-tools` entries to your project's `settings.local.json`
@@ -17,7 +17,7 @@ Always push via the wrapper script to prevent force-pushing to protected
 branches:
 
 ```bash
-$HOME/.codex/skills/dev10x-git/scripts/git-push-safe.sh [git push arguments...]
+$HOME/.codex/skills/Dev10x-git/scripts/git-push-safe.sh [git push arguments...]
 ```
 
 Default protected branches: `main master`
@@ -26,7 +26,7 @@ To extend the list, set `GIT_PROTECTED_BRANCHES` before calling:
 
 ```bash
 GIT_PROTECTED_BRANCHES="main master staging" \
-  $HOME/.codex/skills/dev10x-git/scripts/git-push-safe.sh --force-with-lease
+  $HOME/.codex/skills/Dev10x-git/scripts/git-push-safe.sh --force-with-lease
 ```
 
 `--force-with-lease` is always allowed (verifies the remote has not
@@ -70,7 +70,7 @@ then Write the sequence content.
 3. Run the rebase with the sequence file as the first argument:
 
 ```bash
-$HOME/.codex/skills/dev10x-git/scripts/git-rebase-groom.sh <unique-path> <base-ref>
+$HOME/.codex/skills/Dev10x-git/scripts/git-rebase-groom.sh <unique-path> <base-ref>
 ```
 
 ### Sequence file ordering
@@ -116,9 +116,9 @@ Add to your project's `.claude/settings.local.json`:
 {
   "permissions": {
     "allow": [
-      "Bash($HOME/.codex/skills/dev10x-git/scripts/git-push-safe.sh:*)",
-      "Bash($HOME/.codex/skills/dev10x-git/scripts/git-rebase-groom.sh:*)",
-      "Bash($HOME/.codex/skills/dev10x-git/scripts/git-seq-editor.sh:*)",
+      "Bash($HOME/.codex/skills/Dev10x-git/scripts/git-push-safe.sh:*)",
+      "Bash($HOME/.codex/skills/Dev10x-git/scripts/git-rebase-groom.sh:*)",
+      "Bash($HOME/.codex/skills/Dev10x-git/scripts/git-seq-editor.sh:*)",
       "Bash(git reset --soft:*)",
       "Bash(git push --force-with-lease:*)",
       "Bash(/tmp/claude/bin/mktmp.sh:*)",

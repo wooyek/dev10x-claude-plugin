@@ -1,11 +1,11 @@
 ---
-name: dev10x-park-remind
+name: Dev10x-park-remind
 description: Use when you need a reminder to surface in Slack later — so deferred items appear when you are clearing messages, not buried in a file you might not open.
 ---
 
-# dev10x:park-remind — Slack DM Reminder
+# Dev10x:park-remind — Slack DM Reminder
 
-**Announce:** "Using dev10x:park-remind to send a Slack reminder to yourself."
+**Announce:** "Using Dev10x:park-remind to send a Slack reminder to yourself."
 
 ## Overview
 
@@ -15,7 +15,7 @@ context so you know where to pick it up.
 ## Prerequisites
 
 - Slack token available (env `SLACK_TOKEN` or system keyring)
-- `slack-notify.py` accessible at `$HOME/.codex/skills/dev10x-slack/slack-notify.py`
+- `slack-notify.py` accessible at `$HOME/.codex/skills/Dev10x-slack/slack-notify.py`
 
 ## Workflow
 
@@ -55,7 +55,7 @@ using the Write tool first, then pass it via command substitution:
 ```
 Write content to the returned path using Write tool, then:
 ```bash
-$HOME/.codex/skills/dev10x-slack/slack-notify.py \
+$HOME/.codex/skills/Dev10x-slack/slack-notify.py \
   --remind "$(cat <unique-path>)"
 ```
 
@@ -69,10 +69,10 @@ Report to user: "Sent reminder to your Slack DMs."
 
 ## Standalone Usage
 
-When invoked directly: `dev10x-park-remind "message text"`
+When invoked directly: `Dev10x-park-remind "message text"`
 
 Parse the argument as the item text. Gather context and send.
 
 ## Used By
 
-- `dev10x:park` — when user picks "Slack DM to self"
+- `Dev10x:park` — when user picks "Slack DM to self"

@@ -1,20 +1,20 @@
 ---
-name: dev10x:slack-setup
+name: Dev10x:slack-setup
 description: >
   Guide the user through setting up their Slack integration —
   create a Slack app, configure scopes, store the token in the
   system keyring, and generate slack-config.yaml.
 user-invocable: true
-invocation-name: dev10x:slack-setup
+invocation-name: Dev10x:slack-setup
 allowed-tools:
   - AskUserQuestion
   - Bash(secret-tool:*)
   - Bash(security:*)
 ---
 
-# dev10x:slack-setup — Slack Integration Setup
+# Dev10x:slack-setup — Slack Integration Setup
 
-**Announce:** "Using dev10x:slack-setup to configure Slack integration."
+**Announce:** "Using Dev10x:slack-setup to configure Slack integration."
 
 ## Orchestration
 
@@ -147,6 +147,6 @@ Options:
 - Send test DM to myself
 - Skip verification
 
-Use `dev10x:slack` skill to send the test message.
+Use `Dev10x:slack` skill to send the test message.
 
 Report success or failure with actionable guidance.

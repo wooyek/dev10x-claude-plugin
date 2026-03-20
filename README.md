@@ -1,7 +1,7 @@
 # Dev10x Claude Plugin
 
 Stop babysitting your AI. Start supervising it.  
-Join the community: https://www.skool.com/dev10x-1892/about
+Join the community: https://www.skool.com/Dev10x-1892/about
 
 ---
 
@@ -26,7 +26,7 @@ direction, check in during coffee, and move on. Instead you're
 hovering — approving every shell command, every file write, every
 git operation.
 
-## How dev10x solves this
+## How Dev10x solves this
 
 ### Pre-approved workflows, not ad-hoc scripts
 
@@ -35,7 +35,7 @@ git operation.
 title — all through pre-approved tool calls that never trigger
 permission prompts.
 
-When Claude uses `/dev10x:gh-pr-create` instead of raw `gh` commands, every
+When Claude uses `/Dev10x:gh-pr-create` instead of raw `gh` commands, every
 step matches an allow rule. Zero interruptions.
 
 ### Guardrails that teach, not just block
@@ -61,14 +61,14 @@ their phone:
 
 | Step | Skill | Output |
 |------|-------|--------|
-| Scope | [`dev10x:ticket-scope`](skills/ticket-scope/SKILL.md) | Architecture research, ticket update |
-| Branch | [`dev10x:work-on`](skills/work-on/SKILL.md) | Named branch, gathered context |
-| Commit | [`dev10x:git-commit`](skills/git-commit/SKILL.md) | Atomic commits with benefit-focused titles |
-| Groom | [`dev10x:git-groom`](skills/git-groom/SKILL.md) | Clean history, no fixup commits |
-| PR | [`dev10x:gh-pr-create`](skills/gh-pr-create/SKILL.md) | Job Story description, ticket links |
-| Monitor | [`dev10x:gh-pr-monitor`](skills/gh-pr-monitor/SKILL.md) | Background CI + review watch |
-| Respond | [`dev10x:gh-pr-respond`](skills/gh-pr-respond/SKILL.md) | Batched review responses, minimal noise |
-| Review | [`dev10x:gh-pr-review`](skills/gh-pr-review/SKILL.md) | Domain-routed review across 5 agents |
+| Scope | [`Dev10x:ticket-scope`](skills/ticket-scope/SKILL.md) | Architecture research, ticket update |
+| Branch | [`Dev10x:work-on`](skills/work-on/SKILL.md) | Named branch, gathered context |
+| Commit | [`Dev10x:git-commit`](skills/git-commit/SKILL.md) | Atomic commits with benefit-focused titles |
+| Groom | [`Dev10x:git-groom`](skills/git-groom/SKILL.md) | Clean history, no fixup commits |
+| PR | [`Dev10x:gh-pr-create`](skills/gh-pr-create/SKILL.md) | Job Story description, ticket links |
+| Monitor | [`Dev10x:gh-pr-monitor`](skills/gh-pr-monitor/SKILL.md) | Background CI + review watch |
+| Respond | [`Dev10x:gh-pr-respond`](skills/gh-pr-respond/SKILL.md) | Batched review responses, minimal noise |
+| Review | [`Dev10x:gh-pr-review`](skills/gh-pr-review/SKILL.md) | Domain-routed review across 5 agents |
 
 No step produces wall-of-text. Each output is sized for a Slack
 preview, a PR comment, or a task list glance.
@@ -113,8 +113,8 @@ review comment) is concise enough to evaluate in seconds.
 | **Tooling** | [`py-uv`](skills/py-uv/SKILL.md), [`slack`](skills/slack/SKILL.md), [`slack-review-request`](skills/slack-review-request/SKILL.md) | Python packaging, Slack notifications |
 | **Meta** | [`skill-create`](skills/skill-create/SKILL.md), [`skill-audit`](skills/skill-audit/SKILL.md), [`skill-index`](skills/skill-index/SKILL.md), [`audit-report`](skills/audit-report/SKILL.md), [`playbook`](skills/playbook/SKILL.md) | Create, audit, and discover skills |
 
-All skills use the `dev10x:` prefix — type `/dev10x:git-commit` in the Claude
-Code CLI to run it. Run `/dev10x:skill-index` for the full reference.
+All skills use the `Dev10x:` prefix — type `/Dev10x:git-commit` in the Claude
+Code CLI to run it. Run `/Dev10x:skill-index` for the full reference.
 
 ## Installation
 
@@ -135,7 +135,7 @@ Claude Code.
 
 ## Community
 
-The [Dev10x community on Skool](https://www.skool.com/dev10x-1892)
+The [Dev10x community on Skool](https://www.skool.com/Dev10x-1892)
 is where plugin users get assistance, request features, and share
 workflows. If you already have access to this repository, you do not
 need to join Skool — it is a support and discussion hub, not a

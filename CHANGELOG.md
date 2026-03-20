@@ -89,7 +89,7 @@ names, and script-path leaks are eliminated across the tooling surface.
 ### Improvements
 
 - **Aligned session skill names** — 11 session skills get consistent
-  `dev10x:` prefixed invocation names ([GH-224], [GH-102])
+  `Dev10x:` prefixed invocation names ([GH-224], [GH-102])
 - **Script-path leak elimination** — skill tooling no longer leaks
   resolved cache paths in allowed-tools or Bash calls ([GH-280],
   [GH-275], [GH-283])
@@ -157,7 +157,7 @@ obfuscation blocks.
 - **Conflict-free PRs** — PR creation and monitoring detect merge conflicts
   via `git merge-tree` and GitHub's mergeable API, with auto-rebase +
   force-with-lease resolution ([GH-261])
-- **Consistent skill naming** — 9 skills get proper `dev10x:` invocation
+- **Consistent skill naming** — 9 skills get proper `Dev10x:` invocation
   names with documented branding rationale ([GH-234])
 - **Friction-free issue status checks** — jq concatenation pattern replaces
   interpolation to avoid obfuscation detection ([GH-260])
@@ -182,7 +182,7 @@ subshell commands.
 ### Features
 
 - **Self-healing code review** — work-on shipping pipeline now dispatches
-  `dev10x:review` + `dev10x:review-fix` to autonomously create fixup commits
+  `Dev10x:review` + `Dev10x:review-fix` to autonomously create fixup commits
   for review findings ([GH-252])
 - **Full task visibility in unattended mode** — git-commit and gh-pr-create
   create all startup tasks regardless of mode; auto-skipped tasks are
@@ -294,7 +294,7 @@ one with ~80% overhead reduction. User-space config overrides ship.
   customizable playbooks with convention-based discovery. Any orchestration
   skill can become playbook-powered by adding `references/playbook.yaml`.
   User overrides stored per-skill in memory ([GH-209])
-- **Guided work plan customization** — dedicated `dev10x:work-plan` skill
+- **Guided work plan customization** — dedicated `Dev10x:work-plan` skill
   with list, view, edit, and reset subcommands ([GH-209])
 - **Per-project work plan customization** — projects can override plan
   templates without modifying plugin source ([GH-140])
@@ -323,7 +323,7 @@ PR creation now works in repos without a develop branch.
 
 ### Features
 
-- **Combined review request skill** — `dev10x:request-review` assigns
+- **Combined review request skill** — `Dev10x:request-review` assigns
   GitHub reviewers and posts Slack notification in one command ([GH-188])
 - **PR creation without develop** — gh-pr-create works in repos that
   use main as their only branch ([GH-180])
@@ -442,12 +442,12 @@ skill pack and install tooling.
 Released 2026-03-05
 
 11 sub-plugins merged into one unified Dev10x plugin with a consistent
-`dev10x:` namespace and cross-script compatible directory resolution.
+`Dev10x:` namespace and cross-script compatible directory resolution.
 
 ### Refactoring
 
 - **Single plugin consolidation** — merge 11 separate plugin directories
-  into one unified Dev10x plugin with consistent `dev10x:` namespace
+  into one unified Dev10x plugin with consistent `Dev10x:` namespace
 - Refactor directory resolution for cross-script compatibility
 - Remove unused session-start-git-aliases hook
 - Clarify hook-blocked and advisory patterns in session guidance
@@ -468,14 +468,14 @@ conventions for agent directories and skill naming.
 
 Released 2026-03-04
 
-Every skill gets the `dev10x:` prefix. Skills are isolated into 11
+Every skill gets the `Dev10x:` prefix. Skills are isolated into 11
 domain-specific sub-plugins with distributed hooks and marketplace
 discovery.
 
 ### Refactoring
 
 - **Namespace unification** — standardize all skill invocation names
-  from mixed `dx:`, `ticket:`, `pr:`, `qa:` prefixes to `dev10x:`
+  from mixed `dx:`, `ticket:`, `pr:`, `qa:` prefixes to `Dev10x:`
 - **Multi-plugin architecture** — isolate skills into 11 domain-specific
   sub-plugins (fundamentals, git, gh, db, tickets, sessions, parking,
   py, skills, slack, qa) with distributed hooks
@@ -495,7 +495,7 @@ Config-driven Slack notifications and dual-format skill index also ship.
 - **Config-driven Slack notifications** — per-project Slack channel
   and mention configuration for review requests
 - **Dual-format skill index** — MOTD and SKILLS.md output formats
-  with proper `dev10x:` invocation prefixes
+  with proper `Dev10x:` invocation prefixes
 - Use Haiku model in GitHub Actions for faster CI
 
 ### Refactoring

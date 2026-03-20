@@ -15,11 +15,11 @@
 
 | Tool | Used by |
 |------|---------|
-| [PostgreSQL client (`psql`)](https://www.postgresql.org/download/) | `dev10x:db-psql` — database queries |
+| [PostgreSQL client (`psql`)](https://www.postgresql.org/download/) | `Dev10x:db-psql` — database queries |
 | Linux: [`libsecret` (`secret-tool`)](https://gitlab.gnome.org/GNOME/libsecret); macOS: Keychain (built-in) | Keyring lookups for DB DSNs, Slack tokens, Linear API keys |
-| [`ffmpeg`](https://ffmpeg.org/download.html) | `dev10x:qa-self` — video evidence conversion |
-| [ImageMagick](https://imagemagick.org/script/download.php) (`convert`) | `dev10x:qa-self` — screenshot conversion |
-| [Playwright](https://playwright.dev/python/docs/intro#installing-playwright) | `dev10x:playwright` — browser QA (auto-installed via `uv`) |
+| [`ffmpeg`](https://ffmpeg.org/download.html) | `Dev10x:qa-self` — video evidence conversion |
+| [ImageMagick](https://imagemagick.org/script/download.php) (`convert`) | `Dev10x:qa-self` — screenshot conversion |
+| [Playwright](https://playwright.dev/python/docs/intro#installing-playwright) | `Dev10x:playwright` — browser QA (auto-installed via `uv`) |
 | [`bump-my-version`](https://github.com/callowayproject/bump-my-version#installation) | `bin/release.sh` — plugin releases |
 
 > **Python dependencies** are handled automatically. Scripts use
@@ -63,28 +63,28 @@ Switch back to stable releases:
 ## Option B: Manual clone
 
 This is a private repository. You need GitHub access granted through
-the [Dev10x community](https://www.skool.com/dev10x-1892). Once you
+the [Dev10x community](https://www.skool.com/Dev10x-1892). Once you
 have access:
 
 ```bash
-git clone git@github.com:wooyek/dev10x-ai.git \
-  ~/.claude/plugins/dev10x-ai
+git clone git@github.com:wooyek/Dev10x-ai.git \
+  ~/.claude/plugins/Dev10x-ai
 ```
 
 > **Using HTTPS?** Replace the URL with
-> `https://github.com/wooyek/dev10x-ai.git` and
+> `https://github.com/wooyek/Dev10x-ai.git` and
 > authenticate when prompted.
 
 Register the plugin so Claude Code loads it on every session:
 
 ```bash
-claude plugin add --local ~/.claude/plugins/dev10x-ai
+claude plugin add --local ~/.claude/plugins/Dev10x-ai
 ```
 
 Update manually with:
 
 ```bash
-cd ~/.claude/plugins/dev10x-ai && git pull
+cd ~/.claude/plugins/Dev10x-ai && git pull
 ```
 
 ## Verify the installation
@@ -94,7 +94,7 @@ Start a new Claude Code session and check that skills are loaded:
 ```bash
 claude
 # Inside the session, type:
-/dev10x:skill-index
+/Dev10x:skill-index
 ```
 
 You should see a skills reference listing all available commands.
@@ -104,5 +104,5 @@ You should see a skills reference listing all available commands.
 Load the plugin for a single session:
 
 ```bash
-claude --plugin-dir ~/.claude/plugins/dev10x-ai
+claude --plugin-dir ~/.claude/plugins/Dev10x-ai
 ```

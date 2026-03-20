@@ -1,5 +1,5 @@
 {
-  "skill_name": "dev10x:git-commit",
+  "skill_name": "Dev10x:git-commit",
   "eval_dimensions": [
     {
       "id": "format",
@@ -31,7 +31,7 @@
     {
       "id": 1,
       "name": "standard-feature-commit",
-      "prompt": "/dev10x:git-commit",
+      "prompt": "/Dev10x:git-commit",
       "description": "Standard feature commit on branch janusz/PAY-310/fix-flaky-tests with staged changes. Tests full happy-path workflow.",
       "setup": {
         "branch": "janusz/PAY-310/fix-flaky-tests",
@@ -106,7 +106,7 @@
     {
       "id": 2,
       "name": "jtbd-verb-rewrite",
-      "prompt": "/dev10x:git-commit\n\n(User selects Feature type, then provides description: \"Add Square location ID query\")",
+      "prompt": "/Dev10x:git-commit\n\n(User selects Feature type, then provides description: \"Add Square location ID query\")",
       "description": "Tests JTBD enforcement — user provides implementation-focused title that should be rewritten to outcome-focused.",
       "setup": {
         "branch": "janusz/PAY-200/multi-location-routing",
@@ -137,7 +137,7 @@
     {
       "id": 3,
       "name": "no-ticket-branch",
-      "prompt": "/dev10x:git-commit",
+      "prompt": "/Dev10x:git-commit",
       "description": "Branch without standard naming convention (fix-typo-readme). Tests ticket extraction failure handling and ticketless commit format.",
       "setup": {
         "branch": "fix-typo-readme",
@@ -174,7 +174,7 @@
     {
       "id": 4,
       "name": "protected-branch-guard",
-      "prompt": "/dev10x:git-commit",
+      "prompt": "/Dev10x:git-commit",
       "description": "Attempt to commit while on develop branch. Should be blocked immediately.",
       "setup": {
         "branch": "develop",
@@ -205,7 +205,7 @@
     {
       "id": 5,
       "name": "long-title-enforcement",
-      "prompt": "/dev10x:git-commit\n\n(User provides description: \"Enable automatic discovery of Square terminal devices across all dealer locations with retry\")",
+      "prompt": "/Dev10x:git-commit\n\n(User provides description: \"Enable automatic discovery of Square terminal devices across all dealer locations with retry\")",
       "description": "User provides a title that exceeds 72 chars when combined with gitmoji + ticket. Tests length validation and iteration.",
       "setup": {
         "branch": "janusz/PAY-400/terminal-discovery",
@@ -236,7 +236,7 @@
     {
       "id": 6,
       "name": "auto-generate-from-context",
-      "prompt": "/dev10x:git-commit\n\n(Session already has context from a preceding scope/investigation about the fix)",
+      "prompt": "/Dev10x:git-commit\n\n(Session already has context from a preceding scope/investigation about the fix)",
       "description": "When problem and solution are already known from session context, auto-generates Steps 5-6 but STILL shows preview.",
       "setup": {
         "branch": "janusz/PAY-133/fix-motor-timeout",
@@ -262,14 +262,14 @@
     {
       "id": 7,
       "name": "unattended-orchestrated-commit",
-      "prompt": "Skill(dev10x:git-commit)",
+      "prompt": "Skill(Dev10x:git-commit)",
       "description": "When invoked by an orchestrating skill with an active task list, all interactive gates should be bypassed: auto-stage, auto-select commit type, auto-generate message, skip preview, and return control immediately.",
       "setup": {
         "branch": "janusz/PAY-500/new-feature",
         "staged_changes": false,
         "unstaged_changes": true,
         "prior_context": "Implemented new feature as part of work-on plan step. Commit type is clearly Feature (new .py files). Problem and solution known from session.",
-        "orchestrator": "dev10x:work-on",
+        "orchestrator": "Dev10x:work-on",
         "active_task_list": true
       },
       "dimensions": ["workflow"],
@@ -327,7 +327,7 @@
         "rationale": "Explicit intent to commit with formatting help"
       },
       {
-        "query": "/dev10x:git-commit",
+        "query": "/Dev10x:git-commit",
         "rationale": "Direct invocation"
       },
       {
@@ -362,7 +362,7 @@
       },
       {
         "query": "push this branch and create a PR",
-        "rationale": "Wants PR creation (dev10x:gh-pr-create), not a commit"
+        "rationale": "Wants PR creation (Dev10x:gh-pr-create), not a commit"
       },
       {
         "query": "what gitmoji should I use for a performance improvement?",

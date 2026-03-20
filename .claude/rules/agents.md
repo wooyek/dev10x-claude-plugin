@@ -45,7 +45,7 @@ include full phase logic and examples, as opposed to internal review agents
 ## File Naming
 
 Use the feature name as-is: `agents/permission-auditor.md`, `agents/audit-deps.md`.
-Do NOT add a `dev10x-` prefix to the filename.
+Do NOT add a `Dev10x-` prefix to the filename.
 
 ## Linking from Skills
 

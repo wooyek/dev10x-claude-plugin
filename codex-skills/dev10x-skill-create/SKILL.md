@@ -1,15 +1,15 @@
 ---
-name: dev10x-skill-create
-description: Use when creating or improving a local skill and hitting friction — bash commands keep prompting for approval, the skill doesn't appear in MOTD, or it's unclear which frontmatter fields wire up invocability — so you get the dev10x-specific setup right without hunting through existing skills for examples.
+name: Dev10x-skill-create
+description: Use when creating or improving a local skill and hitting friction — bash commands keep prompting for approval, the skill doesn't appear in MOTD, or it's unclear which frontmatter fields wire up invocability — so you get the Dev10x-specific setup right without hunting through existing skills for examples.
 ---
 
-# dev10x Skill Create
+# Dev10x Skill Create
 
-**Announce:** "Using dev10x:skill-create to [create/improve] the `<name>` skill."
+**Announce:** "Using Dev10x:skill-create to [create/improve] the `<name>` skill."
 
 **Foundation:** Read `superpowers:writing-skills` first for TDD methodology,
 CSO principles, and quality standards. This skill covers only the local
-dev10x conventions that sit on top of that foundation.
+Dev10x conventions that sit on top of that foundation.
 
 ## Directory Layout
 
@@ -21,7 +21,7 @@ $HOME/.codex/skills/
     references/         # markdown reference docs (optional)
 ```
 
-Active namespaces: `my:`, `dev10x:`, `ticket:`, `pr:`, `commit:`
+Active namespaces: `my:`, `Dev10x:`, `ticket:`, `pr:`, `commit:`
 
 ## Frontmatter Template
 
@@ -101,7 +101,7 @@ Follow `superpowers:writing-skills` RED-GREEN-REFACTOR:
 ### 3. Validate Structure
 
 ```bash
-$HOME/.codex/skills/dev10x-skill-index/scripts/generate-all.sh --force
+$HOME/.codex/skills/Dev10x-skill-index/scripts/generate-all.sh --force
 rg -n "<namespace>-<skill-name>" $HOME/.codex/SKILLS.md $HOME/.codex/.skills-menu.txt
 ```
 
@@ -114,16 +114,16 @@ new skill is discoverable at the next session start (run this if you skipped
 step 3 or made additional edits):
 
 ```bash
-$HOME/.codex/skills/dev10x-skill-index/scripts/generate-motd.sh --force
+$HOME/.codex/skills/Dev10x-skill-index/scripts/generate-motd.sh --force
 ```
 
 ## Patterns from Existing Skills
 
 | Skill | Patterns to study |
 |---|---|
-| `dev10x:git-worktree` | Step-numbered workflow, `allowed-tools`, templates |
-| `dev10x:ticket-create` | Prerequisites check, integration section |
-| `dev10x:skill-index` | Minimal skill that fully delegates to a script |
+| `Dev10x:git-worktree` | Step-numbered workflow, `allowed-tools`, templates |
+| `Dev10x:ticket-create` | Prerequisites check, integration section |
+| `Dev10x:skill-index` | Minimal skill that fully delegates to a script |
 | `commit` | Multi-step workflow with explicit validation gates |
 
 ## Calling Other Skills
@@ -133,7 +133,7 @@ Never `@`-force-load another skill file — it consumes context immediately.
 
 ```markdown
 ## Prerequisites
-**REQUIRED:** Invoke `dev10x:ticket-branch` before this workflow begins.
+**REQUIRED:** Invoke `Dev10x:ticket-branch` before this workflow begins.
 ```
 
 ## Script Conventions

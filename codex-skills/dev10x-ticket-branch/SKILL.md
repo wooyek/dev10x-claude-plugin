@@ -1,5 +1,5 @@
 ---
-name: dev10x-ticket-branch
+name: Dev10x-ticket-branch
 description: Create a properly named git branch for a ticket following project conventions (username/TICKET-ID/[worktree/]short-slug). Accepts ticket ID and title, ensures latest develop is pulled before creating the branch. Automatically detects worktrees and includes worktree name in branch.
 ---
 
@@ -307,7 +307,7 @@ Create branch for PAY-100: Update customer search
 
 This skill is designed to be used standalone or as part of larger workflows:
 
-- **dev10x:work-on**: Uses this skill for Step 4 (Create Git Branch)
+- **Dev10x:work-on**: Uses this skill for Step 4 (Create Git Branch)
 - **commit:to-new-ticket**: Could use this skill to create branch before cherry-picking
 
 When integrating, pass the ticket ID and title as parameters.

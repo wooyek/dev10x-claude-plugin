@@ -8,7 +8,7 @@
 
 Merges gh_server.py + git_server.py + utils_server.py into a single
 process to reduce token overhead and subprocess startup cost.
-See: https://github.com/wooyek/dev10x-ai/issues/194
+See: https://github.com/wooyek/Dev10x-ai/issues/194
 """
 
 import json
@@ -23,7 +23,7 @@ import sys
 sys.path.insert(0, str(lib_path))
 from subprocess_utils import parse_key_value_output, run_script
 
-server = FastMCP(name="dev10x-cli")
+server = FastMCP(name="Dev10x-cli")
 
 
 # ── GitHub tools ─────────────────────────────────────────────────

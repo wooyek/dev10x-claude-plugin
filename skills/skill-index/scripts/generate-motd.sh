@@ -31,7 +31,7 @@ USER_HIDDEN_FILE="${USER_CONFIG_DIR}/hidden.yaml"
 # ── Resolve skill source directories ────────────────────────────
 LOCAL_DIR="${HOME}/.claude/skills"
 
-resolve_dev10x_dir() {
+resolve_Dev10x_dir() {
     local cache_base="${HOME}/.claude/plugins/cache"
     [[ -d "$cache_base" ]] || return 0
 
@@ -46,7 +46,7 @@ resolve_dev10x_dir() {
         | cut -f2-
 }
 
-DEV10X_DIR="$(resolve_dev10x_dir)"
+DEV10X_DIR="$(resolve_Dev10x_dir)"
 
 OFFICIAL_BASE="${HOME}/.claude/plugins/cache/claude-plugins-official"
 
@@ -109,7 +109,7 @@ if [[ -d "$LOCAL_DIR" ]]; then
     done
 fi
 
-# Scan dev10x plugin skills (local overrides)
+# Scan Dev10x plugin skills (local overrides)
 if [[ -n "$DEV10X_DIR" && -d "$DEV10X_DIR" ]]; then
     for sf in "$DEV10X_DIR"/*/SKILL.md; do
         [[ -f "$sf" ]] || continue
@@ -320,7 +320,7 @@ print_wrapped() {
 # ── Render SKILLS.md ────────────────────────────────────────────
 {
     # Header
-    header_line "─ dev10x ─" "  ${invocable_count} invocable, ${hidden_count} internal"
+    header_line "─ Dev10x ─" "  ${invocable_count} invocable, ${hidden_count} internal"
 
     # Helper: for "Other" skills, map key to display name if available
     display_name_for() {

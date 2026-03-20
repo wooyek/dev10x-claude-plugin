@@ -1,7 +1,7 @@
-# playbook.yaml — Respond workflow plays for dev10x:gh-pr-respond
+# playbook.yaml — Respond workflow plays for Dev10x:gh-pr-respond
 # Default location: ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-respond/references/playbook.yaml
 # User overrides: ~/.claude/projects/<project>/memory/playbooks/gh-pr-respond.yaml
-# Managed by dev10x:playbook skill.
+# Managed by Dev10x:playbook skill.
 #
 # Play names match the mode detection in SKILL.md:
 #   single — one comment at a time (Mode A)
@@ -17,11 +17,11 @@ defaults:
       - subject: Process comment
         type: detailed
         prompt: >
-          Delegate to dev10x:gh-pr-triage with the comment URL.
-          If VALID → delegate to dev10x:gh-pr-fixup.
+          Delegate to Dev10x:gh-pr-triage with the comment URL.
+          If VALID → delegate to Dev10x:gh-pr-fixup.
           If not VALID → reply is posted, proceed to thread
           resolution confirmation.
-        skills: [dev10x:gh-pr-triage, dev10x:gh-pr-fixup]
+        skills: [Dev10x:gh-pr-triage, Dev10x:gh-pr-fixup]
       - subject: Confirm thread resolution
         type: detailed
         prompt: >
@@ -82,10 +82,10 @@ defaults:
       - subject: Execute approved responses
         type: detailed
         prompt: >
-          For VALID comments → delegate to dev10x:gh-pr-fixup
+          For VALID comments → delegate to Dev10x:gh-pr-fixup
           (one fixup commit per comment). For non-VALID comments
           → post reply via gh api. Do NOT resolve threads yet.
-        skills: [dev10x:gh-pr-fixup]
+        skills: [Dev10x:gh-pr-fixup]
       - subject: Resolve threads
         type: detailed
         prompt: >

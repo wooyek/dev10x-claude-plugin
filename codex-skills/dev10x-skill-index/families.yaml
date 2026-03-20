@@ -7,20 +7,20 @@
 # keys from SKILL.md. Skills not in display_map match by exact key.
 
 display_map:
-  commit: dev10x:git-commit
-  commit:split: dev10x:git-commit-split
-  commit:fixup: dev10x:git-fixup
-  commit:to-new-ticket: dev10x:git-promote
-  branch:groom: dev10x:git-groom
-  pr:create: dev10x:gh-pr-create
-  pr:respond: dev10x:gh-pr-respond
-  pr:monitor: dev10x:gh-pr-monitor
-  pr:request-review: dev10x:gh-pr-request-review
-  pr:triage: dev10x:gh-pr-triage
-  pr:comment-fixup: dev10x:gh-pr-fixup
-  ticket:work-on: dev10x:work-on
+  commit: Dev10x:git-commit
+  commit:split: Dev10x:git-commit-split
+  commit:fixup: Dev10x:git-fixup
+  commit:to-new-ticket: Dev10x:git-promote
+  branch:groom: Dev10x:git-groom
+  pr:create: Dev10x:gh-pr-create
+  pr:respond: Dev10x:gh-pr-respond
+  pr:monitor: Dev10x:gh-pr-monitor
+  pr:request-review: Dev10x:gh-pr-request-review
+  pr:triage: Dev10x:gh-pr-triage
+  pr:comment-fixup: Dev10x:gh-pr-fixup
+  ticket:work-on: Dev10x:work-on
   logs: logs:start
-  dev10x:investigate: investigate
+  Dev10x:investigate: investigate
   triage-sentry: triage-sentry
   tt-db: tt:db
 
@@ -29,7 +29,7 @@ families:
     description: "Scope → branch → implement → PR"
     skills:
       - ticket:work-on
-      - dev10x:playbook
+      - Dev10x:playbook
       - ticket:scope
       - ticket:create
       - ticket:branch
@@ -57,9 +57,9 @@ families:
   - label: Session
     description: "Track progress, defer & resume work"
     skills:
-      - dev10x:session-wrap-up
-      - dev10x:park
-      - dev10x:park-discover
+      - Dev10x:session-wrap-up
+      - Dev10x:park
+      - Dev10x:park-discover
 
   - label: Testing
     description: "pytest, e2e, QA"
@@ -67,8 +67,8 @@ families:
       - test
       - test:fix-flaky
       - tt:e2e-debug
-      - dev10x:qa-scope
-      - dev10x:qa-self
+      - Dev10x:qa-scope
+      - Dev10x:qa-self
 
   - label: Ops
     description: "k8s logs, payment & device debugging"
@@ -76,7 +76,7 @@ families:
       - logs
       - debug:payments
       - debug:square-terminal
-      - dev10x:investigate
+      - Dev10x:investigate
       - triage-sentry
       - inbox:triage
 
@@ -84,7 +84,7 @@ families:
     description: "Schema context, safe queries, KPI"
     skills:
       - tt-db
-      - dev10x-db-psql
+      - Dev10x-db-psql
       - report:pos-gpv
 
   - label: Reports
@@ -99,7 +99,7 @@ families:
   - label: Meta
     description: "Create skills, audit usage, code review"
     skills:
-      - dev10x:skill-create
-      - dev10x:skill-audit
-      - dev10x:skill-index
+      - Dev10x:skill-create
+      - Dev10x:skill-audit
+      - Dev10x:skill-index
       - review

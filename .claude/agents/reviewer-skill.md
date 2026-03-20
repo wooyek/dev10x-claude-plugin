@@ -19,9 +19,9 @@ Files matching: `skills/**`
    valid YAML front matter. Required: `name:`, `description:`, `invocation-name:`.
    Optional: `allowed-tools:`, `user-invocable:`.
 2. **Naming convention** — directory uses plain name (no `dx-` prefix);
-   `name:` MUST use `dev10x:<feature>` format; `invocation-name:` MUST
+   `name:` MUST use `Dev10x:<feature>` format; `invocation-name:` MUST
    match `name:` exactly — no shortened aliases, cross-family variants, or
-   non-`dev10x:` prefixes permitted. Both fields require the `dev10x:`
+   non-`Dev10x:` prefixes permitted. Both fields require the `Dev10x:`
    prefix (see `.claude/rules/skill-naming.md` lines 86-97)
 3. **Description quality** — `description:` must explain when to
    trigger the skill; vague descriptions reduce discoverability
@@ -71,7 +71,7 @@ Files matching: `skills/**`
 9. **Template consistency** — YAML code blocks containing a `name:` field
    must follow `skill-naming.md`, not ad-hoc examples.
 9a. **Skill tool invocation syntax** — `Skill()` calls must use named
-    parameters: `Skill(skill="dev10x:target-name", args="...")`.
+    parameters: `Skill(skill="Dev10x:target-name", args="...")`.
     See `references/skill-invocation.md`.
 10. **Reference doc consistency** — cross-check `references/` documents
     against any matching `.claude/rules/` file.

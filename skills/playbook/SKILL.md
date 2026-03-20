@@ -1,11 +1,11 @@
 ---
-name: dev10x:playbook
+name: Dev10x:playbook
 description: >
   View and customize playbooks (step-by-step procedures) for any
   orchestration skill. List playbook-powered skills, inspect plays,
   edit steps through a guided flow, or reset to defaults.
 user-invocable: true
-invocation-name: dev10x:playbook
+invocation-name: Dev10x:playbook
 allowed-tools:
   - Read(~/.claude/projects/**/memory/playbooks/*.yaml)
   - Write(~/.claude/projects/**/memory/playbooks/*.yaml)
@@ -14,7 +14,7 @@ allowed-tools:
   - TaskUpdate
 ---
 
-# dev10x:playbook — Playbook Manager
+# Dev10x:playbook — Playbook Manager
 
 ## Overview
 
@@ -72,7 +72,7 @@ Parse the arguments to determine the subcommand:
 | `reset [<skill> [<play>]]` | Reset | Reset overrides to defaults |
 
 If `<skill>` is ambiguous, match against both directory name and
-invocation name (e.g., `work-on` matches `dev10x:work-on`).
+invocation name (e.g., `work-on` matches `Dev10x:work-on`).
 
 ---
 
@@ -93,11 +93,11 @@ Scan all installed skill directories for `references/playbook.yaml`.
 
 | Skill | Plays | Customized? |
 |-------|-------|-------------|
-| dev10x:work-on | 5 (feature, bugfix, pr-continuation, local-only, investigation) | feature ✎ |
+| Dev10x:work-on | 5 (feature, bugfix, pr-continuation, local-only, investigation) | feature ✎ |
 | tt:e2e-debug | 2 (investigate, fix) | — |
 
-Use `/dev10x:playbook view <skill>` to inspect plays.
-Use `/dev10x:playbook edit <skill> <play>` to customize.
+Use `/Dev10x:playbook view <skill>` to inspect plays.
+Use `/Dev10x:playbook edit <skill> <play>` to customize.
 ```
 
 ---
@@ -116,14 +116,14 @@ Show plays for a specific skill, or drill into one play.
 **Play detail format:**
 
 ```
-## dev10x:work-on → feature
+## Dev10x:work-on → feature
 
 **Prompt:** Use when a ticket describes new functionality...
 
 | # | Type | Step | Skills | Children |
 |---|------|------|--------|----------|
-| 1 | detailed | Set up workspace | dev10x:ticket-branch | — |
-| 2 | detailed | Draft Job Story | dev10x:jtbd | — |
+| 1 | detailed | Set up workspace | Dev10x:ticket-branch | — |
+| 2 | detailed | Draft Job Story | Dev10x:jtbd | — |
 | 3 | epic | Design implementation approach | — | 3 children |
 |   |   | ├─ Read relevant code | — | |
 |   |   | ├─ Identify affected components | — | |
@@ -204,7 +204,7 @@ overrides:
     steps:
       - subject: Set up workspace
         type: detailed
-        skills: [dev10x:ticket-branch]
+        skills: [Dev10x:ticket-branch]
       # ... full step list
 ```
 
@@ -306,7 +306,7 @@ with all 5 plays as a reference implementation.
    2. Fall back to references/playbook.yaml
    3. Create TaskCreate per step in the resolved play
    ```
-4. The `dev10x:playbook` skill automatically discovers your skill
+4. The `Dev10x:playbook` skill automatically discovers your skill
 
 **Loading pattern for orchestration skills:**
 ```
@@ -320,7 +320,7 @@ Read(~/.claude/projects/<project>/memory/playbooks/<key>.yaml)
 
 Any orchestration skill can load its playbook using the resolution
 order above. When presenting the play to the user, it should note:
-"Customize this playbook with `/dev10x:playbook edit <skill> <play>`."
+"Customize this playbook with `/Dev10x:playbook edit <skill> <play>`."
 
 If a user asks to customize during an active session, the
 orchestrator can delegate to this skill mid-flight and then
@@ -332,28 +332,28 @@ reload the updated playbook.
 
 ### Example 1: List all playbook-powered skills
 
-**User:** `/dev10x:playbook`
+**User:** `/Dev10x:playbook`
 
 Shows all skills with `references/playbook.yaml`, their play
 counts, and customization status.
 
 ### Example 2: View work-on plays
 
-**User:** `/dev10x:playbook view work-on`
+**User:** `/Dev10x:playbook view work-on`
 
 Shows summary of all 5 plays (feature, bugfix, etc.) with
 step counts and descriptions.
 
 ### Example 3: View a specific play
 
-**User:** `/dev10x:playbook view work-on bugfix`
+**User:** `/Dev10x:playbook view work-on bugfix`
 
 Shows the full bugfix play with all steps, children, prompts,
 and skill delegations in a readable tree format.
 
 ### Example 4: Customize a play for a project
 
-**User:** `/dev10x:playbook edit work-on feature`
+**User:** `/Dev10x:playbook edit work-on feature`
 
 1. Shows current feature play (10 steps)
 2. User selects "Add step"
@@ -383,5 +383,5 @@ defaults:
         prompt: Either implement a fix or document findings.
 ```
 
-Then `/dev10x:playbook view tt-e2e-debug investigate` works
+Then `/Dev10x:playbook view tt-e2e-debug investigate` works
 automatically — no changes to this skill needed.

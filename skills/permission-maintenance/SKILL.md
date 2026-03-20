@@ -1,8 +1,8 @@
 ---
-name: dev10x:permission-maintenance
+name: Dev10x:permission-maintenance
 description: Maintain Claude Code permissions — update plugin version paths, ensure base permissions, merge worktree rules, generalize session-specific args, and audit for friction-causing patterns via the permission-auditor agent
 user-invocable: true
-invocation-name: dev10x:permission-maintenance
+invocation-name: Dev10x:permission-maintenance
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/scripts/*:*)
   - Agent(Dev10x:permission-auditor)
@@ -15,7 +15,7 @@ permission settings across all projects."
 
 ## When to Use
 
-- After installing a new dev10x plugin version
+- After installing a new Dev10x plugin version
 - When `Bash()` allow rules fail because paths reference an old version
 - After `claude plugin update`
 - When worktree sessions accumulate useful permissions the main project lacks
@@ -30,7 +30,7 @@ Initialize userspace config with your project roots:
 ${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/scripts/update-paths.py --init
 ```
 
-Then edit `~/.claude/skills/dev10x:permission-maintenance/projects.yaml`
+Then edit `~/.claude/skills/Dev10x:permission-maintenance/projects.yaml`
 to add your project roots.
 
 ## Workflow
@@ -143,7 +143,7 @@ proposals. Review and apply selectively.
 ## Configuration
 
 The script looks for `projects.yaml` in two locations (first wins):
-1. `~/.claude/skills/dev10x:permission-maintenance/projects.yaml` (userspace)
+1. `~/.claude/skills/Dev10x:permission-maintenance/projects.yaml` (userspace)
 2. `${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/projects.yaml` (plugin default)
 
 The userspace config is user-specific and not tracked in git.

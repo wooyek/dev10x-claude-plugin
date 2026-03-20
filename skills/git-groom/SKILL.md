@@ -1,8 +1,8 @@
 ---
-name: dev10x:git-groom
+name: Dev10x:git-groom
 description: Restructure, polish, and clean up git commit history in the current branch before merging. Creates atomic, well-organized commits that tell a clear story.
 user-invocable: true
-invocation-name: dev10x:git-groom
+invocation-name: Dev10x:git-groom
 allowed-tools:
   - mcp__plugin_Dev10x_cli__mass_rewrite
   - mcp__plugin_Dev10x_cli__rebase_groom
@@ -490,16 +490,16 @@ git reset --hard HEAD@{n}
 
 ## Integration with Other Skills
 
-### dev10x:git-commit-split
+### Dev10x:git-commit-split
 
 When the user asks to split a specific commit mid-session (e.g. "Split
-<sha>"), invoke the `dev10x:git-commit-split` skill rather than handling it inline.
-`dev10x:git-commit-split` provides the canonical workflow with dependency-order
+<sha>"), invoke the `Dev10x:git-commit-split` skill rather than handling it inline.
+`Dev10x:git-commit-split` provides the canonical workflow with dependency-order
 guidance and commit message conventions.
 
 ```
 User: "Split 835fc34"
--> Invoke Skill(dev10x:git-commit-split) before proceeding
+-> Invoke Skill(Dev10x:git-commit-split) before proceeding
 ```
 
 ## Integration with PR Workflow

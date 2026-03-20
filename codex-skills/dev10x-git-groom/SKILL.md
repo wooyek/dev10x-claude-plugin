@@ -1,5 +1,5 @@
 ---
-name: dev10x-git-groom
+name: Dev10x-git-groom
 description: Restructure, polish, and clean up git commit history in the current branch before merging. Creates atomic, well-organized commits that tell a clear story.
 ---
 
@@ -55,7 +55,7 @@ GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base develop HEA
 # Custom sequence (reordering, message rewrites, splits):
 # 1. Create unique seq file: /tmp/claude/bin/mktmp.sh git rebase-seq .txt
 # 2. Write sequence to the returned path
-# 3. Run: $HOME/.codex/skills/dev10x-git/scripts/git-rebase-groom.sh <path> develop
+# 3. Run: $HOME/.codex/skills/Dev10x-git/scripts/git-rebase-groom.sh <path> develop
 ```
 
 **Key insight:** For pure autosquash (squashing fixup commits into their targets), use `GIT_SEQUENCE_EDITOR=true` directly — it accepts git's auto-generated todo as-is. The rebase script (`git-rebase-groom.sh`) replaces the todo with your sequence file, so commits not listed in the file are dropped. Only use the script when you need custom sequence control.
@@ -87,7 +87,7 @@ Fully automatable — no interactive editor required.
 ```
 Write the config to the returned path, then run:
 ```bash
-$HOME/.codex/skills/dev10x-git-groom/scripts/mass-rewrite.py <config-path>
+$HOME/.codex/skills/Dev10x-git-groom/scripts/mass-rewrite.py <config-path>
 ```
 The script creates its own isolated workdir under `/tmp/claude/git/`.
 
@@ -153,7 +153,7 @@ Oldest commit at top.
 
 **Step 5:** Run the non-interactive rebase:
 ```bash
-$HOME/.codex/skills/dev10x-git/scripts/git-rebase-groom.sh <seq-path> develop
+$HOME/.codex/skills/Dev10x-git/scripts/git-rebase-groom.sh <seq-path> develop
 ```
 
 `GIT_EDITOR="true"` suppresses the commit message editor for `--amend`
@@ -409,10 +409,10 @@ When calling skill scripts, never wrap arguments in `$()` subshells:
 ```bash
 # BAD — $() changes the effective command prefix, breaking allow rules
 BASE=$(git merge-base develop HEAD)
-$HOME/.codex/skills/dev10x-git/scripts/git-rebase-groom.sh "$BASE"
+$HOME/.codex/skills/Dev10x-git/scripts/git-rebase-groom.sh "$BASE"
 
 # GOOD — pass branch name directly, script resolves merge-base internally
-$HOME/.codex/skills/dev10x-git/scripts/git-rebase-groom.sh develop
+$HOME/.codex/skills/Dev10x-git/scripts/git-rebase-groom.sh develop
 ```
 
 **Symptom:** Every invocation prompts for permission even though the
@@ -438,16 +438,16 @@ git reset --hard HEAD@{n}
 
 ## Integration with Other Skills
 
-### dev10x:git-commit-split
+### Dev10x:git-commit-split
 
 When the user asks to split a specific commit mid-session (e.g. "Split
-<sha>"), invoke the `dev10x:git-commit-split` skill rather than handling it inline.
-`dev10x:git-commit-split` provides the canonical workflow with dependency-order
+<sha>"), invoke the `Dev10x:git-commit-split` skill rather than handling it inline.
+`Dev10x:git-commit-split` provides the canonical workflow with dependency-order
 guidance and commit message conventions.
 
 ```
 User: "Split 835fc34"
--> Invoke Skill(dev10x:git-commit-split) before proceeding
+-> Invoke Skill(Dev10x:git-commit-split) before proceeding
 ```
 
 ## Integration with PR Workflow

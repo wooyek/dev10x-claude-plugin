@@ -1,14 +1,14 @@
 ---
-name: dev10x:ticket-scope
+name: Dev10x:ticket-scope
 description: Scope Linear tickets with technical research and architecture design. Extends the base scope skill with Linear ticket integration, story point estimation, and acceptance criteria formatting. Use when preparing to implement a Linear ticket.
 user-invocable: true
-invocation-name: dev10x:ticket-scope
+invocation-name: Dev10x:ticket-scope
 allowed-tools:
   - mcp__claude_ai_Linear__get_issue
   - mcp__claude_ai_Linear__list_issues
   - mcp__claude_ai_Linear__list_comments
   - mcp__claude_ai_Linear__save_comment
-  - Skill(dev10x:jtbd)
+  - Skill(Dev10x:jtbd)
   - Agent
   - WebFetch
   - Grep
@@ -30,7 +30,7 @@ This skill creates comprehensive technical scoping documents for Linear tickets.
 - Creating detailed implementation plan
 
 **Do NOT use for:**
-- Architectural decisions (use `dev10x:adr` instead)
+- Architectural decisions (use `Dev10x:adr` instead)
 - Simple bug fixes with obvious solutions
 - Quick tasks under 1 story point
 
@@ -164,13 +164,13 @@ Order steps by dependencies:
 
 After estimating complexity, draft a Job Story for the ticket using the JTBD framework. This captures the business "why" early — before implementation begins — and will later be used in the PR description and release notes.
 
-**Invoke the `dev10x:jtbd` base skill in attended mode:**
+**Invoke the `Dev10x:jtbd` base skill in attended mode:**
 
 1. Pass the ticket context already gathered in Phase 1 (ticket details, parent ticket, related tickets) via the `context` parameter to avoid redundant API calls
-2. The `dev10x:jtbd` skill handles: situation identification, drafting, and user approval
+2. The `Dev10x:jtbd` skill handles: situation identification, drafting, and user approval
 3. Include the approved Job Story in the scoping document under a `## Job Story` section (right after the title)
 
-**Do NOT update the Linear ticket description at this point** — the story is saved in the scoping document and will be applied to the PR later via `dev10x:ticket-jtbd` or `dev10x:gh-pr-create`.
+**Do NOT update the Linear ticket description at this point** — the story is saved in the scoping document and will be applied to the PR later via `Dev10x:ticket-jtbd` or `Dev10x:gh-pr-create`.
 
 ### Phase 5: Format Scoping Document
 
@@ -388,12 +388,12 @@ Before finalizing, verify:
 ## Integration with Other Skills
 
 ```
-dev10x:ticket-scope
+Dev10x:ticket-scope
 ├── Extends: scope (base scoping workflow)
 ├── Uses: Linear MCP (ticket data)
-├── Uses: dev10x:jtbd (JTBD story drafting in Phase 4b)
-├── May lead to: dev10x:work-on (start implementation)
-├── Alternative: dev10x:adr (for architectural decisions)
+├── Uses: Dev10x:jtbd (JTBD story drafting in Phase 4b)
+├── May lead to: Dev10x:work-on (start implementation)
+├── Alternative: Dev10x:adr (for architectural decisions)
 └── Saves to: /tmp/claude/ticket-scope/TICKET-ID-scope.md
 ```
 
@@ -401,7 +401,7 @@ dev10x:ticket-scope
 
 ### User Request
 ```
-/dev10x:ticket-scope PAY-329
+/Dev10x:ticket-scope PAY-329
 ```
 
 ### Workflow
@@ -413,7 +413,7 @@ dev10x:ticket-scope
 6. Apply YAGNI
 7. Create implementation plan
 8. Estimate story points
-9. Draft Job Story (using dev10x:jtbd base skill)
+9. Draft Job Story (using Dev10x:jtbd base skill)
 10. Present to user for review
 11. Incorporate feedback
 12. Save scoping document
@@ -429,5 +429,5 @@ dev10x:ticket-scope
 
 ### Related Skills
 - `scope` - Base scoping skill
-- `dev10x:adr` - For architectural decisions
-- `dev10x:work-on` - Start implementation
+- `Dev10x:adr` - For architectural decisions
+- `Dev10x:work-on` - Start implementation

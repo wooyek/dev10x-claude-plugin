@@ -1,11 +1,11 @@
 ---
-name: dev10x-slack
+name: Dev10x-slack
 description: Send notifications to Slack channels with support for threads, file uploads, message updates, and user group mentions.
 ---
 
-# dev10x:slack — Slack Notifications
+# Dev10x:slack — Slack Notifications
 
-**Announce:** "Using dev10x:slack to send a Slack notification."
+**Announce:** "Using Dev10x:slack to send a Slack notification."
 
 ## Overview
 
@@ -67,7 +67,7 @@ user group mentions and self-DMs just won't resolve.
 ### Send a message
 
 ```bash
-$HOME/.codex/skills/dev10x-slack/slack-notify.py \
+$HOME/.codex/skills/Dev10x-slack/slack-notify.py \
   --channel CHANNEL_ID \
   --message "Your message here"
 ```
@@ -75,7 +75,7 @@ $HOME/.codex/skills/dev10x-slack/slack-notify.py \
 ### Reply in a thread
 
 ```bash
-$HOME/.codex/skills/dev10x-slack/slack-notify.py \
+$HOME/.codex/skills/Dev10x-slack/slack-notify.py \
   --channel CHANNEL_ID \
   --thread-ts 1770113637.855309 \
   --message "Thread reply"
@@ -89,7 +89,7 @@ $HOME/.codex/skills/dev10x-slack/slack-notify.py \
 ### Upload files
 
 ```bash
-$HOME/.codex/skills/dev10x-slack/slack-notify.py \
+$HOME/.codex/skills/Dev10x-slack/slack-notify.py \
   --channel CHANNEL_ID \
   --files screenshot.png report.pdf \
   --message "Optional comment"
@@ -98,7 +98,7 @@ $HOME/.codex/skills/dev10x-slack/slack-notify.py \
 ### Update a message
 
 ```bash
-$HOME/.codex/skills/dev10x-slack/slack-notify.py \
+$HOME/.codex/skills/Dev10x-slack/slack-notify.py \
   --channel CHANNEL_ID \
   --update MESSAGE_TS \
   --message "Revised content"
@@ -107,7 +107,7 @@ $HOME/.codex/skills/dev10x-slack/slack-notify.py \
 ### Delete a message
 
 ```bash
-$HOME/.codex/skills/dev10x-slack/slack-notify.py \
+$HOME/.codex/skills/Dev10x-slack/slack-notify.py \
   --channel CHANNEL_ID \
   --delete MESSAGE_TS
 ```
@@ -115,7 +115,7 @@ $HOME/.codex/skills/dev10x-slack/slack-notify.py \
 ### Send a self-DM reminder
 
 ```bash
-$HOME/.codex/skills/dev10x-slack/slack-notify.py \
+$HOME/.codex/skills/Dev10x-slack/slack-notify.py \
   --remind "Follow up on PR #1234"
 ```
 
@@ -166,8 +166,8 @@ To discover user IDs, use MCP `slack_search_users` tool.
 ## Integration with Other Skills
 
 This script is used by:
-- **dev10x:park-remind** — sends deferred-item DMs to yourself
-- **dev10x:gh-pr-monitor** — posts PR review notifications
+- **Dev10x:park-remind** — sends deferred-item DMs to yourself
+- **Dev10x:gh-pr-monitor** — posts PR review notifications
 
 For multi-line messages, use the Write tool to create a temp file,
 then pass via `--message-file` or `$(cat /tmp/msg.txt)`. Do NOT use

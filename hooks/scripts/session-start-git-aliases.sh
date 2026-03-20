@@ -28,5 +28,5 @@ else
     if [[ ${#present[@]} -gt 0 ]]; then
         echo "Git aliases available: ${present[*]}"
     fi
-    echo "Run the git-alias-setup skill (/dev10x:git-alias-setup) to configure them."
+    echo "Run the git-alias-setup skill (/Dev10x:git-alias-setup) to configure them."
 fi

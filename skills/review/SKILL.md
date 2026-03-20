@@ -1,6 +1,6 @@
 ---
-name: dev10x:review
-invocation-name: dev10x:review
+name: Dev10x:review
+invocation-name: Dev10x:review
 description: Use when reviewing your own branch changes before creating a PR. Reviews diff against base branch, runs automated checks, and produces structured findings with severity, file, line, and suggested fix. Works in attended (pick findings) or unattended (auto-advance to fixer) mode.
 user-invocable: true
 allowed-tools:
@@ -21,13 +21,13 @@ allowed-tools:
 # Self-Review Branch
 
 Review current branch changes against the base branch, applying project
-review guidelines. Produces structured findings that `dev10x:review-fix`
+review guidelines. Produces structured findings that `Dev10x:review-fix`
 can consume to create fixup commits.
 
 ## Arguments
 
 - `--unattended` — skip finding approval, auto-advance to
-  `dev10x:review-fix` for all actionable findings
+  `Dev10x:review-fix` for all actionable findings
 - No arguments — attended mode, present findings for user approval
 
 ## When to Use
@@ -36,7 +36,7 @@ can consume to create fixup commits.
 - As the "Code review" step in the `work-on` shipping pipeline
 - When asked to review your own changes
 
-**Not for remote PR review** — use `dev10x:gh-pr-review` to post
+**Not for remote PR review** — use `Dev10x:gh-pr-review` to post
 findings to GitHub.
 
 ## Orchestration
@@ -133,8 +133,8 @@ Write the findings array as JSON to the temp file path.
 
 **Unattended mode** (`--unattended`):
 - Skip presentation
-- Pass all `ERROR` and `WARNING` findings to `dev10x:review-fix`
-- Invoke: `Skill(skill="dev10x:review-fix", args="<findings-file-path>")`
+- Pass all `ERROR` and `WARNING` findings to `Dev10x:review-fix`
+- Invoke: `Skill(skill="Dev10x:review-fix", args="<findings-file-path>")`
 - Auto-advance after fixer completes
 
 **Attended mode** (default):
@@ -145,14 +145,14 @@ Write the findings array as JSON to the temp file path.
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
 Options:
 - Fix all (Recommended) — Send all ERROR and WARNING findings to
-  `dev10x:review-fix`
+  `Dev10x:review-fix`
 - Pick findings — Review each finding and select which to fix
 - Skip — No fixes, continue with pipeline
 
 If "Pick findings": present each finding with fix/skip choice,
-collect approved findings, then invoke `dev10x:review-fix`.
+collect approved findings, then invoke `Dev10x:review-fix`.
 
-If "Fix all" or after picking: invoke `dev10x:review-fix` with
+If "Fix all" or after picking: invoke `Dev10x:review-fix` with
 the findings file path.
 
 ### Step 7: Summary
@@ -164,8 +164,8 @@ Report:
 
 ## Findings Format (Handoff Protocol)
 
-The JSON findings file is the contract between `dev10x:review`
-and `dev10x:review-fix`:
+The JSON findings file is the contract between `Dev10x:review`
+and `Dev10x:review-fix`:
 
 ```json
 [
@@ -188,11 +188,11 @@ path passed as its argument.
 
 ```
 work-on shipping pipeline
-└─ dev10x:review          ← this skill (reviewer)
-   └─ dev10x:review-fix   ← fixer (consumes findings)
+└─ Dev10x:review          ← this skill (reviewer)
+   └─ Dev10x:review-fix   ← fixer (consumes findings)
       └─ git commit fixup!  ← one fixup commit per finding
 ```
 
 Complements:
-- `dev10x:gh-pr-review` — posts findings to GitHub (remote PRs)
-- `dev10x:gh-pr-respond` — responds to PR review comments
+- `Dev10x:gh-pr-review` — posts findings to GitHub (remote PRs)
+- `Dev10x:gh-pr-respond` — responds to PR review comments

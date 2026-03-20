@@ -1,13 +1,13 @@
 ---
-name: dev10x:skill-create
+name: Dev10x:skill-create
 description: >
   Use when creating or improving a local skill and hitting friction — bash
   commands keep prompting for approval, the skill doesn't appear in MOTD,
   or it's unclear which frontmatter fields wire up invocability — so you
-  get the dev10x-specific setup right without hunting through existing
+  get the Dev10x-specific setup right without hunting through existing
   skills for examples.
 user-invocable: true
-invocation-name: dev10x:skill-create
+invocation-name: Dev10x:skill-create
 allowed-tools:
   - Bash(mkdir -p:*)
   - Bash(chmod:*)
@@ -15,7 +15,7 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/*:*)
 ---
 
-# dev10x Skill Create
+# Dev10x Skill Create
 
 ## Orchestration
 
@@ -28,11 +28,11 @@ Create a task at invocation, mark completed when done:
 
 Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
-**Announce:** "Using dev10x:skill-create to [create/improve] the `<name>` skill."
+**Announce:** "Using Dev10x:skill-create to [create/improve] the `<name>` skill."
 
 **Foundation:** Read `superpowers:writing-skills` first for TDD methodology,
 CSO principles, and quality standards. This skill covers only the local
-dev10x conventions that sit on top of that foundation.
+Dev10x conventions that sit on top of that foundation.
 
 ## Directory Layout
 
@@ -44,14 +44,14 @@ dev10x conventions that sit on top of that foundation.
     references/         # markdown reference docs (optional)
 ```
 
-Active namespaces: `my:`, `dev10x:`, `ticket:`, `pr:`, `commit:`
+Active namespaces: `my:`, `Dev10x:`, `ticket:`, `pr:`, `commit:`
 
 ## Frontmatter Template
 
 ```yaml
 ---
-name: dev10x:my-skill-name
-invocation-name: dev10x:my-skill-name
+name: Dev10x:my-skill-name
+invocation-name: Dev10x:my-skill-name
 description: Use when [situation trigger] so [what the user gains or stops suffering]
 user-invocable: true          # include for user-invocable skills
 allowed-tools:                # pre-approve bash commands (removes prompts)
@@ -62,7 +62,7 @@ allowed-tools:                # pre-approve bash commands (removes prompts)
 
 | Field | When to use |
 |---|---|
-| `name` | Canonical identifier; MUST use `dev10x:` prefix |
+| `name` | Canonical identifier; MUST use `Dev10x:` prefix |
 | `invocation-name` | Required on every skill; matches `name:` by default, or shorter alias |
 | `user-invocable: true` | Skill appears in MOTD and is callable via Skill tool |
 | `allowed-tools` | Pre-approve bash commands Claude needs; use `:*` for any args |
@@ -145,9 +145,9 @@ ${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/generate-motd.sh --force
 
 | Skill | Patterns to study |
 |---|---|
-| `dev10x:git-worktree` | Step-numbered workflow, `allowed-tools`, templates |
-| `dev10x:ticket-create` | Prerequisites check, integration section |
-| `dev10x:skill-index` | Minimal skill that fully delegates to a script |
+| `Dev10x:git-worktree` | Step-numbered workflow, `allowed-tools`, templates |
+| `Dev10x:ticket-create` | Prerequisites check, integration section |
+| `Dev10x:skill-index` | Minimal skill that fully delegates to a script |
 | `commit` | Multi-step workflow with explicit validation gates |
 
 ## Calling Other Skills
@@ -157,7 +157,7 @@ Never `@`-force-load another skill file — it consumes context immediately.
 
 ```markdown
 ## Prerequisites
-**REQUIRED:** Invoke `dev10x:ticket-branch` before this workflow begins.
+**REQUIRED:** Invoke `Dev10x:ticket-branch` before this workflow begins.
 ```
 
 ## Script Conventions

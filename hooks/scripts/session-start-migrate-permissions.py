@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """SessionStart hook: migrate stale plugin permission rules.
 
-When the dev10x plugin updates, permission rules saved in
+When the Dev10x plugin updates, permission rules saved in
 ~/.claude/settings.json still reference the old version's cache
 path (e.g. 0.4.0). This hook rewrites them to the current version.
 

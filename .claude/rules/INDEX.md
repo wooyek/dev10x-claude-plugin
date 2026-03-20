@@ -58,10 +58,10 @@ Always apply `references/review-checks-common.md`.
 
 | File | Topic | Loaded by | Scope |
 |------|-------|-----------|-------|
-| `git-commits.md` | Commit format, gitmoji, atomic commits | `dev10x:git-commit` skill, PR hygiene CI | Mandatory for all commits |
-| `git-pr.md` | PR format, grooming, review feedback | `dev10x:gh-pr-create` skill, PR hygiene CI | Mandatory for all PRs |
-| `git-jtbd.md` | Job Story format, principles, examples | `dev10x:jtbd` skill, PR hygiene CI | Mandatory for JTBD decisions |
-| `review-guidelines.md` | Review workflow, threads, summaries | `dev10x:gh-pr-review` skill, code review CI | Mandatory for PR reviews |
+| `git-commits.md` | Commit format, gitmoji, atomic commits | `Dev10x:git-commit` skill, PR hygiene CI | Mandatory for all commits |
+| `git-pr.md` | PR format, grooming, review feedback | `Dev10x:gh-pr-create` skill, PR hygiene CI | Mandatory for all PRs |
+| `git-jtbd.md` | Job Story format, principles, examples | `Dev10x:jtbd` skill, PR hygiene CI | Mandatory for JTBD decisions |
+| `review-guidelines.md` | Review workflow, threads, summaries | `Dev10x:gh-pr-review` skill, code review CI | Mandatory for PR reviews |
 | `review-checks-common.md` | False positives, verification | Review agent specs, code review CI | Mandatory for code review agents |
 | `eval-schema.md` | Evaluation assertions format for skills | `reviewer-skill.md` (item 19) | Decision gate validation |
 | `skill-invocation.md` | Skill() syntax, named parameters, delegation | `reviewer-skill.md` (items 8g, 9a) | Mandatory for skill reviews |

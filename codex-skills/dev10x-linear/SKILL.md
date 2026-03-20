@@ -1,9 +1,9 @@
 ---
-name: dev10x-linear
+name: Dev10x-linear
 description: Linear issue tracker operations via MCP tools. Get, create, update issues and list comments. Documentation-only skill — no scripts.
 ---
 
-# dev10x:linear — Linear Issue Tracker
+# Dev10x:linear — Linear Issue Tracker
 
 Documentation-only skill centralizing Linear MCP tool references.
 No scripts — all operations use MCP tools directly.

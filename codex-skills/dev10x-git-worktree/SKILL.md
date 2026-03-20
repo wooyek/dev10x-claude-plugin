@@ -1,11 +1,11 @@
 ---
-name: dev10x-git-worktree
+name: Dev10x-git-worktree
 description: Create git worktrees for clean workspace isolation. Offers two modes: native EnterWorktree (switches CWD in current session) or external worktree (IDE-isolated, requires restarting claude in new dir).
 ---
 
 # Git Worktree
 
-**Announce:** "Using dev10x:git-worktree skill to create an isolated workspace."
+**Announce:** "Using Dev10x:git-worktree skill to create an isolated workspace."
 
 ## Workflow
 
@@ -24,7 +24,7 @@ The branch name is needed by both paths. Follow project naming conventions:
 Present the two options with AskUserQuestion:
 
 - **Same session** (Recommended) — native `EnterWorktree` tool switches CWD
-  immediately; all subsequent git commands and skills (`commit`, `dev10x:gh-pr-create`,
+  immediately; all subsequent git commands and skills (`commit`, `Dev10x:gh-pr-create`,
   `branch:groom`) work without flags; worktree lives inside `.claude/worktrees/`
   (excluded from hook copies and `.gitignore`)
 - **External + new session** — worktree created at `../.worktrees/<project>-NN`
@@ -72,7 +72,7 @@ Default pattern: `../.worktrees/<project-basename>-NN`
 Calculate the next available path:
 
 ```bash
-$HOME/.codex/skills/dev10x-git-worktree/scripts/next-worktree-name.sh
+$HOME/.codex/skills/Dev10x-git-worktree/scripts/next-worktree-name.sh
 ```
 
 Ask user to confirm (AskUserQuestion):
@@ -87,7 +87,7 @@ See **Hook Templates** section below.
 ### Step B3: Create the Worktree
 
 ```bash
-$HOME/.codex/skills/dev10x-git-worktree/scripts/create-worktree.sh \
+$HOME/.codex/skills/Dev10x-git-worktree/scripts/create-worktree.sh \
   <worktree-path> <branch-name> [repo-root]
 ```
 
@@ -99,7 +99,7 @@ The `post-checkout` hook fires automatically after this script runs.
 ### Step B4: Install SessionEnd Cleanup Hook
 
 ```bash
-$HOME/.codex/skills/dev10x-git-worktree/scripts/setup-session-end-hook.sh <worktree-path>
+$HOME/.codex/skills/Dev10x-git-worktree/scripts/setup-session-end-hook.sh <worktree-path>
 ```
 
 This writes a SessionEnd hook into `<worktree-path>/.claude/settings.local.json`
@@ -109,7 +109,7 @@ that prompts the user to remove the worktree when the new session ends.
 
 Claude Code sessions have a fixed CWD. `cd` inside a Bash call does not
 persist, so every subsequent git command would need `git -C <path>` and
-skills like `dev10x:gh-pr-create` (whose `verify-state.sh` runs plain `git`) would fail.
+skills like `Dev10x:gh-pr-create` (whose `verify-state.sh` runs plain `git`) would fail.
 
 Print this message and **stop — do not continue with ticket workflow steps**:
 

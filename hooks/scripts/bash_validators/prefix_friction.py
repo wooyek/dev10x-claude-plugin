@@ -93,7 +93,7 @@ ENV_PREFIX_MSG = (
     "      git develop-rebase    \u2014 interactive rebase onto develop\n"
     "  \u2022 For rebase --continue, no env prefix is needed:\n"
     "      git rebase --continue\n\n"
-    "If aliases are missing, run: /dev10x:git-alias-setup"
+    "If aliases are missing, run: /Dev10x:git-alias-setup"
 )
 
 MERGE_BASE_MSG = (
@@ -106,7 +106,7 @@ MERGE_BASE_MSG = (
     "    git {{branch}}-log       \u2014 log since diverging from branch\n"
     "    git {{branch}}-diff      \u2014 diff since diverging from branch\n"
     "    git {{branch}}-rebase    \u2014 interactive rebase onto branch\n\n"
-    "If aliases are missing, run: /dev10x:git-alias-setup"
+    "If aliases are missing, run: /Dev10x:git-alias-setup"
 )
 
 

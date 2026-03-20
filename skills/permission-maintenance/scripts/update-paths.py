@@ -11,7 +11,7 @@ Modes:
   - --generalize: Replace session-specific args with wildcard patterns
 
 Config lookup order:
-  1. ~/.claude/skills/dev10x:permission-maintenance/projects.yaml (userspace)
+  1. ~/.claude/skills/Dev10x:permission-maintenance/projects.yaml (userspace)
   2. ${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/projects.yaml (plugin default)
 """
 
@@ -24,7 +24,7 @@ from pathlib import Path
 import yaml
 
 USERSPACE_CONFIG = (
-    Path.home() / ".claude" / "skills" / "dev10x:permission-maintenance" / "projects.yaml"
+    Path.home() / ".claude" / "skills" / "Dev10x:permission-maintenance" / "projects.yaml"
 )
 PLUGIN_CONFIG = Path(__file__).resolve().parent.parent / "projects.yaml"
 VERSION_PATTERN = re.compile(r"(plugins/cache/WooYek/Dev10x/)(\d+\.\d+\.\d+)")

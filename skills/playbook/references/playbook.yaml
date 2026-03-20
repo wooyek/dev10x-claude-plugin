@@ -1,7 +1,7 @@
 # playbook.yaml — Reusable play templates for orchestration skills
 # Default location: ${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml
 # User overrides: ~/.claude/projects/<project>/memory/playbooks/<skill-key>.yaml
-# Managed by dev10x:playbook skill.
+# Managed by Dev10x:playbook skill.
 #
 # Structure:
 #   fragments  — reusable step sequences (see below)
@@ -46,52 +46,52 @@ fragments:
         Self-review the current branch to catch issues before
         creating the PR. In unattended mode, auto-fix all
         findings. In attended mode, present findings for approval.
-      skills: [dev10x:review, dev10x:review-fix]
+      skills: [Dev10x:review, Dev10x:review-fix]
     - subject: Commit outstanding changes
       type: detailed
       prompt: >
         Stage and commit any uncommitted work from the review
         fixes. Use atomic commits with gitmoji + ticket ID.
         Auto-advance — do not pause after committing.
-      skills: [dev10x:git-commit]
+      skills: [Dev10x:git-commit]
     - subject: Create draft PR
       type: detailed
       prompt: >
         Create a draft PR immediately. The PR body and commit
         history can be refined later. Auto-advance — do not
         block on PR preview approval.
-      skills: [dev10x:gh-pr-create]
+      skills: [Dev10x:gh-pr-create]
     - subject: Monitor CI
       type: detailed
       prompt: >
         Watch CI checks on the draft PR. Fix any failures
         with fixup commits and push.
-      skills: [dev10x:gh-pr-monitor]
+      skills: [Dev10x:gh-pr-monitor]
     - subject: Apply fixups to review comments
       type: epic
       prompt: >
         Address each review comment with a fixup commit. Validate
         before replying. Do not auto-resolve threads.
-      skills: [dev10x:gh-pr-respond]
+      skills: [Dev10x:gh-pr-respond]
     - subject: Groom commit history
       type: detailed
       prompt: >
         Squash fixups, reorder for logical flow, ensure each
         commit message follows gitmoji + JTBD conventions.
-      skills: [dev10x:git-groom]
+      skills: [Dev10x:git-groom]
     - subject: Update PR description
       type: detailed
       prompt: >
         Update the draft PR title and body with the final Job
         Story, linked commit list, and checklist. Mark as ready
         for review if all checks pass.
-      skills: [dev10x:gh-pr-create]
+      skills: [Dev10x:gh-pr-create]
     - subject: Request review
       type: detailed
       prompt: >
         Assign reviewers and post Slack notification per project
         config.
-      skills: [dev10x:gh-pr-request-review]
+      skills: [Dev10x:gh-pr-request-review]
     - subject: Verify acceptance criteria
       type: detailed
       prompt: >
@@ -105,34 +105,34 @@ fragments:
       prompt: >
         Self-review changes to catch issues before pushing.
         Fix any findings before proceeding.
-      skills: [dev10x:review, dev10x:review-fix]
+      skills: [Dev10x:review, Dev10x:review-fix]
     - subject: Commit outstanding changes
       type: detailed
       prompt: >
         Stage and commit any uncommitted fixup work.
         Auto-advance — do not pause after committing.
-      skills: [dev10x:git-commit]
+      skills: [Dev10x:git-commit]
     - subject: Monitor CI
       type: detailed
       prompt: >
         Push changes and monitor CI. Fix any failures
         introduced by the fixups.
-      skills: [dev10x:gh-pr-monitor]
+      skills: [Dev10x:gh-pr-monitor]
     - subject: Groom commit history
       type: detailed
       prompt: Squash fixups into their parent commits.
-      skills: [dev10x:git-groom]
+      skills: [Dev10x:git-groom]
     - subject: Update PR description
       type: detailed
       prompt: >
         Update the PR with final linked commits and checklist.
-      skills: [dev10x:gh-pr-create]
+      skills: [Dev10x:gh-pr-create]
     - subject: Request re-review
       type: detailed
       prompt: >
         Notify reviewers that feedback has been addressed
         and request re-review.
-      skills: [dev10x:gh-pr-request-review]
+      skills: [Dev10x:gh-pr-request-review]
     - subject: Verify acceptance criteria
       type: detailed
       prompt: >
@@ -154,14 +154,14 @@ defaults:
           Create a feature branch from develop. Skip if a matching
           branch already exists. In a worktree with a generic
           branch, create a work-specific branch.
-        skills: [dev10x:ticket-branch]
+        skills: [Dev10x:ticket-branch]
       - subject: Draft Job Story
         type: detailed
         prompt: >
           Invoke in attended mode. Pass gathered context to avoid
           redundant API calls. If approved, write back to the
           ticket as a comment.
-        skills: [dev10x:jtbd]
+        skills: [Dev10x:jtbd]
       - subject: Design implementation approach
         type: epic
         prompt: >
@@ -221,7 +221,7 @@ defaults:
         prompt: >
           Create a feature branch from develop. Skip if a matching
           branch already exists.
-        skills: [dev10x:ticket-branch]
+        skills: [Dev10x:ticket-branch]
       - subject: Reproduce the issue
         type: detailed
         prompt: >
@@ -296,7 +296,7 @@ defaults:
         prompt: >
           Batch-process remaining unaddressed comments using
           the gh-pr-respond skill.
-        skills: [dev10x:gh-pr-respond]
+        skills: [Dev10x:gh-pr-respond]
       - fragment: shipping-pipeline-continuation
 
   local-only:

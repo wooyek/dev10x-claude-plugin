@@ -1,8 +1,8 @@
 ---
-name: dev10x:gh-pr-create
+name: Dev10x:gh-pr-create
 description: Create a GitHub pull request for the current branch with issue tracker integration (GitHub Issues, Linear, or JIRA). Sources or generates a JTBD Job Story for the PR description, extracts ticket info from branch name, pushes the branch, creates a draft PR with Job Story, commit list, and issue tracker link, posts summary comment, and opens in browser.
 user-invocable: true
-invocation-name: dev10x:gh-pr-create
+invocation-name: Dev10x:gh-pr-create
 allowed-tools:
   - AskUserQuestion
   - mcp__plugin_Dev10x_cli__detect_base_branch
@@ -54,14 +54,14 @@ appropriate reason). This preserves supervisor visibility into
 the full workflow.
 
 **Unattended mode:** When this skill is invoked by an
-orchestrating skill (e.g., `dev10x:work-on`, `dev10x:git-promote`,
+orchestrating skill (e.g., `Dev10x:work-on`, `Dev10x:git-promote`,
 `test:fix-flaky`) and the orchestrator has already approved the
 work plan, all interactive decision gates are bypassed:
 - PR preview gate → skip (orchestrator already approved the plan)
 - Title → auto-generate from commit(s) (single-commit: use
   title; multi-commit: derive from JTBD "so I can" clause)
 - Job Story → auto-generate inline for simple changes; reuse
-  session context for complex ones (skip full `dev10x:jtbd` skill)
+  session context for complex ones (skip full `Dev10x:jtbd` skill)
 - Pre-PR checks → still run (safety gate, not interactive)
 - Browser open → skip
 - Next steps → return control to orchestrator immediately
@@ -73,8 +73,8 @@ high-level progress.
 
 Detection: unattended mode activates when **both** conditions
 are met:
-1. The skill is invoked via `Skill(dev10x:gh-pr-create)` (not
-   directly by the user via `/dev10x:gh-pr-create`)
+1. The skill is invoked via `Skill(Dev10x:gh-pr-create)` (not
+   directly by the user via `/Dev10x:gh-pr-create`)
 2. The caller is executing a plan step with an active task
    list (i.e., an orchestrating skill like `work-on`)
 
@@ -250,8 +250,8 @@ If none found, generate a Job Story:
 
 - **For simple/trivial fixes** (flaky tests, typos, single-line changes):
   generate the Job Story inline in `**When** / **I want to** / **so I can**`
-  format without invoking the full `dev10x:jtbd` skill.
-- **For features, bug fixes, and multi-commit PRs**: follow the `dev10x:jtbd`
+  format without invoking the full `Dev10x:jtbd` skill.
+- **For features, bug fixes, and multi-commit PRs**: follow the `Dev10x:jtbd`
   base skill workflow:
   1. Gather context (ticket, parent ticket, diff)
   2. Identify the situation (who, trigger, current pain)
@@ -369,7 +369,7 @@ Next steps:
 - Handle existing PR case gracefully
 - Link to issue tracker ticket in PR body (when FIXES_URL is available)
 - **PR body starts with the Job Story** — sourced from ticket description,
-  ticket comments, or generated fresh using the `dev10x:jtbd` base skill.
+  ticket comments, or generated fresh using the `Dev10x:jtbd` base skill.
 - **PR body contains the checklist** — Job Story + separator + commit
   list + issue tracker link + separator + checklist.
 - Open PR in browser for immediate review
@@ -379,6 +379,6 @@ Next steps:
 This skill is designed to be used standalone or as part of larger workflows:
 
 - **ticket:work-on**: Could add an optional final step to create PR when work is done
-- **dev10x:git-promote**: Uses this skill for Push and Create PR
+- **Dev10x:git-promote**: Uses this skill for Push and Create PR
 - **test:fix-flaky**: Uses this skill for Create PR
 - **Standalone usage**: User manually invokes when ready to create PR

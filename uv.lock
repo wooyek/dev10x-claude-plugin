@@ -12,7 +12,7 @@ wheels = [
 ]
 
 [[package]]
-name = "dev10x-ai"
+name = "Dev10x-ai"
 version = "0.31.0.dev0"
 source = { virtual = "." }
 

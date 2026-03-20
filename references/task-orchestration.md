@@ -92,7 +92,7 @@ TaskUpdate(taskId, status="completed")
 ### Delegated Invocation Exception
 
 When a skill is invoked as a subtask of a parent orchestrator (e.g.,
-`dev10x:work-on`), internal `TaskCreate` calls MAY be skipped. The
+`Dev10x:work-on`), internal `TaskCreate` calls MAY be skipped. The
 parent orchestrator owns the task lifecycle and has already created
 tasks that track the child skill's progress. Duplicate `TaskCreate`
 calls would clutter the task list with redundant entries.
@@ -305,7 +305,7 @@ Set dependencies:
 - Multiple independent analysis phases (e.g., 5+ parallel subagents)
 - Partial dependencies between phases (some are independent, others depend on earlier outputs)
 - Long-running workflows where parallelization saves significant time
-- Example: `dev10x:skill-audit` with 5 parallel analysis phases + dependency on Phase 1 output
+- Example: `Dev10x:skill-audit` with 5 parallel analysis phases + dependency on Phase 1 output
 
 **Phase reference pattern:**
 Create a "Phase Reference" section in SKILL.md that documents each phase's

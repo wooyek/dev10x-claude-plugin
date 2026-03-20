@@ -1,6 +1,6 @@
 ---
-name: dev10x:linear
-invocation-name: dev10x:linear
+name: Dev10x:linear
+invocation-name: Dev10x:linear
 description: Linear issue tracker operations via MCP tools. Get, create, update issues and list comments. Documentation-only skill — no scripts.
 user-invocable: false
 allowed-tools:
@@ -21,7 +21,7 @@ allowed-tools:
   - mcp__claude_ai_Linear__list_milestones
 ---
 
-# dev10x:linear — Linear Issue Tracker
+# Dev10x:linear — Linear Issue Tracker
 
 ## Orchestration
 

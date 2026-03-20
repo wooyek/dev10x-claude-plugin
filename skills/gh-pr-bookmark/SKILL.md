@@ -1,19 +1,19 @@
 ---
-name: dev10x:gh-pr-bookmark
+name: Dev10x:gh-pr-bookmark
 description: >
   Post a rich session bookmark comment on a PR — captures session ID,
   review thread status, current state, and next steps so the next
   session can pick up where this one left off.
 user-invocable: true
-invocation-name: dev10x:gh-pr-bookmark
+invocation-name: Dev10x:gh-pr-bookmark
 allowed-tools:
   - Bash(gh:*)
-  - Skill(dev10x:park)
+  - Skill(Dev10x:park)
 ---
 
-# dev10x:gh-pr-bookmark — PR Session Bookmark
+# Dev10x:gh-pr-bookmark — PR Session Bookmark
 
-**Announce:** "Using dev10x:gh-pr-bookmark to save session state to the PR."
+**Announce:** "Using Dev10x:gh-pr-bookmark to save session state to the PR."
 
 ## Orchestration
 
@@ -28,7 +28,7 @@ Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ## Overview
 
-Thin wrapper around `dev10x:park` that pre-selects the **PR session
+Thin wrapper around `Dev10x:park` that pre-selects the **PR session
 bookmark** target. Use at end-of-session or when pausing work on a PR.
 
 ## Workflow
@@ -41,28 +41,28 @@ gh pr list --head "$(git branch --show-current)" --state open --json number,url 
 
 If no open PR found, tell the user and stop.
 
-### 2. Delegate to dev10x:park
+### 2. Delegate to Dev10x:park
 
-Invoke `dev10x:park` with:
+Invoke `Dev10x:park` with:
 - **Item**: the user's description (or "Continuing PR review" if none)
 - **Pre-selected target**: `PR session bookmark`
 
 Skip the target selection prompt — this skill always routes to the
-PR session bookmark target in `dev10x:park`.
+PR session bookmark target in `Dev10x:park`.
 
 ### 3. Done
 
-`dev10x:park` handles data gathering, composition, posting, and
+`Dev10x:park` handles data gathering, composition, posting, and
 confirmation.
 
 ## Usage
 
 ```
-/dev10x:gh-pr-bookmark                          # bookmark current PR
-/dev10x:gh-pr-bookmark Wait for CI then merge   # bookmark with custom note
+/Dev10x:gh-pr-bookmark                          # bookmark current PR
+/Dev10x:gh-pr-bookmark Wait for CI then merge   # bookmark with custom note
 ```
 
 ## See Also
 
-- `dev10x:park` — full deferral router with all targets
-- `dev10x:session-wrap-up` — end-of-session orchestrator that may call this
+- `Dev10x:park` — full deferral router with all targets
+- `Dev10x:session-wrap-up` — end-of-session orchestrator that may call this

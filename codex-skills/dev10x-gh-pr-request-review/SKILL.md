@@ -1,5 +1,5 @@
 ---
-name: dev10x-gh-pr-request-review
+name: Dev10x-gh-pr-request-review
 description: Request review on a GitHub PR from teams or users
 ---
 

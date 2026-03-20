@@ -1,8 +1,8 @@
 ---
-name: dev10x:skill-audit
+name: Dev10x:skill-audit
 description: Audit a session's skill usage, compliance, and extract lessons learned. Dispatches parallel subagents for analysis phases — run from a separate terminal.
 user-invocable: true
-invocation-name: dev10x:skill-audit
+invocation-name: Dev10x:skill-audit
 allowed-tools:
   - Agent
   - AskUserQuestion
@@ -150,7 +150,7 @@ When a trigger is detected, find the current session's JSONL path and suggest:
 
 > "I've noticed [trigger description]. Open a new terminal and run:
 > ```
-> claude '/dev10x:skill-audit <jsonl-path>'
+> claude '/Dev10x:skill-audit <jsonl-path>'
 > ```
 > to capture these as improvements."
 
@@ -430,7 +430,7 @@ For each candidate, note:
 
 | Skill | Inline block (type + line count) | Suggested script path |
 |-------|----------------------------------|-----------------------|
-| `dev10x:some-skill` | 12-line bash loop | already extracted ✓ |
+| `Dev10x:some-skill` | 12-line bash loop | already extracted ✓ |
 | `some:skill` | 8-line curl + jq pipeline | `scripts/fetch-data.sh` |
 
 Also scan the session transcript for Bash tool calls that were multi-step
@@ -464,7 +464,7 @@ a new rule). Structural friction needs skill updates and/or hooks.
 | `HOOK_BLOCKED_RETRY` | `cat <<'EOF'...` or `echo >` | Hook rejects it; Claude retries anyway | Update skill to use Write + `-F` |
 | `NUISANCE_APPROVE` | Safe command prompted 3+ times | Allow rule exists but pattern doesn't match | Widen existing rule or add new one |
 | `UNNECESSARY_CD_WORKTREE` | `cd /worktree/path && command` | `cd` shifts prefix; CWD is already the worktree | Drop the `cd` — session is already there |
-| `WORKTREE_CWD_NOT_SWITCHED` | Commands run in main repo after worktree creation | Worktree creation should switch CWD | Investigate `dev10x:git-worktree` — CWD switch may have failed |
+| `WORKTREE_CWD_NOT_SWITCHED` | Commands run in main repo after worktree creation | Worktree creation should switch CWD | Investigate `Dev10x:git-worktree` — CWD switch may have failed |
 
 **Detection algorithm:**
 
@@ -507,13 +507,13 @@ a new rule). Structural friction needs skill updates and/or hooks.
    the worktree root is always redundant. Classification:
    `UNNECESSARY_CD_WORKTREE`. Fix: drop the `cd` prefix.
 
-9. **Worktree CWD not switched**: After a `dev10x:git-worktree`
+9. **Worktree CWD not switched**: After a `Dev10x:git-worktree`
    invocation in the transcript, check whether subsequent Bash
    commands target the new worktree path or still operate in the
    original repo. If commands use `cd <worktree>` or `git -C
    <worktree>` after creation, the CWD switch may have failed.
    Classification: `WORKTREE_CWD_NOT_SWITCHED`. Fix: investigate
-   `dev10x:git-worktree` skill — the EnterWorktree tool should have
+   `Dev10x:git-worktree` skill — the EnterWorktree tool should have
    switched the session directory automatically.
 
 **Output format:**
@@ -526,7 +526,7 @@ a new rule). Structural friction needs skill updates and/or hooks.
 | 4 | `git -C /work/myproject log` | PREFIX_POISONED_GIT_C | `-C` breaks `Bash(git log:*)` | Skill: use CWD |
 | 5 | `pytest src/` (3x) | NUISANCE_APPROVE | No matching rule | Allow: `Bash(pytest:*)` |
 | 6 | `cd /work/.worktrees/proj && pytest` | UNNECESSARY_CD_WORKTREE | CWD is already the worktree | Drop the `cd` |
-| 7 | `git -C /work/.worktrees/proj log` after worktree create | WORKTREE_CWD_NOT_SWITCHED | CWD switch failed | Fix `dev10x:git-worktree` skill |
+| 7 | `git -C /work/.worktrees/proj log` after worktree create | WORKTREE_CWD_NOT_SWITCHED | CWD switch failed | Fix `Dev10x:git-worktree` skill |
 
 **10. Wrapper discovery**: For each PREFIX_POISONED or chained
 command finding, check whether a wrapper already exists that
@@ -570,7 +570,7 @@ for allow-rule matching."
 ```
 
 When no wrapper exists, propose creating one AND a memory update
-documenting it. For git aliases, reference `dev10x:git-alias-setup`
+documenting it. For git aliases, reference `Dev10x:git-alias-setup`
 as the canonical setup mechanism rather than proposing raw
 `git config` commands.
 
@@ -678,14 +678,14 @@ first, then route based on result:
 ```
 Fix type: MEMORY_UPDATE + SKILL_UPDATE
 Wrapper: git develop-log (git alias)
-Skill: dev10x:some-skill (line 38)
+Skill: Dev10x:some-skill (line 38)
 Before: git log $(git merge-base develop HEAD)..HEAD
 After:  git develop-log
 Memory: "Use `git develop-log` — wraps the subshell"
 ```
 
 **2b. No wrapper exists (`CREATE_WRAPPER_ALIAS` / `CREATE_WRAPPER_SCRIPT`):**
-1. Propose creating the wrapper (alias via `dev10x:git-alias-setup`
+1. Propose creating the wrapper (alias via `Dev10x:git-alias-setup`
    or script in `~/.claude/tools/`)
 2. Propose SKILL_UPDATE replacing the toxic pattern
 3. Propose MEMORY_UPDATE documenting the new wrapper
@@ -695,7 +695,7 @@ Memory: "Use `git develop-log` — wraps the subshell"
 ```
 Fix type: CREATE_WRAPPER + SKILL_UPDATE + HOOKIFY_RULE
 Proposed: ~/.claude/tools/export-with-env.sh
-Skill: dev10x:some-skill (line 38)
+Skill: Dev10x:some-skill (line 38)
 Before: ENV=val ~/.claude/skills/foo/scripts/run.sh
 After:  ~/.claude/tools/export-with-env.sh
 Allow:  Bash(~/.claude/tools/export-with-env:*)
@@ -734,7 +734,7 @@ For each REDUNDANT_UV_PREFIX finding:
 
 ```
 Fix type: SKILL_UPDATE
-Skill: dev10x:some-skill (line 42)
+Skill: Dev10x:some-skill (line 42)
 Before: uv run --script ~/.claude/tools/gh-pr-comments.py get ...
 After:  ~/.claude/tools/gh-pr-comments.py get ...
 Prereq: script has #!/usr/bin/env -S uv run --script + chmod +x
@@ -793,8 +793,8 @@ for consistency.
 | 1 | `tools/gh-pr-comments.py` | `#!/usr/bin/env python3` | WRONG_SHEBANG | Change to uv shebang + PEP 723 |
 | 2 | `tools/upload-screenshots.py` | Has deps but python3 shebang | WRONG_SHEBANG | Change shebang (deps already in PEP 723) |
 | 3 | `scripts/fernet-decrypt.py` | mode 644 | NOT_EXECUTABLE | `chmod +x` |
-| 4 | `dev10x:some-skill/SKILL.md` | `uv run --script ~/.claude/tools/...` | REDUNDANT_UV_PREFIX | Drop prefix |
-| 5 | `dev10x:some-skill/scripts/notify.sh` | `uv run --script ...slack-notify.py` | REDUNDANT_UV_PREFIX_SHELL | Drop prefix |
+| 4 | `Dev10x:some-skill/SKILL.md` | `uv run --script ~/.claude/tools/...` | REDUNDANT_UV_PREFIX | Drop prefix |
+| 5 | `Dev10x:some-skill/scripts/notify.sh` | `uv run --script ...slack-notify.py` | REDUNDANT_UV_PREFIX_SHELL | Drop prefix |
 
 **Recommendations:**
 
@@ -827,12 +827,12 @@ pattern as skill scripts under `Bash(~/.claude/skills/<name>/scripts/:*)`.
 
 | # | Classification | Fix Type | Target | Action |
 |---|---|---|---|---|
-| 1 | PREFIX_POISONED (wrapper exists) | Memory + Skill | `dev10x:some-skill` | USE_EXISTING_WRAPPER: `git develop-log` |
+| 1 | PREFIX_POISONED (wrapper exists) | Memory + Skill | `Dev10x:some-skill` | USE_EXISTING_WRAPPER: `git develop-log` |
 | 2 | PREFIX_POISONED (no wrapper) | Wrapper + Skill + Hook | `~/.claude/tools/` | CREATE_WRAPPER_SCRIPT + hookify |
 | 3 | HOOK_BLOCKED | Skill + Memory | `commit` | Replace heredoc with Write + -F |
 | 4 | MISSING_RULE | Allow rule | `settings.local.json` | Add `Bash(pytest:*)` |
 | 5 | CORRECTLY_PROMPTED | None | — | `git push` should require approval |
-| 6 | REDUNDANT_UV_PREFIX | Skill update | `dev10x:some-skill` | Drop `uv run --script` prefix |
+| 6 | REDUNDANT_UV_PREFIX | Skill update | `Dev10x:some-skill` | Drop `uv run --script` prefix |
 | 7 | WRONG_SHEBANG | Script fix | `tools/script.py` | Add uv shebang + PEP 723 |
 
 ---
@@ -874,7 +874,7 @@ Merge them into a unified view before presenting proposals.
 
 2. Use AskUserQuestion to confirm each change (or batch related changes).
 
-3. If approved, edit the files. For new skills, suggest using `/dev10x:skill-create`.
+3. If approved, edit the files. For new skills, suggest using `/Dev10x:skill-create`.
 
 4. Generate a summary report:
    - Total actions reviewed
@@ -911,12 +911,12 @@ If no upstream-relevant findings exist, mark Phase 7 completed.
 **REQUIRED: invoke `AskUserQuestion` tool** (not a plain text
 question) to ask whether to file upstream. Present the count
 of upstream-relevant findings and two options: "File issue
-(Recommended)" to delegate to `dev10x:audit-report`, or
+(Recommended)" to delegate to `Dev10x:audit-report`, or
 "Skip" to keep findings local only.
 
 If the user selects **Skip**, mark Phase 7 completed and end.
 
-**Sub-step C: Delegate to dev10x:audit-report**
+**Sub-step C: Delegate to Dev10x:audit-report**
 
 Write a findings summary to a temp file so the delegated
 skill can read it without needing the full transcript:
@@ -929,10 +929,10 @@ Write the upstream-relevant findings table and proposed fixes
 to that file, then invoke:
 
 ```
-Skill(skill="dev10x:audit-report", args="<findings-file-path>")
+Skill(skill="Dev10x:audit-report", args="<findings-file-path>")
 ```
 
-The `dev10x:audit-report` skill handles version detection,
+The `Dev10x:audit-report` skill handles version detection,
 issue body generation, and `gh issue create`. Mark Phase 7
 completed after delegation returns.
 
@@ -951,7 +951,7 @@ completed after delegation returns.
   finding, propose: (1) moving the block to `~/.claude/skills/<skill>/scripts/`,
   (2) updating SKILL.md to call the script, (3) adding a
   `Bash(~/.claude/skills/<skill>/scripts/:*)` allow rule so future runs need zero
-  approval prompts. Reference `dev10x:some-skill/scripts/triage.py` as the canonical
+  approval prompts. Reference `Dev10x:some-skill/scripts/triage.py` as the canonical
   example of a skill that already does this correctly.
 - **Structural before rule-based**: When analyzing permission friction, always
   check Step 4c toxicity first. A PREFIX_POISONED command should never get a
@@ -977,6 +977,6 @@ completed after delegation returns.
   local skills, memory updates, and permission rule changes are
   local-only and never filed upstream.
 - **Delegation over embedding**: Phase 7 delegates issue filing to
-  `dev10x:audit-report` rather than implementing it inline. This
+  `Dev10x:audit-report` rather than implementing it inline. This
   keeps skill-audit focused on analysis and lets users who don't
   want upstream reporting skip the skill entirely.

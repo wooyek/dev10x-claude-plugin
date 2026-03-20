@@ -1,5 +1,5 @@
 ---
-name: dev10x-db-psql
+name: Dev10x-db-psql
 description: Safe read-only psql wrapper for Claude Code. Provides db.sh with SQL validation hook so database queries are safe and auditable. Configure databases in databases.yaml with env var or keyring backends.
 ---
 
@@ -15,9 +15,9 @@ Safe read-only psql wrapper with two layers of protection:
 ## How to Use
 
 ```bash
-$HOME/.codex/skills/dev10x-db-psql/scripts/db.sh <database> "<SQL>"
-$HOME/.codex/skills/dev10x-db-psql/scripts/db.sh <database> -f <file>
-$HOME/.codex/skills/dev10x-db-psql/scripts/db.sh --list
+$HOME/.codex/skills/Dev10x-db-psql/scripts/db.sh <database> "<SQL>"
+$HOME/.codex/skills/Dev10x-db-psql/scripts/db.sh <database> -f <file>
+$HOME/.codex/skills/Dev10x-db-psql/scripts/db.sh --list
 ```
 
 ## Common Mistakes (DO NOT do these)
@@ -120,6 +120,6 @@ Never attempt to bypass the safety checks.
 
 ## Integration
 
-- Uses **`dev10x:db`** for query planning and schema discovery
+- Uses **`Dev10x:db`** for query planning and schema discovery
 - Project-specific skills (e.g., `tt:db`) provide `databases.yaml`
   with aliases and schema references

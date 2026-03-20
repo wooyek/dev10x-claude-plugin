@@ -1,5 +1,5 @@
 ---
-name: dev10x-gh-pr-review
+name: Dev10x-gh-pr-review
 description: Review a GitHub pull request and post findings with inline comments. Fetches PR diff, reads changed files, checks for interface impact, applies project review guidelines, and posts a COMMENT review to GitHub.
 ---
 
@@ -169,12 +169,12 @@ From `review-guidelines.md` and `review-checks-common.md`:
 ## Integration
 
 ```
-dev10x:gh-pr-review
+Dev10x:gh-pr-review
 ├─ Standalone review of any GitHub PR
 └─ Posts findings directly to GitHub
 ```
 
 Complements:
 - `/review` — self-review before PR creation (no GitHub posting)
-- `dev10x-gh-pr-respond` — respond to review comments on YOUR PR
-- `dev10x-gh-pr-triage` — validate a single review comment
+- `Dev10x-gh-pr-respond` — respond to review comments on YOUR PR
+- `Dev10x-gh-pr-triage` — validate a single review comment

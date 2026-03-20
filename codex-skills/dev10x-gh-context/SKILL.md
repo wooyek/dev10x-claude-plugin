@@ -1,9 +1,9 @@
 ---
-name: dev10x-gh-context
-description: Use when detecting PR context (number, repo, URL, branch) from a URL, PR number, or current branch — so skills like dev10x:gh-pr-monitor always get the correct target PR even in multi-worktree setups
+name: Dev10x-gh-context
+description: Use when detecting PR context (number, repo, URL, branch) from a URL, PR number, or current branch — so skills like Dev10x:gh-pr-monitor always get the correct target PR even in multi-worktree setups
 ---
 
-# dev10x:gh-context — GitHub CLI helpers
+# Dev10x:gh-context — GitHub CLI helpers
 
 Shell script wrappers for common `gh` operations. Pre-approved via
 `allowed-tools` so they run without permission prompts.
@@ -31,7 +31,7 @@ Detects PR number, repo, URL, and branch. Accepts a GitHub PR URL, a
 bare PR number, or nothing (detects from current branch).
 
 ```bash
-$HOME/.codex/skills/dev10x-gh-context/scripts/gh-pr-detect.sh "$ARG"
+$HOME/.codex/skills/Dev10x-gh-context/scripts/gh-pr-detect.sh "$ARG"
 ```
 
 | Input | Behaviour |
@@ -60,11 +60,11 @@ allow-rule prefix matching.
 
 ```bash
 # ✅ Run directly — script path is first token, matches allow rules
-$HOME/.codex/skills/dev10x-gh-context/scripts/gh-pr-detect.sh "$ARG"
+$HOME/.codex/skills/Dev10x-gh-context/scripts/gh-pr-detect.sh "$ARG"
 # Parse PR_NUMBER, REPO, PR_URL, BRANCH from stdout
 
 # ❌ NEVER use source <() — breaks allow rules, triggers permission prompt
-source <($HOME/.codex/skills/dev10x-gh-context/scripts/gh-pr-detect.sh "$ARG")
+source <($HOME/.codex/skills/Dev10x-gh-context/scripts/gh-pr-detect.sh "$ARG")
 ```
 
 When a single Bash call needs the variables (e.g., chaining with
@@ -72,7 +72,7 @@ another command), use the temp-file pattern:
 
 ```bash
 ENVFILE=$(/tmp/claude/bin/mktmp.sh git pr-detect .env)
-$HOME/.codex/skills/dev10x-gh-context/scripts/gh-pr-detect.sh "$ARG" > "$ENVFILE"
+$HOME/.codex/skills/Dev10x-gh-context/scripts/gh-pr-detect.sh "$ARG" > "$ENVFILE"
 source "$ENVFILE"
 echo "PR #$PR_NUMBER"
 ```
@@ -85,7 +85,7 @@ Detects issue tracker type from a ticket ID using prefix heuristics
 and GitHub autolink references.
 
 ```bash
-$HOME/.codex/skills/dev10x-gh-context/scripts/detect-tracker.sh TICKET_ID
+$HOME/.codex/skills/Dev10x-gh-context/scripts/detect-tracker.sh TICKET_ID
 ```
 
 Detection cascade:
@@ -114,7 +114,7 @@ and parse KEY=VALUE stdout. Do not use `source <(...)`.
 Fetches a GitHub issue as JSON with full details.
 
 ```bash
-$HOME/.codex/skills/dev10x-gh-context/scripts/gh-issue-get.sh NUMBER [REPO]
+$HOME/.codex/skills/Dev10x-gh-context/scripts/gh-issue-get.sh NUMBER [REPO]
 ```
 
 | Param | Required | Default |
@@ -130,7 +130,7 @@ Output: JSON object with fields `number`, `title`, `body`, `state`,
 Returns comments on a GitHub issue as a JSON array.
 
 ```bash
-$HOME/.codex/skills/dev10x-gh-context/scripts/gh-issue-comments.sh NUMBER [REPO]
+$HOME/.codex/skills/Dev10x-gh-context/scripts/gh-issue-comments.sh NUMBER [REPO]
 ```
 
 | Param | Required | Default |

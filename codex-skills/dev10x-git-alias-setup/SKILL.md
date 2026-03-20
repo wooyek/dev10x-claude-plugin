@@ -1,11 +1,11 @@
 ---
-name: dev10x-git-alias-setup
+name: Dev10x-git-alias-setup
 description: Set up git aliases that reduce permission friction by wrapping $(git merge-base ...) subshells into stable command prefixes.
 ---
 
-**Announce:** "Using dev10x:git-alias-setup to configure branch-comparison aliases."
+**Announce:** "Using Dev10x:git-alias-setup to configure branch-comparison aliases."
 
-# dev10x:git-alias-setup — Git Alias Configuration
+# Dev10x:git-alias-setup — Git Alias Configuration
 
 Configures global git aliases that wrap `$(git merge-base ...)` subshells.
 Without these aliases, commands like `git log $(git merge-base develop HEAD)..HEAD`
@@ -17,7 +17,7 @@ the Bash command prefix.
 Run the setup script:
 
 ```bash
-$HOME/.codex/skills/dev10x-git-alias-setup/scripts/git-alias-setup.sh
+$HOME/.codex/skills/Dev10x-git-alias-setup/scripts/git-alias-setup.sh
 ```
 
 ## Aliases Configured

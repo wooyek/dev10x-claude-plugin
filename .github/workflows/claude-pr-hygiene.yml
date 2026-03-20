@@ -64,7 +64,7 @@ jobs:
                  The release notes process collects Job Stories by position — it must
                  come before the commit list and any other content
                - May optionally include a compact commit list with links
-               - Must end with `Fixes: https://github.com/wooyek/dev10x-claude-plugin/issues/NUMBER`
+               - Must end with `Fixes: https://github.com/wooyek/Dev10x-claude-plugin/issues/NUMBER`
                - Should NOT contain summaries or checklists (those go in the first comment)
 
             3. **Commits**

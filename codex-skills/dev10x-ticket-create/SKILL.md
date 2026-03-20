@@ -1,5 +1,5 @@
 ---
-name: dev10x-ticket-create
+name: Dev10x-ticket-create
 description: Create an issue tracker ticket (GitHub issue, Linear, or JIRA) with proper formatting, description structure, and labels. Accepts title, description content, and optional labels. Automatically formats the description with Root Cause, Solution, and Files Changed sections. Returns the created ticket ID.
 ---
 
@@ -23,7 +23,7 @@ Determine which tracker to use. Priority:
 |---------|----------|----------------|
 | GitHub | `gh` CLI | `gh issue create` |
 | Linear | Linear MCP | `mcp__claude_ai_Linear__save_issue` |
-| JIRA | `JIRA_TENANT` + keyring | `jira-update.sh` (requires external `dev10x:jira` skill) |
+| JIRA | `JIRA_TENANT` + keyring | `jira-update.sh` (requires external `Dev10x:jira` skill) |
 
 ## When to Use This Skill
 
@@ -143,13 +143,13 @@ mcp__claude_ai_Linear__save_issue(
 
 **JIRA:**
 
-> Requires the external `dev10x:jira` skill installed at `$HOME/.codex/skills/`.
+> Requires the external `Dev10x:jira` skill installed at `$HOME/.codex/skills/`.
 
 ```bash
-$HOME/.codex/skillsdev10x-jira/scripts/jira-update.sh "$TICKET_ID" /tmp/claude/jira-payload.json
+$HOME/.codex/skillsDev10x-jira/scripts/jira-update.sh "$TICKET_ID" /tmp/claude/jira-payload.json
 ```
 
-> Team-specific IDs are documented in the tracker skill (`dev10x:linear`, `dev10x:jira`).
+> Team-specific IDs are documented in the tracker skill (`Dev10x:linear`, `Dev10x:jira`).
 
 ### Step 6: Return Ticket Information
 

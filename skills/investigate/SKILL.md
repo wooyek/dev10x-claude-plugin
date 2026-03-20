@@ -1,23 +1,23 @@
 ---
-name: dev10x:investigate
+name: Dev10x:investigate
 description: >
   Use when given a Slack URL pointing to a bug report, question, or
   unexpected behaviour — so the issue gets root-caused in the codebase,
   a technical reply with GitHub links is posted back to the thread,
   and a Linear ticket is created when warranted.
 user-invocable: true
-invocation-name: dev10x:investigate
+invocation-name: Dev10x:investigate
 allowed-tools:
   - AskUserQuestion
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/investigate/scripts/parse-slack-url.sh:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/investigate/scripts/reply.sh:*)
-  - Skill(skill="dev10x:ticket-create")
+  - Skill(skill="Dev10x:ticket-create")
   - Skill(skill="pr:review")
 ---
 
-# dev10x:investigate
+# Dev10x:investigate
 
-**Announce:** "Using dev10x:investigate to investigate [brief description of the issue]."
+**Announce:** "Using Dev10x:investigate to investigate [brief description of the issue]."
 
 ## Orchestration
 
@@ -69,7 +69,7 @@ still apply to get context before delegating.
 
 **External dependency:** `pr:review` is a user-level skill (installed at
 `~/.claude/skills/pr-review/`). If unavailable, fall back to
-`dev10x:gh-pr-review` for PR review functionality.
+`Dev10x:gh-pr-review` for PR review functionality.
 
 ## Workflow
 
@@ -150,7 +150,7 @@ Create a ticket when:
 - The issue affects users in production or staging
 - The user asks for one (e.g. "scope a ticket")
 
-Invoke `dev10x:ticket-create` skill with the gathered context.
+Invoke `Dev10x:ticket-create` skill with the gathered context.
 
 ### Step 8 — Mention the Ticket in the Thread
 

@@ -1,8 +1,8 @@
 ---
-name: dev10x:ticket-create
+name: Dev10x:ticket-create
 description: Create an issue tracker ticket (GitHub issue, Linear, or JIRA) with proper formatting, description structure, and labels. Accepts title, description content, and optional labels. Automatically formats the description with Root Cause, Solution, and Files Changed sections. Returns the created ticket ID.
 user-invocable: true
-invocation-name: dev10x:ticket-create
+invocation-name: Dev10x:ticket-create
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
   - Bash(gh issue create:*)
@@ -45,7 +45,7 @@ Determine which tracker to use. Priority:
 |---------|----------|----------------|
 | GitHub | `gh` CLI | `gh issue create` |
 | Linear | Linear MCP | `mcp__claude_ai_Linear__save_issue` |
-| JIRA | `JIRA_TENANT` + keyring | `jira-update.sh` (requires external `dev10x:jira` skill) |
+| JIRA | `JIRA_TENANT` + keyring | `jira-update.sh` (requires external `Dev10x:jira` skill) |
 
 ## When to Use This Skill
 
@@ -165,7 +165,7 @@ If a `project` parameter was provided by the caller, resolve the
 project UUID first via `list_projects(team: "TEAM_UUID")` — never
 pass a display name (name matching is exact and fails silently).
 After creation, verify linkage with `get_issue(id)` and confirm
-`projectId` matches the expected UUID. See `dev10x:linear`
+`projectId` matches the expected UUID. See `Dev10x:linear`
 § Project Assignment.
 
 ```
@@ -180,13 +180,13 @@ mcp__claude_ai_Linear__save_issue(
 
 **JIRA:**
 
-> Requires the external `dev10x:jira` skill installed at `~/.claude/skills/`.
+> Requires the external `Dev10x:jira` skill installed at `~/.claude/skills/`.
 
 ```bash
-~/.claude/skills/dev10x:jira/scripts/jira-update.sh "$TICKET_ID" /tmp/claude/jira-payload.json
+~/.claude/skills/Dev10x:jira/scripts/jira-update.sh "$TICKET_ID" /tmp/claude/jira-payload.json
 ```
 
-> Team-specific IDs are documented in the tracker skill (`dev10x:linear`, `dev10x:jira`).
+> Team-specific IDs are documented in the tracker skill (`Dev10x:linear`, `Dev10x:jira`).
 
 ### Step 6: Return Ticket Information
 

@@ -1,16 +1,16 @@
 ---
-name: dev10x:gh-pr-respond
-description: Validate and respond to PR review comments. Handles single comment (with follow-up offer) or batch mode for all unaddressed comments on a PR/review. Orchestrates dev10x:gh-pr-triage and dev10x:gh-pr-fixup.
+name: Dev10x:gh-pr-respond
+description: Validate and respond to PR review comments. Handles single comment (with follow-up offer) or batch mode for all unaddressed comments on a PR/review. Orchestrates Dev10x:gh-pr-triage and Dev10x:gh-pr-fixup.
 user-invocable: true
-invocation-name: dev10x:gh-pr-respond
+invocation-name: Dev10x:gh-pr-respond
 allowed-tools:
   - AskUserQuestion
   - Bash(gh:*)
-  - Skill(dev10x:gh-pr-triage)
-  - Skill(dev10x:gh-pr-fixup)
-  - Skill(dev10x:git-groom)
-  - Skill(dev10x:gh-pr-monitor)
-  - Skill(dev10x:git)
+  - Skill(Dev10x:gh-pr-triage)
+  - Skill(Dev10x:gh-pr-fixup)
+  - Skill(Dev10x:git-groom)
+  - Skill(Dev10x:gh-pr-monitor)
+  - Skill(Dev10x:git)
 ---
 
 # Respond to PR Review Comments
@@ -59,7 +59,7 @@ This skill is playbook-powered. The workflow steps are defined in
 1. User overrides: `~/.claude/projects/<project>/memory/playbooks/gh-pr-respond.yaml`
 2. Defaults: `${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-respond/references/playbook.yaml`
 
-Customize with `/dev10x:playbook edit gh-pr-respond <play>`.
+Customize with `/Dev10x:playbook edit gh-pr-respond <play>`.
 
 ## Decision Gates
 
@@ -95,14 +95,14 @@ This skill handles PR review comments end-to-end in two modes:
    comments, triage them, and present a response plan for user approval.
 
 Sub-skills:
-- **`dev10x:gh-pr-triage`** — Validate the comment against the codebase
-- **`dev10x:gh-pr-fixup`** — Implement the fix if the comment is valid
+- **`Dev10x:gh-pr-triage`** — Validate the comment against the codebase
+- **`Dev10x:gh-pr-fixup`** — Implement the fix if the comment is valid
 
 ```
-dev10x:gh-pr-respond (this skill)
-    ├── dev10x:gh-pr-triage         → validate, reply if invalid (never auto-resolves)
+Dev10x:gh-pr-respond (this skill)
+    ├── Dev10x:gh-pr-triage         → validate, reply if invalid (never auto-resolves)
     ├── resolve gate      → ask user to confirm thread resolution
-    └── dev10x:gh-pr-fixup  → implement fix, fixup commit, reply with ref
+    └── Dev10x:gh-pr-fixup  → implement fix, fixup commit, reply with ref
          └── commit:fixup → create the fixup! commit
 ```
 
@@ -122,7 +122,7 @@ or `{review_id}` from the URL.
 
 **Optional additional context:**
 - User may provide extra context after the URL
-- Example: `/dev10x:gh-pr-respond https://...#discussion_r456 Note that PR #1135 is merged`
+- Example: `/Dev10x:gh-pr-respond https://...#discussion_r456 Note that PR #1135 is merged`
 
 ---
 
@@ -132,18 +132,18 @@ or `{review_id}` from the URL.
 
 ### Step 1: Process the comment
 
-Delegate to `dev10x:gh-pr-triage` with the comment URL (and any additional context).
+Delegate to `Dev10x:gh-pr-triage` with the comment URL (and any additional context).
 
-`dev10x:gh-pr-triage` returns a verdict: `VALID`, `INVALID`, `QUESTION`, or `OUT_OF_SCOPE`.
+`Dev10x:gh-pr-triage` returns a verdict: `VALID`, `INVALID`, `QUESTION`, or `OUT_OF_SCOPE`.
 
-- If **VALID** → delegate to `dev10x:gh-pr-fixup` to implement fix, commit, push,
+- If **VALID** → delegate to `Dev10x:gh-pr-fixup` to implement fix, commit, push,
   and reply.
-- If **not VALID** → `dev10x:gh-pr-triage` has posted a reply but has NOT resolved the
+- If **not VALID** → `Dev10x:gh-pr-triage` has posted a reply but has NOT resolved the
   thread. Ask the user whether to resolve it (see Step 1b).
 
 ### Step 1b: Confirm thread resolution (non-VALID only)
 
-When `dev10x:gh-pr-triage` returns INVALID, QUESTION, or OUT_OF_SCOPE, present the
+When `Dev10x:gh-pr-triage` returns INVALID, QUESTION, or OUT_OF_SCOPE, present the
 verdict and reason to the user and ask for confirmation before resolving:
 
 ```
@@ -307,7 +307,7 @@ Mark phase transition: `TaskUpdate(taskId=execute_task, status="in_progress")`
 
 For each approved comment:
 
-- **VALID** → delegate to `dev10x:gh-pr-fixup` (one fixup commit per comment)
+- **VALID** → delegate to `Dev10x:gh-pr-fixup` (one fixup commit per comment)
 - **INVALID / QUESTION / OUT_OF_SCOPE** → post reply using `gh api`:
   ```bash
   gh api --method POST \
@@ -461,9 +461,9 @@ pipeline:
 
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
 Options:
-- **"Groom + push + monitor" (Recommended)** — Invoke `dev10x:git-groom`
+- **"Groom + push + monitor" (Recommended)** — Invoke `Dev10x:git-groom`
   to squash fixups, push with `--force-with-lease`, then invoke
-  `dev10x:gh-pr-monitor` to watch CI and new comments
+  `Dev10x:gh-pr-monitor` to watch CI and new comments
 - **"Push only"** — Push current commits (including fixups) without
   grooming
 - **"Stop"** — End without pushing
@@ -497,8 +497,8 @@ Input URL
     │
     ├─ Has #discussion_r{id} ──► MODE A (single)
     │       │
-    │       ├── dev10x:gh-pr-triage → verdict
-    │       ├── if VALID → dev10x:gh-pr-fixup
+    │       ├── Dev10x:gh-pr-triage → verdict
+    │       ├── if VALID → Dev10x:gh-pr-fixup
     │       ├── if not VALID → reply posted, ask user to resolve
     │       ├── if resolved → offer to hide (minimize) comment
     │       ├── check remaining
@@ -519,34 +519,34 @@ Input URL
 ## Integration
 
 ```
-dev10x:gh-pr-monitor → dev10x:gh-pr-respond (this skill)
-                 ├── dev10x:gh-pr-triage
-                 └── dev10x:gh-pr-fixup
+Dev10x:gh-pr-monitor → Dev10x:gh-pr-respond (this skill)
+                 ├── Dev10x:gh-pr-triage
+                 └── Dev10x:gh-pr-fixup
                       └── commit:fixup
 ```
 
 **Standalone usage:**
 ```bash
 # Single comment
-/dev10x:gh-pr-respond https://github.com/owner/repo/pull/123#discussion_r456
+/Dev10x:gh-pr-respond https://github.com/owner/repo/pull/123#discussion_r456
 
 # Single comment with context
-/dev10x:gh-pr-respond https://github.com/owner/repo/pull/123#discussion_r456 Note that PR #1135 is merged
+/Dev10x:gh-pr-respond https://github.com/owner/repo/pull/123#discussion_r456 Note that PR #1135 is merged
 
 # Batch — all unaddressed comments on PR
-/dev10x:gh-pr-respond https://github.com/owner/repo/pull/123
+/Dev10x:gh-pr-respond https://github.com/owner/repo/pull/123
 
 # Batch — all comments from a specific review
-/dev10x:gh-pr-respond https://github.com/owner/repo/pull/123#pullrequestreview-789
+/Dev10x:gh-pr-respond https://github.com/owner/repo/pull/123#pullrequestreview-789
 
 # Batch — PR number only
-/dev10x:gh-pr-respond 1164
+/Dev10x:gh-pr-respond 1164
 ```
 
-**Called by dev10x:gh-pr-monitor:**
+**Called by Dev10x:gh-pr-monitor:**
 ```
-dev10x:gh-pr-monitor detects new comments →
-  delegate to dev10x:gh-pr-respond with PR URL (batch mode)
+Dev10x:gh-pr-monitor detects new comments →
+  delegate to Dev10x:gh-pr-respond with PR URL (batch mode)
 ```
 
 ## References

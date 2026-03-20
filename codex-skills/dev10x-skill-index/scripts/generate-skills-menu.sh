@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Generate ~/.claude/.skills-menu.txt — compact terminal-friendly skill index.
-# Sourced from families.yaml and skill definitions with dev10x: prefix invocations.
+# Sourced from families.yaml and skill definitions with Dev10x: prefix invocations.
 set -euo pipefail
 
 SKILLS_MENU="${HOME}/.claude/.skills-menu.txt"
@@ -17,7 +17,7 @@ fi
 # ── Resolve skill source directories ────────────────────────────
 LOCAL_DIR="${HOME}/.claude/skills"
 
-resolve_dev10x_dir() {
+resolve_Dev10x_dir() {
     local cache_base="${HOME}/.claude/plugins/cache"
     [[ -d "$cache_base" ]] || return 0
 
@@ -32,7 +32,7 @@ resolve_dev10x_dir() {
         | cut -f2-
 }
 
-DEV10X_DIR="$(resolve_dev10x_dir)"
+DEV10X_DIR="$(resolve_Dev10x_dir)"
 
 # ── Parse SKILL.md frontmatter ──────────────────────────────────
 declare -A SKILL_NAME
@@ -78,7 +78,7 @@ parse_skill() {
     ALL_KEYS+=("$key")
 }
 
-# Scan local and dev10x skills
+# Scan local and Dev10x skills
 if [[ -d "$LOCAL_DIR" ]]; then
     for sf in "$LOCAL_DIR"/*/SKILL.md; do
         [[ -f "$sf" ]] || continue
@@ -145,7 +145,7 @@ done
 
 # ── Match and render ────────────────────────────────────────────
 {
-    printf '# dev10x skills\n\n'
+    printf '# Dev10x skills\n\n'
 
     for label in "${FAMILY_LABELS[@]}"; do
         IFS='|' read -ra fam_skills <<< "${FAMILY_SKILLS[$label]}"

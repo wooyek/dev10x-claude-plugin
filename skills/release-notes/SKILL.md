@@ -1,8 +1,8 @@
 ---
-name: dev10x:release-notes
+name: Dev10x:release-notes
 description: Generate JTBD-driven release notes from git commits between releases. Playbook-powered workflow with configurable ticket patterns, output targets, and categories.
 user-invocable: true
-invocation-name: dev10x:release-notes
+invocation-name: Dev10x:release-notes
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/release-notes/scripts/collect-prs.py:*)
   - Bash(gh pr view:*)
@@ -120,7 +120,7 @@ git log <from_tag>..<to_tag> --no-merges --format="### %s%n%n%b%n---"
 
 For feature PRs listed as "MISSING JTBDs":
 
-1. Invoke `dev10x:jtbd` in unattended mode with ticket ID and PR number
+1. Invoke `Dev10x:jtbd` in unattended mode with ticket ID and PR number
 2. Collect all drafts
 3. Present as a batch for user approval:
 
@@ -198,7 +198,7 @@ to a temp file and use the Slack posting mechanism. For GitHub, use
 ## Arguments
 
 ```
-/dev10x:release-notes [--play release|hotfix] [--from TAG] [--to TAG]
+/Dev10x:release-notes [--play release|hotfix] [--from TAG] [--to TAG]
 ```
 
 - `--play`: Which playbook play to use (default: `release`)

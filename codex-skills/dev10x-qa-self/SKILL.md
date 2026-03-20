@@ -1,5 +1,5 @@
 ---
-name: dev10x-qa-self
+name: Dev10x-qa-self
 description: Execute QA test cases on staging using headless Playwright, capture screenshot and video evidence, upload to Linear, and post structured results. Use when a QA ticket has test cases to execute against staging and you need to produce evidence.
 ---
 
@@ -12,7 +12,7 @@ Linear.
 **Use when:**
 - A QA ticket (e.g., QA-xxx) has test cases ready to execute
 - You need to verify a feature works on staging before closing a ticket
-- `dev10x:qa-scope` has created a QA sub-ticket and tests need running
+- `Dev10x:qa-scope` has created a QA sub-ticket and tests need running
 
 **Do NOT use when:**
 - The test requires real hardware (e.g., Square Terminal pairing)
@@ -20,7 +20,7 @@ Linear.
 
 ## Prerequisites
 
-- Linear ticket with test cases (from `dev10x:qa-scope` or manual)
+- Linear ticket with test cases (from `Dev10x:qa-scope` or manual)
 - Headless Playwright: `uv run --with playwright python3 -m playwright install chromium`
 
 ## Workflow
@@ -358,21 +358,21 @@ uv run --with playwright python3 -m playwright install chromium
 Always validate syntax before launching a browser:
 
 ```bash
-$HOME/.codex/skills/dev10x-playwright/scripts/run-playwright.sh \
+$HOME/.codex/skills/Dev10x-playwright/scripts/run-playwright.sh \
   /tmp/claude/self-qa/qa-<ticket>-test.py --validate-only
 ```
 
 Then execute (credentials injected automatically from settings.secrets.env):
 
 ```bash
-$HOME/.codex/skills/dev10x-playwright/scripts/run-playwright.sh \
+$HOME/.codex/skills/Dev10x-playwright/scripts/run-playwright.sh \
   /tmp/claude/self-qa/qa-<ticket>-test.py
 ```
 
 For admin-gated features (reopen/void WO), use `--user janusz_ai`:
 
 ```bash
-$HOME/.codex/skills/dev10x-playwright/scripts/run-playwright.sh \
+$HOME/.codex/skills/Dev10x-playwright/scripts/run-playwright.sh \
   /tmp/claude/self-qa/qa-<ticket>-test.py --user janusz_ai
 ```
 
@@ -395,7 +395,7 @@ If tests fail, fix the script and re-run. Common issues:
 
 Use the bundled conversion script:
 ```bash
-$HOME/.codex/skills/dev10x-qa-self/scripts/convert-evidence.sh \
+$HOME/.codex/skills/Dev10x-qa-self/scripts/convert-evidence.sh \
   screenshots /tmp/claude/self-qa/qa-test1.png /tmp/claude/self-qa/qa-test2.png
 ```
 
@@ -406,7 +406,7 @@ file paths to stdout.
 
 Playwright records video as `.webm`. Convert to `.mp4` for Linear:
 ```bash
-$HOME/.codex/skills/dev10x-qa-self/scripts/convert-evidence.sh \
+$HOME/.codex/skills/Dev10x-qa-self/scripts/convert-evidence.sh \
   video /tmp/claude/self-qa/qa-<ticket>-video/*.webm
 ```
 
@@ -418,7 +418,7 @@ stdout.
 Use the upload script bundled with this skill (supports images and
 video):
 ```bash
-$HOME/.codex/skills/dev10x-qa-self/scripts/upload-screenshots.py \
+$HOME/.codex/skills/Dev10x-qa-self/scripts/upload-screenshots.py \
   upload /tmp/claude/self-qa/qa-test1.jpg /tmp/claude/self-qa/qa-test2.jpg /tmp/claude/self-qa/qa-video.mp4
 ```
 
@@ -499,8 +499,8 @@ If tests are blocked, leave in current status and note the blocker.
 ## Integration with Other Skills
 
 ```
-dev10x:qa-self
-├── Prereq: dev10x:qa-scope (creates the QA ticket with test cases)
+Dev10x:qa-self
+├── Prereq: Dev10x:qa-scope (creates the QA ticket with test cases)
 ├── Uses: Linear MCP (read ticket, post results)
 ├── Scripts:
 │   ├── upload-screenshots.py (upload images & video to Linear)

@@ -1,7 +1,7 @@
 ---
-name: dev10x:scope
-invocation-name: dev10x:scope
-description: Base scoping skill for technical research and architecture design. Provides reusable scoping workflow for investigating codebases, designing solutions, and documenting decisions. Used as foundation by dev10x:ticket-scope (Linear tickets) and dev10x:adr (Architecture Decision Records).
+name: Dev10x:scope
+invocation-name: Dev10x:scope
+description: Base scoping skill for technical research and architecture design. Provides reusable scoping workflow for investigating codebases, designing solutions, and documenting decisions. Used as foundation by Dev10x:ticket-scope (Linear tickets) and Dev10x:adr (Architecture Decision Records).
 user-invocable: false
 allowed-tools:
   - Agent
@@ -12,15 +12,15 @@ allowed-tools:
   - Bash(java -jar:*)
 ---
 
-# dev10x:scope — Base Technical Scoping
+# Dev10x:scope — Base Technical Scoping
 
 ## Overview
 
 Foundational scoping skill that provides reusable research and
 architecture design workflows. Not directly invocable — extended by:
 
-- `dev10x:ticket-scope` — for scoping Linear tickets
-- `dev10x:adr` — for creating Architecture Decision Records
+- `Dev10x:ticket-scope` — for scoping Linear tickets
+- `Dev10x:adr` — for creating Architecture Decision Records
 
 ## Orchestration
 
@@ -291,14 +291,14 @@ Before finalizing, check:
 
 This skill is extended by:
 
-### dev10x:ticket-scope
+### Dev10x:ticket-scope
 Adds:
 - Linear ticket integration
 - Ticket creation/updates
 - Story point estimation
 - Acceptance criteria format
 
-### dev10x:adr
+### Dev10x:adr
 Adds:
 - ADR format and numbering
 - Decision record structure
@@ -306,12 +306,12 @@ Adds:
 - Consequences documentation
 - Diagram generation workflow
 
-### dev10x:jtbd
+### Dev10x:jtbd
 Provides:
 - JTBD Job Story drafting methodology
 - Context gathering from tickets and PR diffs
 - Attended and unattended drafting modes
-- Used by extending skills (dev10x:ticket-scope, dev10x:work-on, pr:create)
+- Used by extending skills (Dev10x:ticket-scope, Dev10x:work-on, pr:create)
 
 ## Key Learnings from Practice
 

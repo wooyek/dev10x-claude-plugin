@@ -1,7 +1,7 @@
 ---
-name: dev10x:review-fix
-invocation-name: dev10x:review-fix
-description: Use when dev10x:review has produced structured findings that need fixup commits. Consumes a findings JSON file and creates one standalone fixup! commit per finding via dev10x:git-fixup.
+name: Dev10x:review-fix
+invocation-name: Dev10x:review-fix
+description: Use when Dev10x:review has produced structured findings that need fixup commits. Consumes a findings JSON file and creates one standalone fixup! commit per finding via Dev10x:git-fixup.
 user-invocable: false
 allowed-tools:
   - Bash(git log:*)
@@ -18,18 +18,18 @@ allowed-tools:
 
 # Review Fix
 
-Consume structured findings from `dev10x:review` and create one
+Consume structured findings from `Dev10x:review` and create one
 `fixup!` commit per finding using the standalone mode of
-`dev10x:git-fixup`.
+`Dev10x:git-fixup`.
 
 ## Arguments
 
 - **findings file path** — path to the JSON findings file produced
-  by `dev10x:review` (e.g., `/tmp/claude/review/findings-abc.json`)
+  by `Dev10x:review` (e.g., `/tmp/claude/review/findings-abc.json`)
 
 ## When to Use
 
-- Called by `dev10x:review` after findings are approved
+- Called by `Dev10x:review` after findings are approved
 - Part of the `work-on` shipping pipeline (review → fix cycle)
 - Not intended for standalone invocation
 
@@ -85,7 +85,7 @@ For each finding:
    ```
 
    This uses the same `Standalone fixup` marker that
-   `dev10x:git-fixup` uses, so the pre-commit hook accepts it.
+   `Dev10x:git-fixup` uses, so the pre-commit hook accepts it.
 
 6. **Mark subtask completed**
 
@@ -110,7 +110,7 @@ Review fix complete:
 
 ## Finding Format (Input Contract)
 
-Reads the same JSON format produced by `dev10x:review`:
+Reads the same JSON format produced by `Dev10x:review`:
 
 ```json
 [
@@ -132,8 +132,8 @@ Optional fields: `severity`, `source`, `suggested_fix`, `category`
 ## Integration
 
 ```
-dev10x:review (produces findings JSON)
-└─ dev10x:review-fix (this skill)
+Dev10x:review (produces findings JSON)
+└─ Dev10x:review-fix (this skill)
    └─ git commit -F <msg-file> (one fixup! commit per finding)
 ```
 

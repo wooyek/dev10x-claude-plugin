@@ -17,7 +17,7 @@ sys.path.insert(0, str(lib_path))
 from sql_validation import is_read_only_sql  # noqa: E402
 from subprocess_utils import run_script  # noqa: E402
 
-server = FastMCP(name="dev10x-db")
+server = FastMCP(name="Dev10x-db")
 
 
 @server.tool()

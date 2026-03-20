@@ -1,7 +1,7 @@
 ---
-name: dev10x:gh-context
-invocation-name: dev10x:gh-context
-description: Use when detecting PR context (number, repo, URL, branch) from a URL, PR number, or current branch — so skills like dev10x:gh-pr-monitor always get the correct target PR even in multi-worktree setups
+name: Dev10x:gh-context
+invocation-name: Dev10x:gh-context
+description: Use when detecting PR context (number, repo, URL, branch) from a URL, PR number, or current branch — so skills like Dev10x:gh-pr-monitor always get the correct target PR even in multi-worktree setups
 user-invocable: false
 allowed-tools:
   - mcp__plugin_Dev10x_cli__*
@@ -9,10 +9,10 @@ allowed-tools:
   - Bash(/tmp/claude/bin/mktmp.sh:*)
 ---
 
-# dev10x:gh-context — GitHub CLI helpers
+# Dev10x:gh-context — GitHub CLI helpers
 
 Shell script wrappers for common `gh` operations. **These operations are
-now available as first-class MCP tools** via the `dev10x-gh` MCP server.
+now available as first-class MCP tools** via the `Dev10x-gh` MCP server.
 Both paths (shell scripts and MCP tools) coexist during migration.
 
 ## Using MCP Tools (Preferred)
