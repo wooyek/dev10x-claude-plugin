@@ -317,16 +317,25 @@ Each step in the play has:
 - `steps` — child steps for pre-templated epic expansion (optional)
 - `condition` — hint for conditional execution (optional)
 
+### Self-Check Before Plan Generation
+
+**REQUIRED:** Before generating any tasks, you MUST have read
+a playbook file. Call `Read` on the playbook path and verify
+you received YAML content with a `defaults:` key containing
+play definitions. If you cannot confirm this, STOP.
+
 **Loading the play:**
 1. Determine the `work_type` from gathered context (see table below)
 2. Read the user's playbook at
    `~/.claude/projects/<project>/memory/playbooks/work-on.yaml`;
    if absent, read from
    `${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml`
-3. **REQUIRED: If both playbook paths fail to load (file missing or
-   unreadable), STOP and report the error to the user.** Do NOT
-   fall back to generating an ad-hoc plan. The playbook IS the
-   plan — without it, Phase 3 cannot produce a correct task list.
+3. **VERIFY: Confirm the playbook loaded successfully.** Check that
+   the read returned YAML with `defaults.<work_type>.steps` present.
+   If BOTH paths fail (file missing or unreadable), STOP and report
+   the error to the user. Do NOT fall back to generating an ad-hoc
+   plan. The playbook IS the plan — without it, Phase 3 cannot
+   produce a correct task list.
 4. Resolve: overrides first (same as acceptance-criteria), then
    defaults, then schema fallback
 5. **Resolve fragment references:** Walk the step list. When a
@@ -341,6 +350,10 @@ Each step in the play has:
    `type` in metadata, and `agent`/`skills` in metadata if present
 7. If a step has child `steps`, store them in metadata for
    expansion when the epic is reached (Phase 4)
+8. **VERIFY: Call `TaskList` and count Phase 4 subtasks.** The count
+   must match the number of steps in the loaded play (including
+   expanded fragment steps). If fewer tasks exist than play steps,
+   you skipped steps — go back and create the missing ones.
 
 **Work type classification:**
 
