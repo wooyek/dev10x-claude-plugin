@@ -126,13 +126,17 @@ def _extract_sql_from_command(command: str) -> str | None:
     return None
 
 
+_SINGLE_QUOTED_RE = re.compile(r"'[^']*'")
+
+
 def _validate_sql(sql: str) -> tuple[bool, str]:
     stripped = sql.strip().rstrip(";").strip()
 
     if not stripped:
         return True, ""
 
-    if ";" in stripped:
+    without_strings = _SINGLE_QUOTED_RE.sub("", stripped)
+    if ";" in without_strings:
         return False, (
             "Multi-statement SQL is not allowed.\n"
             "Submit one statement at a time.\n\n"
@@ -191,16 +195,13 @@ class SqlSafetyValidator:
 
     def _check_direct_connection(self, *, command: str) -> HookResult | None:
         if "psycopg2" in command or (
-            POSTGRES_CONN_RE.search(command)
-            and not any(_is_db_sh(p) for p in command.split())
+            POSTGRES_CONN_RE.search(command) and not any(_is_db_sh(p) for p in command.split())
         ):
             return HookResult(message=DIRECT_CONN_MSG)
         return None
 
     def _check_script_content(self, *, command: str) -> HookResult | None:
-        script_match = re.search(
-            r"(?:uv run(?:\s+--script)?|python3?)\s+(\S+\.py)", command
-        )
+        script_match = re.search(r"(?:uv run(?:\s+--script)?|python3?)\s+(\S+\.py)", command)
         if not script_match:
             return None
         script_path = script_match.group(1)

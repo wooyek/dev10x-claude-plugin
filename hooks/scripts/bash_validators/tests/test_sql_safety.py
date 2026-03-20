@@ -109,3 +109,17 @@ class TestSqlValidation:
         result = validator.validate(inp=inp)
         assert result is not None
         assert "Multi-statement" in result.message
+
+    def test_allows_semicolon_inside_string_literal(self, validator: SqlSafetyValidator) -> None:
+        sql = "SELECT STRING_AGG(name, '; ' ORDER BY name) FROM users"
+        inp = _make_input(command=f'db.sh pp "{sql}"')
+        result = validator.validate(inp=inp)
+        assert result is None
+
+    def test_blocks_multi_statement_with_string_literal(
+        self, validator: SqlSafetyValidator
+    ) -> None:
+        sql = "SELECT '; '; DROP TABLE users"
+        inp = _make_input(command=f'db.sh pp "{sql}"')
+        result = validator.validate(inp=inp)
+        assert result is not None
