@@ -3,13 +3,13 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## 0.31.0 — MCP-Powered PRs
+## 0.31.0 — MCP Consolidation & Parallel Workflows
 
-Released UNRELEASED
+Released 2026-03-20
 
-PR creation runs through native MCP tools instead of Bash wrappers, git
-aliases work with any default branch name, and skill authoring gets
-stricter enforcement for naming and tool declarations.
+MCP servers consolidate from 4 to 2, PR creation runs through native
+MCP tools, macOS Keychain credentials land, and work-on gains parallel
+stream processing with context compaction.
 
 ### Features
 
@@ -19,15 +19,44 @@ stricter enforcement for naming and tool declarations.
 - **Universal branch aliases** — git log, diff, rebase, and autosquash
   aliases now support main and master alongside existing develop,
   development, and trunk variants ([GH-288])
+- **Non-destructive CTE in db queries** — db hook allows WITH clauses
+  that don't modify data, unblocking analytical queries ([GH-303])
+- **Slack thread investigation** — new plugin skill investigates Slack
+  bug reports, root-causes in codebase, and creates Linear tickets
+  ([#298])
+- **Guided Slack integration setup** — interactive skill walks through
+  Slack app creation, token configuration, and channel setup ([GH-14])
+- **macOS Keychain credential retrieval** — secrets can be stored and
+  retrieved via macOS Keychain as an alternative to env vars ([GH-119])
 
 ### Improvements
 
+- **MCP server consolidation** — reduced from 4 servers to 2 (cli →
+  git + utils, gh stays), cutting startup overhead ([GH-194])
+- **Parallel work stream processing** — work-on dispatches independent
+  tasks concurrently instead of sequentially ([#301])
+- **Context compaction in orchestration** — skills compact context at
+  phase boundaries to stay within token limits ([#299])
+- **Work-on audit enforcement** — audit findings from GH-295, GH-296,
+  GH-297 enforced as playbook and eval updates ([#300])
+- **False positive prevention** — shared code patterns (MCP imports,
+  PEP 723 inlining) no longer trigger review warnings ([#294])
+- **Broader permission maintenance** — permission update workflow
+  covers more path patterns and project configurations
 - **Playbook pattern documentation** — reviewer guidance for validating
   playbook-powered skills and reference file patterns ([#243])
-- **External tool declaration requirements** — skill authors must declare
-  all external tool dependencies in SKILL.md front matter ([#270])
-- **Invocation-name enforcement** — reviewer checklist enforces mandatory
-  invocation-name field with exact-match rule ([#267])
+- **External tool declaration requirements** — skill authors must
+  declare all external tool dependencies in SKILL.md front matter
+  ([#270])
+- **Invocation-name enforcement** — reviewer checklist enforces
+  mandatory invocation-name field with exact-match rule ([#267])
+
+### Testing
+
+- **Automated hook testing** — pytest CI pipeline validates hook
+  scripts with unit tests ([GH-214])
+- **CI concurrency groups** — prevent duplicate CI runs on rapid
+  pushes to the same branch ([GH-214])
 
 ### Bug Fixes
 
