@@ -6,9 +6,9 @@ invocation-name: dev10x:gh-pr-monitor
 allowed-tools:
   - Agent
   - AskUserQuestion
-  - mcp__plugin_Dev10x_gh__pr_notify
-  - mcp__plugin_Dev10x_gh__detect_tracker
-  - mcp__plugin_Dev10x_gh__pr_detect
+  - mcp__plugin_Dev10x_cli__pr_notify
+  - mcp__plugin_Dev10x_cli__detect_tracker
+  - mcp__plugin_Dev10x_cli__pr_detect
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/*:*)
   - Bash(gh:*)

@@ -5,13 +5,13 @@ user-invocable: true
 invocation-name: dev10x:gh-pr-create
 allowed-tools:
   - AskUserQuestion
-  - mcp__plugin_Dev10x_gh__detect_base_branch
-  - mcp__plugin_Dev10x_gh__verify_pr_state
-  - mcp__plugin_Dev10x_gh__pre_pr_checks
-  - mcp__plugin_Dev10x_gh__create_pr
-  - mcp__plugin_Dev10x_gh__generate_commit_list
-  - mcp__plugin_Dev10x_gh__post_summary_comment
-  - mcp__plugin_Dev10x_gh__detect_tracker
+  - mcp__plugin_Dev10x_cli__detect_base_branch
+  - mcp__plugin_Dev10x_cli__verify_pr_state
+  - mcp__plugin_Dev10x_cli__pre_pr_checks
+  - mcp__plugin_Dev10x_cli__create_pr
+  - mcp__plugin_Dev10x_cli__generate_commit_list
+  - mcp__plugin_Dev10x_cli__post_summary_comment
+  - mcp__plugin_Dev10x_cli__detect_tracker
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/*:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
 ---

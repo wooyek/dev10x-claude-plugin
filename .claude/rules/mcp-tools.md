@@ -10,18 +10,18 @@ registration:
 - **Python function**: `snake_case` (e.g., `detect_tracker`)
 - **MCP registration**: `mcp__plugin_<PluginName>_<ServerName>__<snake_case>`
   - `<PluginName>`: Title-case plugin name from plugin.json (e.g., `Dev10x`)
-  - `<ServerName>`: Server name in plugin.json (e.g., `gh`, `git`, `db`)
+  - `<ServerName>`: Server name in plugin.json (e.g., `cli`, `db`)
   - `<snake_case>`: Unchanged function name
 
 ## Examples
 
 | Server | Function | MCP Name |
 |--------|----------|----------|
-| `gh` | `detect_tracker()` | `mcp__plugin_Dev10x_gh__detect_tracker` |
-| `gh` | `pr_comments()` | `mcp__plugin_Dev10x_gh__pr_comments` |
-| `git` | `get_commit_log()` | `mcp__plugin_Dev10x_git__get_commit_log` |
+| `cli` | `detect_tracker()` | `mcp__plugin_Dev10x_cli__detect_tracker` |
+| `cli` | `pr_comments()` | `mcp__plugin_Dev10x_cli__pr_comments` |
+| `cli` | `get_commit_log()` | `mcp__plugin_Dev10x_cli__get_commit_log` |
+| `cli` | `mktmp()` | `mcp__plugin_Dev10x_cli__mktmp` |
 | `db` | `list_tables()` | `mcp__plugin_Dev10x_db__list_tables` |
-| `utils` | `mktmp()` | `mcp__plugin_Dev10x_utils__mktmp` |
 
 ## Tool Declaration Pattern
 
@@ -53,14 +53,28 @@ supporting each tool:
 
 | Tool | Server | Introduced | Availability |
 |------|--------|------------|--------------|
-| `mktmp` | `utils` | PR #160 | Available in all current versions |
-| `detect_base_branch` | `gh` | GH-191 | v0.31.0+ |
-| `verify_pr_state` | `gh` | GH-191 | v0.31.0+ |
-| `pre_pr_checks` | `gh` | GH-191 | v0.31.0+ |
-| `create_pr` | `gh` | GH-191 | v0.31.0+ |
-| `generate_commit_list` | `gh` | GH-191 | v0.31.0+ |
-| `post_summary_comment` | `gh` | GH-191 | v0.31.0+ |
-| `pr_notify` | `gh` | GH-191 | v0.31.0+ |
+| `detect_tracker` | `cli` | PR #126 | v0.25.0+ |
+| `pr_detect` | `cli` | PR #126 | v0.25.0+ |
+| `issue_get` | `cli` | PR #126 | v0.25.0+ |
+| `issue_comments` | `cli` | PR #126 | v0.25.0+ |
+| `pr_comments` | `cli` | PR #126 | v0.25.0+ |
+| `request_review` | `cli` | PR #126 | v0.25.0+ |
+| `detect_base_branch` | `cli` | PR #191 | v0.30.0+ |
+| `verify_pr_state` | `cli` | PR #191 | v0.30.0+ |
+| `pre_pr_checks` | `cli` | PR #191 | v0.30.0+ |
+| `create_pr` | `cli` | PR #191 | v0.30.0+ |
+| `generate_commit_list` | `cli` | PR #191 | v0.30.0+ |
+| `post_summary_comment` | `cli` | PR #191 | v0.30.0+ |
+| `pr_notify` | `cli` | PR #191 | v0.30.0+ |
+| `push_safe` | `cli` | PR #126 | v0.25.0+ |
+| `rebase_groom` | `cli` | PR #126 | v0.25.0+ |
+| `create_worktree` | `cli` | PR #126 | v0.25.0+ |
+| `mass_rewrite` | `cli` | PR #288 | v0.30.0+ |
+| `start_split_rebase` | `cli` | PR #288 | v0.30.0+ |
+| `next_worktree_name` | `cli` | PR #126 | v0.25.0+ |
+| `setup_aliases` | `cli` | PR #288 | v0.30.0+ |
+| `mktmp` | `cli` | PR #160 | v0.26.0+ |
+| `query` | `db` | PR #126 | v0.25.0+ |
 
 When adding a new tool, update this table and note any dependencies on
 specific CLI commands or external programs. Skills should declare required
@@ -72,12 +86,12 @@ In SKILL.md, declare MCP tool access via `allowed-tools:`:
 
 ```yaml
 allowed-tools:
-  - mcp__plugin_Dev10x_gh__detect_tracker
-  - mcp__plugin_Dev10x_gh__pr_comments
+  - mcp__plugin_Dev10x_cli__detect_tracker
+  - mcp__plugin_Dev10x_cli__pr_comments
   - Bash(/path/to/script:*)
 ```
 
-Use wildcard sparingly: `mcp__plugin_Dev10x_gh__*` grants access to all gh
+Use wildcard sparingly: `mcp__plugin_Dev10x_cli__*` grants access to all cli
 server tools. Prefer explicit tool names for security and clarity.
 
 ## Server Registration
@@ -86,8 +100,8 @@ Each MCP server must be registered in `.claude-plugin/plugin.json`:
 
 ```json
 "mcpServers": {
-  "gh": {
-    "command": "${CLAUDE_PLUGIN_ROOT}/servers/gh_server.py",
+  "cli": {
+    "command": "${CLAUDE_PLUGIN_ROOT}/servers/cli_server.py",
     "env": { "PYTHONUNBUFFERED": "1" }
   }
 }
@@ -107,7 +121,7 @@ the primary invocation method. MCP calls avoid permission friction
 
 ```
 # ✅ PREFERRED — MCP tool call (no permission prompt)
-mcp__plugin_Dev10x_utils__mktmp(namespace="git", prefix="msg", ext=".txt")
+mcp__plugin_Dev10x_cli__mktmp(namespace="git", prefix="msg", ext=".txt")
 
 # ⚠️ FALLBACK — direct script (needs Bash allow-rule)
 /tmp/claude/bin/mktmp.sh git msg .txt
@@ -119,14 +133,14 @@ protocol).
 
 ### MCP tool names cannot appear in shell scripts
 
-MCP tool names (e.g., `mcp__plugin_Dev10x_utils__mktmp`) are
+MCP tool names (e.g., `mcp__plugin_Dev10x_cli__mktmp`) are
 Claude tool-call primitives. They cannot be used inside bash
 code blocks, shell scripts, or Makefiles — only via Claude's
 tool-use protocol.
 
 ```bash
 # ❌ WRONG — MCP name in a bash block (not a shell command)
-mcp__plugin_Dev10x_utils__mktmp git commit-msg .txt
+mcp__plugin_Dev10x_cli__mktmp git commit-msg .txt
 
 # ✅ CORRECT — use the underlying CLI script in shell contexts
 /tmp/claude/bin/mktmp.sh git commit-msg .txt

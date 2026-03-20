@@ -17,7 +17,7 @@ allowed-tools:
   - mcp__claude_ai_Slack__slack_send_message_draft
   - mcp__claude_ai_Slack__slack_read_channel
   - mcp__claude_ai_Slack__slack_search_public
-  - mcp__plugin_Dev10x_utils__mktmp
+  - mcp__plugin_Dev10x_cli__mktmp
   - AskUserQuestion
   - TaskCreate
   - TaskUpdate

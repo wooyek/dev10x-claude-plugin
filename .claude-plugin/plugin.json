@@ -11,26 +11,14 @@
   "license": "MIT",
   "keywords": ["git", "commits", "pull-requests", "code-review", "workflow", "tasks"],
   "mcpServers": {
-    "gh": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/servers/gh_server.py",
-      "env": {
-        "PYTHONUNBUFFERED": "1"
-      }
-    },
-    "git": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/servers/git_server.py",
+    "cli": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/servers/cli_server.py",
       "env": {
         "PYTHONUNBUFFERED": "1"
       }
     },
     "db": {
       "command": "${CLAUDE_PLUGIN_ROOT}/servers/db_server.py",
-      "env": {
-        "PYTHONUNBUFFERED": "1"
-      }
-    },
-    "utils": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/servers/utils_server.py",
       "env": {
         "PYTHONUNBUFFERED": "1"
       }

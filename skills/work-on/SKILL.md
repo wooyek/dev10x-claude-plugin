@@ -8,7 +8,7 @@ description: >
 user-invocable: true
 invocation-name: dev10x:work-on
 allowed-tools:
-  - mcp__plugin_Dev10x_gh__*
+  - mcp__plugin_Dev10x_cli__*
   - Read(~/.claude/projects/**/memory/playbooks/work-on.yaml)
   - Read(${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml)
   - Write(~/.claude/projects/**/**)
@@ -88,7 +88,7 @@ argument is classified independently:
 | Anything else | `note` | Store as free-text context |
 
 For ticket IDs, call the tracker detector MCP tool:
-`mcp__plugin_Dev10x_gh__detect_tracker(ticket_id="$TICKET_ID")`
+`mcp__plugin_Dev10x_cli__detect_tracker(ticket_id="$TICKET_ID")`
 Parse `tracker`, `ticket_number`, and `fixes_url` from the response.
 
 Each classified input becomes a **source** entry with its type and
