@@ -29,9 +29,7 @@ class TestShouldRun:
             "python3 /tmp/script.py",  # no db keyword
         ],
     )
-    def test_should_run_for_db_commands(
-        self, validator: SqlSafetyValidator, command: str
-    ) -> None:
+    def test_should_run_for_db_commands(self, validator: SqlSafetyValidator, command: str) -> None:
         inp = _make_input(command=command)
         expected = "db.sh" in command or "psql" in command
         assert validator.should_run(inp=inp) is expected
@@ -86,10 +84,23 @@ class TestSqlValidation:
         "keyword",
         ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE"],
     )
-    def test_blocks_write_keywords(
-        self, validator: SqlSafetyValidator, keyword: str
-    ) -> None:
+    def test_blocks_write_keywords(self, validator: SqlSafetyValidator, keyword: str) -> None:
         inp = _make_input(command=f'db.sh pp "{keyword} INTO users VALUES (1)"')
+        result = validator.validate(inp=inp)
+        assert result is not None
+
+    def test_allows_cte(self, validator: SqlSafetyValidator) -> None:
+        inp = _make_input(command='db.sh pp "WITH cte AS (SELECT 1) SELECT * FROM cte"')
+        result = validator.validate(inp=inp)
+        assert result is None
+
+    @pytest.mark.parametrize(
+        "keyword",
+        ["INSERT", "UPDATE", "DELETE", "DROP"],
+    )
+    def test_blocks_write_inside_cte(self, validator: SqlSafetyValidator, keyword: str) -> None:
+        sql = f"WITH cte AS ({keyword} INTO t VALUES (1) RETURNING id) SELECT * FROM cte"
+        inp = _make_input(command=f'db.sh pp "{sql}"')
         result = validator.validate(inp=inp)
         assert result is not None
 

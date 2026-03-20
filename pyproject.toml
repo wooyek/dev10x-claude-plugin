@@ -13,7 +13,7 @@ dev = [
 
 [tool.pytest.ini_options]
 norecursedirs = ["codex-skills"]
-testpaths = ["hooks/scripts", "hooks/tests", "skills"]
+testpaths = ["hooks/scripts", "hooks/tests", "servers/tests", "skills"]
 
 [tool.ruff]
 line-length = 99

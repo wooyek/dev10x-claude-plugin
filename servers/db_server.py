@@ -7,53 +7,17 @@
 """MCP server for database operations (read-only)."""
 
 import json
-import re
+import sys
 from pathlib import Path
+
 from mcp.server.fastmcp import FastMCP
 
-# Add lib directory to path for imports
 lib_path = Path(__file__).parent / "lib"
-import sys
-
 sys.path.insert(0, str(lib_path))
-from subprocess_utils import run_script
+from sql_validation import is_read_only_sql  # noqa: E402
+from subprocess_utils import run_script  # noqa: E402
 
 server = FastMCP(name="dev10x-db")
-
-
-def is_read_only_sql(sql: str) -> bool:
-    """Check if SQL statement is read-only (SELECT only).
-
-    Args:
-        sql: SQL statement to validate
-
-    Returns:
-        True if statement is read-only (SELECT), False otherwise
-    """
-    # Remove leading/trailing whitespace and comments
-    sql_clean = re.sub(r"^\s*(--.*)?", "", sql, flags=re.MULTILINE).strip()
-
-    # Check if it starts with SELECT (case-insensitive)
-    if not re.match(r"^select\s", sql_clean, re.IGNORECASE):
-        return False
-
-    # Check for write operations in WITH clauses or subqueries
-    # This is a simple heuristic - more sophisticated parsing could be added
-    forbidden_keywords = [
-        r"\bINSERT\b",
-        r"\bUPDATE\b",
-        r"\bDELETE\b",
-        r"\bDROP\b",
-        r"\bTRUNCATE\b",
-        r"\bALTER\b",
-        r"\bCREATE\b",
-    ]
-
-    for keyword in forbidden_keywords:
-        if re.search(keyword, sql_clean, re.IGNORECASE):
-            return False
-
-    return True
 
 
 @server.tool()
@@ -73,7 +37,10 @@ async def query(
     # Validate that SQL is read-only
     if not is_read_only_sql(sql):
         return {
-            "error": "Write operations are prohibited. Only SELECT statements are allowed.",
+            "error": (
+                "Write operations are prohibited. "
+                "Only read-only queries (SELECT, WITH, EXPLAIN, SHOW) are allowed."
+            ),
             "blocked": True,
         }
 

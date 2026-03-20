@@ -115,8 +115,9 @@ No manual configuration needed.
 
 ## Safety Rules
 
-1. **SELECT only** — the hook rejects INSERT, UPDATE, DELETE, DROP,
-   ALTER, CREATE, TRUNCATE, and other write operations
+1. **Read-only queries only** — SELECT, WITH (CTEs), EXPLAIN, and SHOW
+   are allowed. The hook rejects INSERT, UPDATE, DELETE, DROP, ALTER,
+   CREATE, TRUNCATE, and other write operations
 2. **Read-only connections** — DSNs should use read-only DB users or
    read-replica endpoints
 3. **30-second timeout** — prevents runaway queries

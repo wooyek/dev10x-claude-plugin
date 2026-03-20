@@ -52,9 +52,10 @@ Always load available context before constructing queries.
 
 ## Safety Rules
 
-1. **SELECT only** — never run INSERT, UPDATE, DELETE, DROP, ALTER,
-   CREATE, TRUNCATE, or other write operations through automated tools
-2. **Non-SELECT queries**: print the raw SQL and tell the user to run
+1. **Read-only queries only** — SELECT, WITH (CTEs), EXPLAIN, and SHOW
+   are allowed. Never run INSERT, UPDATE, DELETE, DROP, ALTER, CREATE,
+   TRUNCATE, or other write operations through automated tools
+2. **Write queries**: print the raw SQL and tell the user to run
    it manually. Never attempt workarounds or bypass safety checks
 3. **Use timeouts** — all queries should have statement timeouts to
    prevent runaway execution
