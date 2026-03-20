@@ -99,5 +99,7 @@ defaults:
           Invoke pr:review skill with the PR URL and Slack thread
           context. Let the review skill handle the rest.
         skills: [pr:review]
+        # pr:review is a user-level skill (~/.claude/skills/pr-review/).
+        # Fallback: dev10x:gh-pr-review if pr:review is unavailable.
 
 overrides: []
