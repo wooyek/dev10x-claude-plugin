@@ -3,15 +3,16 @@
 # requires-python = ">=3.12"
 # dependencies = ["pyyaml"]
 # ///
-"""Update versioned Dev10x plugin paths in .claude/settings.local.json files.
+"""Maintain Dev10x plugin permission settings across all projects.
 
-Scans project roots defined in a user config file, finds all settings files
-with versioned plugin cache paths, and replaces old versions with the latest
-installed version.
+Modes:
+  - (default) Update versioned plugin cache paths to the latest version
+  - --ensure-base: Add missing base permissions from projects.yaml
+  - --generalize: Replace session-specific args with wildcard patterns
 
 Config lookup order:
-  1. ~/.claude/skills/dev10x:update-permission-paths/projects.yaml (userspace)
-  2. ${CLAUDE_PLUGIN_ROOT}/skills/update-permission-paths/projects.yaml (plugin default)
+  1. ~/.claude/skills/dev10x:permission-maintenance/projects.yaml (userspace)
+  2. ${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/projects.yaml (plugin default)
 """
 
 import argparse
@@ -23,7 +24,7 @@ from pathlib import Path
 import yaml
 
 USERSPACE_CONFIG = (
-    Path.home() / ".claude" / "skills" / "dev10x:update-permission-paths" / "projects.yaml"
+    Path.home() / ".claude" / "skills" / "dev10x:permission-maintenance" / "projects.yaml"
 )
 PLUGIN_CONFIG = Path(__file__).resolve().parent.parent / "projects.yaml"
 VERSION_PATTERN = re.compile(r"(plugins/cache/WooYek/Dev10x/)(\d+\.\d+\.\d+)")
@@ -162,9 +163,66 @@ def ensure_base_permissions(
     return len(missing), messages
 
 
+GENERALIZE_PATTERNS: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"(detect-tracker\.sh)\s+[^:)]+"), r"\1"),
+    (re.compile(r"(gh-issue-get\.sh)\s+[^:)]+"), r"\1"),
+    (re.compile(r"(gh-pr-detect\.sh)\s+[^:)]+"), r"\1"),
+    (re.compile(r"(generate-commit-list\.sh)\s+[^:)]+"), r"\1"),
+    (re.compile(r"(extract-session\.sh)\s+[^:)]+"), r"\1"),
+    (re.compile(r"(/tmp/claude/[^/]+/)[^/]+\.[A-Za-z0-9]{6,}\.(txt|md|json)"), r"\1**"),
+    (re.compile(r"(\.[A-Za-z0-9]{8,})\.(txt|md|json)"), r"**"),
+]
+
+
+def generalize_permission(entry: str) -> str | None:
+    original = entry
+    for pattern, replacement in GENERALIZE_PATTERNS:
+        entry = pattern.sub(replacement, entry)
+    if entry != original:
+        return entry
+    return None
+
+
+def generalize_permissions(
+    path: Path,
+    *,
+    dry_run: bool = False,
+) -> tuple[int, list[str]]:
+    content = path.read_text()
+    try:
+        data = json.loads(content)
+    except json.JSONDecodeError as e:
+        return 0, [f"  SKIP (invalid JSON): {e}"]
+
+    allow_list: list[str] = data.get("permissions", {}).get("allow", [])
+    if not allow_list:
+        return 0, []
+
+    existing = set(allow_list)
+    replacements: list[tuple[str, str]] = []
+    for entry in allow_list:
+        generalized = generalize_permission(entry)
+        if generalized and generalized != entry and generalized not in existing:
+            replacements.append((entry, generalized))
+
+    if not replacements:
+        return 0, []
+
+    if not dry_run:
+        new_allow = list(allow_list)
+        for old, new in replacements:
+            idx = new_allow.index(old)
+            new_allow[idx] = new
+        data["permissions"]["allow"] = new_allow
+        path.write_text(json.dumps(data, indent=2) + "\n")
+
+    messages = [f"  {old} → {new}" for old, new in replacements]
+    return len(replacements), messages
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Update Dev10x plugin version paths in settings files",
+        description="Maintain Dev10x plugin permission settings",
     )
     parser.add_argument(
         "--dry-run",
@@ -184,6 +242,11 @@ def main() -> int:
         "--ensure-base",
         action="store_true",
         help="Add missing base permissions from projects.yaml to all settings files",
+    )
+    parser.add_argument(
+        "--generalize",
+        action="store_true",
+        help="Replace session-specific permission args with wildcard patterns",
     )
     args = parser.parse_args()
 
@@ -206,6 +269,12 @@ def main() -> int:
     if args.ensure_base:
         return _ensure_base(
             config=config,
+            settings_files=settings_files,
+            dry_run=args.dry_run,
+        )
+
+    if args.generalize:
+        return _generalize(
             settings_files=settings_files,
             dry_run=args.dry_run,
         )
@@ -278,6 +347,35 @@ def _ensure_base(
     else:
         verb = "Would add" if dry_run else "Added"
         print(f"\n{verb} {total_added} permissions across {files_changed} files.")
+
+    return 0
+
+
+def _generalize(
+    *,
+    settings_files: list[Path],
+    dry_run: bool,
+) -> int:
+    if dry_run:
+        print("(dry run — no files will be modified)\n")
+
+    total_generalized = 0
+    files_changed = 0
+
+    for path in sorted(settings_files):
+        count, messages = generalize_permissions(path, dry_run=dry_run)
+        if count > 0:
+            print(f"\n{path}")
+            for msg in messages:
+                print(msg)
+            total_generalized += count
+            files_changed += 1
+
+    if total_generalized == 0:
+        print("\nNo session-specific permissions found.")
+    else:
+        verb = "Would generalize" if dry_run else "Generalized"
+        print(f"\n{verb} {total_generalized} permissions in {files_changed} files.")
 
     return 0
 
