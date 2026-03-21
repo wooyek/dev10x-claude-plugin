@@ -11,7 +11,57 @@
     {
       "name": "Dev10x",
       "source": "./",
-      "description": "40 skills for structured commits, PR lifecycle, branch hygiene, ticket management, task tracking, code review, scoping, and QA automation."
+      "description": "55+ skills for structured commits, PR lifecycle, branch hygiene, ticket management, task tracking, code review, scoping, and QA automation.",
+      "features": {
+        "git": [
+          "Atomic JTBD commits with gitmoji",
+          "Interactive commit grooming and splitting",
+          "Branch creation from tickets",
+          "Worktree management",
+          "Protected branch push safety"
+        ],
+        "review": [
+          "Multi-agent code review with domain routing",
+          "PR review comment triage and response",
+          "Fixup commit creation from review findings",
+          "Self-review before PR creation"
+        ],
+        "hooks": [
+          "Bash command validation and safety",
+          "JTBD commit message enforcement",
+          "Sensitive file write blocking",
+          "PreCompact context persistence",
+          "Session state persistence across restarts",
+          "Skill invocation metrics",
+          "Ruff auto-formatting on Edit/Write"
+        ],
+        "workflow": [
+          "Ticket scoping with architecture design",
+          "PR creation with Job Story descriptions",
+          "Parallel work stream orchestration",
+          "Session wrap-up and parking",
+          "Weekly and daily work summaries"
+        ]
+      },
+      "requirements": {
+        "python": ">=3.11",
+        "tools": ["jq", "git", "gh"],
+        "optional": ["ruff", "shellcheck"]
+      },
+      "keywords": [
+        "git", "commits", "pull-requests", "code-review",
+        "workflow", "tasks", "JTBD", "gitmoji", "hooks",
+        "worktrees", "ticket-management", "metrics",
+        "session-persistence", "MCP"
+      ],
+      "compatibility": {
+        "claude-code": ">=2.0.0"
+      },
+      "stats": {
+        "skills": 55,
+        "hooks": 15,
+        "mcp_servers": 2
+      }
     }
   ]
 }
