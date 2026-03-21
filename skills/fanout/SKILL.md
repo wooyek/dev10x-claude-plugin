@@ -157,14 +157,34 @@ TaskCreate(subject="Process: GH-10 — add retry mechanism",
 Mark each subtask `in_progress` when starting and `completed`
 when the item's PR is merged or work is handed off.
 
+### Pre-Item Self-Check (REQUIRED)
+
+Before processing **each** work item, execute this two-step gate:
+
+1. **Branch verification:** Run `git symbolic-ref --short HEAD`
+   and confirm the current branch matches the expected item.
+   If it does not, create or switch to the correct branch
+   before proceeding. This prevents commits landing on the
+   wrong branch when processing items sequentially.
+
+2. **Delegation check:** STOP and ask yourself: "Am I about to
+   implement this item directly?" If yes, invoke
+   `Skill(skill="Dev10x:work-on", args="<item-url>")` instead.
+   Fanout is an **orchestrator**, not an implementor.
+
+Skipping either step causes cascading errors — wrong-branch
+commits require destructive `git reset --hard` cleanup, and
+inline implementation bypasses work-on's structured lifecycle
+(branch setup, code review, shipping pipeline).
+
 ### Work-On Delegation
 
 **REQUIRED: Every issue MUST be delegated to `Dev10x:work-on`.**
 Do NOT implement issues inline within the fanout session. Fanout
-is an **orchestrator**, not an implementor — it dispatches work
-to `Dev10x:work-on` and tracks results. Inline implementation
-bypasses work-on's structured lifecycle (branch setup, Job Story,
-code review, shipping pipeline) and produces untracked work.
+dispatches work to `Dev10x:work-on` and tracks results. Inline
+implementation bypasses work-on's structured lifecycle (branch
+setup, Job Story, code review, shipping pipeline) and produces
+untracked work.
 
 **Enforcement:**
 - Each issue → `Skill(skill="Dev10x:work-on", args="<issue-url>")`
@@ -184,7 +204,8 @@ Work-on executes the pr-continuation play:
 5. Mark ready via `gh pr ready`
 6. Monitor CI — fix failures with fixup commits
 7. When CI passes and no new comments → merge via
-   `gh pr merge --squash --delete-branch`
+   `gh pr merge <MERGE_STRATEGY> --delete-branch`
+   (see Merge Strategy below)
 8. After merge → rebase any downstream items that
    depend on this PR's changes
 
@@ -229,6 +250,43 @@ same sequential chain are affected:
 3. If rebase conflicts → resolve, commit, force-push
 4. If rebase succeeds → continue processing
 
+### Merge Strategy
+
+The merge command uses a configurable strategy flag. Resolution
+order (first match wins):
+
+1. **Playbook override:** `merge_strategy` in the user's
+   `work-on.yaml` playbook (e.g., `merge_strategy: rebase`)
+2. **Memory note:** user feedback memory mentioning merge
+   preference (e.g., "prefer --rebase")
+3. **Default:** `--rebase` — preserves groomed commit history
+   and minimizes stacked-branch friction
+
+| Strategy | Flag | When to use |
+|----------|------|-------------|
+| Rebase | `--rebase` | Default — atomic commits preserved |
+| Squash | `--squash` | Single-commit PRs or messy history |
+| Merge commit | `--merge` | Protected branches requiring merge |
+
+### Stacked-Branch Merge Protocol
+
+When merging stacked PRs (PR B depends on PR A's branch),
+squash merges rewrite history and make downstream PRs
+unmergeable. Follow this protocol:
+
+1. Merge the base PR (A) using the configured strategy
+2. `git fetch origin develop`
+3. For each downstream PR (B):
+   - `git checkout <branch-B>`
+   - `git rebase origin/develop`
+   - If conflicts → resolve, commit, force-push
+   - Wait for CI to pass on the rebased branch
+4. Merge downstream PR (B)
+5. Repeat for further stacked PRs
+
+**Note:** `--rebase` merge minimizes this friction compared
+to `--squash` because the base commits remain intact.
+
 ### Progress Compaction
 
 After completing each parallel group or sequential chain,
@@ -254,7 +312,8 @@ For each PR:
 2. If CI fails → fix with fixup commits, push, re-monitor
 3. If new review comments → delegate to `Dev10x:gh-pr-respond`
 4. When CI passes and PR is approved → merge via
-   `gh pr merge --squash --delete-branch`
+   `gh pr merge <MERGE_STRATEGY> --delete-branch`
+   (see Merge Strategy below)
 5. After merge → rebase downstream branches if needed
 
 Mark each subtask `completed` when the PR is merged or
@@ -285,16 +344,18 @@ Options:
 
 ## Phase 6: Audit
 
-For multi-item sessions (3+ work items), invoke a session
-skill audit to capture orchestration quality and extract
-lessons learned.
+**Phase 6 is REQUIRED when the session processes 3 or more
+work items.** "Fewer than 3" means exactly 0, 1, or 2 items.
+Do not add qualifiers like "independent" or "unique" to
+justify skipping — count all items processed, regardless of
+type or complexity.
 
 **REQUIRED:** Invoke `Skill(skill="Dev10x:skill-audit")` to
 analyze skill usage, compliance rates, and identify process
 improvements.
 
-**Skip this phase** for sessions with fewer than 3 work items
-or when the user explicitly declines.
+**Skip this phase** only when the session processed 0, 1, or
+2 work items, or when the user explicitly declines.
 
 ## Pause/Resume
 
