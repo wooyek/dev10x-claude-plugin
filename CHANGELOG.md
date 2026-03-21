@@ -3,6 +3,46 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.33.0 — Orchestration Discipline & Session Resilience
+
+Released 2026-03-21
+
+Fanout enforces structured work-on delegation, session state
+survives compaction and restarts, and acceptance criteria
+verification becomes a reusable skill.
+
+### Features
+
+- **Session resilience** — pre-compaction hook preserves critical
+  context, session state persists across restarts, and skill
+  invocation metrics are tracked for audit ([GH-310]–[GH-317])
+- **Fanout orchestration discipline** — work-on delegation is now
+  REQUIRED with enforcement language, per-issue subtask tracking,
+  and new Monitor + Audit phases ([GH-338], [GH-339])
+- **Full shipping pipeline in gh-pr-respond** — post-response
+  continuation expanded from groom+push+monitor to the complete
+  groom → push → ready → monitor → merge lifecycle with
+  solo-maintainer auto-merge support ([GH-338], [GH-339])
+- **Reusable definition-of-done verification** — extracted
+  `Dev10x:verify-acc-dod` skill for consistent acceptance checks
+  across work-on, fanout, and future orchestrators ([GH-340])
+
+### Improvements
+
+- **Task tracking in DDD and permission-maintenance** — both skills
+  gain TaskCreate/TaskUpdate orchestration for supervisor visibility
+  ([GH-41])
+- **Statusline enrichment** — branch name and worktree context shown
+  in terminal statusline ([GH-312])
+- **Skill scaffolding** — `Dev10x:skill-create` generates directory
+  structure with scripts via `scaffold.sh` ([GH-314])
+- **Plugin health verification** — install and verify scripts validate
+  plugin structure after updates ([GH-315])
+- **Marketplace metadata** — enriched `marketplace.json` for better
+  plugin discovery ([GH-317])
+- **Trigger/skip standardization** — consistent trigger and skip
+  documentation across 13+ skills ([GH-313])
+
 ## 0.32.0 — Permission Friction & Review Hardening
 
 Released 2026-03-20
