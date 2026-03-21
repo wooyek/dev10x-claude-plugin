@@ -10,6 +10,10 @@
   "repository": "https://github.com/wooyek/Dev10x-ai",
   "license": "MIT",
   "keywords": ["git", "commits", "pull-requests", "code-review", "workflow", "tasks"],
+  "statusLine": {
+    "command": "bash ${CLAUDE_PLUGIN_ROOT}/bin/statusline.sh",
+    "timeout": 2
+  },
   "mcpServers": {
     "cli": {
       "command": "${CLAUDE_PLUGIN_ROOT}/servers/cli_server.py",
