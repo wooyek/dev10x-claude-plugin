@@ -242,20 +242,24 @@ Create a temp file for each analysis phase's output:
 Store the returned paths — subagents write their findings here
 and the main agent reads them in Phase 6.
 
-**Subagent write permissions:** Subagents dispatched via `Agent()`
-do not inherit this skill's `allowed-tools`. The user must have
-these rules in their `settings.local.json` or approve the writes
-when prompted:
-- `Write(/tmp/claude/skill-audit/**)`
-- `Read(/tmp/claude/skill-audit/**)`
+**Subagent output strategy:** Subagents dispatched via `Agent()`
+cannot reliably write to output files — `bypassPermissions` does
+not propagate to subagents, and `settings.local.json` allow rules
+may not take effect depending on the permission mode. The primary
+strategy is to have each subagent **return its findings as the
+Agent result string**, then have the main agent write output files
+from the returned values.
 
-To avoid per-invocation prompts, add these to
-`~/.claude/settings.local.json` under `permissions.allow`:
+**Fallback:** If direct file writes are needed, the user must
+have these rules in their `settings.local.json`:
 ```json
 ["Write", {"glob": "/tmp/claude/skill-audit/**"}],
 ["Read", {"glob": "/tmp/claude/skill-audit/**"}],
 ["Edit", {"glob": "/tmp/claude/skill-audit/**"}]
 ```
+
+Even with these rules, writes may still fail. Always design
+subagent prompts to return complete findings as their result.
 
 ### Step 6: Wave 1 — dispatch parallel subagents
 
@@ -269,17 +273,19 @@ Include the full text of each phase's instructions from the Phase
 Reference section in the subagent prompt. Replace `<PLACEHOLDERS>`
 with actual paths from previous steps.
 
-**REQUIRED: Include this permission note in every subagent prompt:**
-"You have permission to write to /tmp/claude/skill-audit/ paths.
-Use the Write tool to save your findings to the output file path
-provided."
+**REQUIRED: Include this output note in every subagent prompt:**
+"Return your complete findings as your response. Also attempt to
+write them to the output file path provided using the Write tool,
+but if the write fails, the main agent will capture your findings
+from the returned result."
 
-1. `Agent(subagent_type="general-purpose", description="Phase 1: Action inventory", prompt="You are running Phase 1 (Action Inventory) of a skill audit. You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Read the session transcript at: <TRANSCRIPT_PATH>. Skills directory: <SKILLS_DIR>. [Include full Phase 1: Action Inventory instructions from the Phase Reference section]. Write your complete findings (markdown table) to: <PHASE1_OUTPUT>.")`
+1. `Agent(subagent_type="general-purpose", description="Phase 1: Action inventory", prompt="You are running Phase 1 (Action Inventory) of a skill audit. Return your complete findings as your response. Also attempt to write them to <PHASE1_OUTPUT> using the Write tool — if the write fails, the main agent will capture your findings from the returned result. Read the session transcript at: <TRANSCRIPT_PATH>. Skills directory: <SKILLS_DIR>. [Include full Phase 1: Action Inventory instructions from the Phase Reference section].")`
 
-2. `Agent(subagent_type="general-purpose", description="Phase 4: Permission friction", prompt="You are running Phase 4 (Permission Friction Analysis) of a skill audit. You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Read the session transcript at: <TRANSCRIPT_PATH>. Project settings: ~/.claude/settings.local.json. Skills directory: <SKILLS_DIR>. [Include full Phase 4: Permission Friction Analysis instructions from the Phase Reference section, all sub-steps 4a through 4g]. Write your complete findings to: <PHASE4_OUTPUT>.")`
+2. `Agent(subagent_type="general-purpose", description="Phase 4: Permission friction", prompt="You are running Phase 4 (Permission Friction Analysis) of a skill audit. Return your complete findings as your response. Also attempt to write them to <PHASE4_OUTPUT> using the Write tool — if the write fails, the main agent will capture your findings from the returned result. Read the session transcript at: <TRANSCRIPT_PATH>. Project settings: ~/.claude/settings.local.json. Skills directory: <SKILLS_DIR>. [Include full Phase 4: Permission Friction Analysis instructions from the Phase Reference section, all sub-steps 4a through 4g].")`
 
 Wait for both subagents to complete. Mark tasks 4 and 5 as
-`completed` as each returns.
+`completed` as each returns. If a subagent's output file was not
+written, use the returned result to write it from the main agent.
 
 ### Step 7: Wave 2 — dispatch dependent subagents
 
@@ -290,19 +296,24 @@ that Phases 2, 3, and 5 need.
 they run concurrently. Include the full text of each phase's
 instructions from the Phase Reference section in each prompt.
 
-1. `Agent(subagent_type="general-purpose", description="Phase 2: Skill coverage", prompt="You are running Phase 2 (Skill Coverage Analysis). You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Phase 1 action inventory: <PHASE1_OUTPUT>. Skills directory: <SKILLS_DIR>. Read the Phase 1 output, then [include full Phase 2: Skill Coverage Analysis instructions from the Phase Reference section]. Write findings to: <PHASE2_OUTPUT>.")`
+1. `Agent(subagent_type="general-purpose", description="Phase 2: Skill coverage", prompt="You are running Phase 2 (Skill Coverage Analysis). Return your complete findings as your response. Also attempt to write them to <PHASE2_OUTPUT> — if the write fails, the main agent will capture your findings from the returned result. Phase 1 action inventory: <PHASE1_OUTPUT>. Skills directory: <SKILLS_DIR>. Read the Phase 1 output, then [include full Phase 2: Skill Coverage Analysis instructions from the Phase Reference section].")`
 
-2. `Agent(subagent_type="general-purpose", description="Phase 3: Compliance check", prompt="You are running Phase 3 (Compliance Check). You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Phase 1 action inventory: <PHASE1_OUTPUT>. Session transcript: <TRANSCRIPT_PATH>. Skills directory: <SKILLS_DIR>. Read the Phase 1 output, then [include full Phase 3: Compliance Check instructions from the Phase Reference section]. Write findings to: <PHASE3_OUTPUT>.")`
+2. `Agent(subagent_type="general-purpose", description="Phase 3: Compliance check", prompt="You are running Phase 3 (Compliance Check). Return your complete findings as your response. Also attempt to write them to <PHASE3_OUTPUT> — if the write fails, the main agent will capture your findings from the returned result. Phase 1 action inventory: <PHASE1_OUTPUT>. Session transcript: <TRANSCRIPT_PATH>. Skills directory: <SKILLS_DIR>. Read the Phase 1 output, then [include full Phase 3: Compliance Check instructions from the Phase Reference section].")`
 
-3. `Agent(subagent_type="general-purpose", description="Phase 5: Lessons learned", prompt="You are running Phase 5 (Lessons Learned Extraction). You have permission to write to /tmp/claude/skill-audit/ paths — use the Write tool to save findings. Phase 1 action inventory: <PHASE1_OUTPUT>. Session transcript: <TRANSCRIPT_PATH>. Memory directory: <MEMORY_DIR>. Read the Phase 1 output, then [include full Phase 5: Lessons Learned Extraction instructions from the Phase Reference section]. Write findings to: <PHASE5_OUTPUT>.")`
+3. `Agent(subagent_type="general-purpose", description="Phase 5: Lessons learned", prompt="You are running Phase 5 (Lessons Learned Extraction). Return your complete findings as your response. Also attempt to write them to <PHASE5_OUTPUT> — if the write fails, the main agent will capture your findings from the returned result. Phase 1 action inventory: <PHASE1_OUTPUT>. Session transcript: <TRANSCRIPT_PATH>. Memory directory: <MEMORY_DIR>. Read the Phase 1 output, then [include full Phase 5: Lessons Learned Extraction instructions from the Phase Reference section].")`
 
 Wait for all three subagents to complete. Mark tasks 6, 7, 8
-as `completed` as each returns.
+as `completed` as each returns. If any output file was not written
+by the subagent, use the returned result to write it from the
+main agent.
 
 ### Step 8: Collect and synthesize
 
-Read all five output files. The main agent now has the complete
-findings from all analysis phases and proceeds to Phase 6
+Read all five output files. If any file is empty or missing
+(subagent write failed), the main agent should already have the
+findings from the subagent's returned result — write them now.
+The main agent now has the complete findings from all analysis
+phases and proceeds to Phase 6
 (Propose Changes) and Phase 7 (Upstream Reporting) directly —
 these require user interaction and cannot be delegated.
 

@@ -186,17 +186,18 @@ Choose the agent type based on the source's tool requirements:
 
 | Source type | Agent type | Why |
 |-------------|-----------|-----|
-| `github-issue` | `Explore` | `gh` CLI works in Explore agents |
-| `github-pr` | `Explore` | `gh` CLI works in Explore agents |
+| `github-issue` | `general-purpose` | Needs Bash for `gh` CLI |
+| `github-pr` | `general-purpose` | Needs Bash for `gh` CLI |
 | `linear-ticket` | `general-purpose` | Needs Linear MCP tools |
-| `jira-ticket` | `Explore` | Uses `Dev10x:jira` skill |
+| `jira-ticket` | `general-purpose` | Needs Bash for `Dev10x:jira` skill |
 | `slack-thread` | `general-purpose` | Needs Slack MCP tools |
 | `sentry-issue` | `general-purpose` | Needs Sentry MCP tools |
 | `note` | (none) | Pass through as-is |
 
-**Do NOT use Explore agents for MCP-dependent fetches.** Explore
-agents lack access to MCP tools and `WebFetch`. If a source
-requires MCP tools (Linear, Slack, Sentry), use `general-purpose`.
+**Do NOT use Explore agents for source fetches.** Explore agents
+lack access to Bash, MCP tools, and `WebFetch`. Since `gh` CLI
+requires Bash and Linear/Slack/Sentry require MCP tools, all
+source fetches must use `general-purpose` agents.
 
 ```
 # Single tool-call block — all launch concurrently
@@ -220,10 +221,10 @@ in the main session via `WebFetch`, not dispatched to subagents.
 
 | Source type | Agent type | Subagent instructions |
 |-------------|-----------|----------------------|
-| `github-issue` | Explore | Run `gh issue view "$NUMBER" --repo "$REPO" --json title,state,body,labels,assignees`. Return title, status, labels, body summary, linked PRs. |
-| `github-pr` | Explore | Run `gh pr view --json title,body,headRefName,state,mergedAt,reviews`. Return title, status, branch, review comment count. |
+| `github-issue` | general-purpose | Run `gh issue view "$NUMBER" --repo "$REPO" --json title,state,body,labels,assignees`. Return title, status, labels, body summary, linked PRs. |
+| `github-pr` | general-purpose | Run `gh pr view --json title,body,headRefName,state,mergedAt,reviews`. Return title, status, branch, review comment count. |
 | `linear-ticket` | general-purpose | Call `mcp__claude_ai_Linear__get_issue(issueId)`. Return title, status, parent ID, relations, comment summaries. |
-| `jira-ticket` | Explore | Use `Dev10x:jira` skill to fetch ticket. Return title, status, assignee, linked issues. |
+| `jira-ticket` | general-purpose | Use `Dev10x:jira` skill to fetch ticket. Return title, status, assignee, linked issues. |
 | `slack-thread` | general-purpose | Call `mcp__claude_ai_Slack__slack_read_thread(channelId, threadTs)`. Return message count, key decisions, action items. |
 | `sentry-issue` | general-purpose | Call `mcp__sentry__get_issue_details(issueId)`. Return error type, frequency, first/last seen, top stack frame. |
 | `note` | (none) | No subagent needed — pass through as-is. |
@@ -600,6 +601,14 @@ invoke via `Skill()`. Do NOT perform actions directly.** Skill
 delegation ensures consistent behavior, proper tool declarations,
 and reusable orchestration. Bypassing delegation by inlining the
 skill's logic breaks these guarantees.
+
+**Unattended mode compliance:** Auto-advance pressure in
+unattended mode makes it tempting to perform operations directly
+(e.g., `git checkout -b` instead of `Dev10x:ticket-branch`,
+inline review instead of `Dev10x:review`). This is still a
+violation — unattended mode changes the *pace*, not the *rules*.
+If you catch yourself about to skip a `Skill()` call, stop and
+invoke the skill.
 
 Common skill delegations:
 
