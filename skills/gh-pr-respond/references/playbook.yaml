@@ -109,4 +109,38 @@ defaults:
           Report counts by verdict type, resolution status, and
           hiding status. Include fixup commit count.
 
+  post-response:
+    prompt: >
+      Use after all comments are processed and fixup commits exist.
+      Executes the full shipping pipeline: groom → push → ready →
+      monitor → merge. Skip if no fixup commits were created.
+    steps:
+      - subject: Groom commit history
+        type: detailed
+        skills: [Dev10x:git-groom]
+        prompt: Squash fixup commits into clean history.
+      - subject: Push changes
+        type: detailed
+        skills: [Dev10x:git]
+        prompt: Push with --force-with-lease.
+      - subject: Mark PR ready
+        type: detailed
+        prompt: >
+          Run `gh pr ready` if the PR is still a draft. Skip if
+          already marked ready.
+      - subject: Monitor CI
+        type: detailed
+        skills: [Dev10x:gh-pr-monitor]
+        prompt: >
+          Watch CI. Fix failures with fixup commits if needed.
+          Auto-advance when green.
+      - subject: Merge PR
+        type: detailed
+        prompt: >
+          When CI passes and no new review comments exist, merge
+          via `gh pr merge --squash --delete-branch`. In solo-
+          maintainer mode, merge automatically. Otherwise, stop
+          and report ready-to-merge status.
+        condition: ci-green-no-comments
+
 overrides: []

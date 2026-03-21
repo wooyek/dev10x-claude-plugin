@@ -16,6 +16,7 @@ allowed-tools:
   - Skill(skill="Dev10x:gh-pr-create")
   - Skill(skill="Dev10x:ticket-branch")
   - Skill(skill="Dev10x:session-wrap-up")
+  - Skill(skill="Dev10x:skill-audit")
   - mcp__plugin_Dev10x_cli__*
 ---
 
@@ -53,7 +54,9 @@ next. Never pause between items to ask "should I continue?"
 1. `TaskCreate(subject="Scan: discover work items", activeForm="Scanning")`
 2. `TaskCreate(subject="Classify: dependency and conflict analysis", activeForm="Classifying")`
 3. `TaskCreate(subject="Execute: process work streams", activeForm="Processing")`
-4. `TaskCreate(subject="Verify: confirm all items resolved", activeForm="Verifying")`
+4. `TaskCreate(subject="Monitor: track PRs through merge", activeForm="Monitoring")`
+5. `TaskCreate(subject="Verify: confirm all items resolved", activeForm="Verifying")`
+6. `TaskCreate(subject="Audit: review session skill usage", activeForm="Auditing")`
 
 ## Phase 1: Scan
 
@@ -138,10 +141,41 @@ Options:
 
 Process items according to the approved plan.
 
+**REQUIRED: Create one subtask per work item** under the Phase 3
+parent task before starting any execution. Each subtask tracks
+the lifecycle of a single issue or PR:
+
+```
+TaskCreate(subject="Process: PR #42 — fix payment routing",
+    parentTaskId=phase3TaskId,
+    metadata={"type": "pr-continuation", "item": "#42"})
+TaskCreate(subject="Process: GH-10 — add retry mechanism",
+    parentTaskId=phase3TaskId,
+    metadata={"type": "feature", "item": "GH-10"})
+```
+
+Mark each subtask `in_progress` when starting and `completed`
+when the item's PR is merged or work is handed off.
+
+### Work-On Delegation
+
+**REQUIRED: Every issue MUST be delegated to `Dev10x:work-on`.**
+Do NOT implement issues inline within the fanout session. Fanout
+is an **orchestrator**, not an implementor — it dispatches work
+to `Dev10x:work-on` and tracks results. Inline implementation
+bypasses work-on's structured lifecycle (branch setup, Job Story,
+code review, shipping pipeline) and produces untracked work.
+
+**Enforcement:**
+- Each issue → `Skill(skill="Dev10x:work-on", args="<issue-url>")`
+- Each PR → `Skill(skill="Dev10x:work-on", args="<pr-url>")`
+- After work-on completes → invoke `Dev10x:gh-pr-monitor` to
+  track the resulting PR through CI and merge
+
 ### Processing PRs
 
-For each PR, execute the pr-continuation play from
-`Dev10x:work-on`:
+For each PR, delegate to `Dev10x:work-on` with the PR URL.
+Work-on executes the pr-continuation play:
 
 1. Check out the PR branch (or work in existing worktree)
 2. If review comments exist → `Dev10x:gh-pr-respond`
@@ -164,8 +198,9 @@ cycle if the review is informational only.
 For each issue (or parallel group of issues):
 
 1. Create a worktree or branch per issue
-2. Delegate to `Dev10x:work-on` with the issue URL
-3. Monitor the resulting PR through to merge
+2. **REQUIRED:** Delegate to `Dev10x:work-on` with the issue URL
+3. After work-on completes → invoke `Dev10x:gh-pr-monitor`
+   to track the resulting PR through CI and merge
 4. After merge → update develop, rebase downstream items
 
 **Parallel execution:** For non-conflicting issues, launch
@@ -201,9 +236,33 @@ compact progress per `references/task-orchestration.md`
 Pattern 8. Summarize completed items in task metadata to
 free context for remaining work.
 
-## Phase 4: Verify
+## Phase 4: Monitor
 
-After all items are processed:
+After all items have been processed in Phase 3, track every
+PR created during this session through to merge.
+
+**REQUIRED: Create one subtask per PR** under the Phase 4
+parent task:
+
+```
+TaskCreate(subject="Monitor: PR #101 — GH-10 implementation",
+    parentTaskId=phase4TaskId)
+```
+
+For each PR:
+1. Invoke `Dev10x:gh-pr-monitor` to watch CI and review status
+2. If CI fails → fix with fixup commits, push, re-monitor
+3. If new review comments → delegate to `Dev10x:gh-pr-respond`
+4. When CI passes and PR is approved → merge via
+   `gh pr merge --squash --delete-branch`
+5. After merge → rebase downstream branches if needed
+
+Mark each subtask `completed` when the PR is merged or
+handed off for external review.
+
+## Phase 5: Verify
+
+After all items are processed and PRs merged:
 
 1. Call `TaskList` to show the full task list
 2. Verify all items are either merged, closed, or have
@@ -223,6 +282,19 @@ Options:
 - Work complete — done (Recommended)
 - Add more items
 - Revisit an item
+
+## Phase 6: Audit
+
+For multi-item sessions (3+ work items), invoke a session
+skill audit to capture orchestration quality and extract
+lessons learned.
+
+**REQUIRED:** Invoke `Skill(skill="Dev10x:skill-audit")` to
+analyze skill usage, compliance rates, and identify process
+improvements.
+
+**Skip this phase** for sessions with fewer than 3 work items
+or when the user explicitly declines.
 
 ## Pause/Resume
 

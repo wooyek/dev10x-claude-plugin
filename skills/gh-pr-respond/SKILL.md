@@ -460,23 +460,34 @@ Batch complete: {N} comments processed
 ## Post-Response Continuation
 
 After all comments are processed (Mode A or Mode B), if fixup commits
-were created during this session, offer to continue the shipping
+were created during this session, offer to continue the full shipping
 pipeline:
 
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
 Options:
-- **"Groom + push + monitor" (Recommended)** — Invoke `Dev10x:git-groom`
-  to squash fixups, push with `--force-with-lease`, then invoke
-  `Dev10x:gh-pr-monitor` to watch CI and new comments
-- **"Push only"** — Push current commits (including fixups) without
-  grooming
+- **"Full shipping pipeline" (Recommended)** — Execute the complete
+  post-response shipping sequence:
+  1. `Dev10x:git-groom` — squash fixup commits into clean history
+  2. `Dev10x:git` — push with `--force-with-lease`
+  3. `gh pr ready` — mark PR ready for review (if still draft)
+  4. `Dev10x:gh-pr-monitor` — watch CI and new review comments
+  5. If CI passes and no new comments → merge via
+     `gh pr merge --squash --delete-branch`
+- **"Groom + push only"** — Groom and push, but stop before
+  monitoring and merge
 - **"Stop"** — End without pushing
 
-This eliminates the manual three-step chain (`git-groom` → push →
-`gh-pr-monitor`) that was required after every respond session.
+This eliminates the manual multi-step chain that was required
+after every respond session. The full pipeline handles the entire
+groom → push → ready → monitor → merge lifecycle.
 
 **Skip this gate** if no fixup commits were created (e.g., all
 comments were INVALID and only replies were posted).
+
+**Solo-maintainer mode:** When the project playbook defines a
+solo-maintainer override (no external reviewers), the full
+pipeline auto-merges after CI passes without waiting for
+external approval.
 
 ---
 
