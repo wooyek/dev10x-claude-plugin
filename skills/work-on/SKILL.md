@@ -12,6 +12,7 @@ allowed-tools:
   - Read(~/.claude/projects/**/memory/playbooks/work-on.yaml)
   - Read(${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml)
   - Write(~/.claude/projects/**/**)
+  - Skill(skill="Dev10x:verify-acc-dod")
 ---
 
 # Dev10x:work-on — Adaptive Work Orchestrator
@@ -375,81 +376,17 @@ The last subtask is always acceptance criteria verification.
 ### Acceptance Criteria Verification
 
 The **last task** in every plan verifies the work is shippable
-or ready for handover. Read the acceptance criteria YAML file:
+or ready for handover.
 
+**REQUIRED:** Delegate to `Dev10x:verify-acc-dod` skill:
 ```
-~/.claude/projects/<project>/memory/acceptance-criteria.yaml
-```
-
-**Determine the work type** from the gathered context:
-
-| Context | Work type |
-|---------|-----------|
-| Ticket with implementation | `feature` |
-| Sentry/bug ticket | `bugfix` |
-| PR with review comments | `pr-continuation` |
-| No ticket, no PR | `local-only` |
-| Sentry/Slack only, no fix planned | `investigation` |
-
-**YAML schema:**
-
-```yaml
-# acceptance-criteria.yaml
-defaults:
-  feature:
-    criteria: >
-      PR passing CI with automatic fixups applied to review
-      comments, groomed commit history, and review request
-      published
-  bugfix:
-    criteria: >
-      PR passing CI with automatic fixups applied to review
-      comments, regression test covering the fix, groomed
-      commit history, and review request published
-  pr-continuation:
-    criteria: >
-      PR passing CI with fixups applied to all unaddressed
-      review comments, groomed commit history, and re-review
-      requested
-  local-only:
-    criteria: "Changes verified locally"
-  investigation:
-    criteria: "Findings documented, next steps clear"
-overrides: {}  # populated when user persists a choice
+Skill(skill="Dev10x:verify-acc-dod", args="<work_type>")
 ```
 
-**If the file is absent** on first use, use the hardcoded
-defaults above — do not fail or skip the verification step.
-Create the file only when the user persists a non-default
-choice.
-
-**Resolve criteria** in this order:
-1. Check `overrides` for a matching `work_type` with
-   `persist: false` — use if found, then **remove** the entry
-2. Check `overrides` for a matching `work_type` with
-   `persist: true` — use if found
-3. Fall back to `defaults[work_type].criteria` from the file
-4. If the file is absent or the work type has no entry, use
-   the hardcoded defaults above
-
-**Present the criteria** when building the plan. Show the
-resolved criteria in the final task description. If the user
-has persistent overrides from past sessions, present them
-as choices alongside the default:
-
-```
-Acceptance criteria for this feature work:
-- PR is approved, CI passes, ready to merge (Default)
-- PR created and CI green, skip review (Your past choice)
-- Different criteria this time
-```
-
-If the user picks a non-default option, ask whether to
-persist it (`AskUserQuestion` with "Always" / "Just this
-time"). Update the YAML file accordingly:
-- `persist: true` → add to `overrides` for future sessions
-- `persist: false` → add with `persist: false`; the skill
-  removes consumed one-time overrides after use
+The skill handles criteria resolution (YAML file, defaults,
+overrides), automated state checks (CI, PR, working copy),
+and user confirmation. See the `Dev10x:verify-acc-dod` skill
+for the full criteria schema and verification protocol.
 
 ### Example Plays (Defaults)
 
