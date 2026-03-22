@@ -18,12 +18,28 @@ jobs:
       id-token: write
 
     steps:
+      - name: Skip if duplicate SHA run exists
+        id: dedup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PEER_RUN=$(gh api \
+            "repos/${{ github.repository }}/actions/runs?head_sha=${{ github.sha }}&per_page=10" \
+            --jq "[.workflow_runs[] | select(.name == \"${{ github.workflow }}\" and .id != ${{ github.run_id }} and .conclusion != \"cancelled\" and .conclusion != \"skipped\" and .status != \"queued\")] | first | .id // empty" \
+            2>/dev/null || true)
+          if [ -n "$PEER_RUN" ]; then
+            echo "::notice::Skipping duplicate run — SHA ${{ github.sha }} already handled by run $PEER_RUN"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout repository
+        if: steps.dedup.outputs.skip != 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Run PR Hygiene Review
+        if: steps.dedup.outputs.skip != 'true'
         uses: anthropics/claude-code-action@v1
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
