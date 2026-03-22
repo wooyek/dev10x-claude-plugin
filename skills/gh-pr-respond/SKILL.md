@@ -466,7 +466,26 @@ Batch complete: {N} comments processed
 
 After all comments are processed (Mode A or Mode B), if fixup commits
 were created during this session, offer to continue the full shipping
-pipeline:
+pipeline.
+
+### Parent Context Detection
+
+**Before offering the shipping pipeline, check if a parent
+orchestrator (e.g., `Dev10x:work-on`) is managing the shipping
+sequence.** When invoked as a delegated skill via `Skill()` from
+a parent that has its own shipping pipeline tasks (groom, push,
+monitor, ready), skip the Post-Response Continuation gate entirely
+and return control to the parent. The parent's remaining tasks
+cover the same steps — running them here creates duplicates.
+
+**Detection heuristic:** Call `TaskList`. If tasks exist with
+subjects matching the parent's shipping pipeline (e.g., "Groom
+commit history", "Monitor CI", "Mark PR ready"), a parent
+orchestrator owns the pipeline. Return without offering the
+continuation gate.
+
+**When no parent is detected** (standalone invocation), proceed
+with the gate below.
 
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
 Options:

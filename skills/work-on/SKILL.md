@@ -697,6 +697,31 @@ Common skill delegations:
 After completing a detailed task, mark it `completed` via
 `TaskUpdate` and move to the next task.
 
+### Task Reconciliation After Skill Delegation
+
+**REQUIRED:** After a delegated skill completes (e.g.,
+`Dev10x:gh-pr-respond`, `Dev10x:gh-pr-monitor`), reconcile
+the task list before proceeding. Delegated skills may create
+their own tasks that overlap with the parent's remaining
+pipeline steps. Without reconciliation, parent tasks remain
+`pending` forever and the completion gate is never reached.
+
+**Reconciliation protocol:**
+
+1. Call `TaskList` after the delegated skill returns
+2. Check if the delegated skill fulfilled any of the parent's
+   remaining tasks (e.g., if `gh-pr-respond` ran groom + push,
+   mark the parent's "Groom commit history" and "Push" tasks
+   as `completed`)
+3. Mark any tasks completed by the delegated skill's side
+   effects — match by subject/action, not by task ID
+4. If context compaction cleared the task list, recreate only
+   the remaining uncompleted tasks from the playbook
+
+This prevents the failure mode where delegated skills run
+their own shipping pipeline, the parent's tasks are never
+updated, and the completion gate never fires.
+
 ### Expanding Epic Tasks
 
 When reaching an epic task:
