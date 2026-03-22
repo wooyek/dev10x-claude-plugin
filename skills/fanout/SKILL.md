@@ -75,8 +75,49 @@ gh issue list --state open --json number,title,labels
 ```
 
 **With arguments**: Accept a space-separated list of URLs,
-issue numbers, or PR numbers. Classify each per
-`Dev10x:work-on` Phase 1 rules.
+issue numbers, or PR numbers. Classify each argument
+independently:
+
+| Pattern | Type | Action |
+|---------|------|--------|
+| `https://github.com/{owner}/{repo}/issues` | `scope:issues` | Restrict scan to issues only |
+| `https://github.com/{owner}/{repo}/pulls` | `scope:pulls` | Restrict scan to PRs only |
+| `https://github.com/{owner}/{repo}/issues/{N}` | `item:issue` | Fetch specific issue |
+| `https://github.com/{owner}/{repo}/pull/{N}` | `item:pr` | Fetch specific PR |
+| `#N` or bare number | `item` | Classify per `Dev10x:work-on` Phase 1 rules |
+| `PRs`, `issues` (bare keyword) | `scope` | Restrict scan to matching type (same as scope URL) |
+| Free text (anything else) | `note` | Parse intent to infer scope and work items (see below) |
+
+**Free-text input:** When an argument doesn't match any URL,
+number, or keyword pattern, treat it as a `note`. Analyze the
+text to infer the user's intent:
+
+- Identify scope hints (e.g., "merge all open PRs" → `scope:pulls`,
+  "triage the bug reports" → `scope:issues`)
+- Extract implicit item references (e.g., "fix the timeout bug
+  from last week" → search recent issues)
+- Determine parallelism intent (e.g., "split this into parallel
+  tasks" → plan parallel processing)
+
+Classification follows `Dev10x:work-on` Phase 1 `note` handling.
+When scope cannot be inferred, default to scanning both PRs and
+issues.
+
+**Scope keywords and URLs** constrain the default scan.
+When a scope URL is present, run only the matching `gh` command
+instead of both:
+
+- `scope:issues` → run `gh issue list` only, skip `gh pr list`
+- `scope:pulls` → run `gh pr list` only, skip `gh issue list`
+
+Scope URLs and specific items can be mixed. When both are
+present, the scope restricts the default scan while specific
+items are fetched regardless of scope:
+
+```
+/Dev10x:fanout https://github.com/org/repo/issues #42
+```
+→ Scan issues only (`gh issue list`) + fetch PR #42 explicitly.
 
 Create one subtask per discovered item under the Phase 1
 parent task.
