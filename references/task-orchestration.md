@@ -89,18 +89,27 @@ TaskCreate(subject="Configure git aliases",
 TaskUpdate(taskId, status="completed")
 ```
 
-### Delegated Invocation Exception
+### Delegated Invocation Exception (Nested-Mode Exemption)
 
 When a skill is invoked as a subtask of a parent orchestrator (e.g.,
-`Dev10x:work-on`), internal `TaskCreate` calls MAY be skipped. The
-parent orchestrator owns the task lifecycle and has already created
-tasks that track the child skill's progress. Duplicate `TaskCreate`
-calls would clutter the task list with redundant entries.
+`Dev10x:work-on`), internal `TaskCreate` calls MAY be skipped or
+reduced to at most **1 summary task**. The parent orchestrator owns
+the task lifecycle and has already created tasks that track the child
+skill's progress. Duplicate task trees add clutter without value.
 
-**Detection:** A skill is delegated when invoked via the `Skill` tool
-from within another skill's orchestration flow. When running as a
-top-level invocation (user types `/skill-name`), TaskCreate is
-mandatory as documented above.
+**Detection:** A skill is running in nested mode when:
+- It was invoked via the `Skill` tool from another skill's flow
+- A parent task list already exists (check via `TaskList`)
+- The skill received `--unattended` or similar delegation flags
+
+**Behavior in nested mode:**
+- Startup `TaskCreate` calls are OPTIONAL (at most 1 summary task)
+- The parent orchestrator provides progress visibility
+- Decision gates (AskUserQuestion) may be auto-resolved per the
+  parent's unattended policy
+
+When running as a top-level invocation (user types `/skill-name`),
+`TaskCreate` is mandatory as documented above.
 
 ### Startup Gate (Full and Standard tiers)
 

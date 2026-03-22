@@ -47,6 +47,11 @@ Never pause to ask "should I continue?" between steps.
 
 Set dependencies and update status as each completes.
 
+**Nested-mode exemption:** When invoked as a nested skill within
+a parent orchestrator (e.g., via `Skill()` from `Dev10x:work-on`),
+startup task creation is optional — at most 1 summary task. See
+`references/task-orchestration.md` § Delegated Invocation Exception.
+
 **Parallel triage (Mode B Step 2):** Dispatch up to 4 triage
 subagents concurrently to reduce processing time. Each subagent
 receives only its comment context and returns verdict + draft

@@ -56,6 +56,11 @@ next. Never pause between phases to ask "should I continue?".
 Set dependencies: strategy blocked by analysis, execute blocked
 by strategy, push blocked by execute.
 
+**Nested-mode exemption:** When invoked as a nested skill within
+a parent orchestrator (e.g., via `Skill()` from `Dev10x:work-on`),
+startup task creation is optional — at most 1 summary task. See
+`references/task-orchestration.md` § Delegated Invocation Exception.
+
 ## Workflow
 
 ### Phase 1: Analyze Current State
