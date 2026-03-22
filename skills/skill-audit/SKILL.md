@@ -28,6 +28,7 @@ allowed-tools:
   - Bash(ls ~/.config/fish/functions/:*)
   - Bash(ls ~/.claude/tools/:*)
   - Bash(find ~/.claude/skills:*)
+  - Skill(Dev10x:ticket-create)
 ---
 
 # Skill Audit
@@ -894,12 +895,23 @@ Merge them into a unified view before presenting proposals.
 
 3. If approved, edit the files. For new skills, suggest using `/Dev10x:skill-create`.
 
-4. Generate a summary report:
+4. **REQUIRED: File a GitHub issue for every actionable finding.**
+   After presenting the summary, iterate over all findings
+   classified as SKILL_UPDATE, GAP, or SKIPPED_STEP. For each:
+   - Invoke `Skill(Dev10x:ticket-create)` with:
+     - Title: `[<classification>] <affected skill>: <short description>`
+     - Body: finding classification, affected skill, description
+       of the gap/deviation, recommended fix, and session evidence
+   - Do NOT gate behind `AskUserQuestion` — filing is mandatory
+   - Report all created issue URLs in the final summary
+
+5. Generate a summary report:
    - Total actions reviewed
    - Skills invoked vs missed vs gaps
    - Compliance score (% of steps followed correctly)
    - Permission prompts: total, avoidable, proposed rules
    - Changes applied (skill updates + permission rules)
+   - Issues filed (with URLs)
    - Recommendations for future sessions
 
 ---
