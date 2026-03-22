@@ -1,0 +1,118 @@
+# Command-to-skill mapping for Dev10x:skill-reinforcement
+#
+# Each entry maps CLI command patterns to the skill that should
+# be used instead. Patterns are matched as prefixes against the
+# full command string.
+#
+# Users can override this file per project by placing a custom
+# version at:
+#   ~/.claude/projects/<project>/memory/playbooks/skill-reinforcement.yaml
+
+mappings:
+  - skill: Dev10x:k8s
+    description: Kubernetes cluster operations via aws-vault authenticated kubectl
+    patterns:
+      - kubectl
+      - aws-vault exec.*kubectl
+    reason: >
+      Direct kubectl calls bypass aws-vault authentication and
+      may use wrong credentials or target wrong cluster.
+    related:
+      - Dev10x:aws-vault
+
+  - skill: Dev10x:git
+    description: Safe git push/rebase with protected branch checks
+    patterns:
+      - git push
+      - git rebase
+    reason: >
+      Direct git push bypasses force-push protection on
+      develop/main branches. Direct rebase may trigger
+      interactive editor prompts.
+    related:
+      - Dev10x:git-commit
+      - Dev10x:git-groom
+
+  - skill: Dev10x:git-commit
+    description: Properly formatted git commit with gitmoji and ticket reference
+    patterns:
+      - git commit
+      - git add
+    reason: >
+      Direct git commit bypasses gitmoji prefix, ticket ID
+      extraction from branch name, and 72-char line limit
+      enforcement.
+
+  - skill: Dev10x:gh-pr-create
+    description: Create GitHub PR with issue tracker integration and Job Story
+    patterns:
+      - gh pr create
+    reason: >
+      Direct gh pr create skips Job Story drafting, commit list
+      generation, and issue tracker linking.
+
+  - skill: Dev10x:gh-pr-review
+    description: Review a PR with inline comments following project guidelines
+    patterns:
+      - gh pr review
+    reason: >
+      Direct gh pr review skips structured review checklist and
+      domain-specific agent routing.
+
+  - skill: Dev10x:db-psql
+    description: Safe read-only database queries with SQL validation
+    patterns:
+      - psql
+      - aws-vault exec.*psql
+    reason: >
+      Direct psql calls bypass SQL validation hooks and may
+      accidentally execute write operations.
+    related:
+      - Dev10x:db
+      - tt:db
+
+  - skill: Dev10x:aws-vault
+    description: Retrieve secrets from AWS Secrets Manager
+    patterns:
+      - aws secretsmanager
+      - aws-vault exec
+    reason: >
+      Direct aws CLI calls bypass credential management and
+      environment-specific profile selection.
+
+  - skill: Dev10x:slack
+    description: Send Slack notifications with channel/thread/mention support
+    patterns:
+      - curl.*slack.com/api
+      - curl.*hooks.slack.com
+    reason: >
+      Direct Slack API calls bypass token management and
+      structured message formatting.
+
+  - skill: Dev10x:playwright
+    description: Run Playwright scripts against staging with CF Access headers
+    patterns:
+      - playwright
+      - npx playwright
+      - uv run.*playwright
+    reason: >
+      Direct playwright calls skip CF Access header injection
+      and credential management for staging environments.
+
+  - skill: test
+    description: Run pytest with coverage reporting
+    patterns:
+      - pytest
+      - python -m pytest
+      - uv run pytest
+    reason: >
+      The test skill ensures consistent coverage reporting and
+      concise summaries. Use it for standardized test execution.
+
+  - skill: Dev10x:investigate
+    description: Root-cause investigation from Slack bug reports
+    patterns:
+      - curl.*sentry
+    reason: >
+      The investigate skill combines Sentry, codebase search,
+      and Slack thread context for structured root-cause analysis.
