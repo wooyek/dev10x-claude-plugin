@@ -580,9 +580,32 @@ Return to the blocked task once the blocker resolves.
 
 ### Plan Completion Gate
 
-**REQUIRED:** After the last task is marked completed, show the
-full task list via `TaskList` and call `AskUserQuestion` with
-options:
+**REQUIRED: Pre-gate verification checklist.** Before triggering
+`AskUserQuestion`, verify ALL of the following:
+
+1. All background agents have completed or reported results —
+   check `TaskList` for any tasks still `in_progress`
+2. No unaddressed review comments exist on the PR — check via
+   `gh pr view --json reviewDecision,reviews`
+3. CI checks have completed (not still running) — check via
+   `gh pr checks`
+4. Working copy is clean — `git status` shows no uncommitted
+   changes
+5. No pending fixup commits that haven't been pushed — compare
+   local HEAD with remote tracking branch
+
+If any check fails, resolve it before presenting the gate.
+Do NOT present "Work complete" as recommended when preconditions
+are unmet.
+
+**Background agent task status:** Tasks for background agents
+(e.g., PR monitor dispatched via `run_in_background`) MUST remain
+`in_progress` until the agent confirms completion. Do NOT mark
+them `completed` on dispatch — only mark `completed` when the
+agent's result notification arrives and confirms success.
+
+**After all checks pass**, show the full task list via `TaskList`
+and call `AskUserQuestion` with options:
 - "Work complete — hand over" (Recommended)
 - "Add more tasks"
 - "Revisit a step"
