@@ -555,6 +555,21 @@ routing for shipping actions. If you are about to run a raw
 git/gh command that appears in the "Never use directly" column,
 STOP and invoke the corresponding skill instead.
 
+**Compaction preservation:** When context is compacted, the
+summary MUST retain this routing table verbatim. Without it,
+the agent loses skill-to-action mappings and falls back to
+raw CLI commands — the #1 source of guardrail bypasses.
+Re-inject the table into the compacted context as:
+```
+## Active Skill Routing (preserved from work-on)
+commit → Skill(Dev10x:git-commit)
+create PR → Skill(Dev10x:gh-pr-create)
+monitor CI → Skill(Dev10x:gh-pr-monitor)
+push → Skill(Dev10x:git)
+groom → Skill(Dev10x:git-groom)
+branch → Skill(Dev10x:ticket-branch)
+```
+
 ### Auto-Advance Rule
 
 See `references/task-orchestration.md` for the full pattern.
@@ -657,7 +672,9 @@ unattended mode makes it tempting to perform operations directly
 inline review instead of `Dev10x:review`). This is still a
 violation — unattended mode changes the *pace*, not the *rules*.
 If you catch yourself about to skip a `Skill()` call, stop and
-invoke the skill.
+invoke the skill. Refer to the **Skill Routing Enforcement**
+table above — it lists every action that MUST use a skill
+wrapper regardless of execution mode.
 
 Common skill delegations:
 
