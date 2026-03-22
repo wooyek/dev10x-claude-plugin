@@ -316,6 +316,39 @@ Set dependencies:
 - Long-running workflows where parallelization saves significant time
 - Example: `Dev10x:skill-audit` with 5 parallel analysis phases + dependency on Phase 1 output
 
+## Fanout Execution (Multiple Items)
+
+When executing a plan with multiple independent items (fanout), each item
+MUST execute the **full orchestration pipeline** — not a collapsed subset.
+Fanout does NOT exempt individual items from verification, grooming, or
+review guardrails.
+
+**Anti-pattern (PROHIBITED):**
+```
+for each issue:
+  branch → edit → commit → push → create-pr   # 5 steps
+```
+
+This collapses the pipeline and skips:
+- Verification (design review, implementation review)
+- Grooming (commit message validation, fixup handling)
+- Re-review (CI must run after grooming, pre-merge checks)
+
+**Required pattern:**
+```
+for each issue:
+  full play → branch → design → implement → verify →
+  review → commit → groom → update → ready → verify-acc   # 12+ steps
+```
+
+**Why:** Evidence from audit session 05d49f11 showed that agents
+rationalized pipeline collapse under fanout: "parallel processing
+optimizes by reducing steps." This assumption was wrong. Each issue
+requires independent verification and review. Parallel execution
+(via Agent with `run_in_background=true`) is orthogonal to the
+pipeline length — parallelizing execution does NOT justify skipping
+steps.
+
 **Phase reference pattern:**
 Create a "Phase Reference" section in SKILL.md that documents each phase's
 inputs, outputs, and instructions. This section can be pasted verbatim into
