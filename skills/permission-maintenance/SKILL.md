@@ -3,7 +3,8 @@ name: Dev10x:permission-maintenance
 description: >
   Maintain Claude Code permissions — update plugin version paths, ensure
   base permissions, merge worktree rules, generalize session-specific args,
-  and audit for friction-causing patterns via the permission-auditor agent.
+  audit for friction-causing patterns via the permission-auditor agent,
+  and clean redundant rules from project settings files.
   TRIGGER when: plugin version changes, permission prompts keep appearing,
   or user asks to fix permission friction.
   DO NOT TRIGGER when: permissions are working correctly, or user is
@@ -35,6 +36,7 @@ Run dry-run first, then apply — no pause between steps.
 3. `TaskCreate(subject="Generalize session-specific permissions", activeForm="Generalizing perms")`
 4. `TaskCreate(subject="Merge worktree permissions", activeForm="Merging worktree perms")`
 5. `TaskCreate(subject="Audit permissions for friction", activeForm="Auditing permissions")`
+6. `TaskCreate(subject="Clean project files", activeForm="Cleaning project files")`
 
 Set sequential dependencies. Mark each step `in_progress` when
 starting and `completed` when done. Steps that produce no
@@ -168,6 +170,36 @@ Agent(subagent_type="Dev10x:permission-auditor",
 The agent produces a severity-categorized report with specific fix
 proposals. Review and apply selectively.
 
+### 6. Clean project files
+
+Strip redundant rules from project `settings.local.json` files that are
+now covered by global `~/.claude/settings.json`. Also flags rules
+containing leaked secrets (env vars with plaintext credential values).
+
+1. Dry run to preview:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/scripts/clean-project-files.py --dry-run
+```
+
+2. Apply cleanup:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/scripts/clean-project-files.py
+```
+
+**What gets cleaned:**
+- Exact duplicates of global rules
+- Rules covered by global wildcard patterns (MCP families, plugin path wildcards)
+- Old plugin version paths (any version older than current)
+- Env-prefixed session noise (`GIT_SEQUENCE_EDITOR=*`, `DATABASE_URL=*`, etc.)
+- Shell control flow fragments (`do`, `done`, `fi`, `for`, `while`, etc.)
+- Double-slash path typos (`Read(//work/...)`)
+
+**Leaked secret detection:** Rules containing plaintext credentials
+(e.g., `LINEAR_KEY=lin_api_...`) are flagged with warnings so users
+know they were persisted in settings files and can rotate them.
+
 ## Configuration
 
 The script looks for `projects.yaml` in two locations (first wins):
@@ -194,3 +226,9 @@ The plugin default ships with empty roots as a template.
 | Flag | Purpose |
 |------|---------|
 | `--dry-run` | Preview what would be merged without writing |
+
+### clean-project-files.py
+
+| Flag | Purpose |
+|------|---------|
+| `--dry-run` | Preview what would be cleaned without writing |
