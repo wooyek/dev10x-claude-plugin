@@ -171,10 +171,15 @@ fi
 
 echo "-- ${DB_LABEL[$db_key]}" >&2
 
+# Set psql prompt to show database alias prominently, preventing
+# wrong-database execution when users have multiple psql sessions.
+export PGAPPNAME="db.sh/$db_key"
+
 if [[ "${1:-}" == "-f" || "${1:-}" == "--file" ]]; then
   exec psql "$dsn" \
     -c "SET statement_timeout = '30s'" \
     -c "SET default_transaction_read_only = on" \
+    -v "prompt1=$db_key=> " \
     -f "$2"
 else
   exec psql "$dsn" \

@@ -135,8 +135,17 @@ If the PreToolUse hook blocks a non-SELECT query, tell the user:
 > tool. Here's the SQL to run manually:
 >
 > ```sql
+> -- Run against: <alias> (<label>)
 > <the blocked query>
 > ```
+
+**REQUIRED: Always prefix SQL snippets with a target database
+comment** when outputting SQL for manual execution. This prevents
+copy-paste errors where SQL intended for staging runs against
+production. The comment format is:
+```sql
+-- Run against: bs (backend-staging)
+```
 
 Never attempt to bypass the safety checks.
 
