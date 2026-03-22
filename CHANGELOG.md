@@ -3,6 +3,74 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.35.0 — Orchestration Integrity & Maintenance Skills
+
+Released 2026-03-22
+
+Skill delegation is enforced end-to-end, new maintenance skills
+catch memory rot and playbook drift before they cause failures,
+and CI deduplication eliminates wasted review runs.
+
+### Features
+
+- **Memory health auditing** — new `Dev10x:memory-maintenance`
+  skill detects stale paths, script-calling instructions,
+  contradictions, and MEMORY.md index drift ([GH-375])
+- **Playbook drift detection** — new `Dev10x:playbook-maintenance`
+  skill compares user overrides against defaults, surfacing new
+  steps and prompt changes with severity levels ([GH-366])
+- **Skill-usage reinforcement** — orchestration skill identifies
+  CLI commands that should be replaced by dedicated skills or MCP
+  tools, with prefix-matched command-to-skill mapping ([GH-384])
+- **Project settings cleanup** — permission-maintenance gains
+  Step 6 to strip duplicate, wildcard-covered, and stale rules
+  from project settings files ([GH-386])
+- **CI SHA deduplication** — GitHub Actions workflows skip
+  redundant runs when a peer workflow already handles the same
+  commit SHA ([GH-382])
+
+### Improvements
+
+- **Skill delegation enforcement** — work-on requires post-step
+  Skill() verification and prohibits pipeline collapse during
+  fanout execution ([GH-367])
+- **CI re-monitoring after force push** — git-groom and work-on
+  mandate `Dev10x:gh-pr-monitor` after any force push to avoid
+  stale CI results ([GH-371])
+- **Task reconciliation after delegation** — work-on reconciles
+  parent task state after child skill completion, preventing
+  orphaned tasks ([GH-376])
+- **Wrong-database prevention** — db-psql requires target database
+  comment prefix on manual SQL and sets PGAPPNAME for process
+  identification ([GH-363])
+- **Scope-aware fanout parsing** — fanout distinguishes scope URLs
+  from specific item URLs, restricting scans to matching commands
+  ([GH-351])
+- **Skill routing through compaction** — compaction preservation
+  directive keeps routing tables intact across context compression
+  ([GH-358])
+- **Unmatched play fallback** — work-on routes unmatched plays to
+  the feature play instead of failing, and bans merge operations
+  in gh-pr-monitor ([GH-357])
+- **CWD-based worktree detection** — ticket-branch detects
+  worktree context from current working directory ([GH-353])
+- **Auto-filing audit findings** — skill-audit findings file
+  automatically as GitHub issues ([GH-356])
+- **Nested-mode task exemption** — formalized exemption for
+  TaskCreate in nested skill invocations ([GH-355])
+
+### Bug Fixes
+
+- **Auditor deny-rule overreach** — permission-auditor now uses
+  three-tier classification (deny/ask/hook-protected/skip) instead
+  of blanket deny recommendations that blocked legitimate skills
+  ([GH-385])
+- **Premature completion gate** — work-on completion gate no longer
+  fires before all tasks are finished ([GH-354])
+- **Explore agent source failures** — GitHub/JIRA fetch subagents
+  switched from Explore to general-purpose to gain Bash access
+  ([GH-348])
+
 ## 0.34.0 — Fanout Safety & Skill Consistency
 
 Released 2026-03-21
@@ -795,6 +863,26 @@ in a single plugin.
 [GH-280]: https://github.com/WooYek/Dev10x/issues/280
 [GH-283]: https://github.com/WooYek/Dev10x/issues/283
 [GH-288]: https://github.com/WooYek/Dev10x/issues/288
+[GH-313]: https://github.com/WooYek/Dev10x/issues/313
+[GH-345]: https://github.com/WooYek/Dev10x/issues/345
+[GH-348]: https://github.com/WooYek/Dev10x/issues/348
+[GH-351]: https://github.com/WooYek/Dev10x/issues/351
+[GH-353]: https://github.com/WooYek/Dev10x/issues/353
+[GH-354]: https://github.com/WooYek/Dev10x/issues/354
+[GH-355]: https://github.com/WooYek/Dev10x/issues/355
+[GH-356]: https://github.com/WooYek/Dev10x/issues/356
+[GH-357]: https://github.com/WooYek/Dev10x/issues/357
+[GH-358]: https://github.com/WooYek/Dev10x/issues/358
+[GH-363]: https://github.com/WooYek/Dev10x/issues/363
+[GH-366]: https://github.com/WooYek/Dev10x/issues/366
+[GH-367]: https://github.com/WooYek/Dev10x/issues/367
+[GH-371]: https://github.com/WooYek/Dev10x/issues/371
+[GH-375]: https://github.com/WooYek/Dev10x/issues/375
+[GH-376]: https://github.com/WooYek/Dev10x/issues/376
+[GH-382]: https://github.com/WooYek/Dev10x/issues/382
+[GH-384]: https://github.com/WooYek/Dev10x/issues/384
+[GH-385]: https://github.com/WooYek/Dev10x/issues/385
+[GH-386]: https://github.com/WooYek/Dev10x/issues/386
 [#243]: https://github.com/WooYek/Dev10x/pull/243
 [#267]: https://github.com/WooYek/Dev10x/pull/267
 [#270]: https://github.com/WooYek/Dev10x/pull/270
