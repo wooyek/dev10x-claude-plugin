@@ -570,6 +570,20 @@ groom → Skill(Dev10x:git-groom)
 branch → Skill(Dev10x:ticket-branch)
 ```
 
+### CI Re-Monitoring After Force Push
+
+**Hard rule:** Force push (from `Dev10x:git-groom` or conflict
+rebase) invalidates all previous CI results. After any force
+push, you MUST re-invoke `Skill(Dev10x:gh-pr-monitor)` to
+monitor the new CI runs. Do NOT declare CI green based on
+pre-groom results — the new HEAD has different commit SHAs
+and GitHub runs fresh checks against it.
+
+This applies to the shipping pipeline sequence:
+```
+... → Groom (force push) → RE-MONITOR CI → Update PR → ...
+```
+
 ### Auto-Advance Rule
 
 See `references/task-orchestration.md` for the full pattern.

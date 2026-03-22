@@ -246,6 +246,11 @@ git push origin <branch> --force-with-lease
 
 **Important:** `--force-with-lease` fails if someone else pushed to the branch, preventing accidental overwrites.
 
+**CI invalidation warning:** Force push triggers new CI runs on
+the new HEAD. All previous CI results become invalid. The calling
+skill (e.g., `Dev10x:work-on`) MUST re-monitor CI after grooming
+completes — do not declare CI green based on pre-groom results.
+
 ### Phase 4: Update PR References
 
 After force-pushing groomed history, PR body and summary comment may
