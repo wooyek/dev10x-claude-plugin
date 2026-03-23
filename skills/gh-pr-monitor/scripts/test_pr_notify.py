@@ -14,14 +14,20 @@ _mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)
 
 extract_jtbd = _mod.extract_jtbd
+format_ci_table = _mod.format_ci_table
+format_comments_section = _mod.format_comments_section
+format_reviewers_section = _mod.format_reviewers_section
 format_slack_message = _mod.format_slack_message
+format_status_report = _mod.format_status_report
 md_to_slack_bold = _mod.md_to_slack_bold
 split_title_jtbd = _mod.split_title_jtbd
 
 
 class TestSplitTitleJtbd:
     def test_splits_at_em_dash(self):
-        title = ":bug: PAY-646 Fix payment routing \u2014 When reconciling payments, I want routing"
+        title = (
+            ":bug: PAY-646 Fix payment routing \u2014 When reconciling payments, I want routing"
+        )
         short, jtbd = split_title_jtbd(pr_title=title)
         assert short == ":bug: PAY-646 Fix payment routing"
         assert jtbd == "When reconciling payments, I want routing"
@@ -94,10 +100,7 @@ class TestFormatSlackMessage:
         )
         lines = result.split("\n")
         assert len(lines) == 3
-        assert (
-            lines[2]
-            == "> *When* reconciling payments, I *want to* see the order number"
-        )
+        assert lines[2] == "> *When* reconciling payments, I *want to* see the order number"
 
 
 class TestExtractJtbd:
@@ -119,3 +122,151 @@ class TestMdToSlackBold:
 
     def test_no_bold_unchanged(self):
         assert md_to_slack_bold(text="plain text") == "plain text"
+
+
+class TestFormatCiTable:
+    def test_empty_checks(self):
+        assert format_ci_table(checks=[]) == "No CI checks found."
+
+    def test_passing_check_with_duration(self):
+        checks = [
+            {
+                "name": "ruff",
+                "state": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "startedAt": "2026-03-23T10:00:00Z",
+                "completedAt": "2026-03-23T10:00:45Z",
+            }
+        ]
+        result = format_ci_table(checks=checks)
+        assert "| ruff | ✅ success | 45s |" in result
+
+    def test_failing_check(self):
+        checks = [
+            {
+                "name": "pytest",
+                "state": "COMPLETED",
+                "conclusion": "FAILURE",
+                "startedAt": "2026-03-23T10:00:00Z",
+                "completedAt": "2026-03-23T10:02:30Z",
+            }
+        ]
+        result = format_ci_table(checks=checks)
+        assert "| pytest | ❌ failure | 2m 30s |" in result
+
+    def test_in_progress_check(self):
+        checks = [
+            {
+                "name": "build",
+                "state": "IN_PROGRESS",
+                "conclusion": "",
+                "startedAt": "2026-03-23T10:00:00Z",
+                "completedAt": None,
+            }
+        ]
+        result = format_ci_table(checks=checks)
+        assert "| build | ⏳ running | ... |" in result
+
+    def test_table_has_header(self):
+        checks = [
+            {
+                "name": "lint",
+                "state": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "startedAt": None,
+                "completedAt": None,
+            }
+        ]
+        result = format_ci_table(checks=checks)
+        assert "| Check | Status | Duration |" in result
+        assert "| --- | --- | --- |" in result
+
+
+class TestFormatCommentsSection:
+    def test_no_comments(self):
+        result = format_comments_section(comments=[])
+        assert result == "No unhandled review comments."
+
+    def test_all_resolved(self):
+        comments = [{"resolved": True, "user": "alice", "path": "a.py", "line": 1, "body": "ok"}]
+        result = format_comments_section(comments=comments)
+        assert result == "No unhandled review comments."
+
+    def test_unresolved_comments(self):
+        comments = [
+            {
+                "resolved": False,
+                "user": "bob",
+                "path": "server.py",
+                "line": 42,
+                "body": "This should use --pr instead",
+            },
+            {
+                "resolved": True,
+                "user": "alice",
+                "path": "other.py",
+                "line": 10,
+                "body": "Looks good",
+            },
+        ]
+        result = format_comments_section(comments=comments)
+        assert "1 unhandled comment(s)" in result
+        assert "**bob**" in result
+        assert "`server.py:42`" in result
+
+
+class TestFormatReviewersSection:
+    def test_no_reviewers(self):
+        data = {"reviewRequests": [], "reviews": [], "latestReviews": []}
+        assert format_reviewers_section(data=data) == "No reviewers assigned."
+
+    def test_approved_reviewer(self):
+        data = {
+            "reviewRequests": [],
+            "reviews": [],
+            "latestReviews": [{"author": {"login": "alice"}, "state": "APPROVED"}],
+        }
+        result = format_reviewers_section(data=data)
+        assert "| @alice | ✅ approved |" in result
+
+    def test_changes_requested_reviewer(self):
+        data = {
+            "reviewRequests": [],
+            "reviews": [],
+            "latestReviews": [{"author": {"login": "bob"}, "state": "CHANGES_REQUESTED"}],
+        }
+        result = format_reviewers_section(data=data)
+        assert "| @bob | 🔄 changes_requested |" in result
+
+    def test_pending_reviewer(self):
+        data = {
+            "reviewRequests": [{"login": "carol"}],
+            "reviews": [],
+            "latestReviews": [],
+        }
+        result = format_reviewers_section(data=data)
+        assert "| @carol | ⏳ requested |" in result
+
+    def test_reviewer_table_has_header(self):
+        data = {
+            "reviewRequests": [{"login": "dev"}],
+            "reviews": [],
+            "latestReviews": [],
+        }
+        result = format_reviewers_section(data=data)
+        assert "| Reviewer | Status |" in result
+
+
+class TestFormatStatusReport:
+    def test_combines_all_sections(self):
+        result = format_status_report(
+            checks=[],
+            comments=[],
+            reviewers={"reviewRequests": [], "reviews": [], "latestReviews": []},
+        )
+        assert "## CI Check Status" in result
+        assert "## Review Comments" in result
+        assert "## Reviewers" in result
+        assert "No CI checks found." in result
+        assert "No unhandled review comments." in result
+        assert "No reviewers assigned." in result

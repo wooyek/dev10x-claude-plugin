@@ -14,6 +14,8 @@ Subcommands:
                 output JSON for Claude to present to user for confirmation.
     send      — Post Slack notification, assign GitHub reviewers, update PR
                 body checklist, and save state snapshot.
+    status    — Show CI check status table, unhandled review comments, and
+                assigned reviewers with their review status.
 
 Usage:
     pr-notify.py prepare --pr 123 --repo owner/repo
@@ -21,6 +23,7 @@ Usage:
         --channel CHANNEL_ID --message-file /tmp/claude/pr-monitor/pr-notify-msg.txt \\
         --reviewer org/team \\
         [--skip-slack] [--skip-reviewers] [--skip-checklist]
+    pr-notify.py status --pr 123 --repo owner/repo [--json]
 """
 
 from __future__ import annotations
@@ -30,6 +33,7 @@ import json
 import re
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -161,6 +165,156 @@ def update_pr_checklist(pr_number: int, repo: str, diff: str) -> None:
 
     gh_run(args=["pr", "edit", str(pr_number), "--repo", repo, "--body", updated])
     print(f"✅ PR #{pr_number} checklist updated.")
+
+
+def fetch_ci_checks(pr_number: int, repo: str) -> list[dict[str, Any]]:
+    return gh_json(
+        args=[
+            "pr",
+            "checks",
+            str(pr_number),
+            "--repo",
+            repo,
+            "--json",
+            "name,state,conclusion,startedAt,completedAt",
+        ]
+    )
+
+
+def fetch_review_comments(pr_number: int, repo: str) -> list[dict[str, Any]]:
+    return gh_json(
+        args=[
+            "api",
+            f"repos/{repo}/pulls/{pr_number}/comments",
+            "--jq",
+            "[.[] | select(.in_reply_to_id == null)"
+            " | {id, user: .user.login, path, line:"
+            " .original_line, body: .body[:80],"
+            ' resolved: (.subject_type == "line" and'
+            " .position == null)}]",
+        ]
+    )
+
+
+def fetch_reviewers(pr_number: int, repo: str) -> dict[str, Any]:
+    return gh_json(
+        args=[
+            "pr",
+            "view",
+            str(pr_number),
+            "--repo",
+            repo,
+            "--json",
+            "reviewRequests,reviews,latestReviews",
+        ]
+    )
+
+
+def format_ci_table(checks: list[dict[str, Any]]) -> str:
+    if not checks:
+        return "No CI checks found."
+    lines = ["| Check | Status | Duration |", "| --- | --- | --- |"]
+    for c in checks:
+        name = c.get("name", "unknown")
+        state = c.get("state", "")
+        conclusion = c.get("conclusion", "")
+        if state == "COMPLETED":
+            icon = "✅" if conclusion == "SUCCESS" else "❌"
+            status = f"{icon} {conclusion.lower()}"
+        elif state == "IN_PROGRESS":
+            status = "⏳ running"
+        else:
+            status = f"⏸️ {state.lower()}"
+        started = c.get("startedAt") or ""
+        completed = c.get("completedAt") or ""
+        if started and completed:
+            t0 = datetime.fromisoformat(started.replace("Z", "+00:00"))
+            t1 = datetime.fromisoformat(completed.replace("Z", "+00:00"))
+            secs = int((t1 - t0).total_seconds())
+            duration = f"{secs // 60}m {secs % 60}s" if secs >= 60 else f"{secs}s"
+        elif state == "IN_PROGRESS":
+            duration = "..."
+        else:
+            duration = "-"
+        lines.append(f"| {name} | {status} | {duration} |")
+    return "\n".join(lines)
+
+
+def format_comments_section(
+    comments: list[dict[str, Any]],
+) -> str:
+    unresolved = [c for c in comments if not c.get("resolved")]
+    if not unresolved:
+        return "No unhandled review comments."
+    lines = [f"**{len(unresolved)} unhandled comment(s):**\n"]
+    for c in unresolved:
+        user = c.get("user", "?")
+        path = c.get("path", "?")
+        line_no = c.get("line", "?")
+        body = c.get("body", "").split("\n")[0][:60]
+        lines.append(f"- **{user}** on `{path}:{line_no}` — {body}")
+    return "\n".join(lines)
+
+
+def format_reviewers_section(data: dict[str, Any]) -> str:
+    lines: list[str] = []
+    requests = data.get("reviewRequests", [])
+    latest = data.get("latestReviews", [])
+    if not requests and not latest:
+        return "No reviewers assigned."
+    review_map: dict[str, str] = {}
+    for r in latest:
+        login = r.get("author", {}).get("login", "?")
+        state = r.get("state", "PENDING")
+        icon = {
+            "APPROVED": "✅",
+            "CHANGES_REQUESTED": "🔄",
+            "COMMENTED": "💬",
+            "DISMISSED": "⚪",
+        }.get(state, "⏳")
+        review_map[login] = f"{icon} {state.lower()}"
+    for req in requests:
+        login = req.get("login") or req.get("name", "?")
+        if login not in review_map:
+            review_map[login] = "⏳ requested"
+    lines.append("| Reviewer | Status |")
+    lines.append("| --- | --- |")
+    for login, status in review_map.items():
+        lines.append(f"| @{login} | {status} |")
+    return "\n".join(lines)
+
+
+def format_status_report(
+    checks: list[dict[str, Any]],
+    comments: list[dict[str, Any]],
+    reviewers: dict[str, Any],
+) -> str:
+    sections = [
+        "## CI Check Status\n",
+        format_ci_table(checks=checks),
+        "\n## Review Comments\n",
+        format_comments_section(comments=comments),
+        "\n## Reviewers\n",
+        format_reviewers_section(data=reviewers),
+    ]
+    return "\n".join(sections)
+
+
+def cmd_status(args: argparse.Namespace) -> None:
+    checks = fetch_ci_checks(pr_number=args.pr, repo=args.repo)
+    comments = fetch_review_comments(pr_number=args.pr, repo=args.repo)
+    reviewers = fetch_reviewers(pr_number=args.pr, repo=args.repo)
+    report = format_status_report(checks=checks, comments=comments, reviewers=reviewers)
+    if args.json:
+        output = {
+            "ci_checks": checks,
+            "review_comments": comments,
+            "reviewers": reviewers,
+            "report_markdown": report,
+        }
+        print(json.dumps(output, indent=2))
+    else:
+        print(report)
 
 
 def cmd_prepare(args: argparse.Namespace) -> None:
@@ -297,9 +451,7 @@ def main() -> None:
     p_send.add_argument("--channel", help="Slack channel ID")
     p_send.add_argument("--message", help="Notification message text")
     p_send.add_argument("--message-file", help="Read message from file")
-    p_send.add_argument(
-        "--reviewer", help="GitHub reviewer to assign (user or org/team)"
-    )
+    p_send.add_argument("--reviewer", help="GitHub reviewer to assign (user or org/team)")
     p_send.add_argument(
         "--skip-slack",
         action="store_true",
@@ -316,10 +468,22 @@ def main() -> None:
         help="Skip updating PR body checklist",
     )
 
+    p_status = subparsers.add_parser(
+        "status",
+        help="Show CI checks, review comments, and reviewer status",
+    )
+    add_common(p=p_status)
+    p_status.add_argument(
+        "--json",
+        action="store_true",
+        help="Output as JSON instead of markdown",
+    )
+
     args = parser.parse_args()
     commands = {
         "prepare": cmd_prepare,
         "send": cmd_send,
+        "status": cmd_status,
     }
     commands[args.command](args)
 

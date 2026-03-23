@@ -437,8 +437,19 @@ ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
 
 ### Step 5: Report final status
 
-Report: CI status, comments addressed, notification sent/skipped, GitHub
-reviewers assigned, Slack notification posted.
+Run the status report command and include its output in the final report:
+
+```bash
+/home/janusz/.claude/plugins/cache/WooYek/Dev10x/0.35.0/skills/gh-pr-monitor/scripts/pr-notify.py \
+  status --pr {pr_number} --repo {repo}
+```
+
+This outputs a markdown report with three sections:
+- **CI Check Status** — table with check name, pass/fail, duration
+- **Review Comments** — count and list of unhandled comments
+- **Reviewers** — table with reviewer names and review status
+
+Include the full output in the agent's final report to the supervisor.
 
 ````
 
@@ -468,6 +479,14 @@ reviewers assigned, Slack notification posted.
 - **Working directory**: Use `gh pr view {pr_number} --repo {repo}
   --json headRefName` to get the branch. Never hardcode a working
   directory — the PR branch may live in a different worktree.
+- **Background agent push limitation**: Background agents dispatched
+  with `run_in_background` may lack Bash permissions to run `git
+  commit` and `git push`. If the agent identifies CI failures but
+  cannot push fixes, it should report the failures and required fixes
+  back to the main session for manual application. Consider using
+  `mode: "dontAsk"` on the Agent call when fixes are expected, or
+  run the monitor in foreground mode for PRs that are likely to need
+  CI fixes.
 
 ---
 
