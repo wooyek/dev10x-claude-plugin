@@ -3,6 +3,29 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.36.0 — PR Monitor Visibility & MCP Bugfix
+
+Released 2026-03-23
+
+PR monitoring reports full status context, and the MCP
+pr_comments tool resolves a parameter mapping bug that
+blocked all comment operations.
+
+### Features
+
+- **PR monitor status reporting** — monitor agent surfaces
+  CI check details, unhandled review comments, and reviewer
+  assignment status instead of completing silently ([GH-392])
+
+### Bug Fixes
+
+- **pr_comments parameter mapping** — fix `--pr-number` to
+  `--pr` in cli_server.py so reply, resolve, and thread
+  operations work correctly ([GH-393])
+
+[GH-392]: https://github.com/wooyek/dev10x-ai/issues/392
+[GH-393]: https://github.com/wooyek/dev10x-ai/issues/393
+
 ## 0.35.0 — Orchestration Integrity & Maintenance Skills
 
 Released 2026-03-22
