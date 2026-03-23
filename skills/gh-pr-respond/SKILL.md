@@ -118,6 +118,22 @@ Dev10x:gh-pr-respond (this skill)
          └── commit:fixup → create the fixup! commit
 ```
 
+## Critical: Delegation is Mandatory
+
+**Never manually implement a fix and post a reply via `gh api`
+or MCP tool for VALID comments.** Always delegate the entire
+lifecycle to `Dev10x:gh-pr-fixup` via `Skill()`, even if the
+fix is trivial or already committed. The delegation is about
+the *workflow boundary*, not just the code change — `gh-pr-fixup`
+ensures atomic push+reply, proper fixup commit format, and
+consistent thread management.
+
+Similarly, never triage comments inline — always delegate to
+`Dev10x:gh-pr-triage` via `Skill()`. Never run raw `git rebase`,
+`git push`, or `gh pr checks --watch` — delegate to
+`Dev10x:git-groom`, `Dev10x:git`, and `Dev10x:gh-pr-monitor`
+respectively.
+
 ## Preamble: Branch Location Check
 
 Before processing comments, verify the PR branch is accessible

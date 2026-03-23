@@ -109,6 +109,18 @@ mappings:
       The test skill ensures consistent coverage reporting and
       concise summaries. Use it for standardized test execution.
 
+  - skill: Dev10x:gh-pr-fixup
+    description: Implement fix for a validated PR review comment with atomic push+reply
+    patterns:
+      - "gh api --method POST repos/.*/pulls/.*/comments/.*/replies"
+    reason: >
+      PR comment replies for VALID review comments must go through
+      the fixup skill's push+reply atomic workflow. Raw gh api
+      replies bypass fixup commit creation and thread management.
+    related:
+      - Dev10x:gh-pr-respond
+      - Dev10x:gh-pr-triage
+
   - skill: Dev10x:investigate
     description: Root-cause investigation from Slack bug reports
     patterns:
