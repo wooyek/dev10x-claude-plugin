@@ -132,12 +132,17 @@ this comment:
    - Follow existing code patterns
    - Maintain consistent style
 
-3. **Run verification (if applicable):**
+3. **REQUIRED: Run tests before committing.** Do NOT skip this
+   step, even for single-line fixes. Code changes across bounded
+   contexts can break invariants that only tests catch.
 
    **Python projects:**
    ```bash
    pytest {test_file} -x
    ```
+   If no specific test file relates to the change, run the full
+   suite for affected packages: `pytest {package_path} -x`
+
    Note: `ruff format` and `ruff check --fix` run automatically via PostToolUse hook.
 
    **JavaScript/TypeScript projects:**
@@ -147,6 +152,10 @@ this comment:
    npx tsc --noEmit -p {tsconfig_path}
    npm test -- --testPathPattern="{test_pattern}" --no-coverage
    ```
+
+   **If tests fail:** Fix the test failure before proceeding to
+   Step 5. If the fix itself is wrong, revert and reply asking
+   for clarification (see Error Handling).
 
 ### Step 5: Create Fixup Commit (delegate to commit:fixup)
 

@@ -63,7 +63,26 @@ confirm this is a standalone fixup before proceeding.
 
 ## Workflow
 
-### Step 0: Determine Mode
+### Step 0: Verify CWD is the target repository
+
+**REQUIRED: Before any git operation**, verify the working
+directory matches the expected repository:
+
+```bash
+git rev-parse --show-toplevel
+```
+
+Compare the output against the expected repo path. If they
+differ, **STOP** — do not use `git -C` as a workaround. Instead:
+- If in a worktree setup, call `EnterWorktree` to switch to the
+  correct worktree first
+- If the repo is not checked out, inform the caller
+
+This prevents the cascade of `git -C` usage that follows when
+the CWD is wrong. The `git -C` flag is **NEVER permitted** in
+this skill (see Important Notes).
+
+### Step 1: Determine Mode
 
 If a comment ID or PR comment URL was provided → **review fixup** mode.
 
@@ -80,7 +99,7 @@ Options: "Yes, standalone fixup" / "No, use /Dev10x:git-commit instead"
 If the user confirms → **standalone fixup** mode.
 If the user declines → suggest using `/Dev10x:git-commit` instead.
 
-### Step 1: Fetch Comment Details (review fixup only)
+### Step 2: Fetch Comment Details (review fixup only)
 
 Skip this step entirely for standalone fixups.
 
@@ -101,7 +120,7 @@ Extract from comment:
 - `html_url` - Link to comment thread (for commit body)
 - `body` - The review comment text
 
-### Step 2: Identify Original Commit
+### Step 3: Identify Original Commit
 
 Find the commit this fixup should target:
 
@@ -113,7 +132,7 @@ ORIGINAL_COMMIT=$(git log ${BASE_BRANCH}..HEAD --reverse --format="%H" | head -1
 ORIGINAL_MESSAGE=$(git log --format=%s -1 $ORIGINAL_COMMIT)
 ```
 
-### Step 3: Validate Staged Changes
+### Step 4: Validate Staged Changes
 
 **Check what's staged:**
 ```bash
@@ -134,7 +153,7 @@ Warning: The following staged files may be unrelated to comment on {path}:
 Continue anyway? (y/n)
 ```
 
-### Step 4: Build Commit Message
+### Step 5: Build Commit Message
 
 **Review fixup format:**
 ```
@@ -169,7 +188,7 @@ Remove duplicate flat attributes and encapsulate data
 in PosSubModelNode for cohesion.
 ```
 
-### Step 5: Create the Commit
+### Step 6: Create the Commit
 
 **IMPORTANT:** Never use `cat <<EOF` or heredoc syntax — the
 `validate-bash-security.py` hook blocks it. Use Write tool + `git commit -F`.
@@ -206,7 +225,7 @@ Write "<unique-path>" with:
 git commit -F <unique-path>
 ```
 
-### Step 6: Verify and Return
+### Step 7: Verify and Return
 
 ```bash
 # Get the new commit hash

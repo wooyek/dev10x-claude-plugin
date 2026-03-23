@@ -305,27 +305,23 @@ If neither inline comments nor review body found → report
 
 Mark phase transition: `TaskUpdate(taskId=triage_task, status="in_progress")`
 
-Dispatch parallel triage subagents — up to 4 concurrent. Each
-subagent receives only its comment context (not the full PR diff)
-and returns only the verdict + draft reply:
+**REQUIRED: Dispatch parallel triage subagents.** Do NOT triage
+comments sequentially in the main thread. Execute these steps:
 
-```
-# In a single tool-call block:
-Agent(description=f"Triage r{id1} on {path1}",
-    prompt=f"""Triage PR comment r{id1}:
-    File: {path1}:{line1}
-    Comment: "{body1}"
-    Code context: {surrounding_code}
-    Evaluate: VALID, INVALID, QUESTION, or OUT_OF_SCOPE?
-    Return: verdict, reason (1 sentence), draft reply (2-3 sentences).""",
-    run_in_background=true)
-Agent(description=f"Triage r{id2} on {path2}", ..., run_in_background=true)
-Agent(description=f"Triage r{id3} on {path3}", ..., run_in_background=true)
-Agent(description=f"Triage r{id4} on {path4}", ..., run_in_background=true)
-```
+1. Group comments into batches of up to 4
+2. For each batch, dispatch all subagents in a **single tool-call
+   block** using `Agent()` with `run_in_background=true`
+3. Each subagent receives only its comment context (file, line,
+   body, surrounding code) and returns: verdict, reason (1
+   sentence), draft reply (2-3 sentences)
+4. Collect results as notifications arrive
+5. If more than 4 comments, dispatch the next batch as agents
+   complete
 
-Collect results as notifications arrive. If more than 4 comments,
-dispatch the next batch as agents complete.
+**DO NOT SKIP parallel dispatch.** Sequential inline triage
+defeats the purpose of this step — it increases processing time
+linearly and blocks the main thread. Even for 2 comments, use
+parallel agents.
 
 Mark phase transition: `TaskUpdate(taskId=triage_task, status="completed")`
 
