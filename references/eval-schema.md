@@ -52,8 +52,8 @@ Each eval scenario tests a specific code path:
 
 | Type | Purpose | Example |
 |------|---------|---------|
-| `tool_called` | Verify tool is invoked (not skipped or substituted) | Confirm AskUserQuestion is called |
-| `tool_parameters` | Validate tool arguments match spec | Check multiSelect=true, option labels |
+| `tool_called` | Verify tool is invoked (not skipped or substituted) | Confirm AskUserQuestion called, or Skill() invoked |
+| `tool_parameters` | Validate tool arguments match spec | Check multiSelect=true, option labels, skill name |
 | `behavioral` | Verify side effects (not just tool presence) | Task state updated, no auto-progression |
 | `plain_text` | Detect forbidden plain-text questions (negative check) | Catch "Do you want to proceed?" inline |
 
@@ -80,11 +80,14 @@ Signals are **machine-detectable patterns** for regression detection:
 
 - ✓ `gate*-uses-tool`: "AskUserQuestion" appears in tool call list
 - ✓ `gate*-correct-options`: Option labels match documented list
+- ✓ `skill*-uses-tool`: "Skill(" appears in tool call list (e.g., "Skill(Dev10x:gh-pr-fixup)")
 - ✗ `gate*-no-plain-text`: No inline question text before tool call
 - ✗ `no-auto-*`: Explicit user confirmation before proceeding
+- ✗ `no-inline-delegation`: Skill not invoked via inline natural language
 
 Use negative signals (`✗`) to detect regressions like:
 - Agents asking "Confirm this action?" as text instead of calling AskUserQuestion
+- Agents delegating to skills via text ("Call the fixup skill") instead of Skill() tool
 - Auto-resolving states without user confirmation
 - Silently accepting defaults
 
@@ -94,7 +97,9 @@ Use negative signals (`✗`) to detect regressions like:
 - **Assertion names**: `gate{N}_{check_type}` (e.g., `gate1_uses_tool`)
 - **Signals**: Plain English describing what to look for in transcript
 
-## Example from PR #136
+## Examples
+
+### Example 1: AskUserQuestion Gate (from PR #136)
 
 ```json
 {
@@ -112,6 +117,35 @@ Use negative signals (`✗`) to detect regressions like:
       "type": "plain_text",
       "assertion": "gate1_no_plain_text",
       "signal": "No inline 'Resolve thread?' before tool call"
+    }
+  ]
+}
+```
+
+### Example 2: Skill() Delegation (Enforcement Coverage)
+
+```json
+{
+  "name": "valid-comment-fixup-delegation",
+  "description": "VALID verdict triggers skill delegation to fixup",
+  "setup": "Comment marked VALID; should delegate to gh-pr-fixup",
+  "checks": [
+    {
+      "type": "tool_called",
+      "tool": "Skill",
+      "assertion": "fixup_uses_skill_tool",
+      "signal": "Skill(Dev10x:gh-pr-fixup) is called"
+    },
+    {
+      "type": "tool_parameters",
+      "tool": "Skill",
+      "assertion": "fixup_skill_correct_args",
+      "signal": "Skill call includes comment URL and context"
+    },
+    {
+      "type": "plain_text",
+      "assertion": "no_inline_fixup_delegation",
+      "signal": "No inline 'I will implement the fix' before Skill() call"
     }
   ]
 }
