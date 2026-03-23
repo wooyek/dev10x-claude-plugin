@@ -13,7 +13,7 @@ wheels = [
 
 [[package]]
 name = "dev10x-ai"
-version = "0.35.0.dev0"
+version = "0.36.0.dev0"
 source = { virtual = "." }
 
 [package.optional-dependencies]
