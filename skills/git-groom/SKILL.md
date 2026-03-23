@@ -61,6 +61,14 @@ a parent orchestrator (e.g., via `Skill()` from `Dev10x:work-on`),
 startup task creation is optional — at most 1 summary task. See
 `references/task-orchestration.md` § Delegated Invocation Exception.
 
+**Scope of nested-mode exemption:** The exemption covers only
+`TaskCreate` calls (task tracking overhead). It does NOT exempt
+`REQUIRED: AskUserQuestion` decision gates — the Phase 2
+strategy selection gate must still fire even in nested mode,
+because the parent cannot predict which grooming strategy is
+appropriate. The parent's "Full shipping pipeline" selection
+establishes *intent to groom*, not *which strategy to use*.
+
 ## Workflow
 
 ### Phase 1: Analyze Current State

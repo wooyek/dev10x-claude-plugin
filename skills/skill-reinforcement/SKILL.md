@@ -63,6 +63,24 @@ any pattern in the list, it matches that entry.
 
 If no match is found in the map, fall back to Step 3.
 
+### Step 2b: Check workflow context
+
+If a pattern match is found but the command appears to be a valid
+part of the currently active skill's documented workflow, check
+whether the skill says to **delegate** for this case:
+
+- Read the active skill's SKILL.md (if identifiable from context)
+- Check if the command matches a delegation point marked with
+  `REQUIRED: Skill()` — a command can be valid syntax within
+  a skill but still a violation if the skill mandates delegation
+  to a sub-skill for that operation
+- Example: `gh api --method POST .../replies` is documented in
+  `gh-pr-respond` but the skill requires VALID comments to go
+  through `Dev10x:gh-pr-fixup` — using the raw API is a violation
+
+If the command is a delegation bypass, treat it as a match and
+output the reinforcement pointing to the correct sub-skill.
+
 ### Step 3: Fall back to SKILLS.md
 
 If no direct mapping exists, read `~/.claude/SKILLS.md` and scan
@@ -81,6 +99,15 @@ Output a firm, concise reinforcement message with these sections:
 
 If multiple skills could apply, list all of them ranked by
 relevance.
+
+### Step 4b: Respect user rejection
+
+**If the user explicitly rejected the command** (denied the Bash
+tool call), do NOT conclude "no violation found" and resume the
+rejected workflow. A user rejection overrides documentation
+matching — even if the command appears valid within the skill,
+the user's denial takes precedence. Instead, ask the user what
+they expected if no skill match is found.
 
 ### Step 5: Reinforce the general principle
 
