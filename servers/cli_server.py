@@ -133,13 +133,13 @@ async def pr_comments(
     body: str | None = None,
     repo: str | None = None,
 ) -> dict:
-    """Manage GitHub PR comments (list, create, update, delete).
+    """Manage GitHub PR review comments and threads.
 
     Args:
-        action: One of: list, create, update, delete
-        pr_number: PR number (required for list, create, update/delete by ID)
-        comment_id: Comment ID (required for update/delete operations)
-        body: Comment body text (required for create action)
+        action: One of: list, get, reply, resolve, threads, summary
+        pr_number: PR number (required for list, reply, resolve, threads)
+        comment_id: Comment ID (required for get, reply, resolve)
+        body: Comment body text (required for reply)
         repo: Repository (owner/repo). If omitted, uses current repo
 
     Returns:
@@ -154,7 +154,7 @@ async def pr_comments(
     args = [str(tool_path), action]
 
     if pr_number is not None:
-        args.extend(["--pr-number", str(pr_number)])
+        args.extend(["--pr", str(pr_number)])
     if comment_id is not None:
         args.extend(["--comment-id", str(comment_id)])
     if body is not None:
