@@ -31,6 +31,13 @@ The code review system uses a **multi-agent architecture**:
 | `docs/**`, `.claude/**/*.md`, `README.md` | `reviewer-docs` | `references/review-checks-common.md` |
 | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | `reviewer-rules-maintenance` | (self-contained) |
 | `skills/**` | `reviewer-skill`, `reviewer-skill-behavior` | `.claude/rules/skill-naming.md`, `references/skill-invocation.md`, `references/eval-schema.md` |
+| `**/tasks.py`, `**/celery.py` | `reviewer-celery` | (self-contained) |
+| `**/e2e/**/*.py`, `**/e2e/**/*.feature` | `reviewer-e2e` | (self-contained) |
+| `**/*.svelte`, `**/*.astro`, `**/*.tsx` | `reviewer-frontend` | (self-contained) |
+| `**/api/queries.py`, `**/api/mutations.py` | `reviewer-graphql` | (self-contained) |
+| `**/migrations/*.py` | `reviewer-migration` | (self-contained) |
+| `**/signals.py`, `**/handlers.py` | `reviewer-signals` | (self-contained) |
+| `**/tests/**/*.py` | `reviewer-test-flaky`, `reviewer-test-patterns` | (self-contained) |
 
 ## Loading Strategy
 
@@ -81,6 +88,15 @@ Internal review-only agents (≤ 50 lines each).
 | `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | (self-contained) |
 | `reviewer-skill.md` | `skills/**` | `.claude/rules/skill-naming.md`, `references/skill-invocation.md`, `references/eval-schema.md` |
 | `reviewer-skill-behavior.md` | `skills/**` | `references/task-orchestration.md`, `.claude/rules/skill-gates.md` |
+| `reviewer-celery.md` | `**/tasks.py`, `**/celery.py` | (self-contained) |
+| `reviewer-e2e.md` | `**/e2e/**/*.py`, `**/e2e/**/*.feature` | (self-contained) |
+| `reviewer-frontend.md` | `**/*.svelte`, `**/*.astro`, `**/*.tsx` | (self-contained) |
+| `reviewer-graphql.md` | `**/api/queries.py`, `**/api/mutations.py`, `**/schema.py` | (self-contained) |
+| `reviewer-migration.md` | `**/migrations/*.py` | (self-contained) |
+| `reviewer-signals.md` | `**/signals.py`, `**/handlers.py`, `**/receivers.py` | (self-contained) |
+| `reviewer-test-flaky.md` | `**/tests/**/*.py` (flaky risk patterns) | (self-contained) |
+| `reviewer-test-patterns.md` | `**/tests/**/*.py` (pattern compliance) | (self-contained) |
+| `adr-reviewer.md` | Invoked by `Dev10x:adr-evaluate` skill only | (self-contained) |
 
 ## Plugin-Distributed Sub-Agents (`agents/`)
 
@@ -90,7 +106,18 @@ checklists, and need full phase logic and examples.
 
 | File | Purpose |
 |------|---------|
-| `agents/<name>.md` | Plugin sub-agent spec (e.g., `permission-auditor.md`) |
+| `permission-auditor.md` | Audit Claude Code permission settings |
+| `architecture-advisor.md` | Evaluate architecture, identify design issues |
+| `issue-investigator.md` | Deep-dive bug/error investigation |
+| `infrastructure-investigator.md` | K8s/cloud infrastructure investigation |
+| `code-reviewer.md` | Review branch changes against standards |
+| `pytest-tester.md` | Run tests and verify coverage |
+| `pytest-test-writer.md` | Write/review pytest tests |
+| `architect-api.md` | API architecture evaluation for ADRs |
+| `architect-db.md` | Database architecture evaluation for ADRs |
+| `architect-domain.md` | Domain modeling evaluation for ADRs |
+| `architect-frontend.md` | Frontend architecture evaluation for ADRs |
+| `architect-infra.md` | Infrastructure evaluation for ADRs |
 
 ## Size Budgets
 
