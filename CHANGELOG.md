@@ -3,6 +3,50 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.37.0 — Skill Compliance Enforcement
+
+Released 2026-03-24
+
+Agents can no longer bypass skill delegations or use raw CLI
+commands where skills exist. A new PreToolUse hook auto-denies
+known CLI anti-patterns, SKILL.md enforcement markers prevent
+inline handling of sub-skill operations, and a new MCP tool
+eliminates the permission friction that incentivized bypasses.
+
+### Features
+
+- **Auto-deny wrong-tool drift** — PreToolUse hook blocks raw
+  CLI commands (git commit -m, gh pr create, git push) that
+  should go through skill wrappers, while allowing skill-internal
+  patterns like -F and --fixup ([GH-397])
+- **Frictionless PR comment replies** — new `pr_comment_reply`
+  MCP tool replaces raw `gh api` calls in gh-pr-fixup,
+  gh-pr-respond, and gh-pr-triage, removing per-invocation
+  Bash permission prompts ([GH-399])
+
+### Improvements
+
+- **Sub-skill delegation enforcement** — gh-pr-respond gains
+  REQUIRED: Skill() markers at all 5 delegation points (triage,
+  fixup, groom, push, monitor), plus branch location pre-check
+  and stash guard in git-groom ([GH-400])
+- **Review delegation bypass prevention** — gh-pr-respond adds
+  negative instruction prohibiting manual fixes; skill-reinforcement
+  gains workflow-context checking for delegation bypasses ([GH-401])
+- **Audit-driven skill hardening** — gh-pr-respond, gh-pr-fixup,
+  and git-fixup gain mandatory markers for parallel dispatch,
+  test gates, and CWD pre-checks based on audit findings ([GH-407])
+- **Eval schema for Skill() assertions** — evaluation schema
+  documents Skill() invocation assertion patterns, enabling
+  detection of enforcement bypass regressions ([b90c5de])
+
+[GH-397]: https://github.com/wooyek/dev10x-ai/issues/397
+[GH-399]: https://github.com/wooyek/dev10x-ai/issues/399
+[GH-400]: https://github.com/wooyek/dev10x-ai/issues/400
+[GH-401]: https://github.com/wooyek/dev10x-ai/issues/401
+[GH-407]: https://github.com/wooyek/dev10x-ai/issues/407
+[b90c5de]: https://github.com/wooyek/dev10x-ai/commit/b90c5de
+
 ## 0.36.0 — PR Monitor Visibility & MCP Bugfix
 
 Released 2026-03-23
