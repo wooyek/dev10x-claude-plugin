@@ -3,7 +3,9 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.38.0 — Brave-Labs Rebrand & Version Visibility
+
+Released 2026-03-24
 
 ### Features
 
