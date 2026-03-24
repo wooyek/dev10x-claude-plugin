@@ -32,14 +32,14 @@
 Add the marketplace source and install the plugin:
 
 ```
-/plugin marketplace add WooYek/Dev10x-AI
-/plugin install Dev10x@WooYek
+/plugin marketplace add Brave-Labs/dev10x-ai
+/plugin install Dev10x@Brave-Labs
 ```
 
 Update to the latest version:
 
 ```
-/plugin update Dev10x@WooYek
+/plugin update Dev10x@Brave-Labs
 ```
 
 ### Install the develop (pre-release) version
@@ -48,16 +48,16 @@ To test the latest develop branch before it's released:
 
 ```
 /plugin marketplace remove WooYek
-/plugin marketplace add WooYek/Dev10x-AI#develop
-/plugin install Dev10x@WooYek
+/plugin marketplace add Brave-Labs/dev10x-ai#develop
+/plugin install Dev10x@Brave-Labs
 ```
 
 Switch back to stable releases:
 
 ```
 /plugin marketplace remove WooYek
-/plugin marketplace add WooYek/Dev10x-AI
-/plugin install Dev10x@WooYek
+/plugin marketplace add Brave-Labs/dev10x-ai
+/plugin install Dev10x@Brave-Labs
 ```
 
 ## Option B: Manual clone
@@ -67,12 +67,12 @@ the [Dev10x community](https://www.skool.com/Dev10x-1892). Once you
 have access:
 
 ```bash
-git clone git@github.com:wooyek/Dev10x-ai.git \
+git clone git@github.com:Brave-Labs/dev10x-ai.git \
   ~/.claude/plugins/Dev10x-ai
 ```
 
 > **Using HTTPS?** Replace the URL with
-> `https://github.com/wooyek/Dev10x-ai.git` and
+> `https://github.com/Brave-Labs/Dev10x-ai.git` and
 > authenticate when prompted.
 
 Register the plugin so Claude Code loads it on every session:

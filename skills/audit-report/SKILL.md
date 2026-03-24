@@ -19,7 +19,7 @@ allowed-tools:
 # Audit Report — File Findings Upstream
 
 Generate a structured GitHub issue from skill-audit findings
-and file it at `wooyek/Dev10x-ai`.
+and file it at `Brave-Labs/dev10x-ai`.
 
 ## When to Use
 
@@ -116,7 +116,7 @@ Write the assembled body to that file using the Write tool.
 ### Step 6: File the issue
 
 ```bash
-gh issue create --repo wooyek/Dev10x-ai \
+gh issue create --repo Brave-Labs/dev10x-ai \
   --title "{title}" \
   --body-file {temp-file-path} \
   --label "enhancement"

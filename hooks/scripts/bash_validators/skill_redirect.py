@@ -25,7 +25,7 @@ _REDIRECT_MSG = (
     "Why: Raw CLI bypasses guardrails that the skill enforces\n"
     "({guardrails}).\n\n"
     "If you are inside the skill already, this is a bug — "
-    "file it at https://github.com/wooyek/dev10x-ai/issues"
+    "file it at https://github.com/Brave-Labs/Dev10x-ai/issues"
 )
 
 GIT_COMMIT_M_RE = re.compile(r"\bgit\s+commit\b(?!.*(?:--fixup|--amend|-F\b))")

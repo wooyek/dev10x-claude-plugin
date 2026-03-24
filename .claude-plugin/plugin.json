@@ -1,13 +1,13 @@
 {
   "name": "Dev10x",
-  "description": "40 skills for structured commits, PR lifecycle, branch hygiene, ticket management, task tracking, code review, scoping, and QA automation in Claude Code.",
+  "description": "v0.38.0.dev0 — 59 skills for structured commits, PR lifecycle, branch hygiene, ticket management, task tracking, code review, scoping, and QA automation in Claude Code.",
   "version": "0.38.0.dev0",
   "author": {
     "name": "Janusz Skonieczny",
     "email": "Dev10xAI@WooYek.com"
   },
   "homepage": "https://www.skool.com/Dev10x-1892",
-  "repository": "https://github.com/wooyek/Dev10x-ai",
+  "repository": "https://github.com/Brave-Labs/Dev10x-ai",
   "license": "MIT",
   "keywords": ["git", "commits", "pull-requests", "code-review", "workflow", "tasks"],
   "statusLine": {

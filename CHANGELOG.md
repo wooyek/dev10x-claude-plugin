@@ -3,6 +3,39 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Features
+
+- **Version visibility in marketplace** — plugin description now
+  leads with the installed version (e.g., `v0.38.0`) so users
+  can tell at a glance what they're running
+- **Automatic version in description** — bumpversion config
+  updates both the `version` field and the description prefix
+  in plugin.json
+
+### Improvements
+
+- **Repo rename to Brave-Labs** — all URLs, marketplace commands,
+  and installation docs updated from `wooyek/dev10x-ai` to
+  `Brave-Labs/dev10x-ai`
+- **Skill count update** — README and plugin description now
+  reflect 59 skills (was 40)
+
+### Bug Fixes
+
+- **Restore PR comment and review tools** — re-enable
+  `pr_comment_reply` and review MCP tools that were
+  inadvertently disabled ([GH-422])
+
+### Documentation
+
+- **Data-driven skill redirect ADR** — propose friction-level
+  based redirect system for hook validators ([GH-417])
+
+[GH-417]: https://github.com/Brave-Labs/Dev10x-ai/issues/417
+[GH-422]: https://github.com/Brave-Labs/Dev10x-ai/issues/422
+
 ## 0.37.0 — Skill Compliance Enforcement
 
 Released 2026-03-24
@@ -40,12 +73,12 @@ eliminates the permission friction that incentivized bypasses.
   documents Skill() invocation assertion patterns, enabling
   detection of enforcement bypass regressions ([b90c5de])
 
-[GH-397]: https://github.com/wooyek/dev10x-ai/issues/397
-[GH-399]: https://github.com/wooyek/dev10x-ai/issues/399
-[GH-400]: https://github.com/wooyek/dev10x-ai/issues/400
-[GH-401]: https://github.com/wooyek/dev10x-ai/issues/401
-[GH-407]: https://github.com/wooyek/dev10x-ai/issues/407
-[b90c5de]: https://github.com/wooyek/dev10x-ai/commit/b90c5de
+[GH-397]: https://github.com/Brave-Labs/Dev10x-ai/issues/397
+[GH-399]: https://github.com/Brave-Labs/Dev10x-ai/issues/399
+[GH-400]: https://github.com/Brave-Labs/Dev10x-ai/issues/400
+[GH-401]: https://github.com/Brave-Labs/Dev10x-ai/issues/401
+[GH-407]: https://github.com/Brave-Labs/Dev10x-ai/issues/407
+[b90c5de]: https://github.com/Brave-Labs/Dev10x-ai/commit/b90c5de
 
 ## 0.36.0 — PR Monitor Visibility & MCP Bugfix
 
@@ -67,8 +100,8 @@ blocked all comment operations.
   `--pr` in cli_server.py so reply, resolve, and thread
   operations work correctly ([GH-393])
 
-[GH-392]: https://github.com/wooyek/dev10x-ai/issues/392
-[GH-393]: https://github.com/wooyek/dev10x-ai/issues/393
+[GH-392]: https://github.com/Brave-Labs/Dev10x-ai/issues/392
+[GH-393]: https://github.com/Brave-Labs/Dev10x-ai/issues/393
 
 ## 0.35.0 — Orchestration Integrity & Maintenance Skills
 

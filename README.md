@@ -30,7 +30,7 @@ git operation.
 
 ### Pre-approved workflows, not ad-hoc scripts
 
-40 skills encapsulate complete dev workflows as slash commands.
+59 skills encapsulate complete dev workflows as slash commands.
 `/commit` handles gitmoji, ticket reference, and benefit-focused
 title — all through pre-approved tool calls that never trigger
 permission prompts.
@@ -119,8 +119,8 @@ Code CLI to run it. Run `/Dev10x:skill-index` for the full reference.
 ## Installation
 
 ```
-/plugin marketplace add WooYek/Dev10x-AI
-/plugin install Dev10x@WooYek
+/plugin marketplace add Brave-Labs/dev10x-ai
+/plugin install Dev10x@Brave-Labs
 ```
 
 [Full installation guide →](docs/installation.md) — prerequisites,

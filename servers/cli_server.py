@@ -8,7 +8,7 @@
 
 Merges gh_server.py + git_server.py + utils_server.py into a single
 process to reduce token overhead and subprocess startup cost.
-See: https://github.com/wooyek/Dev10x-ai/issues/194
+See: https://github.com/Brave-Labs/Dev10x-ai/issues/194
 """
 
 import json
