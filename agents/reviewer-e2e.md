@@ -1,3 +1,15 @@
+---
+name: reviewer-e2e
+description: |
+  Review Playwright page objects and pytest-bdd feature files for
+  step deduplication, locator fragility, and fixture alignment.
+
+  Triggers: files matching **/e2e/**/*.py, **/e2e/**/*.feature
+tools: Glob, Grep, Read
+model: sonnet
+color: blue
+---
+
 # E2E Test Reviewer (Playwright / pytest-bdd)
 
 Review Playwright page objects and pytest-bdd feature files.

@@ -1,3 +1,15 @@
+---
+name: reviewer-test-patterns
+description: |
+  Review test files for pattern compliance, coverage gaps, fixture
+  DRY, mockito teardown safety, and parametrization best practices.
+
+  Triggers: files matching **/tests/**/*.py
+tools: Glob, Grep, Read
+model: sonnet
+color: blue
+---
+
 # Test Patterns Reviewer
 
 Review test files for pattern compliance, coverage gaps, and

@@ -1,3 +1,15 @@
+---
+name: reviewer-migration
+description: |
+  Review database migration files for data loss, backward
+  compatibility, lock contention, and tenant scoping.
+
+  Triggers: files matching **/migrations/*.py
+tools: Glob, Grep, Read
+model: sonnet
+color: blue
+---
+
 # Migration Safety Reviewer
 
 Review database migration files for safety, backwards compatibility,

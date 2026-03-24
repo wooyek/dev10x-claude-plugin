@@ -1,3 +1,15 @@
+---
+name: reviewer-signals
+description: |
+  Review signal handlers, event receivers, and repository lookup
+  semantics for correctness, naming, and exception safety.
+
+  Triggers: files matching **/signals.py, **/handlers.py, **/receivers.py
+tools: Glob, Grep, Read
+model: sonnet
+color: blue
+---
+
 # Signal & Event Handler Reviewer
 
 Review signal handlers, event receivers, and repository lookup

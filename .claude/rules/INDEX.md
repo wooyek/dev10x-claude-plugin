@@ -88,21 +88,14 @@ Internal review-only agents (≤ 50 lines each).
 | `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | (self-contained) |
 | `reviewer-skill.md` | `skills/**` | `.claude/rules/skill-naming.md`, `references/skill-invocation.md`, `references/eval-schema.md` |
 | `reviewer-skill-behavior.md` | `skills/**` | `references/task-orchestration.md`, `.claude/rules/skill-gates.md` |
-| `reviewer-celery.md` | `**/tasks.py`, `**/celery.py` | (self-contained) |
-| `reviewer-e2e.md` | `**/e2e/**/*.py`, `**/e2e/**/*.feature` | (self-contained) |
-| `reviewer-frontend.md` | `**/*.svelte`, `**/*.astro`, `**/*.tsx` | (self-contained) |
-| `reviewer-graphql.md` | `**/api/queries.py`, `**/api/mutations.py`, `**/schema.py` | (self-contained) |
-| `reviewer-migration.md` | `**/migrations/*.py` | (self-contained) |
-| `reviewer-signals.md` | `**/signals.py`, `**/handlers.py`, `**/receivers.py` | (self-contained) |
-| `reviewer-test-flaky.md` | `**/tests/**/*.py` (flaky risk patterns) | (self-contained) |
-| `reviewer-test-patterns.md` | `**/tests/**/*.py` (pattern compliance) | (self-contained) |
-| `adr-reviewer.md` | Invoked by `Dev10x:adr-evaluate` skill only | (self-contained) |
 
-## Plugin-Distributed Sub-Agents (`agents/`)
+## Plugin-Distributed Agents (`agents/`)
 
-Sub-agent specs shipped with the plugin for user workflows (≤ 200 lines each).
-Distinct from `.claude/agents/` — these are operational agents, not review
-checklists, and need full phase logic and examples.
+Agents shipped with the plugin for all users (≤ 200 lines each).
+These cover operational workflows, code review, architecture
+evaluation, and testing — usable on any project.
+
+### Operational Agents
 
 | File | Purpose |
 |------|---------|
@@ -113,11 +106,30 @@ checklists, and need full phase logic and examples.
 | `code-reviewer.md` | Review branch changes against standards |
 | `pytest-tester.md` | Run tests and verify coverage |
 | `pytest-test-writer.md` | Write/review pytest tests |
-| `architect-api.md` | API architecture evaluation for ADRs |
-| `architect-db.md` | Database architecture evaluation for ADRs |
-| `architect-domain.md` | Domain modeling evaluation for ADRs |
-| `architect-frontend.md` | Frontend architecture evaluation for ADRs |
-| `architect-infra.md` | Infrastructure evaluation for ADRs |
+
+### Architecture Evaluation Agents (for ADRs)
+
+| File | Purpose |
+|------|---------|
+| `architect-api.md` | API design evaluation |
+| `architect-db.md` | Database architecture evaluation |
+| `architect-domain.md` | Domain modeling evaluation |
+| `architect-frontend.md` | Frontend architecture evaluation |
+| `architect-infra.md` | Infrastructure evaluation |
+| `adr-reviewer.md` | ADR synthesis and fact-checking |
+
+### Domain Review Agents
+
+| File | Trigger |
+|------|---------|
+| `reviewer-celery.md` | `**/tasks.py`, `**/celery.py` |
+| `reviewer-e2e.md` | `**/e2e/**/*.py`, `**/e2e/**/*.feature` |
+| `reviewer-frontend.md` | `**/*.svelte`, `**/*.astro`, `**/*.tsx` |
+| `reviewer-graphql.md` | `**/api/queries.py`, `**/schema.py` |
+| `reviewer-migration.md` | `**/migrations/*.py` |
+| `reviewer-signals.md` | `**/signals.py`, `**/handlers.py` |
+| `reviewer-test-flaky.md` | `**/tests/**/*.py` (flaky risks) |
+| `reviewer-test-patterns.md` | `**/tests/**/*.py` (patterns) |
 
 ## Size Budgets
 

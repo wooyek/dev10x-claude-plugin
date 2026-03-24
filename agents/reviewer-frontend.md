@@ -1,3 +1,15 @@
+---
+name: reviewer-frontend
+description: |
+  Review frontend files — components, routes, i18n, auth patterns,
+  accessibility, and SSR safety.
+
+  Triggers: files matching **/*.svelte, **/*.astro, **/*.tsx, **/*.jsx
+tools: Glob, Grep, Read
+model: sonnet
+color: blue
+---
+
 # Frontend Reviewer
 
 Review frontend files — components, routes, and app-scoped scripts.

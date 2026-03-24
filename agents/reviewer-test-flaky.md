@@ -1,3 +1,15 @@
+---
+name: reviewer-test-flaky
+description: |
+  Detect test flakiness risks: random ID collisions, low-entropy
+  providers, constraint races, and missing branch coverage.
+
+  Triggers: files matching **/tests/**/*.py
+tools: Glob, Grep, Read
+model: sonnet
+color: blue
+---
+
 # Flaky Test Reviewer
 
 Detect test flakiness risks: random ID collisions, low-entropy

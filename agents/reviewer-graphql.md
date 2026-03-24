@@ -1,3 +1,16 @@
+---
+name: reviewer-graphql
+description: |
+  Review GraphQL schema changes for type safety, backward
+  compatibility, authorization, and Clean Architecture compliance.
+
+  Triggers: files matching **/api/queries.py, **/api/mutations.py,
+  **/schema.py
+tools: Glob, Grep, Read
+model: sonnet
+color: blue
+---
+
 # GraphQL Schema Reviewer
 
 Review GraphQL schema changes for type safety, schema evolution,

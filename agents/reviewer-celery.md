@@ -1,3 +1,15 @@
+---
+name: reviewer-celery
+description: |
+  Review Celery task definitions for naming, periodic registration,
+  discovery, and data migration safety.
+
+  Triggers: files matching **/tasks.py, **/celery.py
+tools: Glob, Grep, Read
+model: sonnet
+color: blue
+---
+
 # Celery Task Reviewer
 
 Review Celery task definitions, naming, periodic task registration,
