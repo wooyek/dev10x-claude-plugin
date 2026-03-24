@@ -141,6 +141,34 @@ class TestHasLeakedSecret:
         assert clean_mod.has_leaked_secret(rule) is False
 
 
+class TestIsHookEnabled:
+    @pytest.mark.parametrize(
+        "rule",
+        [
+            "Bash(gh pr create:*)",
+            "Bash(git push:*)",
+            "Bash(git push origin main)",
+            "Bash(git rebase -i:*)",
+            "Bash(git commit -m:*)",
+            "Bash(gh pr checks:*)",
+        ],
+    )
+    def test_detects_hook_enabled_rules(self, rule: str) -> None:
+        assert clean_mod.is_hook_enabled(rule) is True
+
+    @pytest.mark.parametrize(
+        "rule",
+        [
+            "Bash(git log:*)",
+            "Bash(gh pr view:*)",
+            "Bash(docker compose up)",
+            "mcp__plugin_Dev10x_cli__detect_tracker",
+        ],
+    )
+    def test_rejects_non_hook_enabled_rules(self, rule: str) -> None:
+        assert clean_mod.is_hook_enabled(rule) is False
+
+
 class TestClassifyRules:
     GLOBAL_RULES = {
         "Bash(git log:*)",
@@ -249,6 +277,33 @@ class TestClassifyRules:
 
         assert len(result.leaked_secrets) == 1
         assert len(result.env_noise) == 1
+
+    def test_keeps_hook_enabled_rules(self) -> None:
+        rules = ["Bash(git push:*)", "Bash(gh pr create:*)"]
+
+        result = clean_mod.classify_rules(
+            rules,
+            global_rules=self.GLOBAL_RULES,
+            current_version="0.33.0",
+        )
+
+        assert result.hook_enabled == rules
+        assert result.kept == rules
+        assert result.total_removed == 0
+
+    def test_hook_enabled_takes_precedence_over_duplicate(self) -> None:
+        global_rules = self.GLOBAL_RULES | {"Bash(git push:*)"}
+        rules = ["Bash(git push:*)"]
+
+        result = clean_mod.classify_rules(
+            rules,
+            global_rules=global_rules,
+            current_version="0.33.0",
+        )
+
+        assert result.hook_enabled == ["Bash(git push:*)"]
+        assert result.kept == ["Bash(git push:*)"]
+        assert result.exact_duplicates == []
 
     def test_total_removed_counts_all_categories(self) -> None:
         rules = [
@@ -367,6 +422,34 @@ class TestCleanFile:
         data = json.loads(settings_file.read_text())
         assert data["permissions"]["deny"] == ["something"]
         assert data["hooks"] == {"PreToolUse": []}
+
+    def test_keeps_hook_enabled_rules(self, settings_file: Path) -> None:
+        settings_file.write_text(
+            json.dumps(
+                {
+                    "permissions": {
+                        "allow": [
+                            "Bash(git log:*)",
+                            "Bash(git push:*)",
+                            "Bash(docker compose up)",
+                        ]
+                    }
+                }
+            )
+            + "\n"
+        )
+
+        result, messages = clean_mod.clean_file(
+            settings_file,
+            global_rules=self.GLOBAL_RULES,
+            current_version="0.33.0",
+        )
+
+        assert result.total_removed == 1
+        data = json.loads(settings_file.read_text())
+        assert "Bash(git push:*)" in data["permissions"]["allow"]
+        assert "Bash(docker compose up)" in data["permissions"]["allow"]
+        assert "Bash(git log:*)" not in data["permissions"]["allow"]
 
     def test_handles_empty_allow_list(self, settings_file: Path) -> None:
         settings_file.write_text(json.dumps({"permissions": {"allow": []}}) + "\n")

@@ -44,6 +44,14 @@ SHELL_FRAGMENTS = frozenset({"do", "done", "fi", "for", "while", "break", "then"
 
 DOUBLE_SLASH_PATTERN = re.compile(r"\(//")
 
+HOOK_ENABLED_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(r"^Bash\(gh pr create"),
+    re.compile(r"^Bash\(git push"),
+    re.compile(r"^Bash\(git rebase -i"),
+    re.compile(r"^Bash\(git commit -m"),
+    re.compile(r"^Bash\(gh pr checks"),
+]
+
 SECRET_INDICATORS = [
     re.compile(r"LINEAR_KEY=lin_api_"),
     re.compile(r"DATABASE_URL=postgres"),
@@ -64,6 +72,7 @@ class RemovalResult:
     shell_fragments: list[str] = field(default_factory=list)
     double_slash: list[str] = field(default_factory=list)
     leaked_secrets: list[str] = field(default_factory=list)
+    hook_enabled: list[str] = field(default_factory=list)
     kept: list[str] = field(default_factory=list)
 
     @property
@@ -158,6 +167,10 @@ def is_old_version(
     return _version_tuple(rule_version) < _version_tuple(current_version)
 
 
+def is_hook_enabled(rule: str) -> bool:
+    return any(p.search(rule) for p in HOOK_ENABLED_PATTERNS)
+
+
 def has_leaked_secret(rule: str) -> bool:
     return any(p.search(rule) for p in SECRET_INDICATORS)
 
@@ -173,6 +186,11 @@ def classify_rules(
     for rule in project_rules:
         if has_leaked_secret(rule):
             result.leaked_secrets.append(rule)
+
+        if is_hook_enabled(rule):
+            result.hook_enabled.append(rule)
+            result.kept.append(rule)
+            continue
 
         if rule in global_rules:
             result.exact_duplicates.append(rule)
@@ -263,6 +281,9 @@ def _format_messages(result: RemovalResult) -> list[str]:
 
     if result.double_slash:
         messages.append(f"  - {len(result.double_slash)} double-slash paths")
+
+    if result.hook_enabled:
+        messages.append(f"  - {len(result.hook_enabled)} hook-enabled rules (kept)")
 
     messages.append(f"  Removed: {result.total_removed} | Kept: {len(result.kept)}")
     return messages

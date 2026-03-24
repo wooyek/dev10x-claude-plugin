@@ -51,11 +51,21 @@ Classify every allow rule into risk categories:
 | **DESTRUCTIVE** | Permits irreversible operations | `Bash(git reset:*)` allows `--hard` |
 | **OVERLY_BROAD** | Single rule covers destructive + safe operations | `Bash(gh:*)` covers `gh repo delete` |
 | **CONTRADICTS_POLICY** | Rule conflicts with CLAUDE.md instructions | `git config:*` when CLAUDE.md says "NEVER update git config" |
-| **DEAD_RULE** | Rule is overridden by a hook that blocks the pattern | `python3 -c "import json:*"` blocked by `block-python3-inline.py` |
+| **HOOK_ENABLED** | Allow rule exists so a PreToolUse hook can fire its redirect message | `Bash(git push:*)` enabled for SkillRedirectValidator |
+| **DEAD_RULE** | Rule is overridden by a hook AND the hook does not depend on the allow rule to fire | `python3 -c "import json:*"` blocked by `block-python3-inline.py` |
 | **WILDCARD_ESCAPE** | Variable prefix acts as wildcard for any command | `Bash(VARNAME=:*)` matches `VARNAME=x; rm -rf /` |
 | **PRIVILEGE_ESCALATION** | Rule allows modifying permission settings themselves | `Write(~/.claude/**)` covers `settings.local.json` |
 | **REDUNDANT** | Duplicate of another rule | Two identical `curl -sI` entries |
 | **SAFE** | Appropriately scoped for its purpose | `Bash(git log:*)` |
+
+**HOOK_ENABLED vs DEAD_RULE distinction:** The permission layer
+runs before hooks. If a hook's redirect message depends on the
+allow rule passing silently (e.g., SkillRedirectValidator), the
+rule is `HOOK_ENABLED` — removing it replaces the educational
+redirect with a generic permission prompt. Only classify as
+`DEAD_RULE` when the hook blocks unconditionally regardless of
+whether the allow rule exists (e.g., `block-python3-inline.py`).
+See ADR-0003 for the full rationale.
 
 For each non-SAFE rule, note:
 - The specific dangerous command it permits
@@ -76,7 +86,8 @@ For each allow rule classified as non-SAFE, determine if the issue is **structur
 **Rule-based patterns** (fixable with allow/deny rule changes):
 - `MISSING_DENY`: Destructive variant lacks a deny override
 - `NEEDS_GRANULAR`: Broad rule should be split into safe subcommands
-- `DEAD_RULE`: Hook blocks what the rule permits
+- `DEAD_RULE`: Hook blocks what the rule permits (hook does not depend on the allow rule)
+- `HOOK_ENABLED`: Allow rule enables a hook's redirect message — do NOT recommend removal
 
 ### Phase 5: Deny Rule Gap Analysis
 
