@@ -68,7 +68,7 @@ have access:
 
 ```bash
 git clone git@github.com:Brave-Labs/Dev10x.git \
-  ~/.claude/plugins/Dev10x-ai
+  ~/.claude/plugins/Dev10x
 ```
 
 > **Using HTTPS?** Replace the URL with
@@ -78,13 +78,13 @@ git clone git@github.com:Brave-Labs/Dev10x.git \
 Register the plugin so Claude Code loads it on every session:
 
 ```bash
-claude plugin add --local ~/.claude/plugins/Dev10x-ai
+claude plugin add --local ~/.claude/plugins/Dev10x
 ```
 
 Update manually with:
 
 ```bash
-cd ~/.claude/plugins/Dev10x-ai && git pull
+cd ~/.claude/plugins/Dev10x && git pull
 ```
 
 ## Verify the installation
@@ -104,5 +104,5 @@ You should see a skills reference listing all available commands.
 Load the plugin for a single session:
 
 ```bash
-claude --plugin-dir ~/.claude/plugins/Dev10x-ai
+claude --plugin-dir ~/.claude/plugins/Dev10x
 ```
