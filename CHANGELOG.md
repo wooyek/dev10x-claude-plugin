@@ -3,6 +3,54 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.39.0 — Generic Agents & Permission Hardening
+
+Released 2026-03-25
+
+### Features
+
+- **Generic agent library for any project** — review, testing,
+  architecture, and infrastructure agents now ship with the plugin
+  for use on any codebase ([57e3830])
+- **Quiet mode for update-paths.py** — suppress noisy output when
+  running permission path updates ([GH-428])
+- **Allow git reset without permission friction** — reset commands
+  no longer trigger unnecessary approval prompts ([GH-441])
+
+### Improvements
+
+- **Promote review agents to plugin distribution** — domain-specific
+  reviewer agents moved from internal to plugin-distributed so all
+  users benefit ([23229f3])
+- **Rebrand repo from dev10x-ai to Dev10x** — repository name,
+  URLs, and marketplace references updated ([#442])
+- **Tighten work-on approval gate and routing** — stricter approval
+  flow prevents unintended auto-advance past decision gates ([GH-429])
+
+### Bug Fixes
+
+- **Prevent permission-maintenance bootstrap loop** — break the
+  cycle where permission maintenance triggers itself ([GH-426])
+- **Prevent stale permissions after worktree merge** — merged
+  worktree rules are cleaned up so they don't cause false
+  allow/deny matches ([GH-427])
+
+### Documentation
+
+- **Prevent misclassification of hook-enabled rules** — clarify
+  that allow rules enabling hooks must not be removed even when
+  the hook redirects the command ([GH-419])
+
+[GH-419]: https://github.com/Brave-Labs/Dev10x/issues/419
+[GH-426]: https://github.com/Brave-Labs/Dev10x/issues/426
+[GH-427]: https://github.com/Brave-Labs/Dev10x/issues/427
+[GH-428]: https://github.com/Brave-Labs/Dev10x/issues/428
+[GH-429]: https://github.com/Brave-Labs/Dev10x/issues/429
+[GH-441]: https://github.com/Brave-Labs/Dev10x/issues/441
+[#442]: https://github.com/Brave-Labs/Dev10x/pull/442
+[23229f3]: https://github.com/Brave-Labs/Dev10x/commit/23229f3
+[57e3830]: https://github.com/Brave-Labs/Dev10x/commit/57e3830
+
 ## 0.38.0 — Brave-Labs Rebrand & Version Visibility
 
 Released 2026-03-24
