@@ -310,7 +310,7 @@ defaults:
       - subject: Set up workspace
         type: detailed
         condition: if-branch-needed
-        skills: [dev10x:ticket-branch]
+        skills: [Dev10x:ticket-branch]
         prompt: >
           Create a feature branch if not already on one.
           Skip if current branch is already a feature branch.
