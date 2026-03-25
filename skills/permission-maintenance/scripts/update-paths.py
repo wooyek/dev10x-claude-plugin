@@ -27,7 +27,7 @@ USERSPACE_CONFIG = (
     Path.home() / ".claude" / "skills" / "Dev10x:permission-maintenance" / "projects.yaml"
 )
 PLUGIN_CONFIG = Path(__file__).resolve().parent.parent / "projects.yaml"
-VERSION_PATTERN = re.compile(r"(plugins/cache/WooYek/Dev10x/)(\d+\.\d+\.\d+)")
+VERSION_PATTERN = re.compile(r"(plugins/cache/Brave-Labs/Dev10x/)(\d+\.\d+\.\d+)")
 
 
 def find_config() -> Path:

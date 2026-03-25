@@ -1,6 +1,6 @@
 # Lessons Learned: PR #136 Analysis
 
-**Repository**: Brave-Labs/dev10x-ai
+**Repository**: Brave-Labs/Dev10x
 **PR Number**: 136
 **Title**: 🐛 GH-133 Enforce AskUserQuestion at decision gates
 **Author**: wooyek

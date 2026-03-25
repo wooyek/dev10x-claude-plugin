@@ -19,7 +19,7 @@ allowed-tools:
 # Audit Report — File Findings Upstream
 
 Generate a structured GitHub issue from skill-audit findings
-and file it at `Brave-Labs/dev10x-ai`.
+and file it at `Brave-Labs/Dev10x`.
 
 ## When to Use
 
@@ -65,7 +65,7 @@ If empty or missing, inform the user and exit.
 ### Step 2: Determine plugin version
 
 ```bash
-ls ~/.claude/plugins/cache/WooYek/Dev10x/
+ls ~/.claude/plugins/cache/Brave-Labs/Dev10x/
 ```
 
 Use the version directory name (e.g., `0.19.0.dev0`). If the
@@ -116,7 +116,7 @@ Write the assembled body to that file using the Write tool.
 ### Step 6: File the issue
 
 ```bash
-gh issue create --repo Brave-Labs/dev10x-ai \
+gh issue create --repo Brave-Labs/Dev10x \
   --title "{title}" \
   --body-file {temp-file-path} \
   --label "enhancement"

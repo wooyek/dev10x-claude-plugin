@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Release workflow for Dev10x-claude-plugin.
+# Release workflow for Dev10x.
 #
 # Develop uses .dev0 suffixes between releases (e.g. 0.7.0.dev0).
 # The release script strips .dev0 to produce the release version,

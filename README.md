@@ -119,7 +119,7 @@ Code CLI to run it. Run `/Dev10x:skill-index` for the full reference.
 ## Installation
 
 ```
-/plugin marketplace add Brave-Labs/dev10x-ai
+/plugin marketplace add Brave-Labs/Dev10x
 /plugin install Dev10x@Brave-Labs
 ```
 

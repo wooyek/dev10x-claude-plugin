@@ -64,7 +64,7 @@ For each memory file, check for these categories:
 Search for hardcoded plugin cache paths with version numbers:
 
 ```
-~/.claude/plugins/cache/WooYek/Dev10x/0.XX.0/...
+~/.claude/plugins/cache/Brave-Labs/Dev10x/0.XX.0/...
 ```
 
 These break on plugin upgrades. Replace with:

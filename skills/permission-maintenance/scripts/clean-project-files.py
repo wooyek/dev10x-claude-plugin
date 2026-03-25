@@ -36,7 +36,7 @@ USERSPACE_CONFIG = (
 PLUGIN_CONFIG = Path(__file__).resolve().parent.parent / "projects.yaml"
 GLOBAL_SETTINGS = Path.home() / ".claude" / "settings.json"
 
-VERSION_PATTERN = re.compile(r"plugins/cache/WooYek/Dev10x/(\d+\.\d+\.\d+)")
+VERSION_PATTERN = re.compile(r"plugins/cache/Brave-Labs/Dev10x/(\d+\.\d+\.\d+)")
 
 ENV_PREFIX_PATTERN = re.compile(r"^Bash\([A-Z_]+=")
 
