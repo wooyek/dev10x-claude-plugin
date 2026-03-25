@@ -163,7 +163,7 @@ def ensure_base_permissions(
     return len(missing), messages
 
 
-GENERALIZE_PATTERNS: list[tuple[re.Pattern, str]] = [
+GENERALIZE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"(detect-tracker\.sh)\s+[^:)]+"), r"\1"),
     (re.compile(r"(gh-issue-get\.sh)\s+[^:)]+"), r"\1"),
     (re.compile(r"(gh-pr-detect\.sh)\s+[^:)]+"), r"\1"),
@@ -171,6 +171,8 @@ GENERALIZE_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"(extract-session\.sh)\s+[^:)]+"), r"\1"),
     (re.compile(r"(/tmp/claude/[^/]+/)[^/]+\.[A-Za-z0-9]{6,}\.(txt|md|json)"), r"\1**"),
     (re.compile(r"(\.[A-Za-z0-9]{8,})\.(txt|md|json)"), r"**"),
+    (re.compile(r"(git reset --hard) origin/\S+"), r"\1"),
+    (re.compile(r"(git reset --soft) [A-Fa-f0-9]{6,}"), r"\1"),
 ]
 
 
