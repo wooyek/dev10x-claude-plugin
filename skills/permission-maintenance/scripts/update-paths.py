@@ -248,13 +248,19 @@ def main() -> int:
         action="store_true",
         help="Replace session-specific permission args with wildcard patterns",
     )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress per-file details, emit only the summary line",
+    )
     args = parser.parse_args()
 
     if args.init:
         return _init_userspace_config()
 
     config_path = find_config()
-    print(f"Config: {config_path}")
+    if not args.quiet:
+        print(f"Config: {config_path}")
     config = load_config(config_path)
 
     settings_files = find_settings_files(
@@ -271,12 +277,14 @@ def main() -> int:
             config=config,
             settings_files=settings_files,
             dry_run=args.dry_run,
+            quiet=args.quiet,
         )
 
     if args.generalize:
         return _generalize(
             settings_files=settings_files,
             dry_run=args.dry_run,
+            quiet=args.quiet,
         )
 
     cache_dir = Path(config["plugin_cache"]).expanduser()
@@ -286,8 +294,9 @@ def main() -> int:
         print(f"ERROR: No versions found in {cache_dir}", file=sys.stderr)
         return 1
 
-    print(f"Target version: {target}")
-    if args.dry_run:
+    if not args.quiet:
+        print(f"Target version: {target}")
+    if args.dry_run and not args.quiet:
         print("(dry run — no files will be modified)\n")
 
     total_changes = 0
@@ -296,17 +305,18 @@ def main() -> int:
     for path in sorted(settings_files):
         count, messages = update_file(path, target, dry_run=args.dry_run)
         if count > 0:
-            print(f"\n{path}")
-            for msg in messages:
-                print(msg)
+            if not args.quiet:
+                print(f"\n{path}")
+                for msg in messages:
+                    print(msg)
             total_changes += count
             files_changed += 1
 
     if total_changes == 0:
-        print("\nAll files already up to date.")
+        print("All files already up to date.")
     else:
         verb = "Would update" if args.dry_run else "Updated"
-        print(f"\n{verb} {total_changes} paths in {files_changed} files.")
+        print(f"{verb} {total_changes} paths in {files_changed} files.")
 
     return 0
 
@@ -316,15 +326,17 @@ def _ensure_base(
     config: dict,
     settings_files: list[Path],
     dry_run: bool,
+    quiet: bool = False,
 ) -> int:
     base_permissions = config.get("base_permissions", [])
     if not base_permissions:
         print("No base_permissions defined in config.")
         return 0
 
-    print(f"Base permissions: {len(base_permissions)} rules")
-    if dry_run:
-        print("(dry run — no files will be modified)\n")
+    if not quiet:
+        print(f"Base permissions: {len(base_permissions)} rules")
+        if dry_run:
+            print("(dry run — no files will be modified)\n")
 
     total_added = 0
     files_changed = 0
@@ -336,17 +348,18 @@ def _ensure_base(
             dry_run=dry_run,
         )
         if count > 0:
-            print(f"\n{path}")
-            for msg in messages:
-                print(msg)
+            if not quiet:
+                print(f"\n{path}")
+                for msg in messages:
+                    print(msg)
             total_added += count
             files_changed += 1
 
     if total_added == 0:
-        print("\nAll files already have base permissions.")
+        print("All files already have base permissions.")
     else:
         verb = "Would add" if dry_run else "Added"
-        print(f"\n{verb} {total_added} permissions across {files_changed} files.")
+        print(f"{verb} {total_added} permissions across {files_changed} files.")
 
     return 0
 
@@ -355,8 +368,9 @@ def _generalize(
     *,
     settings_files: list[Path],
     dry_run: bool,
+    quiet: bool = False,
 ) -> int:
-    if dry_run:
+    if dry_run and not quiet:
         print("(dry run — no files will be modified)\n")
 
     total_generalized = 0
@@ -365,17 +379,18 @@ def _generalize(
     for path in sorted(settings_files):
         count, messages = generalize_permissions(path, dry_run=dry_run)
         if count > 0:
-            print(f"\n{path}")
-            for msg in messages:
-                print(msg)
+            if not quiet:
+                print(f"\n{path}")
+                for msg in messages:
+                    print(msg)
             total_generalized += count
             files_changed += 1
 
     if total_generalized == 0:
-        print("\nNo session-specific permissions found.")
+        print("No session-specific permissions found.")
     else:
         verb = "Would generalize" if dry_run else "Generalized"
-        print(f"\n{verb} {total_generalized} permissions in {files_changed} files.")
+        print(f"{verb} {total_generalized} permissions in {files_changed} files.")
 
     return 0
 
