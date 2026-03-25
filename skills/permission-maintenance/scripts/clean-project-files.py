@@ -180,12 +180,18 @@ def classify_rules(
     *,
     global_rules: set[str],
     current_version: str | None,
+    base_permissions: set[str] | None = None,
 ) -> RemovalResult:
     result = RemovalResult()
+    _base = base_permissions or set()
 
     for rule in project_rules:
         if has_leaked_secret(rule):
             result.leaked_secrets.append(rule)
+
+        if rule in _base:
+            result.kept.append(rule)
+            continue
 
         if is_hook_enabled(rule):
             result.hook_enabled.append(rule)
@@ -227,6 +233,7 @@ def clean_file(
     *,
     global_rules: set[str],
     current_version: str | None,
+    base_permissions: set[str] | None = None,
     dry_run: bool = False,
 ) -> tuple[RemovalResult | None, list[str]]:
     content = path.read_text()
@@ -243,6 +250,7 @@ def clean_file(
         allow_list,
         global_rules=global_rules,
         current_version=current_version,
+        base_permissions=base_permissions,
     )
 
     if result.total_removed == 0:
@@ -338,6 +346,8 @@ def main() -> int:
     if current_version:
         print(f"Current plugin version: {current_version}")
 
+    base_permissions = set(config.get("base_permissions", []))
+
     settings_files = find_settings_files(roots=config.get("roots", []))
 
     if not settings_files:
@@ -360,6 +370,7 @@ def main() -> int:
             path,
             global_rules=global_rules,
             current_version=current_version,
+            base_permissions=base_permissions,
             dry_run=args.dry_run,
         )
         if result is None:
