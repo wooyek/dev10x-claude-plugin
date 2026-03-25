@@ -1,4 +1,4 @@
-# Dev10x-claude-plugin
+# Dev10x
 
 Claude Code plugin providing reusable skills, hooks, and commands for
 development workflows.

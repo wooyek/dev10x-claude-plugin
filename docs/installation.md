@@ -32,7 +32,7 @@
 Add the marketplace source and install the plugin:
 
 ```
-/plugin marketplace add Brave-Labs/dev10x-ai
+/plugin marketplace add Brave-Labs/Dev10x
 /plugin install Dev10x@Brave-Labs
 ```
 
@@ -48,7 +48,7 @@ To test the latest develop branch before it's released:
 
 ```
 /plugin marketplace remove WooYek
-/plugin marketplace add Brave-Labs/dev10x-ai#develop
+/plugin marketplace add Brave-Labs/Dev10x#develop
 /plugin install Dev10x@Brave-Labs
 ```
 
@@ -56,7 +56,7 @@ Switch back to stable releases:
 
 ```
 /plugin marketplace remove WooYek
-/plugin marketplace add Brave-Labs/dev10x-ai
+/plugin marketplace add Brave-Labs/Dev10x
 /plugin install Dev10x@Brave-Labs
 ```
 
@@ -67,24 +67,24 @@ the [Dev10x community](https://www.skool.com/Dev10x-1892). Once you
 have access:
 
 ```bash
-git clone git@github.com:Brave-Labs/dev10x-ai.git \
-  ~/.claude/plugins/Dev10x-ai
+git clone git@github.com:Brave-Labs/Dev10x.git \
+  ~/.claude/plugins/Dev10x
 ```
 
 > **Using HTTPS?** Replace the URL with
-> `https://github.com/Brave-Labs/Dev10x-ai.git` and
+> `https://github.com/Brave-Labs/Dev10x.git` and
 > authenticate when prompted.
 
 Register the plugin so Claude Code loads it on every session:
 
 ```bash
-claude plugin add --local ~/.claude/plugins/Dev10x-ai
+claude plugin add --local ~/.claude/plugins/Dev10x
 ```
 
 Update manually with:
 
 ```bash
-cd ~/.claude/plugins/Dev10x-ai && git pull
+cd ~/.claude/plugins/Dev10x && git pull
 ```
 
 ## Verify the installation
@@ -104,5 +104,5 @@ You should see a skills reference listing all available commands.
 Load the plugin for a single session:
 
 ```bash
-claude --plugin-dir ~/.claude/plugins/Dev10x-ai
+claude --plugin-dir ~/.claude/plugins/Dev10x
 ```

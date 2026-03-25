@@ -19,8 +19,8 @@ Released 2026-03-24
 ### Improvements
 
 - **Repo rename to Brave-Labs** — all URLs, marketplace commands,
-  and installation docs updated from `wooyek/dev10x-ai` to
-  `Brave-Labs/dev10x-ai`
+  and installation docs updated from `Brave-Labs/dev10x-ai` to
+  `Brave-Labs/Dev10x`
 - **Skill count update** — README and plugin description now
   reflect 59 skills (was 40)
 
@@ -35,8 +35,8 @@ Released 2026-03-24
 - **Data-driven skill redirect ADR** — propose friction-level
   based redirect system for hook validators ([GH-417])
 
-[GH-417]: https://github.com/Brave-Labs/Dev10x-ai/issues/417
-[GH-422]: https://github.com/Brave-Labs/Dev10x-ai/issues/422
+[GH-417]: https://github.com/Brave-Labs/Dev10x/issues/417
+[GH-422]: https://github.com/Brave-Labs/Dev10x/issues/422
 
 ## 0.37.0 — Skill Compliance Enforcement
 
@@ -75,12 +75,12 @@ eliminates the permission friction that incentivized bypasses.
   documents Skill() invocation assertion patterns, enabling
   detection of enforcement bypass regressions ([b90c5de])
 
-[GH-397]: https://github.com/Brave-Labs/Dev10x-ai/issues/397
-[GH-399]: https://github.com/Brave-Labs/Dev10x-ai/issues/399
-[GH-400]: https://github.com/Brave-Labs/Dev10x-ai/issues/400
-[GH-401]: https://github.com/Brave-Labs/Dev10x-ai/issues/401
-[GH-407]: https://github.com/Brave-Labs/Dev10x-ai/issues/407
-[b90c5de]: https://github.com/Brave-Labs/Dev10x-ai/commit/b90c5de
+[GH-397]: https://github.com/Brave-Labs/Dev10x/issues/397
+[GH-399]: https://github.com/Brave-Labs/Dev10x/issues/399
+[GH-400]: https://github.com/Brave-Labs/Dev10x/issues/400
+[GH-401]: https://github.com/Brave-Labs/Dev10x/issues/401
+[GH-407]: https://github.com/Brave-Labs/Dev10x/issues/407
+[b90c5de]: https://github.com/Brave-Labs/Dev10x/commit/b90c5de
 
 ## 0.36.0 — PR Monitor Visibility & MCP Bugfix
 
@@ -102,8 +102,8 @@ blocked all comment operations.
   `--pr` in cli_server.py so reply, resolve, and thread
   operations work correctly ([GH-393])
 
-[GH-392]: https://github.com/Brave-Labs/Dev10x-ai/issues/392
-[GH-393]: https://github.com/Brave-Labs/Dev10x-ai/issues/393
+[GH-392]: https://github.com/Brave-Labs/Dev10x/issues/392
+[GH-393]: https://github.com/Brave-Labs/Dev10x/issues/393
 
 ## 0.35.0 — Orchestration Integrity & Maintenance Skills
 
@@ -892,99 +892,99 @@ in a single plugin.
 
 ---
 
-[GH-1]: https://github.com/WooYek/Dev10x/issues/1
-[GH-7]: https://github.com/WooYek/Dev10x/issues/7
-[GH-10]: https://github.com/WooYek/Dev10x/issues/10
-[GH-15]: https://github.com/WooYek/Dev10x/issues/15
-[GH-17]: https://github.com/WooYek/Dev10x/issues/17
-[GH-19]: https://github.com/WooYek/Dev10x/issues/19
-[GH-31]: https://github.com/WooYek/Dev10x/issues/31
-[GH-33]: https://github.com/WooYek/Dev10x/issues/33
-[GH-35]: https://github.com/WooYek/Dev10x/issues/35
-[GH-44]: https://github.com/WooYek/Dev10x/issues/44
-[GH-45]: https://github.com/WooYek/Dev10x/issues/45
-[GH-50]: https://github.com/WooYek/Dev10x/issues/50
-[GH-54]: https://github.com/WooYek/Dev10x/issues/54
-[GH-59]: https://github.com/WooYek/Dev10x/issues/59
-[GH-68]: https://github.com/WooYek/Dev10x/issues/68
-[GH-70]: https://github.com/WooYek/Dev10x/issues/70
-[GH-79]: https://github.com/WooYek/Dev10x/issues/79
-[GH-84]: https://github.com/WooYek/Dev10x/issues/84
-[GH-86]: https://github.com/WooYek/Dev10x/issues/86
-[GH-87]: https://github.com/WooYek/Dev10x/issues/87
-[GH-118]: https://github.com/WooYek/Dev10x/issues/118
-[GH-121]: https://github.com/WooYek/Dev10x/issues/121
-[GH-126]: https://github.com/WooYek/Dev10x/issues/126
-[GH-131]: https://github.com/WooYek/Dev10x/issues/131
-[GH-133]: https://github.com/WooYek/Dev10x/issues/133
-[GH-134]: https://github.com/WooYek/Dev10x/issues/134
-[GH-135]: https://github.com/WooYek/Dev10x/issues/135
-[GH-140]: https://github.com/WooYek/Dev10x/issues/140
-[GH-143]: https://github.com/WooYek/Dev10x/issues/143
-[GH-144]: https://github.com/WooYek/Dev10x/issues/144
-[GH-151]: https://github.com/WooYek/Dev10x/issues/151
-[GH-153]: https://github.com/WooYek/Dev10x/issues/153
-[GH-154]: https://github.com/WooYek/Dev10x/issues/154
-[GH-157]: https://github.com/WooYek/Dev10x/issues/157
-[GH-159]: https://github.com/WooYek/Dev10x/issues/159
-[GH-179]: https://github.com/WooYek/Dev10x/issues/179
-[GH-180]: https://github.com/WooYek/Dev10x/issues/180
-[GH-187]: https://github.com/WooYek/Dev10x/issues/187
-[GH-188]: https://github.com/WooYek/Dev10x/issues/188
-[GH-196]: https://github.com/WooYek/Dev10x/issues/196
-[GH-200]: https://github.com/WooYek/Dev10x/issues/200
-[GH-208]: https://github.com/WooYek/Dev10x/issues/208
-[GH-209]: https://github.com/WooYek/Dev10x/issues/209
-[GH-213]: https://github.com/WooYek/Dev10x/issues/213
-[GH-219]: https://github.com/WooYek/Dev10x/issues/219
-[GH-225]: https://github.com/WooYek/Dev10x/issues/225
-[GH-226]: https://github.com/WooYek/Dev10x/issues/226
-[GH-227]: https://github.com/WooYek/Dev10x/issues/227
-[GH-231]: https://github.com/WooYek/Dev10x/issues/231
-[GH-232]: https://github.com/WooYek/Dev10x/issues/232
-[GH-237]: https://github.com/WooYek/Dev10x/issues/237
-[GH-244]: https://github.com/WooYek/Dev10x/issues/244
-[GH-247]: https://github.com/WooYek/Dev10x/issues/247
-[GH-251]: https://github.com/WooYek/Dev10x/issues/251
-[GH-252]: https://github.com/WooYek/Dev10x/issues/252
-[GH-253]: https://github.com/WooYek/Dev10x/issues/253
-[GH-258]: https://github.com/WooYek/Dev10x/issues/258
-[GH-259]: https://github.com/WooYek/Dev10x/issues/259
-[GH-260]: https://github.com/WooYek/Dev10x/issues/260
-[GH-261]: https://github.com/WooYek/Dev10x/issues/261
-[GH-263]: https://github.com/WooYek/Dev10x/issues/263
-[GH-267]: https://github.com/WooYek/Dev10x/issues/267
-[GH-269]: https://github.com/WooYek/Dev10x/issues/269
-[GH-270]: https://github.com/WooYek/Dev10x/issues/270
-[GH-271]: https://github.com/WooYek/Dev10x/issues/271
-[GH-272]: https://github.com/WooYek/Dev10x/issues/272
-[GH-273]: https://github.com/WooYek/Dev10x/issues/273
-[GH-274]: https://github.com/WooYek/Dev10x/issues/274
-[GH-275]: https://github.com/WooYek/Dev10x/issues/275
-[GH-277]: https://github.com/WooYek/Dev10x/issues/277
-[GH-280]: https://github.com/WooYek/Dev10x/issues/280
-[GH-283]: https://github.com/WooYek/Dev10x/issues/283
-[GH-288]: https://github.com/WooYek/Dev10x/issues/288
-[GH-313]: https://github.com/WooYek/Dev10x/issues/313
-[GH-345]: https://github.com/WooYek/Dev10x/issues/345
-[GH-348]: https://github.com/WooYek/Dev10x/issues/348
-[GH-351]: https://github.com/WooYek/Dev10x/issues/351
-[GH-353]: https://github.com/WooYek/Dev10x/issues/353
-[GH-354]: https://github.com/WooYek/Dev10x/issues/354
-[GH-355]: https://github.com/WooYek/Dev10x/issues/355
-[GH-356]: https://github.com/WooYek/Dev10x/issues/356
-[GH-357]: https://github.com/WooYek/Dev10x/issues/357
-[GH-358]: https://github.com/WooYek/Dev10x/issues/358
-[GH-363]: https://github.com/WooYek/Dev10x/issues/363
-[GH-366]: https://github.com/WooYek/Dev10x/issues/366
-[GH-367]: https://github.com/WooYek/Dev10x/issues/367
-[GH-371]: https://github.com/WooYek/Dev10x/issues/371
-[GH-375]: https://github.com/WooYek/Dev10x/issues/375
-[GH-376]: https://github.com/WooYek/Dev10x/issues/376
-[GH-382]: https://github.com/WooYek/Dev10x/issues/382
-[GH-384]: https://github.com/WooYek/Dev10x/issues/384
-[GH-385]: https://github.com/WooYek/Dev10x/issues/385
-[GH-386]: https://github.com/WooYek/Dev10x/issues/386
-[#243]: https://github.com/WooYek/Dev10x/pull/243
-[#267]: https://github.com/WooYek/Dev10x/pull/267
-[#270]: https://github.com/WooYek/Dev10x/pull/270
+[GH-1]: https://github.com/Brave-Labs/Dev10x/issues/1
+[GH-7]: https://github.com/Brave-Labs/Dev10x/issues/7
+[GH-10]: https://github.com/Brave-Labs/Dev10x/issues/10
+[GH-15]: https://github.com/Brave-Labs/Dev10x/issues/15
+[GH-17]: https://github.com/Brave-Labs/Dev10x/issues/17
+[GH-19]: https://github.com/Brave-Labs/Dev10x/issues/19
+[GH-31]: https://github.com/Brave-Labs/Dev10x/issues/31
+[GH-33]: https://github.com/Brave-Labs/Dev10x/issues/33
+[GH-35]: https://github.com/Brave-Labs/Dev10x/issues/35
+[GH-44]: https://github.com/Brave-Labs/Dev10x/issues/44
+[GH-45]: https://github.com/Brave-Labs/Dev10x/issues/45
+[GH-50]: https://github.com/Brave-Labs/Dev10x/issues/50
+[GH-54]: https://github.com/Brave-Labs/Dev10x/issues/54
+[GH-59]: https://github.com/Brave-Labs/Dev10x/issues/59
+[GH-68]: https://github.com/Brave-Labs/Dev10x/issues/68
+[GH-70]: https://github.com/Brave-Labs/Dev10x/issues/70
+[GH-79]: https://github.com/Brave-Labs/Dev10x/issues/79
+[GH-84]: https://github.com/Brave-Labs/Dev10x/issues/84
+[GH-86]: https://github.com/Brave-Labs/Dev10x/issues/86
+[GH-87]: https://github.com/Brave-Labs/Dev10x/issues/87
+[GH-118]: https://github.com/Brave-Labs/Dev10x/issues/118
+[GH-121]: https://github.com/Brave-Labs/Dev10x/issues/121
+[GH-126]: https://github.com/Brave-Labs/Dev10x/issues/126
+[GH-131]: https://github.com/Brave-Labs/Dev10x/issues/131
+[GH-133]: https://github.com/Brave-Labs/Dev10x/issues/133
+[GH-134]: https://github.com/Brave-Labs/Dev10x/issues/134
+[GH-135]: https://github.com/Brave-Labs/Dev10x/issues/135
+[GH-140]: https://github.com/Brave-Labs/Dev10x/issues/140
+[GH-143]: https://github.com/Brave-Labs/Dev10x/issues/143
+[GH-144]: https://github.com/Brave-Labs/Dev10x/issues/144
+[GH-151]: https://github.com/Brave-Labs/Dev10x/issues/151
+[GH-153]: https://github.com/Brave-Labs/Dev10x/issues/153
+[GH-154]: https://github.com/Brave-Labs/Dev10x/issues/154
+[GH-157]: https://github.com/Brave-Labs/Dev10x/issues/157
+[GH-159]: https://github.com/Brave-Labs/Dev10x/issues/159
+[GH-179]: https://github.com/Brave-Labs/Dev10x/issues/179
+[GH-180]: https://github.com/Brave-Labs/Dev10x/issues/180
+[GH-187]: https://github.com/Brave-Labs/Dev10x/issues/187
+[GH-188]: https://github.com/Brave-Labs/Dev10x/issues/188
+[GH-196]: https://github.com/Brave-Labs/Dev10x/issues/196
+[GH-200]: https://github.com/Brave-Labs/Dev10x/issues/200
+[GH-208]: https://github.com/Brave-Labs/Dev10x/issues/208
+[GH-209]: https://github.com/Brave-Labs/Dev10x/issues/209
+[GH-213]: https://github.com/Brave-Labs/Dev10x/issues/213
+[GH-219]: https://github.com/Brave-Labs/Dev10x/issues/219
+[GH-225]: https://github.com/Brave-Labs/Dev10x/issues/225
+[GH-226]: https://github.com/Brave-Labs/Dev10x/issues/226
+[GH-227]: https://github.com/Brave-Labs/Dev10x/issues/227
+[GH-231]: https://github.com/Brave-Labs/Dev10x/issues/231
+[GH-232]: https://github.com/Brave-Labs/Dev10x/issues/232
+[GH-237]: https://github.com/Brave-Labs/Dev10x/issues/237
+[GH-244]: https://github.com/Brave-Labs/Dev10x/issues/244
+[GH-247]: https://github.com/Brave-Labs/Dev10x/issues/247
+[GH-251]: https://github.com/Brave-Labs/Dev10x/issues/251
+[GH-252]: https://github.com/Brave-Labs/Dev10x/issues/252
+[GH-253]: https://github.com/Brave-Labs/Dev10x/issues/253
+[GH-258]: https://github.com/Brave-Labs/Dev10x/issues/258
+[GH-259]: https://github.com/Brave-Labs/Dev10x/issues/259
+[GH-260]: https://github.com/Brave-Labs/Dev10x/issues/260
+[GH-261]: https://github.com/Brave-Labs/Dev10x/issues/261
+[GH-263]: https://github.com/Brave-Labs/Dev10x/issues/263
+[GH-267]: https://github.com/Brave-Labs/Dev10x/issues/267
+[GH-269]: https://github.com/Brave-Labs/Dev10x/issues/269
+[GH-270]: https://github.com/Brave-Labs/Dev10x/issues/270
+[GH-271]: https://github.com/Brave-Labs/Dev10x/issues/271
+[GH-272]: https://github.com/Brave-Labs/Dev10x/issues/272
+[GH-273]: https://github.com/Brave-Labs/Dev10x/issues/273
+[GH-274]: https://github.com/Brave-Labs/Dev10x/issues/274
+[GH-275]: https://github.com/Brave-Labs/Dev10x/issues/275
+[GH-277]: https://github.com/Brave-Labs/Dev10x/issues/277
+[GH-280]: https://github.com/Brave-Labs/Dev10x/issues/280
+[GH-283]: https://github.com/Brave-Labs/Dev10x/issues/283
+[GH-288]: https://github.com/Brave-Labs/Dev10x/issues/288
+[GH-313]: https://github.com/Brave-Labs/Dev10x/issues/313
+[GH-345]: https://github.com/Brave-Labs/Dev10x/issues/345
+[GH-348]: https://github.com/Brave-Labs/Dev10x/issues/348
+[GH-351]: https://github.com/Brave-Labs/Dev10x/issues/351
+[GH-353]: https://github.com/Brave-Labs/Dev10x/issues/353
+[GH-354]: https://github.com/Brave-Labs/Dev10x/issues/354
+[GH-355]: https://github.com/Brave-Labs/Dev10x/issues/355
+[GH-356]: https://github.com/Brave-Labs/Dev10x/issues/356
+[GH-357]: https://github.com/Brave-Labs/Dev10x/issues/357
+[GH-358]: https://github.com/Brave-Labs/Dev10x/issues/358
+[GH-363]: https://github.com/Brave-Labs/Dev10x/issues/363
+[GH-366]: https://github.com/Brave-Labs/Dev10x/issues/366
+[GH-367]: https://github.com/Brave-Labs/Dev10x/issues/367
+[GH-371]: https://github.com/Brave-Labs/Dev10x/issues/371
+[GH-375]: https://github.com/Brave-Labs/Dev10x/issues/375
+[GH-376]: https://github.com/Brave-Labs/Dev10x/issues/376
+[GH-382]: https://github.com/Brave-Labs/Dev10x/issues/382
+[GH-384]: https://github.com/Brave-Labs/Dev10x/issues/384
+[GH-385]: https://github.com/Brave-Labs/Dev10x/issues/385
+[GH-386]: https://github.com/Brave-Labs/Dev10x/issues/386
+[#243]: https://github.com/Brave-Labs/Dev10x/pull/243
+[#267]: https://github.com/Brave-Labs/Dev10x/pull/267
+[#270]: https://github.com/Brave-Labs/Dev10x/pull/270

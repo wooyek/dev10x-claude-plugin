@@ -27,9 +27,9 @@ class TestIsCoveredByWildcard:
                 "mcp__claude_ai_Linear__*",
             ),
             (
-                "Bash(/home/user/.claude/plugins/cache/WooYek/Dev10x/0.30.0/scripts/foo.sh:*)",
-                {"Bash(/home/user/.claude/plugins/cache/WooYek/Dev10x/*:*)"},
-                "Bash(/home/user/.claude/plugins/cache/WooYek/Dev10x/*:*)",
+                "Bash(/home/user/.claude/plugins/cache/Brave-Labs/Dev10x/0.30.0/scripts/foo.sh:*)",
+                {"Bash(/home/user/.claude/plugins/cache/Brave-Labs/Dev10x/*:*)"},
+                "Bash(/home/user/.claude/plugins/cache/Brave-Labs/Dev10x/*:*)",
             ),
             (
                 "mcp__plugin_Dev10x_cli__detect_tracker",
@@ -98,12 +98,12 @@ class TestIsShellFragment:
 
 class TestIsOldVersion:
     def test_detects_old_version(self) -> None:
-        rule = "Bash(/home/user/.claude/plugins/cache/WooYek/Dev10x/0.16.0/scripts/foo.sh:*)"
+        rule = "Bash(/home/user/.claude/plugins/cache/Brave-Labs/Dev10x/0.16.0/scripts/foo.sh:*)"
 
         assert clean_mod.is_old_version(rule, "0.33.0") is True
 
     def test_current_version_is_not_old(self) -> None:
-        rule = "Bash(/home/user/.claude/plugins/cache/WooYek/Dev10x/0.33.0/scripts/foo.sh:*)"
+        rule = "Bash(/home/user/.claude/plugins/cache/Brave-Labs/Dev10x/0.33.0/scripts/foo.sh:*)"
 
         assert clean_mod.is_old_version(rule, "0.33.0") is False
 
@@ -111,7 +111,7 @@ class TestIsOldVersion:
         assert clean_mod.is_old_version("Bash(git log:*)", "0.33.0") is False
 
     def test_returns_false_when_no_current_version(self) -> None:
-        rule = "Bash(/home/user/.claude/plugins/cache/WooYek/Dev10x/0.16.0/scripts/foo.sh:*)"
+        rule = "Bash(/home/user/.claude/plugins/cache/Brave-Labs/Dev10x/0.16.0/scripts/foo.sh:*)"
 
         assert clean_mod.is_old_version(rule, None) is False
 
@@ -203,7 +203,7 @@ class TestClassifyRules:
 
     def test_classifies_old_versions(self) -> None:
         rules = [
-            "Bash(/home/u/.claude/plugins/cache/WooYek/Dev10x/0.4.0/scripts/foo.sh:*)",
+            "Bash(/home/u/.claude/plugins/cache/Brave-Labs/Dev10x/0.4.0/scripts/foo.sh:*)",
         ]
 
         result = clean_mod.classify_rules(
@@ -309,7 +309,7 @@ class TestClassifyRules:
         rules = [
             "Bash(git log:*)",
             "mcp__claude_ai_Linear__get_issue",
-            "Bash(/home/u/.claude/plugins/cache/WooYek/Dev10x/0.4.0/x.sh:*)",
+            "Bash(/home/u/.claude/plugins/cache/Brave-Labs/Dev10x/0.4.0/x.sh:*)",
             "Bash(GIT_SEQUENCE_EDITOR=: git rebase)",
             "Bash(fi)",
             "Read(//work/tt/file.py)",

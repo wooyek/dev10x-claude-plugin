@@ -29,7 +29,7 @@ Install one or more skills directly from this repository:
 
 ```bash
 scripts/install-skill-from-github.py \
-  --repo Brave-Labs/dev10x-ai \
+  --repo Brave-Labs/Dev10x \
   --path codex-skills/Dev10x-git-commit \
   --path codex-skills/Dev10x-gh-pr-create
 ```
