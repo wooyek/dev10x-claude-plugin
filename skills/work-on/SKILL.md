@@ -500,12 +500,19 @@ skill. Users can customize these via
 
 Present the plan as a numbered list.
 
-**Implicit approval bypass:** If the user's original input to
-`work-on` contains a complete implementation plan (with deliverables,
-implementation order, and verification steps), treat approval as
-implicit — skip `AskUserQuestion` and proceed directly to Phase 4
-execution. The user already defined the plan; re-presenting it for
-approval adds no value.
+**Implicit approval bypass:** Skip `AskUserQuestion` ONLY when
+ALL three conditions are met:
+1. User input contains **numbered steps** (not just a list of
+   tickets, URLs, or a prose description)
+2. The steps explicitly cover **deliverables**, **verification**,
+   AND **integration/shipping** (commit, PR, merge)
+3. The steps are **actionable as-is** — not "investigate X" or
+   "fix the issues" but concrete actions like "add retry logic
+   to payments/service.py"
+
+A list of ticket URLs, a vague description, or bullet points
+without shipping steps does NOT qualify — always present the
+plan gate in those cases.
 
 **Natural language mapping:** User phrases like "prepare a draft",
 "for my approval", "let me review first", "show me the plan", or
@@ -539,7 +546,8 @@ for the full compaction protocol.
 
 ### Skill Routing Enforcement
 
-**Hard rule — applies to ALL plans (playbook or ad-hoc):**
+**Hard rule — applies to ALL plans and ALL work types
+(feature, bugfix, local-only, investigation, pr-continuation):**
 
 | Action | MUST delegate to | Never use directly |
 |--------|-----------------|-------------------|
