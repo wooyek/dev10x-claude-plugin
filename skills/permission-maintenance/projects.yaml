@@ -43,7 +43,6 @@ base_permissions:
   - "Bash(gh pr checks:*)"
   - "Bash(gh pr edit:*)"
   - "Bash(gh pr ready:*)"
-  - "Bash(gh pr merge:*)"
   - "Bash(gh issue view:*)"
   - "Bash(gh issue list:*)"
   - "Bash(gh issue create:*)"
