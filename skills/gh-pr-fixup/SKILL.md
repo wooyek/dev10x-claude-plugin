@@ -136,10 +136,12 @@ this comment:
    step, even for single-line fixes. Code changes across bounded
    contexts can break invariants that only tests catch.
 
-   **Delegate to the project's test skill** if one exists (e.g.,
-   `Skill(skill="test")`). If no test skill is configured, run
-   the project's test runner directly (`pytest`, `npm test`, etc.)
-   scoped to the affected package.
+   **REQUIRED: Delegate to `Skill(Dev10x:py-test)` for Python
+   projects — never run pytest inline.** The skill enforces
+   coverage checks that bare `pytest -x` commands bypass. This
+   is a repeat offender: 12 instances across 3 audit sessions
+   (PAY-762, PAY-735, PAY-592). For non-Python projects, run
+   the project's test runner directly (`npm test`, etc.).
 
    Note: `ruff format` and `ruff check --fix` run automatically via PostToolUse hook.
 
@@ -155,7 +157,7 @@ this comment:
 # Stage the changes
 git add {file_path}
 
-# Delegate to commit:fixup skill (handles message format)
+# Delegate to Dev10x:git-fixup skill (handles message format)
 ```
 
 **Fixup commit format:**
