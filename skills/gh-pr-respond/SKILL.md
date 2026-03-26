@@ -106,7 +106,8 @@ step description. If you see that marker, you MUST call the
 5. Gate 5 (shipping pipeline): `AskUserQuestion` — MANDATORY
 6. Gate 6 (hide comments): `AskUserQuestion` — MANDATORY
 7. VALID comments: `Skill(Dev10x:gh-pr-fixup)` — NEVER inline
-8. Triage: `Skill(Dev10x:gh-pr-triage)` — NEVER inline
+8. Triage: `Skill(Dev10x:gh-pr-triage)` — NEVER inline, even
+   for "obviously invalid" or bot-generated comments (GH-463)
 9. Pre-action checkpoint: BEFORE any `Edit` or `git commit` on
    a reviewed file, verify a `Skill()` call preceded it
 
@@ -225,6 +226,15 @@ or `{review_id}` from the URL.
 
 **REQUIRED: Call `Skill(Dev10x:gh-pr-triage)`** — never triage
 inline. Pass the comment URL (and any additional context).
+
+**Per-comment enforcement (GH-463):** This delegation is mandatory
+for EVERY comment, including ones that appear "obviously invalid"
+(e.g., bot-generated comments, trivially wrong suggestions). The
+agent MUST NOT read the comment, judge it inline, and post a reply
+directly. Even if you can determine the verdict in 2 seconds, call
+`Skill(Dev10x:gh-pr-triage)` — it ensures consistent reply format,
+audit trail, and workflow state tracking. Audit sessions show the
+bypass happens most often on comments the agent considers trivial.
 
 `Dev10x:gh-pr-triage` returns a verdict: `VALID`, `INVALID`, `QUESTION`, or `OUT_OF_SCOPE`.
 
