@@ -304,11 +304,43 @@ Repeat until no unaddressed comments remain:
 3. When Phase 1 passes AND no unaddressed comments remain → go to
    Phase 2.5.
 
+### Counting Unaddressed Comments (Thread Resolution Awareness)
+
+**CRITICAL (GH-464):** Do NOT count root PR comments as unaddressed
+based solely on the REST API (`gh api .../pulls/.../comments`). The
+REST API returns ALL root comments regardless of thread resolution
+status. Use the GraphQL `reviewThreads` query to check `isResolved`:
+
+```bash
+gh api graphql -f query='
+query($owner: String!, $repo: String!, $pr: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pr) {
+      reviewThreads(first: 100) {
+        nodes {
+          isResolved
+          comments(first: 1) {
+            nodes { databaseId path body author { login } }
+          }
+        }
+      }
+    }
+  }
+}' -f owner='{owner}' -f repo='{repo}' -F pr={pr_number} \
+  --jq '[.data.repository.pullRequest.reviewThreads.nodes[]
+        | select(.isResolved == false)
+        | .comments.nodes[0]]'
+```
+
+Only threads where `isResolved == false` AND the author has not
+replied count as unaddressed. Resolved threads are done — do not
+report them as needing attention.
+
 ### Exit condition for Phase 2 loop
 
 Move to Phase 2.5 when ALL of these are true:
 - All CI checks passing
-- No unaddressed review comments
+- No unresolved review threads (use GraphQL `isResolved` check)
 - PR has at least one approval OR no reviews yet
 
 ---
@@ -399,7 +431,10 @@ ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
   prepare --pr {pr_number} --repo {repo}
 ```
 
-If `open_threads > 0`, return to Phase 2 to address them first.
+If `open_threads > 0`, verify the count using GraphQL `isResolved`
+(see "Counting Unaddressed Comments" in Phase 2). Only return to
+Phase 2 if unresolved threads actually exist — `pr-notify.py` may
+count resolved threads as open if it uses the REST API.
 
 *Why?* Reviewers should only be pinged when the PR is fully ready.
 
