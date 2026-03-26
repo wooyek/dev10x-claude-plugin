@@ -97,6 +97,17 @@ Each gate is marked with **REQUIRED: `AskUserQuestion`** in the
 step description. If you see that marker, you MUST call the
 `AskUserQuestion` tool — never substitute with inline text.
 
+**Compaction-safe gate checklist** — re-inject after compaction:
+
+1. Gate 1 (thread resolution): `AskUserQuestion` — MANDATORY
+2. Gate 2 (continue/batch/stop): `AskUserQuestion` — MANDATORY
+3. Gate 3 (approve batch): `AskUserQuestion` — MANDATORY
+4. Gate 4 (resolve threads): `AskUserQuestion` — MANDATORY
+5. Gate 5 (shipping pipeline): `AskUserQuestion` — MANDATORY
+6. Gate 6 (hide comments): `AskUserQuestion` — MANDATORY
+7. VALID comments: `Skill(Dev10x:gh-pr-fixup)` — NEVER inline
+8. Triage: `Skill(Dev10x:gh-pr-triage)` — NEVER inline
+
 ## Overview
 
 This skill handles PR review comments end-to-end in two modes:
@@ -133,6 +144,13 @@ Similarly, never triage comments inline — always delegate to
 `git push`, or `gh pr checks --watch` — delegate to
 `Dev10x:git-groom`, `Dev10x:git`, and `Dev10x:gh-pr-monitor`
 respectively.
+
+**Post-step self-check:** Before marking any VALID comment as
+processed, verify that `Skill(Dev10x:gh-pr-fixup)` was called
+for it — not `Edit` + `git commit` + `gh api`. If you used
+raw commands instead of `Skill()`, STOP and redo the step with
+proper delegation. Audit sessions show 3 of 4 invocations
+bypass delegation under context pressure (GH-444).
 
 ## Preamble: Branch Location Check
 
