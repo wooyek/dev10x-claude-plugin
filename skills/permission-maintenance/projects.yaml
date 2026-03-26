@@ -45,6 +45,7 @@ base_permissions:
   - "Bash(gh pr ready:*)"
   - "Bash(gh issue view:*)"
   - "Bash(gh issue list:*)"
+  - "Bash(gh issue create:*)"
   - "Bash(gh issue comment:*)"
   - "Bash(gh api:*)"
   - "Bash(gh auth:*)"
