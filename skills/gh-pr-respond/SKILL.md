@@ -236,6 +236,15 @@ directly. Even if you can determine the verdict in 2 seconds, call
 audit trail, and workflow state tracking. Audit sessions show the
 bypass happens most often on comments the agent considers trivial.
 
+**Exception — author-confirmed validity:** If the PR author has
+already replied to the comment explicitly acknowledging it as valid
+(e.g., "good catch", "you're right", "will fix"), you MAY skip
+triage and proceed directly to `Skill(Dev10x:gh-pr-fixup)` with
+verdict `VALID`. This avoids redundant validation when the author
+has already confirmed the comment warrants a fix. The skip applies
+only when the author's reply is unambiguous — if there is any doubt,
+delegate to triage as normal.
+
 `Dev10x:gh-pr-triage` returns a verdict: `VALID`, `INVALID`, `QUESTION`, or `OUT_OF_SCOPE`.
 
 - If **VALID** → **REQUIRED: Call `Skill(Dev10x:gh-pr-fixup)`** —

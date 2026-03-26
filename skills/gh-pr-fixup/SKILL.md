@@ -136,30 +136,20 @@ this comment:
    step, even for single-line fixes. Code changes across bounded
    contexts can break invariants that only tests catch.
 
-   **Python projects:**
-   ```bash
-   pytest {test_file} -x
-   ```
-   If no specific test file relates to the change, run the full
-   suite for affected packages: `pytest {package_path} -x`
+   **Delegate to the project's test skill** if one exists (e.g.,
+   `Skill(skill="test")`). If no test skill is configured, run
+   the project's test runner directly (`pytest`, `npm test`, etc.)
+   scoped to the affected package.
 
    Note: `ruff format` and `ruff check --fix` run automatically via PostToolUse hook.
-
-   **JavaScript/TypeScript projects:**
-   ```bash
-   npx prettier --write {file_path}
-   npx eslint --fix {file_path}
-   npx tsc --noEmit -p {tsconfig_path}
-   npm test -- --testPathPattern="{test_pattern}" --no-coverage
-   ```
 
    **If tests fail:** Fix the test failure before proceeding to
    Step 5. If the fix itself is wrong, revert and reply asking
    for clarification (see Error Handling).
 
-### Step 5: Create Fixup Commit (delegate to commit:fixup)
+### Step 5: Create Fixup Commit (delegate to Dev10x:git-fixup)
 
-**IMPORTANT:** Delegate to the `commit:fixup` skill.
+**IMPORTANT:** Delegate to the `Dev10x:git-fixup` skill.
 
 ```bash
 # Stage the changes
@@ -271,7 +261,7 @@ If the file has changed since the comment was made:
 Dev10x:gh-pr-monitor → Dev10x:gh-pr-respond (orchestrator)
                  ├── Dev10x:gh-pr-triage
                  └── Dev10x:gh-pr-fixup  ← this skill
-                      └── commit:fixup
+                      └── Dev10x:git-fixup
 ```
 
 **Standalone usage:**
