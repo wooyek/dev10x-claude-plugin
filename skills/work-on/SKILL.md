@@ -280,6 +280,14 @@ approved play template becomes one task — this is the supervisor's
 interface for tracking progress and adding work. Collapsing 14
 steps into 5 makes the remaining 9 invisible and unexecuted.
 
+**This applies at Phase 3 (task creation), not Phase 4
+(execution).** The bugfix play's "Investigate root cause" epic
+prompt says "skip sub-steps if root cause is obvious" — that
+guidance applies when *expanding* the epic in Phase 4. In Phase
+3, ALL play steps MUST become `TaskCreate` calls regardless of
+how obvious the fix seems. The task list is created first; the
+agent adapts during execution.
+
 The task list is the supervisor's interface for tracking progress
 and adding new tasks during the session.
 
@@ -432,6 +440,14 @@ skill. Users can customize these via
 ```
 
 **Bug fix from Sentry + ticket:**
+
+**Evidence-first rule:** Before selecting files to edit, review
+all gathered evidence (Sentry stack traces, Linear comments,
+Slack context). The error location in the stack trace identifies
+the failing code path — do NOT skip to implementation based on
+the ticket title alone. If Sentry or Linear evidence names a
+specific file/line, that is the starting point for investigation.
+
 ```
 4.1  [detailed] Set up workspace          → Dev10x:ticket-branch
 4.2  [detailed] Reproduce the issue
@@ -557,6 +573,7 @@ for the full compaction protocol.
 | Push to remote | `Skill(Dev10x:git)` | `git push` |
 | Groom history | `Skill(Dev10x:git-groom)` | `git rebase -i` |
 | Create branch | `Skill(Dev10x:ticket-branch)` | `git checkout -b` |
+| Verify acceptance criteria | `Skill(Dev10x:verify-acc-dod)` | Inline checks |
 
 This table survives context compaction — it is the canonical
 routing for shipping actions. If you are about to run a raw
@@ -567,16 +584,17 @@ STOP and invoke the corresponding skill instead.
 summary MUST retain this routing table verbatim. Without it,
 the agent loses skill-to-action mappings and falls back to
 raw CLI commands — the #1 source of guardrail bypasses.
-Re-inject the table into the compacted context as:
-```
-## Active Skill Routing (preserved from work-on)
-commit → Skill(Dev10x:git-commit)
-create PR → Skill(Dev10x:gh-pr-create)
-monitor CI → Skill(Dev10x:gh-pr-monitor)
-push → Skill(Dev10x:git)
-groom → Skill(Dev10x:git-groom)
-branch → Skill(Dev10x:ticket-branch)
-```
+Re-inject the table into the compacted context as a
+**numbered list** (not a code block — code blocks are treated
+as advisory examples per `skill-orchestration-format.md`):
+
+1. commit → `Skill(Dev10x:git-commit)`
+2. create PR → `Skill(Dev10x:gh-pr-create)`
+3. monitor CI → `Skill(Dev10x:gh-pr-monitor)`
+4. push → `Skill(Dev10x:git)`
+5. groom → `Skill(Dev10x:git-groom)`
+6. branch → `Skill(Dev10x:ticket-branch)`
+7. verify acceptance → `Skill(Dev10x:verify-acc-dod)`
 
 ### CI Re-Monitoring After Force Push
 
@@ -611,6 +629,14 @@ executing the shipping pipeline — the PR body and title can
 always be updated later via the "Update PR description" step.
 When delegating to `Dev10x:gh-pr-create`, pass
 `args="--unattended"` to skip the preview gate.
+
+**Shipping pipeline is atomic:** Once the main implementation
+and verification are done, the remaining shipping steps (code
+review → commit → PR → CI → groom → update → ready → merge)
+form an atomic sequence. Auto-advance through ALL of them
+without pausing for user input. Do NOT stop after posting
+review replies, after creating the PR, or after grooming —
+continue until the plan completion gate or a genuine blocker.
 
 **Batched Decision Queue:** When a task hits a genuine A/B
 decision, do NOT interrupt the user immediately. Instead:
