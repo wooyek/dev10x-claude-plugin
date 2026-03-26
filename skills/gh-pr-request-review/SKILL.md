@@ -117,3 +117,19 @@ gh pr view PR_NUMBER --json reviewRequests \
 - Team format: `org-name/team-slug`
 - Config awareness lives in the skill layer, not the MCP tool
 - Verify the review request was assigned by checking `reviewRequests`
+
+### Team review request 422 fallback
+
+If team review request returns HTTP 422 (e.g., team not found,
+team has no access to the repo, or org settings prevent team
+reviews), fall back to requesting from individual team members:
+
+1. List team members:
+   `gh api orgs/{org}/teams/{slug}/members --jq '.[].login'`
+2. Filter out the PR author
+3. Request review from individual collaborators instead
+4. Log the fallback: "Team request failed (422), falling back
+   to individual reviewers: {list}"
+
+This pattern was discovered in audit session GH-446 where the
+team request consistently returned 422.

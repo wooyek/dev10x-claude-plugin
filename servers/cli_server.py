@@ -46,7 +46,7 @@ def _detect_repo() -> str | None:
 def _gh_api(
     endpoint: str,
     method: str = "GET",
-    fields: dict[str, str | list[str]] | None = None,
+    fields: dict[str, str | int | list[str]] | None = None,
     jq: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Call gh api with consistent error handling.
@@ -67,6 +67,8 @@ def _gh_api(
             if isinstance(value, list):
                 for item in value:
                     args.extend(["-f", f"{key}[]={item}"])
+            elif isinstance(value, int):
+                args.extend(["-F", f"{key}={value}"])
             else:
                 args.extend(["-f", f"{key}={value}"])
     args.append(endpoint)
@@ -229,7 +231,7 @@ async def pr_comments(
         result = _gh_api(
             f"repos/{resolved_repo}/pulls/{pr_number}/comments",
             method="POST",
-            fields={"body": body, "in_reply_to": str(comment_id)},
+            fields={"body": body, "in_reply_to": comment_id},
         )
 
     elif action == "resolve":
@@ -306,7 +308,7 @@ async def pr_comment_reply(
     result = _gh_api(
         f"repos/{resolved_repo}/pulls/{pr_number}/comments",
         method="POST",
-        fields={"body": body, "in_reply_to": str(comment_id)},
+        fields={"body": body, "in_reply_to": comment_id},
     )
 
     if result.returncode != 0:
