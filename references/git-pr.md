@@ -174,3 +174,14 @@ Detailed context for reviewers without bloating the Slack preview.
    ```
 
 For commit format and branch naming, see `git-commits.md`.
+
+## Consolidation PRs
+
+When a PR consolidates multiple directories, features, or components, the JTBD
+must capture the consolidation outcome, not individual features. See
+`consolidation-pr-guide.md` for full guidance, including:
+
+- When consolidation is appropriate (plugin/directory merges, not feature bundling)
+- How to structure JTBD and commits for consolidation scope
+- Review expectations for large structural changes
+- Testing strategies for consolidated components
