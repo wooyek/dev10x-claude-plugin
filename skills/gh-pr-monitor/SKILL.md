@@ -222,8 +222,10 @@ Repeat until all CI checks pass:
    ```
 
 3. Parse results:
-   - ALL PASSING → verify check count (see below), then mark PR
-     ready (`gh pr ready {pr_number}`) and go to Phase 2
+   - ALL PASSING → verify check count (see below), then
+     **re-check for review comments before marking ready**
+     (see Post-CI Comment Re-check below), then go to
+     Phase 2
    - ANY PENDING → wait 30 seconds via `sleep 30`, then re-check.
      **Hard rule: Do NOT exit Phase 1 while ANY check is PENDING.**
      The loop MUST continue until zero checks remain in PENDING
@@ -286,6 +288,25 @@ When `gh pr view` reports `mergeable: CONFLICTING`:
 
 5. After force-push, wait 30 seconds for GitHub to re-compute
    mergeability and re-run CI, then restart the Phase 1 loop.
+
+### Post-CI Comment Re-check (REQUIRED)
+
+**Hard rule (GH-465):** After ALL CI checks pass, re-check for
+review comments BEFORE marking the PR ready. CI hygiene reviews
+(automated code review workflows) post comments *during* the CI
+run — they arrive after the initial comment check at Phase 1
+startup. Without this re-check, the PR gets marked ready with
+unaddressed comments.
+
+1. Fetch unresolved review threads (use the GraphQL query from
+   Phase 2's "Counting Unaddressed Comments" section)
+2. If unresolved threads exist → enter Phase 2 to address them.
+   Do NOT mark PR ready yet.
+3. If no unresolved threads → mark PR ready (`gh pr ready
+   {pr_number}`) and proceed to Phase 2 for a final check.
+
+This re-check adds one API call but prevents the race condition
+where automated reviewers post during CI.
 
 ---
 
