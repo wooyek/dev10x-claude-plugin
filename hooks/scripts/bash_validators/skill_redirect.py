@@ -4,8 +4,9 @@ Blocks Bash commands that bypass skill guardrails (gitmoji, JTBD,
 CI monitoring, protected branch checks) by auto-denying with a
 systemMessage pointing to the correct skill.
 
-Only blocks patterns that are NOT used internally by skills:
-  - git commit -m  → Dev10x:git-commit  (skills use -F, not -m)
+Blocked patterns:
+  - git commit     → Dev10x:git-commit  (except --fixup, --amend,
+    and -F with skill temp paths /tmp/claude/git/commit-msg.*)
   - gh pr create   → Dev10x:gh-pr-create (skill uses MCP create_pr)
   - git push       → Dev10x:git          (skill uses MCP push_safe)
   - git rebase -i  → Dev10x:git-groom    (skill uses MCP rebase_groom)
@@ -28,7 +29,7 @@ _REDIRECT_MSG = (
     "file it at https://github.com/Brave-Labs/Dev10x/issues"
 )
 
-GIT_COMMIT_M_RE = re.compile(r"\bgit\s+commit\b(?!.*(?:--fixup|--amend|-F\b))")
+GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b(?!.*(?:--fixup|--amend))")
 GH_PR_CREATE_RE = re.compile(r"\bgh\s+pr\s+create\b")
 GIT_PUSH_RE = re.compile(r"\bgit\s+push\b")
 GIT_REBASE_I_RE = re.compile(r"\bgit\s+rebase\b.*(?:\s-i\b|\s--interactive\b)")
@@ -36,7 +37,7 @@ GH_PR_CHECKS_WATCH_RE = re.compile(r"\bgh\s+pr\s+checks\b.*(?:\s--watch\b|\s-w\b
 
 _RULES: list[tuple[re.Pattern[str], str, str, str]] = [
     (
-        GIT_COMMIT_M_RE,
+        GIT_COMMIT_RE,
         "git commit",
         "Dev10x:git-commit",
         "gitmoji prefix, JTBD outcome title, 72-char limit",
@@ -94,6 +95,16 @@ class SkillRedirectValidator:
         return None
 
 
+_SKILL_COMMIT_FILE_RE = re.compile(r"-F\s+/tmp/claude/git/commit-msg\.")
+
+
 def _is_direct_commit(*, command: str) -> bool:
-    """Return True only for direct agent commits (with -m flag)."""
-    return bool(re.search(r"\s-m\s", command) or re.search(r'\s-m["\']', command))
+    """Return True unless using -F with a skill-generated temp file.
+
+    The Dev10x:git-commit skill creates commit messages via mktmp
+    at /tmp/claude/git/commit-msg.<random>.txt. Allow only those
+    paths through; block all other git commit invocations.
+    """
+    if _SKILL_COMMIT_FILE_RE.search(command):
+        return False
+    return True

@@ -66,10 +66,24 @@ class TestGitCommitRedirect:
         assert result is not None
         assert "Dev10x:git-commit" in result.message
 
-    def test_allows_git_commit_with_f_flag(self, validator: SkillRedirectValidator) -> None:
-        inp = _make_input(command="git commit -F /tmp/claude/git/msg.txt")
+    def test_allows_git_commit_f_with_skill_temp(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="git commit -F /tmp/claude/git/commit-msg.W9DryMXsQ5Aw.txt")
         result = validator.validate(inp=inp)
         assert result is None
+
+    def test_blocks_git_commit_f_with_arbitrary_path(
+        self, validator: SkillRedirectValidator
+    ) -> None:
+        inp = _make_input(command="git commit -F /tmp/random/msg.txt")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "Dev10x:git-commit" in result.message
+
+    def test_blocks_git_commit_without_flags(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="git commit")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "Dev10x:git-commit" in result.message
 
     def test_allows_git_commit_fixup(self, validator: SkillRedirectValidator) -> None:
         inp = _make_input(command="git commit --fixup=abc1234")
