@@ -274,6 +274,10 @@ Agent(
 - Ask for summary output, not raw data
 - Use `run_in_background=true` when you have other work to do
 - Use `isolation="worktree"` when the agent needs to modify files
+- **Specify `model:` explicitly** for generic-purpose agents —
+  see `.claude/rules/model-selection.md` for the tier framework:
+  `haiku` for monitoring/gathering, `sonnet` for analysis,
+  `opus` for code review and architecture decisions
 
 ### Parallel dispatch
 

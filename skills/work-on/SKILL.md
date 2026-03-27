@@ -202,6 +202,7 @@ source fetches must use `general-purpose` agents.
 ```
 # Single tool-call block — all launch concurrently
 Agent(subagent_type=source_agent_type,  # see table above
+    model="haiku",                      # Gather tier — context fetch only
     description=f"Fetch {source.type} {source.id}",
     prompt=f"""Fetch context for {source.type}: {source.id}
     {source_specific_instructions}

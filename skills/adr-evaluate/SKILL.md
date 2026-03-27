@@ -51,6 +51,7 @@ subagent:
 
 ```
 Agent(subagent_type="general-purpose",
+    model="opus",                       # Design tier — architecture evaluation
     description="Advocate for Option N",
     prompt="""You are advocating for: [Option N — description]
 
