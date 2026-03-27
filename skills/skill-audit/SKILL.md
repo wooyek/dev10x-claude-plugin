@@ -376,6 +376,12 @@ For each action where a skill WAS invoked:
    - **EXTRA_STEP**: An undocumented step was added
    - **DEVIATED**: A step was done differently
    - **COMPLIANT**: Skill was followed correctly
+   - **PLAYBOOK_SUBSTITUTION**: A REQUIRED delegation was
+     replaced by a playbook override's inline `prompt:`.
+     This is COMPLIANT — playbook overrides are valid
+     substitutions for REQUIRED markers. Do NOT classify
+     as SKIPPED_STEP when the playbook provides an
+     equivalent inline implementation.
 
 Assess each deviation: improvement, regression, or neutral?
 

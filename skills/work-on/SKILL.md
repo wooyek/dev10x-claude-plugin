@@ -401,14 +401,21 @@ The **last task** in every plan verifies the work is shippable
 or ready for handover.
 
 **REQUIRED:** Delegate to `Dev10x:verify-acc-dod` skill:
-```
-Skill(skill="Dev10x:verify-acc-dod", args="<work_type>")
-```
+
+1. `Skill(skill="Dev10x:verify-acc-dod", args="<work_type>")`
 
 The skill handles criteria resolution (YAML file, defaults,
 overrides), automated state checks (CI, PR, working copy),
 and user confirmation. See the `Dev10x:verify-acc-dod` skill
 for the full criteria schema and verification protocol.
+
+**Playbook override note:** Solo-maintainer or project-specific
+playbook overrides may substitute an inline acceptance prompt
+for this delegation. When a playbook step replaces the
+`verify-acc-dod` delegation with its own `prompt:`, the inline
+prompt is a valid substitution — not a compliance violation.
+Skill audits should classify this as COMPLIANT (playbook
+substitution), not SKIPPED_STEP.
 
 ### Example Plays (Defaults)
 
@@ -581,13 +588,18 @@ routing for shipping actions. If you are about to run a raw
 git/gh command that appears in the "Never use directly" column,
 STOP and invoke the corresponding skill instead.
 
-**Compaction preservation:** When context is compacted, the
-summary MUST retain this routing table verbatim. Without it,
-the agent loses skill-to-action mappings and falls back to
-raw CLI commands — the #1 source of guardrail bypasses.
+**Compaction preservation (CRITICAL):** When context is
+compacted, the summary MUST retain this routing table
+verbatim. Without it, the agent loses skill-to-action
+mappings and falls back to raw CLI commands — the #1
+source of guardrail bypasses (24% compliance in GH-477).
 Re-inject the table into the compacted context as a
 **numbered list** (not a code block — code blocks are treated
-as advisory examples per `skill-orchestration-format.md`):
+as advisory examples per `skill-orchestration-format.md`).
+**Self-check after compaction:** After any context compaction
+event, verify the routing table is still present by scanning
+for "Skill(Dev10x:git-commit)" in the current context. If
+missing, re-read this section before proceeding.
 
 1. commit → `Skill(Dev10x:git-commit)`
 2. create PR → `Skill(Dev10x:gh-pr-create)`
@@ -625,11 +637,20 @@ proceed to the next task. Never pause to show the commit or ask
 for confirmation — the commit is done, move on.
 
 **Auto-advance on draft PR creation:** Create the draft PR and
-immediately proceed. Do not block on PR preview approval when
-executing the shipping pipeline — the PR body and title can
-always be updated later via the "Update PR description" step.
-When delegating to `Dev10x:gh-pr-create`, pass
+immediately proceed to **Monitor CI** — this is mandatory, not
+optional. Do not block on PR preview approval when executing
+the shipping pipeline — the PR body and title can always be
+updated later via the "Update PR description" step. When
+delegating to `Dev10x:gh-pr-create`, pass
 `args="--unattended"` to skip the preview gate.
+
+**Hard rule: Always invoke CI monitor after PR creation.**
+After `Dev10x:gh-pr-create` completes, the very next action
+MUST be `Skill(Dev10x:gh-pr-monitor)`. Do NOT skip this step
+even if the PR "looks fine" or CI "should pass." Session
+GH-477 showed the monitor was not invoked for 12+ hours after
+PR creation, requiring 9 user prompts. The monitor is part of
+the shipping pipeline, not an optional convenience.
 
 **Shipping pipeline is atomic:** Once the main implementation
 and verification are done, the remaining shipping steps (code
@@ -771,6 +792,16 @@ agent rationalizes raw commands as "equivalent" to skill
 invocations. They are not — skills enforce gitmoji, JTBD,
 Fixes links, CI monitoring, and other guardrails that raw
 commands skip.
+
+**Special attention: verify-acc-dod delegation.** The
+acceptance criteria step is the most commonly bypassed
+delegation (GH-471). Agents perform inline AC checks
+(e.g., "CI green, PR merged, looks good") instead of
+invoking `Skill(Dev10x:verify-acc-dod)`. The inline check
+skips structured PR state verification (`gh pr checks`,
+`gh pr view --json isDraft`) and the skill's own
+`AskUserQuestion` gate. Always delegate — unless a playbook
+override provides an explicit inline substitute.
 
 After verification, mark the task `completed` via
 `TaskUpdate` and move to the next task.
@@ -923,6 +954,12 @@ Options:
 | JIRA | `Dev10x:jira` skill |
 
 **Ticket status update (Linear only):**
+
+**REQUIRED after workspace setup:** When a ticket-backed plan
+starts execution (feature or bugfix), update the ticket status
+to "In Progress" immediately after the "Set up workspace" step
+completes. Do NOT defer this to the end of the session.
+
 1. Get statuses: `list_issue_statuses(teamId)` from
    references/team-info.md
 2. Find "In Progress" (type `started`)
