@@ -9,7 +9,7 @@ description: |
 
   Do NOT use for: reviewing entire codebases, writing code, fixing issues
 tools: Glob, Grep, Read, Bash, BashOutput, Skill
-model: sonnet
+model: opus
 color: blue
 ---
 

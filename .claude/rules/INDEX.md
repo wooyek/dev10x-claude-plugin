@@ -46,6 +46,7 @@ The code review system uses a **multi-agent architecture**:
 | `.claude/rules/essentials.md` | Every session | Universal conventions (~36 lines) |
 | `.claude/rules/skill-naming.md` | When editing `skills/**` | Skill naming conventions |
 | `.claude/rules/agents.md` | When editing `agents/**` | Plugin-distributed agent specs |
+| `.claude/rules/model-selection.md` | When editing `agents/**` or `skills/**` | Model & effort selection for agent dispatch |
 | `.claude/rules/github-workflows.md` | When editing `.github/workflows/**` | GitHub Actions patterns |
 | `references/*.md` | On-demand by skills/CI | Detailed git, review, JTBD guides |
 
