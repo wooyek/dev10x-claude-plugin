@@ -44,7 +44,9 @@ Always push via the wrapper script to prevent force-pushing to protected
 branches:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-push-safe.sh [git push arguments...]
+${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-push-safe.sh [flags] [remote] [refspec]
+# Do NOT pass "push" — the script runs `git push` itself.
+# Example: git-push-safe.sh -u origin feature-branch
 ```
 
 Default protected branches: `main master`

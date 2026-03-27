@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Safe git push wrapper — blocks force push to protected branches.
 #
-# Usage: git-push-safe.sh [git push arguments...]
+# Usage: git-push-safe.sh [flags] [remote] [refspec]
+#   Do NOT include "push" — the script runs `git push` itself.
 #
 # Default protected branches: main master
-# Override: GIT_PROTECTED_BRANCHES="main master staging" git-push-safe.sh ...
+# Override: GIT_PROTECTED_BRANCHES="main master staging" git-push-safe.sh -u origin branch
 
 set -euo pipefail
 

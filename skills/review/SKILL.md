@@ -65,6 +65,12 @@ Never pause between steps to ask "should I continue?".
 
 Set sequential dependencies.
 
+**Nested-mode exemption:** When invoked as a nested skill within
+a parent orchestrator (e.g., via `Skill()` from `Dev10x:work-on`),
+startup task creation is optional — at most 1 summary task. The
+parent provides progress visibility. See
+`references/task-orchestration.md` § Delegated Invocation Exception.
+
 ## Workflow
 
 ### Step 1: Verify Branch State
