@@ -108,6 +108,33 @@ if [[ "$has_plan" == "true" ]]; then
 ${pending_tasks}"
     fi
 
+    # Include plan context (work_type, routing table) if available
+    work_type=$(printf '%s' "$plan_json" | jq -r '.plan.context.work_type // empty')
+    if [[ -n "$work_type" ]]; then
+        context+="
+- Work type: ${work_type}"
+    fi
+
+    tickets=$(printf '%s' "$plan_json" | jq -r '.plan.context.tickets // [] | join(", ")')
+    if [[ -n "$tickets" ]]; then
+        context+="
+- Tickets: ${tickets}"
+    fi
+
+    # Include routing table for shipping action guidance
+    routing=$(printf '%s' "$plan_json" | jq -r '
+        .plan.context.routing_table // {} |
+        to_entries |
+        if length > 0 then
+            map("  " + (.key | tostring) + " → " + (.value | tostring)) | join("\n")
+        else empty end
+    ')
+    if [[ -n "$routing" ]]; then
+        context+="
+- Skill routing:
+${routing}"
+    fi
+
     if [[ "$plan_status" == "completed" ]]; then
         context+="
 - All tasks completed. Plan can be archived."

@@ -91,9 +91,18 @@ if [[ -f "$plan_file" ]]; then
     plan_json=$("$PLUGIN_ROOT/hooks/scripts/task-plan-sync.py" --json-summary 2>/dev/null || echo "{}")
     plan_branch=$(printf '%s' "$plan_json" | jq -r '.plan.branch // "unknown"')
     plan_status=$(printf '%s' "$plan_json" | jq -r '.plan.status // "unknown"')
+    work_type=$(printf '%s' "$plan_json" | jq -r '.plan.context.work_type // "unknown"')
+
+    # Rich task summary: include metadata (type, skills) for non-completed tasks
     task_summary=$(printf '%s' "$plan_json" | jq -r '
         .tasks // [] | map(
-            "- [" + .status + "] #" + .id + " " + .subject
+            if .status == "completed" then
+                "- [completed] #" + .id + " " + .subject
+            else
+                "- [" + .status + "] #" + .id + " " + .subject +
+                (if .metadata.type then " (" + .metadata.type + ")" else "" end) +
+                (if .metadata.skills then " → " + (.metadata.skills | join(", ")) else "" end)
+            end
         ) | join("\n")
     ')
 
@@ -103,14 +112,48 @@ if [[ -f "$plan_file" ]]; then
 ## Persisted Plan State
 - **Branch:** $plan_branch
 - **Plan status:** $plan_status
+- **Work type:** $work_type
 
 ### Tasks
-$task_summary
+$task_summary"
+    fi
+
+    # Inject routing table from plan context or static fallback
+    routing_table=$(printf '%s' "$plan_json" | jq -r '
+        .plan.context.routing_table // {} |
+        to_entries | map(.key + " → " + .value) | join("\n")
+    ')
+
+    if [[ -n "$routing_table" && "$routing_table" != "" ]]; then
+        summary+="
+
+### Skill Routing Table (from plan context)
+$routing_table"
+    else
+        # Fallback: inject static routing table
+        recovery_file="$PLUGIN_ROOT/references/compaction-recovery.md"
+        if [[ -f "$recovery_file" ]]; then
+            recovery_content=$(cat "$recovery_file")
+            summary+="
+
+$recovery_content"
+        fi
+    fi
+
+    # Inject gathered context summary if stored
+    gathered=$(printf '%s' "$plan_json" | jq -r '.plan.context.gathered_summary // empty')
+    if [[ -n "$gathered" ]]; then
+        summary+="
+
+### Gathered Context (from Phase 2)
+$gathered"
+    fi
+
+    summary+="
 
 > Reconstructed from persisted plan file. Use TaskList to verify
 > current session state. If tasks are missing, recreate them from
-> this list."
-    fi
+> this list. Use the routing table above for all shipping actions."
 fi
 
 escape_for_json() {

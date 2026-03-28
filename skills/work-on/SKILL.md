@@ -17,6 +17,7 @@ allowed-tools:
   - Read(${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml)
   - Write(~/.claude/projects/**/**)
   - Skill(skill="Dev10x:verify-acc-dod")
+  - Bash(${CLAUDE_PLUGIN_ROOT}/hooks/scripts/task-plan-sync.py:*)
 ---
 
 # Dev10x:work-on — Adaptive Work Orchestrator
@@ -552,6 +553,30 @@ agent-generated (do NOT use plain text).
 After approval, set task dependencies where appropriate (use
 `TaskUpdate` with `addBlockedBy`). Mark the first task as
 `in_progress` and begin Phase 4.
+
+### Persist Plan Context
+
+**REQUIRED after plan approval:** Store the plan context in the
+persisted plan file so it survives context compaction and session
+restarts. Run:
+
+```bash
+task-plan-sync.py --set-context \
+    work_type=<detected_work_type> \
+    tickets='<JSON array of ticket IDs>' \
+    routing_table='{"commit":"Skill(Dev10x:git-commit)","create_pr":"Skill(Dev10x:gh-pr-create)","monitor_ci":"Skill(Dev10x:gh-pr-monitor)","push":"Skill(Dev10x:git)","groom":"Skill(Dev10x:git-groom)","branch":"Skill(Dev10x:ticket-branch)","verify_acceptance":"Skill(Dev10x:verify-acc-dod)"}'
+```
+
+This ensures the PreCompact hook can inject the routing table and
+work type into the recovery context. Without this, the agent loses
+skill-to-action mappings after compaction (GH-477).
+
+After gathering context in Phase 2, also store a brief summary:
+
+```bash
+task-plan-sync.py --set-context \
+    gathered_summary='<1-3 sentence summary of what was gathered>'
+```
 
 ---
 

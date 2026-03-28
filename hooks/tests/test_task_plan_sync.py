@@ -360,6 +360,125 @@ class TestEdgeCases:
         assert synced2 >= synced1
 
 
+def _run_cli(
+    *args: str,
+) -> subprocess.CompletedProcess[str]:
+    import os
+
+    return subprocess.run(
+        [str(HOOK), *args],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        env=os.environ.copy(),
+    )
+
+
+def _seed_task(task_id: int = 1) -> None:
+    _run_hook(
+        payload={
+            "tool_name": "TaskCreate",
+            "tool_input": {"subject": f"Task {task_id}"},
+            "tool_result": f"Task #{task_id} created successfully: Task {task_id}",
+        },
+    )
+
+
+class TestSetContext:
+    def test_stores_simple_key_value(self) -> None:
+        _seed_task()
+        result = _run_cli("--set-context", "work_type=feature")
+        assert result.returncode == 0
+        plan = _read_plan_yaml(tmp_path=None)
+        assert plan["plan"]["context"]["work_type"] == "feature"
+
+    def test_stores_json_value(self) -> None:
+        _seed_task()
+        result = _run_cli("--set-context", 'tickets=["GH-1","GH-2"]')
+        assert result.returncode == 0
+        plan = _read_plan_yaml(tmp_path=None)
+        assert plan["plan"]["context"]["tickets"] == ["GH-1", "GH-2"]
+
+    def test_stores_dict_value(self) -> None:
+        _seed_task()
+        result = _run_cli(
+            "--set-context",
+            'routing_table={"commit":"Skill(git-commit)"}',
+        )
+        assert result.returncode == 0
+        plan = _read_plan_yaml(tmp_path=None)
+        assert plan["plan"]["context"]["routing_table"]["commit"] == "Skill(git-commit)"
+
+    def test_preserves_existing_tasks(self) -> None:
+        _seed_task()
+        _run_cli("--set-context", "work_type=bugfix")
+        plan = _read_plan_yaml(tmp_path=None)
+        assert len(plan["tasks"]) == 1
+        assert plan["tasks"][0]["subject"] == "Task 1"
+
+    def test_multiple_key_values_in_one_call(self) -> None:
+        _seed_task()
+        result = _run_cli(
+            "--set-context",
+            "work_type=feature",
+            'tickets=["GH-482"]',
+            "gathered_summary=Working on plan persistence",
+        )
+        assert result.returncode == 0
+        plan = _read_plan_yaml(tmp_path=None)
+        assert plan["plan"]["context"]["work_type"] == "feature"
+        assert plan["plan"]["context"]["tickets"] == ["GH-482"]
+        assert plan["plan"]["context"]["gathered_summary"] == "Working on plan persistence"
+
+    def test_creates_plan_if_none_exists(self) -> None:
+        result = _run_cli("--set-context", "work_type=investigation")
+        assert result.returncode == 0
+        plan = _read_plan_yaml(tmp_path=None)
+        assert plan["plan"]["context"]["work_type"] == "investigation"
+
+    def test_invalid_argument_exits_with_error(self) -> None:
+        result = _run_cli("--set-context", "no-equals-sign")
+        assert result.returncode == 1
+        assert "Invalid argument" in result.stderr
+
+
+class TestArchive:
+    def test_archives_completed_plan(self) -> None:
+        _seed_task()
+        _run_hook(
+            payload={
+                "tool_name": "TaskUpdate",
+                "tool_input": {"taskId": "1", "status": "completed"},
+                "tool_result": "Updated task #1 status",
+            },
+        )
+        result = _run_cli("--archive")
+        assert result.returncode == 0
+        assert "Archived plan to" in result.stdout
+        assert len(_plan_files(tmp_path=None)) == 0
+
+    def test_archive_creates_archive_directory(self) -> None:
+        _seed_task()
+        toplevel = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            text=True,
+        ).strip()
+        archive_dir = Path(toplevel) / ".claude" / "session" / "archive"
+        _run_cli("--archive")
+        assert archive_dir.exists()
+        archives = list(archive_dir.glob("plan-*.yaml"))
+        assert len(archives) == 1
+        # Cleanup
+        for f in archives:
+            f.unlink()
+        archive_dir.rmdir()
+
+    def test_archive_without_plan_exits_cleanly(self) -> None:
+        result = _run_cli("--archive")
+        assert result.returncode == 0
+        assert "No plan file" in result.stdout
+
+
 class TestYamlRoundtrip:
     def test_plan_file_is_yaml(self) -> None:
         _run_hook(

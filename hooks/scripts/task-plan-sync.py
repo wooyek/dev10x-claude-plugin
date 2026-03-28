@@ -14,6 +14,8 @@ Plan file location:
 CLI modes:
     (stdin)          — PostToolUse hook mode (default)
     --json-summary   — Read plan YAML, output JSON summary (for bash hooks)
+    --set-context K=V [K=V ...]  — Store plan-level context (dot-paths supported)
+    --archive        — Archive completed plan to .claude/session/archive/
 """
 
 import json
@@ -175,6 +177,65 @@ def handle_task_update(tool_input: dict, plan: dict) -> None:
         break
 
 
+def set_nested(d: dict, dotpath: str, value: str) -> None:
+    keys = dotpath.split(".")
+    for key in keys[:-1]:
+        d = d.setdefault(key, {})
+    try:
+        d[keys[-1]] = json.loads(value)
+    except (json.JSONDecodeError, ValueError):
+        d[keys[-1]] = value
+
+
+def cmd_set_context(args: list[str]) -> None:
+    toplevel = get_toplevel()
+    if not toplevel:
+        print("Not in a git repository", file=sys.stderr)
+        sys.exit(1)
+
+    plan_path = get_plan_path(toplevel=toplevel)
+    plan = read_plan(plan_path=plan_path)
+    ensure_plan_metadata(plan)
+
+    context = plan["plan"].setdefault("context", {})
+    for arg in args:
+        if "=" not in arg:
+            print(f"Invalid argument (expected K=V): {arg}", file=sys.stderr)
+            sys.exit(1)
+        key, value = arg.split("=", 1)
+        set_nested(d=context, dotpath=key, value=value)
+
+    write_plan_atomic(plan_path=plan_path, plan_data=plan)
+    print(f"Updated plan context: {list(context.keys())}")
+
+
+def cmd_archive() -> None:
+    toplevel = get_toplevel()
+    if not toplevel:
+        print("Not in a git repository", file=sys.stderr)
+        sys.exit(1)
+
+    plan_path = get_plan_path(toplevel=toplevel)
+    if not plan_path.exists():
+        print("No plan file to archive")
+        sys.exit(0)
+
+    plan = read_plan(plan_path=plan_path)
+    archive_dir = Path(toplevel) / ".claude" / "session" / "archive"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
+    branch_slug = plan.get("plan", {}).get("branch", "unknown")
+    branch_slug = branch_slug.replace("/", "-")[:50]
+    archive_name = f"plan-{timestamp}-{branch_slug}.yaml"
+    archive_path = archive_dir / archive_name
+
+    plan.setdefault("plan", {})["archived_at"] = now_iso()
+    write_plan_atomic(plan_path=archive_path, plan_data=plan)
+    plan_path.unlink()
+    print(f"Archived plan to {archive_path.name}")
+
+
 def cmd_json_summary() -> None:
     toplevel = get_toplevel()
     if not toplevel:
@@ -243,6 +304,11 @@ def cmd_hook() -> None:
 def main() -> None:
     if "--json-summary" in sys.argv:
         cmd_json_summary()
+    elif "--set-context" in sys.argv:
+        idx = sys.argv.index("--set-context")
+        cmd_set_context(args=sys.argv[idx + 1 :])
+    elif "--archive" in sys.argv:
+        cmd_archive()
     else:
         cmd_hook()
 
