@@ -85,6 +85,34 @@ if [[ -n "$essentials" ]]; then
 $essentials"
 fi
 
+# Inject persisted plan state if available
+plan_file="$toplevel/.claude/session/plan.yaml"
+if [[ -f "$plan_file" ]]; then
+    plan_json=$("$PLUGIN_ROOT/hooks/scripts/task-plan-sync.py" --json-summary 2>/dev/null || echo "{}")
+    plan_branch=$(printf '%s' "$plan_json" | jq -r '.plan.branch // "unknown"')
+    plan_status=$(printf '%s' "$plan_json" | jq -r '.plan.status // "unknown"')
+    task_summary=$(printf '%s' "$plan_json" | jq -r '
+        .tasks // [] | map(
+            "- [" + .status + "] #" + .id + " " + .subject
+        ) | join("\n")
+    ')
+
+    if [[ -n "$task_summary" ]]; then
+        summary+="
+
+## Persisted Plan State
+- **Branch:** $plan_branch
+- **Plan status:** $plan_status
+
+### Tasks
+$task_summary
+
+> Reconstructed from persisted plan file. Use TaskList to verify
+> current session state. If tasks are missing, recreate them from
+> this list."
+    fi
+fi
+
 escape_for_json() {
     local s="$1"
     s="${s//\\/\\\\}"

@@ -1,0 +1,408 @@
+"""Tests for task-plan-sync.py PostToolUse hook."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+from pathlib import Path
+
+import pytest
+
+HOOK = Path(__file__).resolve().parent.parent / "scripts" / "task-plan-sync.py"
+
+
+def _run_hook(
+    *,
+    payload: dict | None = None,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    import os
+
+    run_env = {**os.environ, **(env or {})}
+    stdin_data = json.dumps(payload or {})
+    return subprocess.run(
+        [str(HOOK)],
+        input=stdin_data,
+        capture_output=True,
+        text=True,
+        timeout=10,
+        env=run_env,
+    )
+
+
+def _plan_files(tmp_path: Path) -> list[Path]:
+    """Find plan.yaml in any .claude/session/ under CWD (the git repo)."""
+    toplevel = subprocess.check_output(
+        ["git", "rev-parse", "--show-toplevel"],
+        text=True,
+    ).strip()
+    plan_path = Path(toplevel) / ".claude" / "session" / "plan.yaml"
+    if plan_path.exists():
+        return [plan_path]
+    return []
+
+
+def _read_plan_yaml(tmp_path: Path) -> dict:
+    files = _plan_files(tmp_path=tmp_path)
+    assert len(files) == 1, f"Expected 1 plan file, found {len(files)}"
+    result = subprocess.run(
+        [str(HOOK), "--json-summary"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    return json.loads(result.stdout)
+
+
+def _cleanup_plan() -> None:
+    toplevel = subprocess.check_output(
+        ["git", "rev-parse", "--show-toplevel"],
+        text=True,
+    ).strip()
+    plan_path = Path(toplevel) / ".claude" / "session" / "plan.yaml"
+    if plan_path.exists():
+        plan_path.unlink()
+    session_dir = plan_path.parent
+    if session_dir.exists():
+        try:
+            session_dir.rmdir()
+        except OSError:
+            pass
+
+
+@pytest.fixture(autouse=True)
+def _clean_plan():
+    _cleanup_plan()
+    yield
+    _cleanup_plan()
+
+
+class TestTaskCreate:
+    def test_creates_plan_file(self) -> None:
+        result = _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {
+                    "subject": "Test task",
+                    "description": "A test task",
+                },
+                "tool_result": "Task #1 created successfully: Test task",
+            },
+        )
+        assert result.returncode == 0
+        assert len(_plan_files(tmp_path=None)) == 1
+
+    def test_task_added_to_plan(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {
+                    "subject": "Build feature",
+                    "description": "Implement the feature",
+                },
+                "tool_result": "Task #3 created successfully: Build feature",
+            },
+        )
+        plan = _read_plan_yaml(tmp_path=None)
+        assert len(plan["tasks"]) == 1
+        task = plan["tasks"][0]
+        assert task["id"] == "3"
+        assert task["subject"] == "Build feature"
+        assert task["status"] == "pending"
+        assert "created_at" in task
+
+    def test_plan_metadata_initialized(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {"subject": "First task"},
+                "tool_result": "Task #1 created successfully: First task",
+            },
+        )
+        plan = _read_plan_yaml(tmp_path=None)
+        assert "plan" in plan
+        assert "created_at" in plan["plan"]
+        assert "branch" in plan["plan"]
+        assert plan["plan"]["status"] == "in_progress"
+
+    def test_preserves_metadata(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {
+                    "subject": "Epic task",
+                    "metadata": {"type": "epic", "skills": ["test"]},
+                },
+                "tool_result": "Task #2 created successfully: Epic task",
+            },
+        )
+        plan = _read_plan_yaml(tmp_path=None)
+        assert plan["tasks"][0]["metadata"]["type"] == "epic"
+        assert plan["tasks"][0]["metadata"]["skills"] == ["test"]
+
+    def test_no_duplicate_task_ids(self) -> None:
+        payload = {
+            "tool_name": "TaskCreate",
+            "tool_input": {"subject": "Same task"},
+            "tool_result": "Task #1 created successfully: Same task",
+        }
+        _run_hook(payload=payload)
+        _run_hook(payload=payload)
+        plan = _read_plan_yaml(tmp_path=None)
+        assert len(plan["tasks"]) == 1
+
+    def test_multiple_tasks(self) -> None:
+        for i in range(1, 4):
+            _run_hook(
+                payload={
+                    "tool_name": "TaskCreate",
+                    "tool_input": {"subject": f"Task {i}"},
+                    "tool_result": f"Task #{i} created successfully: Task {i}",
+                },
+            )
+        plan = _read_plan_yaml(tmp_path=None)
+        assert len(plan["tasks"]) == 3
+        assert [t["id"] for t in plan["tasks"]] == ["1", "2", "3"]
+
+
+class TestTaskUpdate:
+    @pytest.fixture(autouse=True)
+    def _seed_plan(self) -> None:
+        for i in range(1, 3):
+            _run_hook(
+                payload={
+                    "tool_name": "TaskCreate",
+                    "tool_input": {"subject": f"Task {i}"},
+                    "tool_result": f"Task #{i} created successfully: Task {i}",
+                },
+            )
+
+    def test_update_status_to_in_progress(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskUpdate",
+                "tool_input": {"taskId": "1", "status": "in_progress"},
+                "tool_result": "Updated task #1 status",
+            },
+        )
+        plan = _read_plan_yaml(tmp_path=None)
+        task = next(t for t in plan["tasks"] if t["id"] == "1")
+        assert task["status"] == "in_progress"
+        assert "started_at" in task
+
+    def test_update_status_to_completed(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskUpdate",
+                "tool_input": {"taskId": "1", "status": "completed"},
+                "tool_result": "Updated task #1 status",
+            },
+        )
+        plan = _read_plan_yaml(tmp_path=None)
+        task = next(t for t in plan["tasks"] if t["id"] == "1")
+        assert task["status"] == "completed"
+        assert "completed_at" in task
+
+    def test_delete_removes_task(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskUpdate",
+                "tool_input": {"taskId": "1", "status": "deleted"},
+                "tool_result": "Updated task #1 status",
+            },
+        )
+        plan = _read_plan_yaml(tmp_path=None)
+        assert len(plan["tasks"]) == 1
+        assert plan["tasks"][0]["id"] == "2"
+
+    def test_update_subject(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskUpdate",
+                "tool_input": {"taskId": "1", "subject": "Renamed task"},
+                "tool_result": "Updated task #1 subject",
+            },
+        )
+        plan = _read_plan_yaml(tmp_path=None)
+        task = next(t for t in plan["tasks"] if t["id"] == "1")
+        assert task["subject"] == "Renamed task"
+
+    def test_merge_metadata(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {
+                    "subject": "Meta task",
+                    "metadata": {"type": "epic", "color": "red"},
+                },
+                "tool_result": "Task #5 created successfully: Meta task",
+            },
+        )
+        _run_hook(
+            payload={
+                "tool_name": "TaskUpdate",
+                "tool_input": {
+                    "taskId": "5",
+                    "metadata": {"color": "blue", "priority": "high"},
+                },
+                "tool_result": "Updated task #5 metadata",
+            },
+        )
+        plan = _read_plan_yaml(tmp_path=None)
+        task = next(t for t in plan["tasks"] if t["id"] == "5")
+        assert task["metadata"]["type"] == "epic"
+        assert task["metadata"]["color"] == "blue"
+        assert task["metadata"]["priority"] == "high"
+
+    def test_all_completed_sets_plan_completed(self) -> None:
+        for i in range(1, 3):
+            _run_hook(
+                payload={
+                    "tool_name": "TaskUpdate",
+                    "tool_input": {"taskId": str(i), "status": "completed"},
+                    "tool_result": f"Updated task #{i} status",
+                },
+            )
+        plan = _read_plan_yaml(tmp_path=None)
+        assert plan["plan"]["status"] == "completed"
+        assert "completed_at" in plan["plan"]
+
+
+class TestEdgeCases:
+    def test_empty_stdin(self) -> None:
+        import os
+
+        result = subprocess.run(
+            [str(HOOK)],
+            input="",
+            capture_output=True,
+            text=True,
+            timeout=10,
+            env=os.environ.copy(),
+        )
+        assert result.returncode == 0
+        assert len(_plan_files(tmp_path=None)) == 0
+
+    def test_malformed_json(self) -> None:
+        import os
+
+        result = subprocess.run(
+            [str(HOOK)],
+            input="{invalid json}",
+            capture_output=True,
+            text=True,
+            timeout=10,
+            env=os.environ.copy(),
+        )
+        assert result.returncode == 0
+        assert len(_plan_files(tmp_path=None)) == 0
+
+    def test_missing_tool_result(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {"subject": "No result"},
+                "tool_result": "",
+            },
+        )
+        assert len(_plan_files(tmp_path=None)) == 0
+
+    def test_unknown_tool_name(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "SomeOtherTool",
+                "tool_input": {},
+                "tool_result": "",
+            },
+        )
+        assert len(_plan_files(tmp_path=None)) == 0
+
+    def test_update_nonexistent_task(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {"subject": "Task 1"},
+                "tool_result": "Task #1 created successfully: Task 1",
+            },
+        )
+        result = _run_hook(
+            payload={
+                "tool_name": "TaskUpdate",
+                "tool_input": {"taskId": "99", "status": "completed"},
+                "tool_result": "Updated task #99 status",
+            },
+        )
+        assert result.returncode == 0
+        plan = _read_plan_yaml(tmp_path=None)
+        assert len(plan["tasks"]) == 1
+        assert plan["tasks"][0]["status"] == "pending"
+
+    def test_last_synced_updates(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {"subject": "First"},
+                "tool_result": "Task #1 created successfully: First",
+            },
+        )
+        plan1 = _read_plan_yaml(tmp_path=None)
+        synced1 = plan1["plan"]["last_synced"]
+
+        _run_hook(
+            payload={
+                "tool_name": "TaskUpdate",
+                "tool_input": {"taskId": "1", "status": "completed"},
+                "tool_result": "Updated task #1 status",
+            },
+        )
+        plan2 = _read_plan_yaml(tmp_path=None)
+        synced2 = plan2["plan"]["last_synced"]
+        assert synced2 >= synced1
+
+
+class TestYamlRoundtrip:
+    def test_plan_file_is_yaml(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {"subject": "YAML test"},
+                "tool_result": "Task #1 created successfully: YAML test",
+            },
+        )
+        files = _plan_files(tmp_path=None)
+        assert len(files) == 1
+        content = files[0].read_text()
+        assert content.startswith("plan:\n")
+        assert "tasks:\n" in content
+
+    def test_plan_file_in_repo_claude_session(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {"subject": "Location test"},
+                "tool_result": "Task #1 created successfully: Location test",
+            },
+        )
+        files = _plan_files(tmp_path=None)
+        assert len(files) == 1
+        assert ".claude/session/plan.yaml" in str(files[0])
+
+    def test_json_summary_mode(self) -> None:
+        _run_hook(
+            payload={
+                "tool_name": "TaskCreate",
+                "tool_input": {"subject": "Summary test"},
+                "tool_result": "Task #1 created successfully: Summary test",
+            },
+        )
+        result = subprocess.run(
+            [str(HOOK), "--json-summary"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        assert result.returncode == 0
+        data = json.loads(result.stdout)
+        assert data["plan"]["status"] == "in_progress"
+        assert len(data["tasks"]) == 1
+        assert data["tasks"][0]["subject"] == "Summary test"

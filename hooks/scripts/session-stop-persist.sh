@@ -36,6 +36,11 @@ recent_commits_json=$(git log --oneline -5 2>/dev/null | jq -R -s 'split("\n") |
 
 timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+has_plan="false"
+if [[ -f "$toplevel/.claude/session/plan.yaml" ]]; then
+    has_plan="true"
+fi
+
 jq -n \
     --arg session_id "$session_id" \
     --arg branch "$branch" \
@@ -45,6 +50,7 @@ jq -n \
     --argjson modified "$modified_json" \
     --argjson staged "$staged_json" \
     --argjson recent_commits "$recent_commits_json" \
+    --argjson has_plan "$has_plan" \
     '{
         session_id: $session_id,
         branch: $branch,
@@ -53,5 +59,6 @@ jq -n \
         timestamp: $timestamp,
         modified_files: $modified,
         staged_files: $staged,
-        recent_commits: $recent_commits
+        recent_commits: $recent_commits,
+        has_plan: $has_plan
     }' > "$state_file"
