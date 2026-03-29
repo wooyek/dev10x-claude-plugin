@@ -76,6 +76,7 @@ Always apply `references/review-checks-common.md`.
 | `task-orchestration.md` | Orchestration patterns, auto-advance, batched decisions | All skills (via `## Orchestration` section) | Referenced, not auto-loaded |
 | `code-sharing-patterns.md` | MCP imports, PEP 723 inlining, cross-context code | Review agents (false positive prevention) | Referenced, not auto-loaded |
 | `permission-architecture.md` | Permission → hook execution order, hook-enabled rules | `permission-auditor` agent, `permission-maintenance` skill | Referenced, not auto-loaded |
+| `model-tiers.md` | Model assignments, tier framework, per-project overrides | `model-selection.md` rule, playbook system | Referenced, not auto-loaded |
 
 ## Agent Specs (`.claude/agents/`)
 

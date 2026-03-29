@@ -25,6 +25,10 @@
 #               describes what to do, what to look for, or how to
 #               adapt the step based on context (optional)
 #   agent     — agent name to invoke when executing this step (optional)
+#   model     — override model for agent dispatch during this step;
+#               one of: haiku, sonnet, opus. When absent, uses the
+#               skill's hardcoded default. See references/model-tiers.md
+#               for tier guidance and cost/quality tradeoffs. (optional)
 #   skills    — list of skills to delegate to (optional)
 #   steps     — child steps for pre-templated epic expansion (optional)
 #   condition — hint for conditional execution (optional)
