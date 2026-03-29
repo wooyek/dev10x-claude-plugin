@@ -455,6 +455,17 @@ The Dev10x:slack-review-request skill will:
 
 **CRITICAL: Do NOT post notifications without user confirmation.**
 
+### Step 0: Verify PR state via MCP
+
+**Hard rule: Verify final PR state with the MCP tool — NEVER use
+raw `gh pr view` or `gh pr checks`.**
+
+`mcp__plugin_Dev10x_cli__verify_pr_state(pr_number={pr_number})`
+
+Parse `is_draft`, `state`, `review_decision`, and `checks_passing`
+from the response. Only proceed to notification if checks pass and
+no blocking issues.
+
 ### Step 1: Prepare
 
 Gather PR info, count open threads, verify readiness:

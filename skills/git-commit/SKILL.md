@@ -486,31 +486,22 @@ Create this commit? (y/n/edit)
 
 ### Step 10: Stage Files (if needed)
 
+**Hard rule: NEVER stage individual files by name** (e.g.,
+`git add file1.py file2.py`). Selective staging bypasses the
+skill contract — all changes in the working directory belong
+to this commit. Use `git add -A` or `git add .` exclusively.
+
 **Unattended mode:** Auto-stage all changes (`git add -A`)
 without prompting. The orchestrator's approved plan implies
 all current changes are intended for this commit.
 
 **Attended mode — if unstaged changes exist:**
-```bash
-# Show what will be staged
-git status --short
 
-# Ask user
-echo "Stage all changes? (y/n/select)"
-- y: git add .
-- n: Only commit already staged files
-- select: Ask which files to stage
-```
-
-**If select:**
-```bash
-# List unstaged files
-git diff --name-only
-
-# User selects files (space-separated)
-# Stage selected files
-git add file1 file2 file3
-```
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+Options:
+- Stage all (Recommended) — `git add -A`
+- Only commit already staged files
+- Abort
 
 ### Step 11: Create the Commit
 
@@ -589,9 +580,14 @@ What would you like to do? (1/2/3/done)
 - **Footer:** Always include `Fixes: TICKET-ID`
 - **Spacing:** One space after gitmoji, one space after ticket ID
 - **Never `git -C <path>`**: See Step 1 — use `cd` to repo root instead.
+- **Never `cd /path && git ...`**: The `&&` shifts the command prefix,
+  breaking allow-rule matching. Use a standalone `cd` call or absolute
+  paths. Each Bash call must contain exactly one command.
 - **Never chain `git add && git commit`**: Use two separate Bash tool
   calls — one to stage, one to commit. Same rule applies to
   `git add && git rebase --continue`. Each call must stand alone.
+- **Never stage individual files**: Use `git add -A` or `git add .`
+  exclusively. Selective staging bypasses the skill contract.
 
 ## Integration with Other Skills
 

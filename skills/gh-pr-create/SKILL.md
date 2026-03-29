@@ -271,9 +271,11 @@ It starts with the Job Story, followed by a commit list with links and
 the issue tracker reference.
 
 **Generate commit list (for preview before PR creation):**
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/generate-commit-list.sh PLACEHOLDER
-```
+
+`mcp__plugin_Dev10x_cli__generate_commit_list(pr_number="PLACEHOLDER")`
+
+**NEVER call `generate-commit-list.sh` directly** — use the MCP tool
+above. The script is an internal implementation detail.
 
 **Body format (Job Story + separator + commit list + issue link + separator + checklist):**
 ```markdown

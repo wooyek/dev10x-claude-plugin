@@ -608,6 +608,8 @@ for the full compaction protocol.
 | Groom history | `Skill(Dev10x:git-groom)` | `git rebase -i`, `git develop-log` for assessment |
 | Create branch | `Skill(Dev10x:ticket-branch)` | `git checkout -b` |
 | Create a skill | `Skill(Dev10x:skill-create)` | Writing SKILL.md directly |
+| Check PR state | `mcp__plugin_Dev10x_cli__pr_detect` | `gh pr view --json` |
+| Verify PR readiness | `mcp__plugin_Dev10x_cli__verify_pr_state` | `gh pr checks` |
 | Verify acceptance criteria | `Skill(Dev10x:verify-acc-dod)` | Inline checks |
 
 This table survives context compaction — it is the canonical
@@ -636,7 +638,9 @@ missing, re-read this section before proceeding.
 6. groom → `Skill(Dev10x:git-groom)`
 7. branch → `Skill(Dev10x:ticket-branch)`
 8. create skill → `Skill(Dev10x:skill-create)`
-9. verify acceptance → `Skill(Dev10x:verify-acc-dod)`
+9. check PR state → `mcp__plugin_Dev10x_cli__pr_detect`
+10. verify PR readiness → `mcp__plugin_Dev10x_cli__verify_pr_state`
+11. verify acceptance → `Skill(Dev10x:verify-acc-dod)`
 
 ### Groom Step: Always Delegate, Never Self-Assess
 
