@@ -607,6 +607,7 @@ for the full compaction protocol.
 | Push to remote | `Skill(Dev10x:git)` | `git push` |
 | Groom history | `Skill(Dev10x:git-groom)` | `git rebase -i`, `git develop-log` for assessment |
 | Create branch | `Skill(Dev10x:ticket-branch)` | `git checkout -b` |
+| Create a skill | `Skill(Dev10x:skill-create)` | Writing SKILL.md directly |
 | Verify acceptance criteria | `Skill(Dev10x:verify-acc-dod)` | Inline checks |
 
 This table survives context compaction — it is the canonical
@@ -634,7 +635,8 @@ missing, re-read this section before proceeding.
 5. push → `Skill(Dev10x:git)`
 6. groom → `Skill(Dev10x:git-groom)`
 7. branch → `Skill(Dev10x:ticket-branch)`
-8. verify acceptance → `Skill(Dev10x:verify-acc-dod)`
+8. create skill → `Skill(Dev10x:skill-create)`
+9. verify acceptance → `Skill(Dev10x:verify-acc-dod)`
 
 ### Groom Step: Always Delegate, Never Self-Assess
 
