@@ -26,7 +26,7 @@ The code review system uses a **multi-agent architecture**:
 
 | File Pattern | Primary Agent | Required References |
 |---|---|---|
-| `**/*.py`, `**/*.sh` | `reviewer-generic` | `references/review-checks-common.md` |
+| `**/*.py`, `**/*.sh` | `reviewer-generic`, `reviewer-security` | `references/review-checks-common.md` |
 | `Makefile`, `bin/**`, `hooks/**`, `*.sh` | `reviewer-infra` | `references/review-checks-common.md` |
 | `docs/**`, `.claude/**/*.md`, `README.md` | `reviewer-docs` | `references/review-checks-common.md` |
 | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | `reviewer-rules-maintenance` | (self-contained) |
@@ -90,6 +90,7 @@ Internal review-only agents (≤ 50 lines each).
 | `reviewer-rules-maintenance.md` | `.claude/rules/**`, `.claude/agents/**`, `agents/**` | (self-contained) |
 | `reviewer-skill.md` | `skills/**` | `.claude/rules/skill-naming.md`, `references/skill-invocation.md`, `references/eval-schema.md` |
 | `reviewer-skill-behavior.md` | `skills/**` | `references/task-orchestration.md`, `.claude/rules/skill-gates.md` |
+| `reviewer-security.md` | `**/*.py`, `**/*.sh` | (self-contained) |
 
 ## Plugin-Distributed Agents (`agents/`)
 
