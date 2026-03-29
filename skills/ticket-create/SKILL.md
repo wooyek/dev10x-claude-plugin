@@ -13,6 +13,7 @@ user-invocable: true
 invocation-name: Dev10x:ticket-create
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/ticket-create/scripts/:*)
   - Bash(gh issue create:*)
   - Bash(/tmp/claude/bin/mktmp.sh:*)
   - mcp__claude_ai_Linear__save_issue
@@ -172,14 +173,12 @@ gh issue create --repo "$REPO" --title "$TITLE" --body-file "$BODY_FILE" --label
 ```
 
 **Title-in-file convention:** When the caller provides
-`--body-file` without `--title`, read the first line of the
-file as the title and the rest (after a blank line) as the
-body. Split the file before passing to `gh issue create`:
+`--body-file` without `--title`, use the split script to
+extract the title from the first line of the file:
 ```bash
-TITLE=$(head -1 "$BODY_FILE")
-BODY_CONTENT=$(tail -n +3 "$BODY_FILE")
-# Overwrite file with body-only content
-echo "$BODY_CONTENT" > "$BODY_FILE"
+${CLAUDE_PLUGIN_ROOT}/skills/ticket-create/scripts/split-title.sh "$BODY_FILE"
+# Outputs: TITLE=<first line>  BODY_FILE=<body-only temp file>
+# Parse output, then:
 gh issue create --repo "$REPO" --title "$TITLE" --body-file "$BODY_FILE" --label "$LABELS"
 ```
 This avoids passing titles with special characters in args
