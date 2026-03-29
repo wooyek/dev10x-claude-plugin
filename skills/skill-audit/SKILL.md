@@ -54,25 +54,25 @@ Execute these exact `TaskCreate` calls at startup:
 
 **Setup (sequential):**
 
-1. `TaskCreate(subject="Resolve session file", activeForm="Resolving session")`
-2. `TaskCreate(subject="Extract and read transcript", activeForm="Extracting transcript")`
-3. `TaskCreate(subject="Detect project context", activeForm="Detecting context")`
+1. `TaskCreate(subject="Resolve session file", description="Find and validate the session JSONL file from the provided path or most recent session", activeForm="Resolving session")`
+2. `TaskCreate(subject="Extract and read transcript", description="Run extract-session.sh to parse the JSONL file into a readable transcript", activeForm="Extracting transcript")`
+3. `TaskCreate(subject="Detect project context", description="Identify project directory, loaded skills, and CLAUDE.md rules from the transcript", activeForm="Detecting context")`
 
 **Wave 1 — parallel analysis (independent phases):**
 
-4. `TaskCreate(subject="Phase 1: Action inventory [subagent]", activeForm="Inventorying actions")`
-5. `TaskCreate(subject="Phase 4: Permission friction [subagent]", activeForm="Analyzing permissions")`
+4. `TaskCreate(subject="Phase 1: Action inventory [subagent]", description="Dispatch subagent to catalogue all tool calls, skill invocations, and agent dispatches", activeForm="Inventorying actions")`
+5. `TaskCreate(subject="Phase 4: Permission friction [subagent]", description="Dispatch subagent to identify permission prompts, hook blocks, and allow-rule gaps", activeForm="Analyzing permissions")`
 
 **Wave 2 — parallel analysis (depends on Phase 1 output):**
 
-6. `TaskCreate(subject="Phase 2: Skill coverage [subagent]", activeForm="Analyzing coverage")`
-7. `TaskCreate(subject="Phase 3: Compliance check [subagent]", activeForm="Checking compliance")`
-8. `TaskCreate(subject="Phase 5: Lessons learned [subagent]", activeForm="Extracting lessons")`
+6. `TaskCreate(subject="Phase 2: Skill coverage [subagent]", description="Dispatch subagent to check which skills should have been invoked but were missed", activeForm="Analyzing coverage")`
+7. `TaskCreate(subject="Phase 3: Compliance check [subagent]", description="Dispatch subagent to verify skill execution matched documented orchestration steps", activeForm="Checking compliance")`
+8. `TaskCreate(subject="Phase 5: Lessons learned [subagent]", description="Dispatch subagent to extract corrections, confirmations, and process improvements", activeForm="Extracting lessons")`
 
 **Synthesis (sequential, main agent):**
 
-9. `TaskCreate(subject="Phase 6: Propose changes", activeForm="Proposing changes")`
-10. `TaskCreate(subject="Phase 7: Upstream reporting", activeForm="Reporting upstream")`
+9. `TaskCreate(subject="Phase 6: Propose changes", description="Synthesize findings into concrete SKILL.md edits, memory updates, and process improvements", activeForm="Proposing changes")`
+10. `TaskCreate(subject="Phase 7: Upstream reporting", description="File findings as GitHub issues at the Dev10x plugin repo via Dev10x:audit-report", activeForm="Reporting upstream")`
 
 Set dependencies:
 - Tasks 1→2→3 sequential (setup chain)
