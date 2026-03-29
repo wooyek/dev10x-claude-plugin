@@ -108,14 +108,14 @@ If user chooses "Skip", done. If "Post to Slack", proceed to Step 4.
 
 ### Step 4: Send
 
-Write the message to a temporary file, then invoke the send command:
+Delegate to `Skill(Dev10x:slack)` for posting. Write the message to
+a temporary file and pass it:
 
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/slack-review-request/scripts/slack-review-request.py \
-  send --channel {channel} --message-file {temp_file}
-```
+`Skill(skill="Dev10x:slack", args="--channel {channel} --message-file {temp_file}")`
 
-Clean up the temp file.
+**NEVER call `slack-review-request.py send` directly** — delegate to
+the slack skill to honor global Slack posting rules. The script is
+an internal fallback only.
 
 Report success: channel ID, thread timestamp (if available).
 

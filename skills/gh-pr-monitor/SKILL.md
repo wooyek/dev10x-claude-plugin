@@ -132,6 +132,13 @@ parameters — it is not optional.
 report pass/fail — they do not need Opus-level reasoning. Using
 haiku reduces cost without affecting monitoring quality.
 
+**Long CI suites (> 10 min):** Haiku agents may still exhaust
+their budget on test suites that take 10+ minutes (GH-497 F5).
+If the project's CI regularly exceeds 10 minutes, use
+`model: "sonnet"` instead of `model: "haiku"` for the monitor
+agent. The main session should also set `max_turns: 400` for
+these projects.
+
 ### Step 4: Report to user
 
 **DO NOT SKIP this step in any mode (full agent or poll).**

@@ -71,6 +71,18 @@ It may skip if the project is configured with `skip: true`.
 
 Capture the outcome (posted / skipped / error) for the summary.
 
+### Step 3.5: Post PR comment (optional)
+
+Post a review request comment on the PR mentioning assigned reviewers:
+
+```bash
+gh pr comment {PR_NUMBER} --repo {REPO} --body "Ready for review @reviewer1 @reviewer2"
+```
+
+Skip this step if:
+- No reviewers were assigned (Step 2 skipped or errored)
+- Project config sets `pr_comment: false`
+
 ### Step 4: Report summary
 
 Report the combined result:
@@ -78,6 +90,7 @@ Report the combined result:
 ```
 Review request for PR #{PR_NUMBER}:
 - GitHub reviewers: {assigned / skipped / error}
+- PR comment: {posted / skipped}
 - Slack notification: {posted / skipped / error}
 ```
 

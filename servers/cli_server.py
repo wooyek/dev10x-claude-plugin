@@ -344,7 +344,7 @@ async def request_review(
 
     fields: dict[str, str | list[str]] = {}
     if team:
-        fields["team_reviewers"] = reviewers
+        fields["team_reviewers"] = [r.split("/")[-1] for r in reviewers]
     else:
         fields["reviewers"] = reviewers
 

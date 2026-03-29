@@ -750,6 +750,11 @@ Return to the blocked task once the blocker resolves.
    changes
 5. No pending fixup commits that haven't been pushed — compare
    local HEAD with remote tracking branch
+6. **verify-acc-dod was invoked** — check the conversation for
+   a `Skill(Dev10x:verify-acc-dod)` call. If absent, invoke it
+   NOW before presenting the gate. This is the #1 bypass pattern
+   (GH-471, GH-497) — agents perform inline checks instead of
+   delegating. The completion gate MUST NOT fire without it.
 
 If any check fails, resolve it before presenting the gate.
 Do NOT present "Work complete" as recommended when preconditions
