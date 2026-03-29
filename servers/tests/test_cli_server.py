@@ -322,3 +322,252 @@ class TestMktmp:
         )
 
         assert "error" in result
+
+
+class TestPrDetect:
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_detects_pr_from_number(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="PR_NUMBER=123\nREPO=owner/repo\nBRANCH=feature/xyz\nSTATE=open\nHEAD_REF=feature/xyz",
+            stderr="",
+        )
+
+        result = await cli_server.pr_detect(arg="#123")
+
+        assert "PR_NUMBER" in result
+        mock_run.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_handles_detection_error(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout="",
+            stderr="Invalid PR reference",
+        )
+
+        result = await cli_server.pr_detect(arg="invalid")
+
+        assert "error" in result
+
+
+class TestNextWorktreeName:
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_calculates_next_worktree_number(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="../.worktrees/project-05",
+            stderr="",
+        )
+
+        result = await cli_server.next_worktree_name()
+
+        assert "path" in result
+        mock_run.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_handles_error_in_calculation(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout="",
+            stderr="Failed to calculate",
+        )
+
+        result = await cli_server.next_worktree_name()
+
+        assert "error" in result
+
+
+class TestSetupAliases:
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_sets_up_git_aliases(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="Aliases configured",
+            stderr="",
+        )
+
+        result = await cli_server.setup_aliases()
+
+        assert isinstance(result, dict)
+        assert result.get("success") is True
+        mock_run.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_handles_alias_setup_error(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout="",
+            stderr="Failed to configure",
+        )
+
+        result = await cli_server.setup_aliases()
+
+        assert "error" in result
+
+
+class TestVerifyPrState:
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_verifies_pr_state_before_creation(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="BRANCH_NAME=feature/test\nISSUE=GH-123\nBASE_BRANCH=develop",
+            stderr="",
+        )
+
+        result = await cli_server.verify_pr_state()
+
+        assert isinstance(result, dict)
+        mock_run.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_blocks_pr_on_protected_branch(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout="",
+            stderr="Cannot create PR from main branch",
+        )
+
+        result = await cli_server.verify_pr_state()
+
+        assert "error" in result
+
+
+class TestPrePrChecks:
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_runs_quality_checks_successfully(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="All checks passed",
+            stderr="",
+        )
+
+        result = await cli_server.pre_pr_checks()
+
+        assert result["success"] is True
+        assert result["output"] == "All checks passed"
+        mock_run.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_reports_check_failures(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout="",
+            stderr="Linting failed",
+        )
+
+        result = await cli_server.pre_pr_checks(base_branch="develop")
+
+        assert result["success"] is False
+        assert "error" in result
+        assert result["error"] == "Linting failed"
+
+
+class TestRebaseGroom:
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_rebases_and_grooms_commits(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="SUCCESS=true\nCOMMITS_REWRITTEN=5",
+            stderr="",
+        )
+
+        result = await cli_server.rebase_groom(
+            seq_path="/tmp/seq",
+            base_ref="develop",
+        )
+
+        assert isinstance(result, dict)
+        mock_run.assert_called_once()
+
+
+class TestCreateWorktree:
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_creates_worktree(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="WORKTREE_PATH=../.worktrees/feature-01\nBRANCH=feature-branch\nCREATED=true",
+            stderr="",
+        )
+
+        result = await cli_server.create_worktree(branch="feature-branch")
+
+        assert "WORKTREE_PATH" in result
+        mock_run.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_handles_worktree_creation_error(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout="",
+            stderr="Branch already exists",
+        )
+
+        result = await cli_server.create_worktree(branch="existing-branch")
+
+        assert "error" in result
