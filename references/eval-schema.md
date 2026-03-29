@@ -125,6 +125,26 @@ Use negative signals (`✗`) to detect regressions like:
 }
 ```
 
+**Gate Naming Pattern**: When a skill has multiple decision gates (e.g.,
+experience level selection, alias setup confirmation, tour summary), name
+assertions using the `gate{N}_*` pattern:
+
+```
+SKILL.md Line 42: **REQUIRED: Call `AskUserQuestion`** (experience level)
+  → evals.json: "gate1_uses_tool"
+
+SKILL.md Line 87: **REQUIRED: Call `AskUserQuestion`** (git alias setup)
+  → evals.json: "gate2_uses_tool", "gate2_correct_options"
+
+SKILL.md Line 142: **REQUIRED: Call `AskUserQuestion`** (tour summary review)
+  → evals.json: "gate3_uses_tool"
+```
+
+**Avoid domain-specific names** (e.g., `alias_setup_offered`, `tour_confirmed`)
+which obscure the gate number and make merge validation harder. Numbered gates
+make it easy to audit: "Does SKILL.md have N gates? Does evals.json have N
+corresponding assertions?"
+
 ### Example 2: Skill() Delegation (Enforcement Coverage)
 
 ```json
