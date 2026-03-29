@@ -29,6 +29,7 @@ families:
   - label: Pipeline
     description: "Scope → branch → implement → PR"
     skills:
+      - Dev10x:onboarding
       - ticket:work-on
       - Dev10x:playbook
       - Dev10x:playbook-maintenance
