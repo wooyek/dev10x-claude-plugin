@@ -13,7 +13,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RESET='\033[0m'
 
-VERSION_FILES=".bumpversion.toml .claude-plugin/plugin.json pyproject.toml"
+VERSION_FILES=".bumpversion.toml .claude-plugin/plugin.json pyproject.toml uv.lock"
 
 command -v bump-my-version >/dev/null || {
     echo "bump-my-version not found. Install: pip install bump-my-version" >&2
