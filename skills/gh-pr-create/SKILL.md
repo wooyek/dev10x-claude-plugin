@@ -222,13 +222,11 @@ before generating a new one.
 
 **Step 3a: Detect issue tracker**
 
-Run `detect-tracker.sh` with the ISSUE extracted from the branch name:
+Call the MCP tool with the ISSUE extracted from the branch name:
 
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/detect-tracker.sh "$ISSUE"
-```
+`mcp__plugin_Dev10x_cli__detect_tracker(ticket_id="$ISSUE")`
 
-Parse TRACKER and FIXES_URL from output.
+Parse `tracker` and `fixes_url` from the response.
 
 **Step 3b: Search for existing Job Story**
 
@@ -286,7 +284,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/generate-commit-list.sh PLACEH
 [`b3a015a8`](REPO_URL/pull/NUMBER/commits/FULL_HASH) ✨ PROJ-36 Enable feature
 [`fec49998`](REPO_URL/pull/NUMBER/commits/FULL_HASH) ♻️ PROJ-36 Refactor module
 
-Fixes: {FIXES_URL from detect-tracker.sh}
+Fixes: {fixes_url from detect_tracker MCP tool}
 
 ---
 

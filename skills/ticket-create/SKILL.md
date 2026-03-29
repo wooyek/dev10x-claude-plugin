@@ -45,8 +45,9 @@ Mark completed when done: `TaskUpdate(taskId, status="completed")`
 Determine which tracker to use. Priority:
 
 1. **Explicit argument** — user specifies `--github`, `--linear`, or `--jira`
-2. **detect-tracker.sh** — if a ticket prefix is available (from branch name),
-   run detection to match the project's tracker
+2. **detect_tracker MCP tool** — if a ticket prefix is available (from branch
+   name), call `mcp__plugin_Dev10x_cli__detect_tracker` to match the project's
+   tracker
 3. **Repo default** — if no prefix, check autolinks to determine project's
    primary tracker. GitHub Issues if no autolinks exist.
 
