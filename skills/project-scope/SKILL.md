@@ -69,7 +69,7 @@ by scope, verify blocked by create.
 
 | Input | Type | Behavior |
 |-------|------|----------|
-| `PAY-662` or `TT-123` | Ticket ID | Run `detect-tracker.sh`, fetch as parent |
+| `PAY-662` or `TT-123` | Ticket ID | Call `detect_tracker` MCP tool, fetch as parent |
 | `https://linear.app/.../issue/XXX-N/...` | Linear URL | Extract ID, fetch as parent |
 | `https://*.atlassian.net/browse/XX-N` | JIRA URL | Extract ID, fetch as parent |
 | `https://github.com/.../issues/N` | GitHub URL | Extract repo + number, fetch as parent |
@@ -90,7 +90,7 @@ comments, labels, related tickets) via Linear MCP or GitHub CLI.
 
 ### 1.3 Detect Tracker
 
-Run `${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/detect-tracker.sh`
+Call `mcp__plugin_Dev10x_cli__detect_tracker(ticket_id="$TICKET_ID")`
 to determine the project's tracker backend.
 
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call spec: [ask-tracker-selection.md](./tool-calls/ask-tracker-selection.md)) when

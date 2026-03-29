@@ -119,8 +119,8 @@ thing visible in PR lists and Slack previews.
 **GitHub issue target:**
 Post the Job Story as a comment on the GitHub issue:
 
-1. Run `detect-tracker.sh` to get the repo and number:
-   `${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/detect-tracker.sh "$TICKET_ID"`
+1. Call the MCP tool to get the repo and number:
+   `mcp__plugin_Dev10x_cli__detect_tracker(ticket_id="$TICKET_ID")`
 2. Post the comment:
    `gh issue comment "$TICKET_NUMBER" --repo "$REPO" --body "$JOB_STORY"`
 
