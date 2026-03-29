@@ -12,7 +12,7 @@ allowed-tools:
   - Read(/tmp/claude/skill-audit/**)
   - Write(/tmp/claude/skill-audit/**)
   - Bash(/tmp/claude/bin/mktmp.sh:*)
-  - Bash(gh issue create:*)
+  - Skill(Dev10x:ticket-create)
   - Bash(ls ~/.claude/plugins/cache/:*)
 ---
 
@@ -115,12 +115,18 @@ Write the assembled body to that file using the Write tool.
 
 ### Step 6: File the issue
 
-```bash
-gh issue create --repo Brave-Labs/Dev10x \
-  --title "{title}" \
-  --body-file {temp-file-path} \
-  --label "enhancement"
+Delegate to `Dev10x:ticket-create` — never use raw `gh issue create`.
+Write the title as the first line of the temp file (followed by a
+blank line and the body) to avoid permission friction from special
+characters in the args string:
+
 ```
+Skill(skill="Dev10x:ticket-create",
+  args="--repo Brave-Labs/Dev10x --body-file {temp-file-path} --label enhancement")
+```
+
+The ticket-create skill reads the first line as the title when
+no `--title` flag is provided.
 
 ### Step 7: Report result
 
