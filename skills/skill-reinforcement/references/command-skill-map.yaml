@@ -128,3 +128,31 @@ mappings:
     reason: >
       The investigate skill combines Sentry, codebase search,
       and Slack thread context for structured root-cause analysis.
+
+  - skill: Read
+    description: Use the Read tool instead of inline Python for file inspection
+    patterns:
+      - python3 -c
+    reason: >
+      Inline python3 -c is hook-blocked. Use the Read tool to
+      inspect files, or write a standalone uv script for complex
+      processing.
+
+  - skill: shellcheck
+    description: Use shellcheck for shell script validation
+    patterns:
+      - bash -n
+    reason: >
+      bash -n only checks syntax errors. shellcheck provides
+      deeper analysis including quoting issues, portability
+      warnings, and style suggestions.
+
+  - skill: uv run (without --extra)
+    description: Use uv run directly without --extra dev flag
+    patterns:
+      - uv run --extra dev
+      - uv run --extra
+    reason: >
+      The --extra dev flag is unnecessary in dev10x-ai repos
+      where dev dependencies are available by default. Use
+      uv run directly.
