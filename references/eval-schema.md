@@ -17,7 +17,58 @@ include evaluation criteria. Optional for simpler skills.
 }
 ```
 
-## Evals Format
+## Canonical Format for New Skills
+
+All new skills MUST use the **dimension-referenced format** established in
+`skills/memory-maintenance/evals/evals.json` and
+`skills/playbook-maintenance/evals/evals.json`. This format ensures:
+- Consistent assertion/dimension cross-references (`dimension` field → eval_dimensions.id)
+- Explicit signals for test automation and regression detection
+- Structured input/output documentation
+
+### Dimension-Referenced Format (Required for New Skills)
+
+```json
+{
+  "skill_name": "Dev10x:example-skill",
+  "eval_dimensions": [
+    {
+      "id": "dimension_1",
+      "name": "Decision Gate Enforcement",
+      "description": "Tool is called, not substituted with plain text"
+    }
+  ],
+  "evals": [
+    {
+      "id": "eval_scenario_1",
+      "name": "Scenario name",
+      "description": "What this test validates",
+      "input": "/Dev10x:example-skill",
+      "assertions": [
+        {
+          "dimension": "dimension_1",
+          "check": "tool_called",
+          "value": "AskUserQuestion",
+          "signal": "What to look for in transcript"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Working Examples
+
+Copy structure from these reference implementations:
+- `skills/memory-maintenance/evals/evals.json` — ✓ Canonical format
+- `skills/playbook-maintenance/evals/evals.json` — ✓ Canonical format
+
+## Legacy Evals Format
+
+Earlier skills used a `setup`/`checks` structure. This format is
+documented below for reference, but **DO NOT use for new skills**.
+
+### Legacy Format (Deprecated)
 
 Each eval scenario tests a specific code path:
 
