@@ -221,17 +221,28 @@ Repeat until all CI checks pass:
    gh pr checks {pr_number}
    ```
 
-3. Parse results:
-   - ALL PASSING → verify check count (see below), then
-     **re-check for review comments before marking ready**
-     (see Post-CI Comment Re-check below), then go to
-     Phase 2
+3. Parse results — **all conditions checked atomically:**
+   A previously passing check may restart or fail between
+   polls. Never cache individual results across iterations —
+   re-evaluate ALL checks on every loop pass and require all
+   conditions true simultaneously before declaring green.
+   - ALL PASSING (no PENDING, no SKIPPING) → verify check
+     count (see below), then **re-check for review comments
+     before marking ready** (see Post-CI Comment Re-check
+     below), then go to Phase 2
    - ANY PENDING → wait 30 seconds via `sleep 30`, then re-check.
      **Hard rule: Do NOT exit Phase 1 while ANY check is PENDING.**
      The loop MUST continue until zero checks remain in PENDING
      state — either all pass, or a failure is detected. Exiting
      early with PENDING checks was the #1 monitor regression
      (GH-447 F1).
+   - ANY SKIPPING → treat as non-terminal. A SKIPPING check
+     has not executed and must not count as passing. Exclude
+     SKIPPING checks from the pass count AND the expected
+     count. Only declare green when all non-SKIPPING checks
+     pass. **Hard rule: SKIPPING ≠ passing.** Session
+     2f07759f showed SKIPPING checks caused premature merge
+     (GH-501).
    - FAILURES → analyze and fix (see CI Failure Handling below)
 
 4. After fixing CI failures or pushing new commits, wait **60
@@ -241,9 +252,10 @@ Repeat until all CI checks pass:
 
 5. **Verify check count before declaring success.** Compare the
    number of passing checks against the expected count (from the
-   first full check run). If fewer checks are reported than
-   expected, GitHub may not have registered all suites yet — wait
-   30 seconds and re-check.
+   first full check run), **excluding SKIPPING checks from both
+   counts**. If fewer non-SKIPPING checks pass than expected,
+   GitHub may not have registered all suites yet — wait 30
+   seconds and re-check.
 
 ### CI Failure Handling
 
