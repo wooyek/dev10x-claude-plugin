@@ -604,7 +604,7 @@ for the full compaction protocol.
 | Create a PR | `Skill(Dev10x:gh-pr-create)` | `gh pr create` |
 | Monitor CI | `Skill(Dev10x:gh-pr-monitor)` | `gh pr checks --watch` |
 | Push to remote | `Skill(Dev10x:git)` | `git push` |
-| Groom history | `Skill(Dev10x:git-groom)` | `git rebase -i` |
+| Groom history | `Skill(Dev10x:git-groom)` | `git rebase -i`, `git develop-log` for assessment |
 | Create branch | `Skill(Dev10x:ticket-branch)` | `git checkout -b` |
 | Verify acceptance criteria | `Skill(Dev10x:verify-acc-dod)` | Inline checks |
 
@@ -633,6 +633,19 @@ missing, re-read this section before proceeding.
 5. groom → `Skill(Dev10x:git-groom)`
 6. branch → `Skill(Dev10x:ticket-branch)`
 7. verify acceptance → `Skill(Dev10x:verify-acc-dod)`
+
+### Groom Step: Always Delegate, Never Self-Assess
+
+**Hard rule (GH-505, recurrence of GH-458):** When the plan
+includes a "Groom commit history" step, you MUST invoke
+`Skill(Dev10x:git-groom)`. Do NOT run `git develop-log` or
+`git log` to self-assess whether grooming is needed and then
+skip the step. The groom skill itself contains the strategy
+gate (`AskUserQuestion`) that determines whether grooming is
+required — that decision belongs to the skill, not to the
+orchestrator. Bypassing with "checked the log, no grooming
+needed" skips the skill's decision gate and fixup squash
+logic.
 
 ### CI Re-Monitoring After Force Push
 

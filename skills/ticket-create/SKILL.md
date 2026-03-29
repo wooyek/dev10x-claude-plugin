@@ -13,6 +13,7 @@ user-invocable: true
 invocation-name: Dev10x:ticket-create
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/ticket-create/scripts/:*)
   - Bash(gh issue create:*)
   - Bash(/tmp/claude/bin/mktmp.sh:*)
   - mcp__claude_ai_Linear__save_issue
@@ -68,7 +69,11 @@ Use this skill when:
 
 This skill requires:
 1. **Context** - Information about the problem/improvement (can be from a commit, code analysis, or user description)
-2. **Optional: Title** - If not provided, generate from context
+2. **Optional: Title** - If not provided, generate from context.
+   When `--body-file` is used without `--title`, the first line
+   of the file is used as the title (separated from the body by
+   a blank line). This avoids permission friction from special
+   characters in args strings.
 3. **Optional: Labels** - If not provided, infer from context
 
 ## Workflow
@@ -166,6 +171,16 @@ BODY_FILE=$(/tmp/claude/bin/mktmp.sh gh-issue body .md)
 # Write description content to $BODY_FILE via the Write tool
 gh issue create --repo "$REPO" --title "$TITLE" --body-file "$BODY_FILE" --label "$LABELS"
 ```
+
+**Title-in-file convention:** When the caller provides
+`--body-file` without `--title`, use the wrapper script that
+reads line 1 as the title and creates the issue in one call
+(like `git commit -F`):
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/ticket-create/scripts/create-github-issue.sh "$BODY_FILE" "$REPO" "$LABELS"
+```
+This avoids passing titles with special characters in args
+strings, which can cause permission friction.
 
 **Linear:**
 
