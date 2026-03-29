@@ -227,14 +227,30 @@ or `{review_id}` from the URL.
 **REQUIRED: Call `Skill(Dev10x:gh-pr-triage)`** — never triage
 inline. Pass the comment URL (and any additional context).
 
-**Per-comment enforcement (GH-463):** This delegation is mandatory
-for EVERY comment, including ones that appear "obviously invalid"
-(e.g., bot-generated comments, trivially wrong suggestions). The
-agent MUST NOT read the comment, judge it inline, and post a reply
-directly. Even if you can determine the verdict in 2 seconds, call
-`Skill(Dev10x:gh-pr-triage)` — it ensures consistent reply format,
-audit trail, and workflow state tracking. Audit sessions show the
-bypass happens most often on comments the agent considers trivial.
+**Per-comment enforcement (GH-463, GH-502):** This delegation
+is mandatory for EVERY comment, including ones that appear
+"obviously invalid" (e.g., bot-generated comments, trivially
+wrong suggestions). The agent MUST NOT read the comment, judge
+it inline, and post a reply directly. Even if you can determine
+the verdict in 2 seconds, call `Skill(Dev10x:gh-pr-triage)` —
+it ensures consistent reply format, audit trail, and workflow
+state tracking. Three audit sessions (GH-463, GH-458, GH-502)
+show the bypass happens when the agent rationalizes inline
+triage as "equivalent" to skill delegation under context
+pressure. It is not equivalent.
+
+**Mandatory triage assertion (GH-502):** After processing each
+comment, output this self-check before proceeding:
+
+```
+TRIAGE CHECK: comment r{id}
+  Skill(Dev10x:gh-pr-triage) called: YES/NO
+  Verdict: VALID/INVALID/QUESTION/OUT_OF_SCOPE
+  If NO → STOP. Re-do with Skill() delegation.
+```
+
+If you cannot fill in "YES" for the Skill call, you have
+bypassed delegation. Do not proceed — re-invoke the skill.
 
 **Exception — author-confirmed validity:** If the PR author has
 already replied to the comment explicitly acknowledging it as valid
@@ -377,7 +393,9 @@ comments sequentially in the main thread. Execute these steps:
 **DO NOT SKIP parallel dispatch.** Sequential inline triage
 defeats the purpose of this step — it increases processing time
 linearly and blocks the main thread. Even for 2 comments, use
-parallel agents.
+parallel agents. Each subagent MUST invoke
+`Skill(Dev10x:gh-pr-triage)` — never inline the triage logic
+within the subagent prompt itself (GH-502).
 
 Mark phase transition: `TaskUpdate(taskId=triage_task, status="completed")`
 
