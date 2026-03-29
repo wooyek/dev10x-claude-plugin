@@ -36,6 +36,7 @@ defaults:
 - `subject`: Step description (used in TaskCreate)
 - `type`: Step category (e.g., "analyze", "plan", "execute")
 - `prompt`: Instruction for Claude to execute
+- `model`: (Optional) Override model for agent dispatch (haiku/sonnet/opus)
 - `condition`: (Optional) Python expression filtering when step runs
 
 ## When to Use Playbooks

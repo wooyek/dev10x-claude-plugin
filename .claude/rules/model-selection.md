@@ -72,8 +72,26 @@ explicitly to avoid wasting tokens on simple tasks.
 | `skill-audit` (Wave 1+2) | Analyze | `sonnet` |
 | `adr-evaluate` (architects) | Design | `opus` |
 
+## User Overrides via Playbooks
+
+Users can override model assignments per project by adding
+`model:` to playbook steps. See `references/model-tiers.md`
+for the full user-facing guide including examples.
+
+Override resolution order:
+1. Step-level `model:` in user playbook override (highest)
+2. Step-level `model:` in default playbook
+3. Skill's hardcoded model (SKILL.md Agent dispatch)
+4. Agent spec `model:` frontmatter (named agents)
+5. Session default model (lowest)
+
+When executing a playbook step with `model:`, use that model
+for any agent dispatch during the step instead of the skill's
+hardcoded default.
+
 ## When to Revisit
 
 - Adding a new agent spec → choose model per tier table
 - Adding agent dispatch to a skill → specify model explicitly
 - Task proves too complex for its tier → promote one tier up
+- User reports cost concerns → point to `references/model-tiers.md`
