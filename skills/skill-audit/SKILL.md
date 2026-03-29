@@ -197,6 +197,30 @@ else:
 Implement this logic using Bash (ls -t + head) rather than running Python inline.
 If resolution fails, ask the user to provide the JSONL path explicitly.
 
+### Step 1.5: Self-session guard
+
+After resolving the JSONL path, check if the resolved file is the
+**current session** by testing whether the file was modified within
+the last 60 seconds (active sessions write continuously):
+
+```bash
+find "$SESSION_FILE" -mmin -1 -print
+```
+
+If the file matches (output is non-empty), this is likely the
+current session. **STOP** and emit a redirect message:
+
+> This audit targets the current session. Running it here will
+> consume the context window before useful analysis begins.
+> Open a **new terminal** and run:
+> ```
+> claude '/Dev10x:skill-audit <session-file-path>'
+> ```
+
+Do NOT proceed with extraction. Do NOT ask the user if they
+want to continue anyway — self-auditing always produces poor
+results because the audit itself dominates the transcript.
+
 ### Step 2: Extract transcript
 
 Create a unique output file:
