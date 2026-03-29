@@ -173,13 +173,11 @@ gh issue create --repo "$REPO" --title "$TITLE" --body-file "$BODY_FILE" --label
 ```
 
 **Title-in-file convention:** When the caller provides
-`--body-file` without `--title`, use the split script to
-extract the title from the first line of the file:
+`--body-file` without `--title`, use the wrapper script that
+reads line 1 as the title and creates the issue in one call
+(like `git commit -F`):
 ```bash
-${CLAUDE_PLUGIN_ROOT}/skills/ticket-create/scripts/split-title.sh "$BODY_FILE"
-# Outputs: TITLE=<first line>  BODY_FILE=<body-only temp file>
-# Parse output, then:
-gh issue create --repo "$REPO" --title "$TITLE" --body-file "$BODY_FILE" --label "$LABELS"
+${CLAUDE_PLUGIN_ROOT}/skills/ticket-create/scripts/create-github-issue.sh "$BODY_FILE" "$REPO" "$LABELS"
 ```
 This avoids passing titles with special characters in args
 strings, which can cause permission friction.
