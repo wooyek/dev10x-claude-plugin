@@ -20,8 +20,8 @@ allowed-tools:
   - mcp__plugin_Dev10x_cli__generate_commit_list
   - mcp__plugin_Dev10x_cli__post_summary_comment
   - mcp__plugin_Dev10x_cli__detect_tracker
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/*:*)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
 ---
 
 # Create Pull Request for Ticket

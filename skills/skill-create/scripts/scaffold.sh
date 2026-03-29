@@ -37,7 +37,7 @@ generate_skill_md() {
     local allowed_tools=""
     case "$PATTERN" in
         script)
-            allowed_tools="  - Bash(\${CLAUDE_PLUGIN_ROOT}/skills/$SKILL_NAME/scripts/*:*)
+            allowed_tools="  - Bash(\${CLAUDE_PLUGIN_ROOT}/skills/$SKILL_NAME/scripts/:*)
   - AskUserQuestion"
             ;;
         orchestration)

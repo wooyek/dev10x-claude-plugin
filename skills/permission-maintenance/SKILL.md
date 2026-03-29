@@ -12,7 +12,7 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:permission-maintenance
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/scripts/:*)
   - Agent(Dev10x:permission-auditor)
 ---
 

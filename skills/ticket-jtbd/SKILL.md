@@ -16,7 +16,7 @@ allowed-tools:
   - Bash(gh pr list:*)
   - Bash(git log:*)
   - Bash(git diff:*)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
   - mcp__claude_ai_Linear__get_issue
   - mcp__claude_ai_Linear__list_issues
   - mcp__claude_ai_Linear__list_comments

@@ -20,7 +20,7 @@ allowed-tools:
   - mcp__claude_ai_Linear__save_milestone
   - mcp__claude_ai_Linear__list_milestones
   - mcp__claude_ai_Linear__list_issue_statuses
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
   - Bash(gh issue create:*)
   - Bash(gh label create:*)
   - Bash(gh api repos/:*)

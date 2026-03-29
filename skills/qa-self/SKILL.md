@@ -11,8 +11,8 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:qa-self
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/*:*)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/qa-self/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/qa-self/scripts/:*)
 ---
 
 # Self-QA — Automated Staging Test Execution

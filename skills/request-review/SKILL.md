@@ -11,7 +11,7 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:request-review
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
   - Skill(Dev10x:gh-pr-request-review)
   - Skill(Dev10x:slack-review-request)
 ---

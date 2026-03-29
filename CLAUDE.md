@@ -45,7 +45,7 @@ them in SKILL.md front matter under `allowed-tools:`:
 
 ```yaml
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/<name>/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/<name>/scripts/:*)
 ```
 
 Missing declarations cause per-invocation approval friction — users cannot

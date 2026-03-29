@@ -11,7 +11,7 @@ description: >
 user-invocable: false
 allowed-tools:
   - mcp__plugin_Dev10x_cli__*
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
   - Bash(/tmp/claude/bin/mktmp.sh:*)
 ---
 

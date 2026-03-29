@@ -10,7 +10,7 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:slack-review-request
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/slack-review-request/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/slack-review-request/scripts/:*)
 ---
 
 # Slack Review Request

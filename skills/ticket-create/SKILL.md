@@ -12,7 +12,7 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:ticket-create
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
   - Bash(gh issue create:*)
   - Bash(/tmp/claude/bin/mktmp.sh:*)
   - mcp__claude_ai_Linear__save_issue

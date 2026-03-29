@@ -15,8 +15,8 @@ allowed-tools:
   - mcp__plugin_Dev10x_cli__pr_notify
   - mcp__plugin_Dev10x_cli__detect_tracker
   - mcp__plugin_Dev10x_cli__pr_detect
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/*:*)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/:*)
   - Bash(gh:*)
   - Skill(Dev10x:qa-scope)
   - Skill(Dev10x:request-review)

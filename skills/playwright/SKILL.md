@@ -11,7 +11,7 @@ description: >
   DO NOT TRIGGER when: testing non-TireTutor sites, running unit tests,
   or writing Playwright scripts for other projects.
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/:*)
 ---
 
 # Dev10x:playwright

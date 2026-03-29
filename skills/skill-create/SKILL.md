@@ -17,8 +17,8 @@ allowed-tools:
   - Bash(mkdir -p:*)
   - Bash(chmod:*)
   - Bash(rg:*)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-create/scripts/*:*)
-  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/*:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-create/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-index/scripts/:*)
 ---
 
 # Dev10x Skill Create
@@ -62,7 +62,7 @@ description: Use when [situation trigger] so [what the user gains or stops suffe
 user-invocable: true          # include for user-invocable skills
 allowed-tools:                # pre-approve bash commands (removes prompts)
   - Bash(git commit:*)
-  - Bash(~/.claude/skills/<name>/scripts/*:*)
+  - Bash(~/.claude/skills/<name>/scripts/:*)
 ---
 ```
 
@@ -188,7 +188,7 @@ Never `@`-force-load another skill file — it consumes context immediately.
 ## Script Conventions
 
 All scripts in `scripts/` must be executable so they can be invoked directly
-and match the `Bash(~/.claude/skills/<name>/scripts/*:*)` allow rule pattern.
+and match the `Bash(~/.claude/skills/<name>/scripts/:*)` allow rule pattern.
 
 ### Making Scripts Executable
 
@@ -234,7 +234,7 @@ python3 ~/.claude/skills/<name>/scripts/my-script.py --arg value
 
 ### Why Direct Invocation Matters
 
-The `allowed-tools` entry `Bash(~/.claude/skills/<name>/scripts/*:*)` only
+The `allowed-tools` entry `Bash(~/.claude/skills/<name>/scripts/:*)` only
 pre-approves commands whose prefix is `~/.claude/skills/...`. If the script
 is invoked with `python3` or `bash` prefix, the prefix becomes `python3` or
 `bash`, the allow rule doesn't match, and Claude prompts for approval on
