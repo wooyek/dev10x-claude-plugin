@@ -146,3 +146,13 @@ gatekeeper for repo access.
 ## Development
 
 [Development guide →](docs/development.md)
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=Brave-Labs%2FDev10x&type=date&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=Brave-Labs/Dev10x&type=date&theme=dark&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=Brave-Labs/Dev10x&type=date&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=Brave-Labs/Dev10x&type=date&legend=bottom-right" />
+ </picture>
+</a>
