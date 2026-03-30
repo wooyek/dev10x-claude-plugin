@@ -112,7 +112,9 @@ all `/` with `-`).
 
 ## Proactive Triggers
 
-**Auto-suggest this skill (DO NOT run it inline) when you detect:**
+**MUST suggest this skill when ANY trigger below is detected.**
+Do NOT run it inline — suggest a separate terminal invocation.
+A 2nd hook-blocked retry in a session is a mandatory trigger.
 
 1. **Raw scripts instead of tools** — You wrote 3+ raw `gh api`, shell pipelines,
    or other manual commands when a dedicated tool exists. The audit captures which
