@@ -462,9 +462,11 @@ has already approved the work plan, and the commit message was
 auto-generated from session context. Proceed directly to
 staging (Step 10) and commit creation (Step 11).
 
-**Attended mode — this step is mandatory.** Never skip it when
+**Attended mode — this step is MANDATORY.** Never skip it when
 invoked directly by the user, even when Steps 5-6 were
-auto-generated from session context.
+auto-generated from session context. **DO NOT proceed to
+`git commit` without user approval — skipping this gate is a
+compliance violation.**
 
 **Display formatted message:**
 ```
@@ -507,11 +509,16 @@ Options:
 
 **Use Write tool + `-F` to preserve formatting (hookify blocks heredocs):**
 
-1. Create a unique temp file to avoid cross-session collisions:
+1. **REQUIRED:** Create a temp file via mktmp MCP tool:
+   `mcp__plugin_Dev10x_cli__mktmp(namespace='git',
+   prefix='commit-msg', ext='.txt')`
+   Store the returned `path` value.
+   **Fallback** (if MCP unavailable):
    ```bash
    /tmp/claude/bin/mktmp.sh git commit-msg .txt
    ```
-   Store the returned path (e.g., `/tmp/claude/git/commit-msg.7f3a9b2c1d4e.txt`).
+   **Do NOT use hardcoded paths** — hooks reject non-mktmp
+   paths and the commit will fail.
 
 2. **Read the empty file first** — the Write tool requires a prior Read
    on the same path. Call `Read(<unique-path>)` before writing. The file
@@ -547,6 +554,12 @@ else
   # Show error
 fi
 ```
+
+**Error recovery:** If the hook blocks the commit, you are
+likely using a non-mktmp path or running outside the skill
+context. Restart via `Skill(Dev10x:git-commit)` with no args.
+Do NOT attempt to bypass hooks with `python3 subprocess` or
+`--no-verify`.
 
 ### Step 12: Next Steps
 
