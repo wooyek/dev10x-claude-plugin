@@ -94,6 +94,14 @@ all collected arguments. The reviewer:
    long-term maintainability, team feasibility
 4. Drafts ADR following project template
 
+**Reviewer agent skip (acceptable):** When the main agent has
+already accumulated sufficient codebase context from prior
+research and advocate agents, it may perform the synthesis
+inline without launching the `adr-reviewer` sub-agent. This
+avoids an unnecessary round-trip while preserving the option
+for complex evaluations where independent fact-checking adds
+value.
+
 ### Phase 3: Present
 
 Present the draft ADR to the user with:
