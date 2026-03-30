@@ -77,6 +77,7 @@ Always apply `references/review-checks-common.md`.
 | `code-sharing-patterns.md` | MCP imports, PEP 723 inlining, cross-context code | Review agents (false positive prevention) | Referenced, not auto-loaded |
 | `permission-architecture.md` | Permission → hook execution order, hook-enabled rules | `permission-auditor` agent, `permission-maintenance` skill | Referenced, not auto-loaded |
 | `model-tiers.md` | Model assignments, tier framework, per-project overrides | `model-selection.md` rule, playbook system | Referenced, not auto-loaded |
+| `skill-pipelines.md` | Skill composition pipelines, standalone invocation | `Dev10x:work-on` skill, pipeline documentation | Referenced, not auto-loaded |
 
 ## Agent Specs (`.claude/agents/`)
 
