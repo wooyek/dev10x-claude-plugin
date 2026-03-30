@@ -259,7 +259,7 @@ wheels = [
 
 [[package]]
 name = "dev10x"
-version = "0.43.0.dev0"
+version = "0.43.0"
 source = { virtual = "." }
 dependencies = [
     { name = "pyyaml" },
