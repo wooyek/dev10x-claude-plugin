@@ -24,7 +24,10 @@ Files matching: `skills/**`
    non-`Dev10x:` prefixes permitted. Both fields require the `Dev10x:`
    prefix (see `.claude/rules/skill-naming.md` lines 86-97)
 3. **Description quality** — `description:` must explain when to
-   trigger the skill; vague descriptions reduce discoverability
+   trigger the skill; vague descriptions reduce discoverability.
+   **Required trigger suffix**: every description must end with
+   `TRIGGER when: [conditions]` and `DO NOT TRIGGER when: [conditions]`
+   lines. Flag missing suffix as WARNING (degrades auto-discovery).
 4. **Script references** — (Script-based skills only; skip for orchestration-based)
    SKILL.md-referenced scripts must exist in the directory. Check both
    `allowed-tools` entries AND inline code blocks.
