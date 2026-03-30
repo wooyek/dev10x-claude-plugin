@@ -47,6 +47,9 @@ Never pause between phases.
 
 **REQUIRED: Create all tasks before ANY other work.**
 Do NOT skip task creation or improvise an ad-hoc workflow.
+Do NOT provide an inline audit summary — the audit MUST use
+the subagent orchestration defined below. Inline summaries
+bypass traceability and produce shallow analysis.
 If you find yourself reading files or analyzing the transcript
 without having created tasks first, STOP and create them now.
 
@@ -286,13 +289,16 @@ have these rules in their `settings.local.json`:
 Even with these rules, writes may still fail. Always design
 subagent prompts to return complete findings as their result.
 
-### Step 6: Wave 1 — dispatch parallel subagents
+### Step 6: Wave 1 — MUST dispatch parallel subagents
 
 **REQUIRED: Launch both subagents in a single message** so they
-run concurrently. Each subagent reads the transcript independently,
-follows its phase instructions from the Phase Reference section
-below, and writes findings to its output file. DO NOT use code
-blocks for these calls — they are mandatory instructions.
+run concurrently. You MUST dispatch subagents — do NOT perform
+the analysis inline in the main session. Inline analysis was the
+#1 deviation in session audits (GH-531). Each subagent reads
+the transcript independently, follows its phase instructions
+from the Phase Reference section below, and writes findings to
+its output file. DO NOT use code blocks for these calls — they
+are mandatory instructions.
 
 Include the full text of each phase's instructions from the Phase
 Reference section in the subagent prompt. Replace `<PLACEHOLDERS>`
