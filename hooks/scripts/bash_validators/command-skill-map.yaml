@@ -96,6 +96,22 @@ mappings:
       (1) poll gh pr checks until all pass, (2) fix any failures,
       (3) mark PR ready with gh pr ready.
 
+  - skill: mcp__plugin_Dev10x_cli__issue_get
+    type: mcp
+    description: Fetch issue details via MCP tool for structured responses
+    patterns:
+      - gh issue view
+    hook_block: true
+    hook_except: []
+    reason: >
+      Direct gh issue view requires Bash permission approval on
+      every call. The MCP tool provides structured JSON responses
+      and avoids permission friction.
+    guardrails: structured responses, no Bash permission friction
+    fallback_instructions: >
+      If the MCP server is unavailable, use gh issue view directly
+      and parse the JSON output manually with --json flag.
+
   - skill: Dev10x:k8s
     description: Kubernetes cluster operations via aws-vault authenticated kubectl
     patterns:
