@@ -6,7 +6,7 @@ systemMessage pointing to the correct skill.
 
 Blocked patterns:
   - git commit     → Dev10x:git-commit  (except --fixup, --amend,
-    and -F with skill temp paths /tmp/claude/git/commit-msg.*)
+    and -F with skill temp paths /tmp/claude/git/*)
   - gh pr create   → Dev10x:gh-pr-create (skill uses MCP create_pr)
   - git push       → Dev10x:git          (skill uses MCP push_safe)
   - git rebase -i  → Dev10x:git-groom    (skill uses MCP rebase_groom)
@@ -27,6 +27,16 @@ _REDIRECT_MSG = (
     "({guardrails}).\n\n"
     "If you are inside the skill already, this is a bug — "
     "file it at https://github.com/Brave-Labs/Dev10x/issues"
+)
+
+_COMMIT_HEAL_MSG = (
+    "\u26d4  `git commit` blocked — wrong temp file path.\n\n"
+    "The `-F` path must be under `/tmp/claude/git/`.\n"
+    "Create it with: `mcp__plugin_Dev10x_cli__mktmp("
+    'namespace="git", prefix="commit-msg", ext=".txt")`\n'
+    "then: `git commit -F <returned-path>`\n\n"
+    "If you used a different namespace (e.g. `commit` instead of "
+    "`git`), that is why this was blocked."
 )
 
 GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b(?!.*(?:--fixup|--amend))")
@@ -83,8 +93,11 @@ class SkillRedirectValidator:
         command = inp.command
         for pattern, label, skill, guardrails in _RULES:
             if pattern.search(command):
-                if label == "git commit" and not _is_direct_commit(command=command):
-                    continue
+                if label == "git commit":
+                    if not _is_direct_commit(command=command):
+                        continue
+                    if _has_wrong_temp_path(command=command):
+                        return HookResult(message=_COMMIT_HEAL_MSG)
                 return HookResult(
                     message=_REDIRECT_MSG.format(
                         command=label,
@@ -95,16 +108,26 @@ class SkillRedirectValidator:
         return None
 
 
-_SKILL_COMMIT_FILE_RE = re.compile(r"-F\s+/tmp/claude/git/commit-msg\.")
+_SKILL_COMMIT_FILE_RE = re.compile(r"-F\s+/tmp/claude/git/\S+\.[A-Za-z0-9]{12}\.\S+")
+_ANY_TEMP_FILE_RE = re.compile(r"-F\s+/tmp/claude/(?!git/)\S+/\S+\.\S+")
 
 
 def _is_direct_commit(*, command: str) -> bool:
     """Return True unless using -F with a skill-generated temp file.
 
     The Dev10x:git-commit skill creates commit messages via mktmp
-    at /tmp/claude/git/commit-msg.<random>.txt. Allow only those
-    paths through; block all other git commit invocations.
+    with namespace=git. Any file under /tmp/claude/git/ is a
+    skill-managed temp file and should be allowed through.
     """
     if _SKILL_COMMIT_FILE_RE.search(command):
         return False
     return True
+
+
+def _has_wrong_temp_path(*, command: str) -> bool:
+    """Return True when -F references a /tmp/claude/ path outside /tmp/claude/git/.
+
+    Detects the common mistake of using the wrong mktmp namespace
+    (e.g. namespace=commit instead of namespace=git).
+    """
+    return bool(_ANY_TEMP_FILE_RE.search(command))

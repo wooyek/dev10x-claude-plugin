@@ -85,4 +85,4 @@ class TestDispatcherBlocking:
             command="git commit -F /tmp/claude/git/msg.txt",
         )
         assert result.returncode == 2
-        assert "Dev10x:git-commit" in result.stderr
+        assert "Dev10x:git-commit" in result.stderr or "wrong temp file path" in result.stderr

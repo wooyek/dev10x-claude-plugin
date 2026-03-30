@@ -71,6 +71,13 @@ class TestGitCommitRedirect:
         result = validator.validate(inp=inp)
         assert result is None
 
+    def test_allows_git_commit_f_with_alternate_prefix(
+        self, validator: SkillRedirectValidator
+    ) -> None:
+        inp = _make_input(command="git commit -F /tmp/claude/git/msg.RnUr0daBNpSj.txt")
+        result = validator.validate(inp=inp)
+        assert result is None
+
     def test_blocks_git_commit_f_with_arbitrary_path(
         self, validator: SkillRedirectValidator
     ) -> None:
@@ -78,6 +85,21 @@ class TestGitCommitRedirect:
         result = validator.validate(inp=inp)
         assert result is not None
         assert "Dev10x:git-commit" in result.message
+
+    def test_blocks_git_commit_f_with_non_git_namespace(
+        self, validator: SkillRedirectValidator
+    ) -> None:
+        inp = _make_input(command="git commit -F /tmp/claude/commit/msg.knDXJdfzYnVI.txt")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "mcp__plugin_Dev10x_cli__mktmp" in result.message
+        assert "wrong temp file path" in result.message
+
+    def test_healing_msg_suggests_git_namespace(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="git commit -F /tmp/claude/commit/msg.abc123.txt")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert 'namespace="git"' in result.message
 
     def test_blocks_git_commit_without_flags(self, validator: SkillRedirectValidator) -> None:
         inp = _make_input(command="git commit")
