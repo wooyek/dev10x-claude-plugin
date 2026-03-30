@@ -207,6 +207,37 @@ class TestGhPrChecksWatchRedirect:
         assert result is None
 
 
+class TestGhIssueViewRedirect:
+    def test_blocks_gh_issue_view(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue view 539 --repo Brave-Labs/dev10x")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "mcp__plugin_Dev10x_cli__issue_get" in result.message
+
+    def test_blocks_gh_issue_view_with_json(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue view 42 --json title,body,state")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "mcp__plugin_Dev10x_cli__issue_get" in result.message
+
+    def test_blocks_gh_issue_view_minimal(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue view 10")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "mcp__plugin_Dev10x_cli__issue_get" in result.message
+
+    def test_mcp_message_uses_tool_label(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue view 1")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "MCP tool" in result.message
+        assert "Skill(" not in result.message
+
+    def test_should_run_true_for_gh_issue_view(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue view 539")
+        assert validator.should_run(inp=inp) is True
+
+
 class TestMessageContent:
     def test_message_includes_skill_name(self, validator: SkillRedirectValidator) -> None:
         inp = _make_input(command="git push origin main")
@@ -228,7 +259,13 @@ class TestMessageContent:
 
 
 class TestFrictionLevels:
-    def _make_yaml(self, *, friction_level: str, fallback: str = "") -> str:
+    def _make_yaml(
+        self,
+        *,
+        friction_level: str,
+        fallback: str = "",
+        mapping_type: str = "skill",
+    ) -> str:
         fallback_line = f'fallback_instructions: "{fallback}"' if fallback else ""
         return textwrap.dedent(
             f"""\
@@ -236,6 +273,7 @@ class TestFrictionLevels:
               friction_level: {friction_level}
             mappings:
               - skill: Dev10x:test-skill
+                type: {mapping_type}
                 patterns:
                   - test cmd
                 hook_block: true
@@ -315,6 +353,76 @@ class TestFrictionLevels:
         config = _load_config(yaml_path=yaml_file)
         assert config.mappings == []
 
+    def test_mcp_type_guided_uses_mcp_template(self, tmp_path: Path) -> None:
+        yaml_file = tmp_path / "map.yaml"
+        yaml_file.write_text(
+            self._make_yaml(
+                friction_level="guided",
+                fallback="Use gh issue view directly.",
+                mapping_type="mcp",
+            )
+        )
+        config = _load_config(yaml_path=yaml_file)
+
+        validator = SkillRedirectValidator()
+        inp = _make_input(command="test cmd foo")
+
+        import bash_validators.skill_redirect as mod
+
+        original = mod._CONFIG
+        mod._CONFIG = config
+        try:
+            result = validator.validate(inp=inp)
+        finally:
+            mod._CONFIG = original
+
+        assert result is not None
+        assert "MCP tool" in result.message
+        assert "Skill(" not in result.message
+
+    def test_mcp_type_strict_uses_mcp_template(self, tmp_path: Path) -> None:
+        yaml_file = tmp_path / "map.yaml"
+        yaml_file.write_text(
+            self._make_yaml(
+                friction_level="strict",
+                mapping_type="mcp",
+            )
+        )
+        config = _load_config(yaml_path=yaml_file)
+
+        validator = SkillRedirectValidator()
+        inp = _make_input(command="test cmd foo")
+
+        import bash_validators.skill_redirect as mod
+
+        original = mod._CONFIG
+        mod._CONFIG = config
+        try:
+            result = validator.validate(inp=inp)
+        finally:
+            mod._CONFIG = original
+
+        assert result is not None
+        assert "MCP tool" in result.message
+        assert "Skill(" not in result.message
+
+    def test_mcp_type_loaded_from_yaml(self, tmp_path: Path) -> None:
+        yaml_file = tmp_path / "map.yaml"
+        yaml_file.write_text(
+            self._make_yaml(
+                friction_level="guided",
+                mapping_type="mcp",
+            )
+        )
+        config = _load_config(yaml_path=yaml_file)
+        assert config.mappings[0].type == "mcp"
+
+    def test_skill_type_is_default(self, tmp_path: Path) -> None:
+        yaml_file = tmp_path / "map.yaml"
+        yaml_file.write_text(self._make_yaml(friction_level="guided"))
+        config = _load_config(yaml_path=yaml_file)
+        assert config.mappings[0].type == "skill"
+
 
 class TestYamlSchema:
     def test_yaml_file_is_valid(self) -> None:
@@ -329,6 +437,14 @@ class TestYamlSchema:
             if entry.get("hook_block"):
                 assert "guardrails" in entry, f"{entry['skill']} missing guardrails"
                 assert entry["guardrails"], f"{entry['skill']} has empty guardrails"
+
+    def test_type_field_is_valid_when_present(self) -> None:
+        data = yaml.safe_load(_YAML_PATH.read_text())  # type: ignore[name-defined]  # noqa: F821
+        for entry in data["mappings"]:
+            entry_type = entry.get("type", "skill")
+            assert entry_type in {"skill", "mcp"}, (
+                f"{entry['skill']} has invalid type: {entry_type}"
+            )
 
 
 # Make _YAML_PATH accessible for tests above

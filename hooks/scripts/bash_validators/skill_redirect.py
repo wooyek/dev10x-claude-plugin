@@ -45,6 +45,24 @@ _GUIDED_MSG = (
     "file it at https://github.com/Brave-Labs/Dev10x/issues"
 )
 
+_MCP_STRICT_MSG = (
+    "\u26d4  `{command}` blocked — use the MCP tool instead.\n\n"
+    "  Tool: `{skill}`\n\n"
+    "Why: Raw CLI bypasses structured responses and causes\n"
+    "permission friction ({guardrails}).\n\n"
+    "If the MCP server is unavailable, this is a bug — "
+    "file it at https://github.com/Brave-Labs/Dev10x/issues"
+)
+
+_MCP_GUIDED_MSG = (
+    "\u26d4  `{command}` blocked — use the MCP tool instead.\n\n"
+    "  Tool: `{skill}`\n\n"
+    "Why: Raw CLI bypasses structured responses and causes\n"
+    "permission friction ({guardrails}).\n\n"
+    "If the MCP server is unavailable, fall back to:\n"
+    "{fallback_instructions}"
+)
+
 _COMMIT_HEAL_MSG = (
     "\u26d4  `git commit` blocked — wrong temp file path.\n\n"
     "The `-F` path must be under `/tmp/claude/git/`.\n"
@@ -67,6 +85,7 @@ class _Mapping:
     hook_except: list[str]
     guardrails: str
     fallback_instructions: str
+    type: str = "skill"
 
 
 @dataclass
@@ -91,6 +110,7 @@ def _load_config(yaml_path: Path = _YAML_PATH) -> _MapConfig:
                 hook_except=entry.get("hook_except", []),
                 guardrails=entry.get("guardrails", ""),
                 fallback_instructions=entry.get("fallback_instructions", "").strip(),
+                type=entry.get("type", "skill"),
             )
         )
     return _MapConfig(friction_level=friction_level, mappings=mappings)
@@ -98,7 +118,7 @@ def _load_config(yaml_path: Path = _YAML_PATH) -> _MapConfig:
 
 _CONFIG: _MapConfig = _load_config()
 
-_QUICK_TOKENS = frozenset(["commit", "create", "push", "rebase", "checks"])
+_QUICK_TOKENS = frozenset(["commit", "create", "push", "rebase", "checks", "issue"])
 
 
 @dataclass
@@ -121,15 +141,19 @@ class SkillRedirectValidator:
             if mapping.skill == "Dev10x:git-commit" and _WRONG_TEMP_PATH_RE.search(command):
                 return HookResult(message=_COMMIT_HEAL_MSG)
             label = mapping.patterns[0].pattern
+            if mapping.type == "mcp":
+                strict_tpl, guided_tpl = _MCP_STRICT_MSG, _MCP_GUIDED_MSG
+            else:
+                strict_tpl, guided_tpl = _STRICT_MSG, _GUIDED_MSG
             if _CONFIG.friction_level == "guided" and mapping.fallback_instructions:
-                msg = _GUIDED_MSG.format(
+                msg = guided_tpl.format(
                     command=label,
                     skill=mapping.skill,
                     guardrails=mapping.guardrails,
                     fallback_instructions=mapping.fallback_instructions,
                 )
             else:
-                msg = _STRICT_MSG.format(
+                msg = strict_tpl.format(
                     command=label,
                     skill=mapping.skill,
                     guardrails=mapping.guardrails,
