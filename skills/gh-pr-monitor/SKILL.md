@@ -86,7 +86,11 @@ When the user invokes `/Dev10x:gh-pr-monitor`:
 
 ### Step 1: Detect PR context
 
-Use the `Dev10x:gh-context` script to detect PR context in one call:
+**Primary (MCP tool):** Call `mcp__plugin_Dev10x_cli__pr_detect`
+with the PR argument (URL, bare number, or empty). Parse
+`PR_NUMBER`, `REPO`, `PR_URL`, `BRANCH` from the response.
+
+**Fallback (script):** If the MCP tool is unavailable:
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
@@ -94,7 +98,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"
 ```
 
 Pass `$ARG` as the skill argument (PR URL, bare number, or empty).
-The script always fetches `BRANCH` via `gh pr view --json headRefName`
+Both methods fetch `BRANCH` via `gh pr view --json headRefName`
 — never from local git — which is critical in multi-worktree setups.
 
 If the script exits non-zero, tell the user and stop.
