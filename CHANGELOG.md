@@ -3,6 +3,211 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.43.0 — Skill Ecosystem & Compliance Hardening
+
+Released 2026-03-30
+
+### Features
+
+- **Competitive multi-agent design exploration** — ADR evaluation
+  dispatches domain-specific architect agents in parallel for
+  adversarial trade-off analysis ([GH-483])
+- **YAML-driven skill redirect with friction levels** — PreToolUse
+  hooks intercept raw CLI commands and redirect to skill wrappers
+  with configurable friction ([GH-418])
+- **Automated security review of changes** — reviewer-security
+  agent scans diffs for OWASP vulnerabilities and hardcoded
+  secrets ([GH-490])
+- **CI-enforced test coverage for servers** — MCP server Python
+  code now requires pytest coverage in CI ([GH-493])
+- **Guided discovery for new users** — onboarding skill index
+  and MOTD help new users find relevant skills ([GH-488])
+- **Context window optimization** — systematic compaction
+  patterns reduce token usage in long sessions ([GH-489])
+- **Per-project model selection for dispatch** — playbook steps
+  can override agent model tier per project ([GH-491])
+- **Skill reinforcement for missing commands** — agent detects
+  raw CLI usage and redirects to proper skills ([GH-506])
+- **Proactive skill-audit triggers** — audit phase fires
+  automatically when session processes 3+ items ([GH-537])
+- **MCP redirect for gh issue view** — issue fetching routes
+  through MCP tool instead of raw CLI ([GH-539])
+- **Harden gh-pr-create skill compliance** — PR creation
+  enforces all delegation and formatting rules ([GH-533])
+
+### Improvements
+
+- **Standardize tracker detection via MCP tool** — all skills
+  use `detect_tracker` MCP call instead of script ([GH-507])
+- **Reduce scoping wall-clock time** — background exploration
+  agents parallelize codebase analysis ([GH-485])
+- **Standardize skill trigger suffixes** — consistent TRIGGER/
+  DO NOT TRIGGER patterns across all skills ([GH-484])
+- **Enable standalone invocation of pipeline steps** — skills
+  in pipelines can run independently ([GH-487])
+- **Prefer MCP tool for PR context detection** — gh-context
+  routes through MCP by default ([GH-534])
+- **Allow inline synthesis when context suffices** — JTBD
+  drafting skips full skill when session has rich context
+  ([GH-536])
+- **Establish canonical eval schema** — standardized JSON
+  format for skill evaluation assertions ([GH-515])
+- **Clarify decision gate assertion naming** — eval patterns
+  use consistent signal names ([GH-488])
+- **Prevent uv.lock drift after version bumps** — lock file
+  stays in sync with pyproject.toml ([9630a11])
+
+### Bug Fixes
+
+- **Harden fanout and git skill guardrails** — Phase 5 checks
+  PR comments, issues use sequential Skill(), MCP push_safe
+  promoted, bypassPermissions documented ([GH-549])
+- **Enforce test skill delegation in routing** — test step
+  routes through skill wrapper, not raw pytest ([GH-504])
+- **Enforce skill-create delegation in routing** — skill
+  creation uses proper skill, not inline logic ([GH-503])
+- **Prevent skill-audit from targeting current session** —
+  audit dispatches to separate session context ([GH-508])
+- **Resolve 3 complex skill-audit findings** — mixed
+  compliance gaps in multiple skills ([d88ef81])
+- **Self-healing for wrong mktmp namespace** — mktmp
+  auto-corrects misrouted temp files ([d0acaf4])
+- **Block cd+rev-parse chaining in hooks** — PreToolUse
+  hook catches compound commands ([GH-528])
+- **Prevent inline audit summary deviation** — audit
+  results use structured output, not free text ([GH-531])
+- **Mandate mktmp for commit message temp files** — commit
+  skill always uses mktmp for collision-free paths ([GH-532])
+- **Harden scope skill review compliance** — scope skill
+  follows all review checklist items ([GH-485])
+- **Resolve checklist numbering conflict** — PR body
+  checklist renders correctly ([GH-486])
+
+### Security
+
+- **Enforce SKILL.md size discipline in reviewer** — reviewer
+  flags skills exceeding line budgets ([GH-486])
+
+### Documentation
+
+- **Surface skill-pipelines in rule index** — pipeline
+  composition patterns documented in INDEX.md ([GH-487])
+- **Prevent MCP tool names used as CLI commands** — docs
+  clarify MCP names are tool-call primitives only ([GH-535])
+- **Enable prospective users to evaluate Dev10x** — public
+  evaluation guide for potential adopters ([GH-492])
+
+### CI
+
+- **Tighten git commit -F allow pattern** — CI allow rules
+  match the mktmp-based commit flow ([GH-418])
+
+[GH-418]: https://github.com/Brave-Labs/Dev10x/issues/418
+[GH-483]: https://github.com/Brave-Labs/Dev10x/issues/483
+[GH-484]: https://github.com/Brave-Labs/Dev10x/issues/484
+[GH-485]: https://github.com/Brave-Labs/Dev10x/issues/485
+[GH-486]: https://github.com/Brave-Labs/Dev10x/issues/486
+[GH-487]: https://github.com/Brave-Labs/Dev10x/issues/487
+[GH-488]: https://github.com/Brave-Labs/Dev10x/issues/488
+[GH-489]: https://github.com/Brave-Labs/Dev10x/issues/489
+[GH-490]: https://github.com/Brave-Labs/Dev10x/issues/490
+[GH-491]: https://github.com/Brave-Labs/Dev10x/issues/491
+[GH-492]: https://github.com/Brave-Labs/Dev10x/issues/492
+[GH-493]: https://github.com/Brave-Labs/Dev10x/issues/493
+[GH-503]: https://github.com/Brave-Labs/Dev10x/issues/503
+[GH-504]: https://github.com/Brave-Labs/Dev10x/issues/504
+[GH-506]: https://github.com/Brave-Labs/Dev10x/issues/506
+[GH-507]: https://github.com/Brave-Labs/Dev10x/issues/507
+[GH-508]: https://github.com/Brave-Labs/Dev10x/issues/508
+[GH-515]: https://github.com/Brave-Labs/Dev10x/issues/515
+[GH-528]: https://github.com/Brave-Labs/Dev10x/issues/528
+[GH-531]: https://github.com/Brave-Labs/Dev10x/issues/531
+[GH-532]: https://github.com/Brave-Labs/Dev10x/issues/532
+[GH-533]: https://github.com/Brave-Labs/Dev10x/issues/533
+[GH-534]: https://github.com/Brave-Labs/Dev10x/issues/534
+[GH-535]: https://github.com/Brave-Labs/Dev10x/issues/535
+[GH-536]: https://github.com/Brave-Labs/Dev10x/issues/536
+[GH-537]: https://github.com/Brave-Labs/Dev10x/issues/537
+[GH-539]: https://github.com/Brave-Labs/Dev10x/issues/539
+[GH-549]: https://github.com/Brave-Labs/Dev10x/issues/549
+[9630a11]: https://github.com/Brave-Labs/Dev10x/commit/9630a11
+[d88ef81]: https://github.com/Brave-Labs/Dev10x/commit/d88ef81
+[d0acaf4]: https://github.com/Brave-Labs/Dev10x/commit/d0acaf4
+
+## 0.42.0 — Plan Persistence & Audit Compliance
+
+Released 2026-03-28
+
+### Features
+
+- **Persistent plan tracking across compaction** — task plans
+  survive context window compaction via file-backed state
+  ([GH-482])
+
+### Bug Fixes
+
+- **Resolve skill-audit TaskCreate validation failures** —
+  audit skill handles missing task fields gracefully ([GH-496])
+- **Ensure audit-report delegates to ticket-create** — report
+  filing routes through proper skill wrapper ([GH-498])
+- **Resolve script allow-rule permission friction** — script
+  paths match updated plugin directory layout ([GH-499])
+- **Prevent premature merge from SKIPPING checks** — CI
+  monitor excludes SKIPPING from pass count ([GH-501])
+- **Prevent inline triage bypass in gh-pr-respond** — all
+  comments route through triage before fixup ([GH-502])
+- **Prevent groom step bypass via self-assessment** — groom
+  skill always presents strategy gate ([GH-505])
+
+[GH-482]: https://github.com/Brave-Labs/Dev10x/issues/482
+[GH-496]: https://github.com/Brave-Labs/Dev10x/issues/496
+[GH-498]: https://github.com/Brave-Labs/Dev10x/issues/498
+[GH-499]: https://github.com/Brave-Labs/Dev10x/issues/499
+[GH-501]: https://github.com/Brave-Labs/Dev10x/issues/501
+[GH-502]: https://github.com/Brave-Labs/Dev10x/issues/502
+[GH-505]: https://github.com/Brave-Labs/Dev10x/issues/505
+
+## 0.41.0 — Orchestration Guardrails & Plan Persistence
+
+Released 2026-03-27
+
+### Features
+
+- **Per-skill model selection for agents** — agent specs and
+  skill dispatch choose model tier based on task complexity
+  ([GH-470])
+- **Harden work-on orchestration guardrails** — skill routing
+  enforcement table survives context compaction ([GH-477])
+- **Plan persistence across compaction** — plans backed by
+  files survive context window resets ([GH-414])
+
+### Improvements
+
+- **Clarify skill docs for nested mode and push** — nested
+  invocation exemptions and push safety documented ([GH-475])
+
+### Bug Fixes
+
+- **Prevent marking PR ready with unaddressed comments** —
+  post-CI comment re-check catches late bot reviews ([GH-465])
+
+### Security
+
+- **Enforce git-commit skill via PreToolUse hook** — raw
+  `git commit` blocked; must use Dev10x:git-commit ([GH-473])
+
+### Tests
+
+- **Ensure dispatcher tests match commit hook rules** —
+  test suite validates hook-to-skill routing ([GH-473])
+
+[GH-414]: https://github.com/Brave-Labs/Dev10x/issues/414
+[GH-465]: https://github.com/Brave-Labs/Dev10x/issues/465
+[GH-470]: https://github.com/Brave-Labs/Dev10x/issues/470
+[GH-473]: https://github.com/Brave-Labs/Dev10x/issues/473
+[GH-475]: https://github.com/Brave-Labs/Dev10x/issues/475
+[GH-477]: https://github.com/Brave-Labs/Dev10x/issues/477
+
 ## 0.40.0 — Delegation Hardening & Fixup Skill Gaps
 
 Released 2026-03-26
