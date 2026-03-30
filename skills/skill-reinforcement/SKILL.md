@@ -102,7 +102,10 @@ Output a firm, concise reinforcement message with these sections:
 4. **How to invoke:** — `Skill("<skill-name>")` call syntax.
    For MCP tools, add: "Call this as an MCP tool call, NOT as a
    Bash command. MCP tool names are tool interface identifiers,
-   never shell executables."
+   never shell executables. Example:
+   `mcp__plugin_Dev10x_cli__mktmp(namespace='git',
+   prefix='commit-msg', ext='.txt')` — not
+   `mcp__plugin_Dev10x_cli__mktmp git commit-msg .txt`."
 5. **Related skills:** — from the map entry (if available)
 
 If multiple skills could apply, list all of them ranked by
