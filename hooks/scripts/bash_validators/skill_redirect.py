@@ -1,30 +1,46 @@
 """Validator: redirect raw CLI commands to their skill equivalents.
 
-Blocks Bash commands that bypass skill guardrails (gitmoji, JTBD,
-CI monitoring, protected branch checks) by auto-denying with a
-systemMessage pointing to the correct skill.
+Loads command-to-skill mappings from command-skill-map.yaml at module
+level. Supports three friction levels:
 
-Blocked patterns:
-  - git commit     → Dev10x:git-commit  (except --fixup, --amend,
-    and -F with skill temp paths /tmp/claude/git/*)
-  - gh pr create   → Dev10x:gh-pr-create (skill uses MCP create_pr)
-  - git push       → Dev10x:git          (skill uses MCP push_safe)
-  - git rebase -i  → Dev10x:git-groom    (skill uses MCP rebase_groom)
-  - gh pr checks --watch → Dev10x:gh-pr-monitor (skill uses MCP tools)
+  strict   — hard deny (exit 2), no fallback shown
+  guided   — hard deny + fallback instructions in systemMessage (default)
+  adaptive — allow + warning in additionalContext (future)
+
+The YAML is the single source of truth shared with
+Dev10x:skill-reinforcement. Per-project overrides:
+  ~/.claude/projects/<project>/memory/playbooks/skill-reinforcement.yaml
 """
 
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import yaml
 
 from bash_validators._types import HookInput, HookResult
 
-_REDIRECT_MSG = (
+_YAML_PATH = Path(__file__).parent / "command-skill-map.yaml"
+
+_STRICT_MSG = (
     "\u26d4  `{command}` blocked — use the skill instead.\n\n"
     "  Skill: `Skill({skill})`\n\n"
     "Why: Raw CLI bypasses guardrails that the skill enforces\n"
     "({guardrails}).\n\n"
+    "If you are inside the skill already, this is a bug — "
+    "file it at https://github.com/Brave-Labs/Dev10x/issues"
+)
+
+_GUIDED_MSG = (
+    "\u26d4  `{command}` blocked — use the skill instead.\n\n"
+    "  Skill: `Skill({skill})`\n\n"
+    "Why: Raw CLI bypasses guardrails that the skill enforces\n"
+    "({guardrails}).\n\n"
+    "If the skill fails, apply these guardrails manually:\n"
+    "{fallback_instructions}\n\n"
     "If you are inside the skill already, this is a bug — "
     "file it at https://github.com/Brave-Labs/Dev10x/issues"
 )
@@ -39,44 +55,47 @@ _COMMIT_HEAL_MSG = (
     "`git`), that is why this was blocked."
 )
 
-GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b(?!.*(?:--fixup|--amend))")
-GH_PR_CREATE_RE = re.compile(r"\bgh\s+pr\s+create\b")
-GIT_PUSH_RE = re.compile(r"\bgit\s+push\b")
-GIT_REBASE_I_RE = re.compile(r"\bgit\s+rebase\b.*(?:\s-i\b|\s--interactive\b)")
-GH_PR_CHECKS_WATCH_RE = re.compile(r"\bgh\s+pr\s+checks\b.*(?:\s--watch\b|\s-w\b)")
+_WRONG_TEMP_PATH_RE = re.compile(r"-F\s+/tmp/claude/(?!git/)\S+/\S+\.\S+")
 
-_RULES: list[tuple[re.Pattern[str], str, str, str]] = [
-    (
-        GIT_COMMIT_RE,
-        "git commit",
-        "Dev10x:git-commit",
-        "gitmoji prefix, JTBD outcome title, 72-char limit",
-    ),
-    (
-        GH_PR_CREATE_RE,
-        "gh pr create",
-        "Dev10x:gh-pr-create",
-        "Job Story body, ticket linking, commit list, summary comment",
-    ),
-    (
-        GIT_PUSH_RE,
-        "git push",
-        "Dev10x:git",
-        "protected branch checks, force-push safety",
-    ),
-    (
-        GIT_REBASE_I_RE,
-        "git rebase -i",
-        "Dev10x:git-groom",
-        "atomic commits, convention enforcement, non-interactive rebase",
-    ),
-    (
-        GH_PR_CHECKS_WATCH_RE,
-        "gh pr checks --watch",
-        "Dev10x:gh-pr-monitor",
-        "failure detection, fixup commits, re-monitoring after push",
-    ),
-]
+
+@dataclass
+class _Mapping:
+    skill: str
+    patterns: list[re.Pattern[str]]
+    hook_block: bool
+    hook_except: list[str]
+    guardrails: str
+    fallback_instructions: str
+
+
+@dataclass
+class _MapConfig:
+    friction_level: str = "guided"
+    mappings: list[_Mapping] = field(default_factory=list)
+
+
+def _load_config(yaml_path: Path = _YAML_PATH) -> _MapConfig:
+    data: dict[str, Any] = yaml.safe_load(yaml_path.read_text())
+    cfg_data = data.get("config", {})
+    friction_level = cfg_data.get("friction_level", "guided")
+    mappings: list[_Mapping] = []
+    for entry in data.get("mappings", []):
+        if not entry.get("hook_block", False):
+            continue
+        mappings.append(
+            _Mapping(
+                skill=entry["skill"],
+                patterns=[re.compile(p) for p in entry.get("patterns", [])],
+                hook_block=True,
+                hook_except=entry.get("hook_except", []),
+                guardrails=entry.get("guardrails", ""),
+                fallback_instructions=entry.get("fallback_instructions", "").strip(),
+            )
+        )
+    return _MapConfig(friction_level=friction_level, mappings=mappings)
+
+
+_CONFIG: _MapConfig = _load_config()
 
 _QUICK_TOKENS = frozenset(["commit", "create", "push", "rebase", "checks"])
 
@@ -91,43 +110,26 @@ class SkillRedirectValidator:
 
     def validate(self, inp: HookInput) -> HookResult | None:
         command = inp.command
-        for pattern, label, skill, guardrails in _RULES:
-            if pattern.search(command):
-                if label == "git commit":
-                    if not _is_direct_commit(command=command):
-                        continue
-                    if _has_wrong_temp_path(command=command):
-                        return HookResult(message=_COMMIT_HEAL_MSG)
-                return HookResult(
-                    message=_REDIRECT_MSG.format(
-                        command=label,
-                        skill=skill,
-                        guardrails=guardrails,
-                    ),
+        for mapping in _CONFIG.mappings:
+            if not any(p.search(command) for p in mapping.patterns):
+                continue
+            if any(exc in command for exc in mapping.hook_except):
+                continue
+            if mapping.skill == "Dev10x:git-commit" and _WRONG_TEMP_PATH_RE.search(command):
+                return HookResult(message=_COMMIT_HEAL_MSG)
+            label = mapping.patterns[0].pattern
+            if _CONFIG.friction_level == "guided" and mapping.fallback_instructions:
+                msg = _GUIDED_MSG.format(
+                    command=label,
+                    skill=mapping.skill,
+                    guardrails=mapping.guardrails,
+                    fallback_instructions=mapping.fallback_instructions,
                 )
+            else:
+                msg = _STRICT_MSG.format(
+                    command=label,
+                    skill=mapping.skill,
+                    guardrails=mapping.guardrails,
+                )
+            return HookResult(message=msg)
         return None
-
-
-_SKILL_COMMIT_FILE_RE = re.compile(r"-F\s+/tmp/claude/git/\S+\.[A-Za-z0-9]{12}\.\S+")
-_ANY_TEMP_FILE_RE = re.compile(r"-F\s+/tmp/claude/(?!git/)\S+/\S+\.\S+")
-
-
-def _is_direct_commit(*, command: str) -> bool:
-    """Return True unless using -F with a skill-generated temp file.
-
-    The Dev10x:git-commit skill creates commit messages via mktmp
-    with namespace=git. Any file under /tmp/claude/git/ is a
-    skill-managed temp file and should be allowed through.
-    """
-    if _SKILL_COMMIT_FILE_RE.search(command):
-        return False
-    return True
-
-
-def _has_wrong_temp_path(*, command: str) -> bool:
-    """Return True when -F references a /tmp/claude/ path outside /tmp/claude/git/.
-
-    Detects the common mistake of using the wrong mktmp namespace
-    (e.g. namespace=commit instead of namespace=git).
-    """
-    return bool(_ANY_TEMP_FILE_RE.search(command))

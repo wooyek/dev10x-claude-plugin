@@ -2,10 +2,17 @@
 
 from __future__ import annotations
 
+import textwrap
+from pathlib import Path
+
 import pytest
+import yaml
 
 from bash_validators._types import HookInput
-from bash_validators.skill_redirect import SkillRedirectValidator
+from bash_validators.skill_redirect import (
+    SkillRedirectValidator,
+    _load_config,
+)
 
 
 def _make_input(*, command: str) -> HookInput:
@@ -218,3 +225,111 @@ class TestMessageContent:
         result = validator.validate(inp=inp)
         assert result is not None
         assert "blocked" in result.message
+
+
+class TestFrictionLevels:
+    def _make_yaml(self, *, friction_level: str, fallback: str = "") -> str:
+        fallback_line = f'fallback_instructions: "{fallback}"' if fallback else ""
+        return textwrap.dedent(
+            f"""\
+            config:
+              friction_level: {friction_level}
+            mappings:
+              - skill: Dev10x:test-skill
+                patterns:
+                  - test cmd
+                hook_block: true
+                hook_except: []
+                guardrails: test guardrail
+                {fallback_line}
+            """
+        )
+
+    def test_guided_mode_includes_fallback(self, tmp_path: Path) -> None:
+        yaml_file = tmp_path / "map.yaml"
+        yaml_file.write_text(
+            self._make_yaml(
+                friction_level="guided",
+                fallback="Apply manual guardrail here.",
+            )
+        )
+        config = _load_config(yaml_path=yaml_file)
+        assert config.friction_level == "guided"
+
+        validator = SkillRedirectValidator()
+        inp = _make_input(command="test cmd foo")
+
+        import bash_validators.skill_redirect as mod
+
+        original = mod._CONFIG
+        mod._CONFIG = config
+        try:
+            result = validator.validate(inp=inp)
+        finally:
+            mod._CONFIG = original
+
+        assert result is not None
+        assert "Apply manual guardrail here." in result.message
+
+    def test_strict_mode_omits_fallback(self, tmp_path: Path) -> None:
+        yaml_file = tmp_path / "map.yaml"
+        yaml_file.write_text(
+            self._make_yaml(
+                friction_level="strict",
+                fallback="Apply manual guardrail here.",
+            )
+        )
+        config = _load_config(yaml_path=yaml_file)
+
+        validator = SkillRedirectValidator()
+        inp = _make_input(command="test cmd foo")
+
+        import bash_validators.skill_redirect as mod
+
+        original = mod._CONFIG
+        mod._CONFIG = config
+        try:
+            result = validator.validate(inp=inp)
+        finally:
+            mod._CONFIG = original
+
+        assert result is not None
+        assert "Apply manual guardrail here." not in result.message
+
+    def test_hook_block_false_entries_not_loaded(self, tmp_path: Path) -> None:
+        yaml_file = tmp_path / "map.yaml"
+        yaml_file.write_text(
+            textwrap.dedent(
+                """\
+                config:
+                  friction_level: guided
+                mappings:
+                  - skill: Dev10x:ignored
+                    patterns:
+                      - ignored cmd
+                    hook_block: false
+                    guardrails: ""
+                """
+            )
+        )
+        config = _load_config(yaml_path=yaml_file)
+        assert config.mappings == []
+
+
+class TestYamlSchema:
+    def test_yaml_file_is_valid(self) -> None:
+        data = yaml.safe_load(_YAML_PATH.read_text())  # type: ignore[name-defined]  # noqa: F821
+        assert "config" in data
+        assert "mappings" in data
+        assert data["config"]["friction_level"] in {"strict", "guided", "adaptive"}
+
+    def test_all_hook_block_entries_have_guardrails(self) -> None:
+        data = yaml.safe_load(_YAML_PATH.read_text())  # type: ignore[name-defined]  # noqa: F821
+        for entry in data["mappings"]:
+            if entry.get("hook_block"):
+                assert "guardrails" in entry, f"{entry['skill']} missing guardrails"
+                assert entry["guardrails"], f"{entry['skill']} has empty guardrails"
+
+
+# Make _YAML_PATH accessible for tests above
+from bash_validators.skill_redirect import _YAML_PATH  # noqa: E402
