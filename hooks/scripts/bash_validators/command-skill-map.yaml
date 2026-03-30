@@ -17,7 +17,6 @@ mappings:
     hook_except:
       - "--fixup"
       - "--amend"
-      - "-F /tmp/claude/git/"
     reason: >
       Direct git commit bypasses gitmoji prefix, ticket ID
       extraction from branch name, and 72-char line limit
