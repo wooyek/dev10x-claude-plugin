@@ -45,10 +45,10 @@ Never pause between steps to ask "should I continue?".
 **REQUIRED: Create tasks before ANY work.** Execute these
 `TaskCreate` calls at startup:
 
-1. `TaskCreate(subject="Verify git state", activeForm="Verifying git state")`
-2. `TaskCreate(subject="Generate PR body", activeForm="Generating PR body")`
-3. `TaskCreate(subject="Run pre-PR checks", activeForm="Running pre-PR checks")`
-4. `TaskCreate(subject="Push and create PR", activeForm="Creating PR")`
+1. `TaskCreate(subject="Verify git state", description="Check branch, commits, base branch", activeForm="Verifying git state")`
+2. `TaskCreate(subject="Generate PR body", description="Source JTBD, build commit list, compose body", activeForm="Generating PR body")`
+3. `TaskCreate(subject="Run pre-PR checks", description="Run ruff, black, mypy, pytest if Python", activeForm="Running pre-PR checks")`
+4. `TaskCreate(subject="Push and create PR", description="Push branch, create draft PR on GitHub", activeForm="Creating PR")`
 
 Set sequential dependencies: generate blocked by verify, checks
 blocked by generate, push blocked by checks.
@@ -93,11 +93,13 @@ with all interactive gates. When in doubt, default to attended.
 `AskUserQuestion`** (do NOT use plain text) at each of these
 points. In unattended mode, these gates are skipped:
 
-- **PR preview approval:**
+- **PR preview approval (MANDATORY in attended mode):**
   **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text,
   call spec: [ask-pr-preview.md](./tool-calls/ask-pr-preview.md))
   after generating the PR body. This blocks execution until the
-  user responds.
+  user responds. **DO NOT skip this gate in attended mode —
+  proceeding directly to `create_pr` without user approval is
+  a compliance violation.**
   Options:
   - Create PR (Recommended) — Push branch and create draft PR as shown
   - Edit title/body — I want to revise before creating
@@ -167,7 +169,11 @@ When a PR number or URL is provided as argument, switch to "update" mode:
 
 ### Step 1: Verify Current State and Extract Ticket
 
-Run the verification script:
+**Primary (MCP tool):** Call
+`mcp__plugin_Dev10x_cli__verify_pr_state` to validate branch
+state. Parse `BRANCH_NAME` and `ISSUE` from the response.
+
+**Fallback (script):** If the MCP tool is unavailable:
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/verify-state.sh
