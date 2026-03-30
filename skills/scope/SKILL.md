@@ -18,6 +18,9 @@ allowed-tools:
   - Glob
   - Read
   - Bash(java -jar:*)
+  - AskUserQuestion
+  - TaskCreate
+  - TaskUpdate
 ---
 
 # Dev10x:scope — Base Technical Scoping
@@ -48,6 +51,13 @@ Never pause between phases.
 
 Set sequential dependencies. Update status as each completes.
 
+**Background exploration at startup:** Immediately on invocation,
+launch a background Explore agent to pre-fetch codebase context
+for the topic. This agent runs concurrently while tasks are
+created and the user is interviewed — results are ready by the
+time Phase 1 needs them. See "Startup: Background Exploration"
+below.
+
 **Parallel research in Phase 1:** Dispatch Explore subagents for
 independent research paths (external docs, codebase patterns,
 test expectations) — collect results before moving to Phase 2.
@@ -62,6 +72,33 @@ Options:
 - Proceed to implementation plan (Recommended) — Design looks good, create actionable steps
 - Revise design — I have corrections to the architecture
 - More research needed — Need to explore additional patterns
+
+## Startup: Background Exploration
+
+**Launch immediately on invocation, before creating tasks or
+asking the user any questions.** This pre-fetches codebase
+context so it is ready when Phase 1 needs it.
+
+```
+Agent(subagent_type="Explore",
+    model="haiku",
+    description="Pre-fetch codebase context for [topic]",
+    prompt="""Explore the codebase for patterns related to [topic].
+    Return:
+    - Relevant file paths and their purpose
+    - Existing patterns and conventions in this area
+    - Components that may need to change
+    - Test files covering related functionality
+    Keep response concise — 10-20 key findings.""",
+    run_in_background=true)
+```
+
+Store the agent ID. When Phase 1 begins (after tasks are
+created), wait for the agent to complete and merge its
+findings into Phase 1.3 (Explore Existing Codebase).
+
+If the agent is still running when Phase 1.3 starts, wait
+for it rather than dispatching a duplicate Explore agent.
 
 ## Core Scoping Workflow
 
