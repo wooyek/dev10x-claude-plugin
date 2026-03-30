@@ -184,6 +184,50 @@ Mark phase transition: `TaskUpdate(taskId=gather_task, status="completed")` then
 3. Extract the structure (e.g., Entry Point → Service → Client)
 4. Apply to new component with same layering
 
+#### 2.1b Design It Twice (Competitive Multi-Agent Exploration)
+
+After gathering requirements, spawn 3 parallel design agents with
+competing constraints. Each agent produces an independent proposal.
+A synthesis step then compares them before the user sees anything.
+
+**Launch 3 agents concurrently:**
+
+```
+Agent(subagent_type="Explore", model="sonnet",
+    description="Design: Minimize complexity",
+    prompt="""Design [feature] with the constraint: minimize
+    complexity. Prefer fewest components, simplest data model,
+    least code. Return: component list, data flow, trade-offs.""",
+    run_in_background=true)
+
+Agent(subagent_type="Explore", model="sonnet",
+    description="Design: Maximize flexibility",
+    prompt="""Design [feature] with the constraint: maximize
+    flexibility for future extension. Use abstractions, plugin
+    points, and extension interfaces. Return: component list,
+    data flow, trade-offs.""",
+    run_in_background=true)
+
+Agent(subagent_type="Explore", model="sonnet",
+    description="Design: Optimize for existing patterns",
+    prompt="""Design [feature] to match the existing codebase
+    patterns as closely as possible. Reuse existing abstractions,
+    follow established conventions. Return: component list,
+    data flow, trade-offs.""",
+    run_in_background=true)
+```
+
+**After all three return**, synthesize:
+1. Identify common structure across proposals
+2. Note where they diverge and why
+3. Recommend: best single approach OR a hybrid
+4. Present synthesis as the proposed design in Phase 2.3
+
+**Skip Design It Twice when:**
+- Work is a bug fix or simple config change (no design needed)
+- Implementation path is already clearly defined from Phase 1
+- User passes `--quick` argument to the skill
+
 #### 2.2 Apply Design Principles
 
 **YAGNI (You Aren't Gonna Need It):**
