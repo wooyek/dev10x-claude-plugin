@@ -73,7 +73,7 @@ _COMMIT_HEAL_MSG = (
     "`git`), that is why this was blocked."
 )
 
-_SKILL_COMMIT_FILE_RE = re.compile(r"-F\s+/tmp/claude/git/\S+\.[A-Za-z0-9]{12}\.\S+")
+_SKILL_COMMIT_FILE_RE = re.compile(r"-F\s+/tmp/claude/git/\S+")
 _WRONG_TEMP_PATH_RE = re.compile(r"-F\s+/tmp/claude/(?!git/)\S+/\S+\.\S+")
 
 
