@@ -181,7 +181,8 @@ reading the state file and comparing against current PR state.
 1. Read `/tmp/claude/pr-monitor/state-{pr_number}.json` (if exists)
 2. Fetch current PR state:
    ```bash
-   gh pr checks {pr_number} --repo {repo} --json name,state,conclusion
+   ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/ci-check-status.py \
+     --pr {pr_number} --repo {repo}
    gh pr view {pr_number} --repo {repo} --json state,reviews,comments
    ```
 3. Compare against saved state
@@ -227,46 +228,44 @@ Repeat until all CI checks pass:
      Conflict Handling below)
    - `UNKNOWN` → wait 10 seconds, re-check (GitHub is still computing)
 
-2. Check CI status:
+2. Check CI status using the structured verdict script:
    ```bash
-   gh pr checks {pr_number}
+   ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/ci-check-status.py \
+     --pr {pr_number} --repo {repo}
+   ```
+   The script returns JSON with a `verdict` field:
+   ```json
+   {"verdict": "green|pending|failing|empty", "total": 5,
+    "pass": 3, "fail": 0, "pending": 2, "skipping": 0, ...}
    ```
 
-3. Parse results — **all conditions checked atomically:**
-   A previously passing check may restart or fail between
-   polls. Never cache individual results across iterations —
-   re-evaluate ALL checks on every loop pass and require all
-   conditions true simultaneously before declaring green.
-   - ALL PASSING (no PENDING, no SKIPPING) → verify check
-     count (see below), then **re-check for review comments
-     before marking ready** (see Post-CI Comment Re-check
-     below), then go to Phase 2
-   - ANY PENDING → wait 30 seconds via `sleep 30`, then re-check.
-     **Hard rule: Do NOT exit Phase 1 while ANY check is PENDING.**
-     The loop MUST continue until zero checks remain in PENDING
-     state — either all pass, or a failure is detected. Exiting
-     early with PENDING checks was the #1 monitor regression
-     (GH-447 F1).
-   - ANY SKIPPING → treat as non-terminal. A SKIPPING check
-     has not executed and must not count as passing. Exclude
-     SKIPPING checks from the pass count AND the expected
-     count. Only declare green when all non-SKIPPING checks
-     pass. **Hard rule: SKIPPING ≠ passing.** Session
-     2f07759f showed SKIPPING checks caused premature merge
-     (GH-501).
-   - FAILURES → analyze and fix (see CI Failure Handling below)
+3. Act on the `verdict` field — **nothing else**:
+   - `"green"` → **re-check for review comments before marking
+     ready** (see Post-CI Comment Re-check below), then Phase 2
+   - `"pending"` → wait 30 seconds via `sleep 30`, re-run the
+     script. **Hard rule: Do NOT exit Phase 1 while verdict is
+     "pending".** The loop MUST continue until verdict changes
+     to `"green"` or `"failing"`. Exiting early with pending
+     checks was the #1 monitor regression (GH-447 F1, GH-553).
+   - `"failing"` → read the `checks` array to identify which
+     checks failed, then fix (see CI Failure Handling below)
+   - `"empty"` → GitHub hasn't registered check suites yet.
+     Wait 60 seconds and re-run. This is expected immediately
+     after a push.
+
+   **Do NOT parse `gh pr checks` text output directly.**
+   Always use the script — it handles bucket classification,
+   SKIPPING exclusion, and check counting reliably (GH-553).
 
 4. After fixing CI failures or pushing new commits, wait **60
    seconds** before the first re-check. GitHub needs time to
    register new check suites after a push — checking too early
    returns stale results from the previous commit.
 
-5. **Verify check count before declaring success.** Compare the
-   number of passing checks against the expected count (from the
-   first full check run), **excluding SKIPPING checks from both
-   counts**. If fewer non-SKIPPING checks pass than expected,
-   GitHub may not have registered all suites yet — wait 30
-   seconds and re-check.
+5. **Check count is handled by the script.** The `total` and
+   `pass` fields in the verdict JSON include the count. If
+   `verdict` is `"empty"` after a push, wait and retry — the
+   script already excludes SKIPPING checks from the pass count.
 
 ### CI Failure Handling
 
