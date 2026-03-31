@@ -269,56 +269,44 @@ Create a temp file for each analysis phase's output:
 /tmp/claude/bin/mktmp.sh skill-audit phase5-lessons .md
 ```
 
-Store the returned paths — subagents write their findings here
-and the main agent reads them in Phase 6.
+Store the returned paths. Phase 1 and Phase 4 scripts write
+directly to their output files. Wave 2 subagents (Phases 2, 3, 5)
+return findings as their Agent result string — the main agent
+writes those to the output files.
 
-**Subagent output strategy:** Subagents dispatched via `Agent()`
-cannot reliably write to output files — `bypassPermissions` does
-not propagate to subagents, and `settings.local.json` allow rules
-may not take effect depending on the permission mode. The primary
-strategy is to have each subagent **return its findings as the
-Agent result string**, then have the main agent write output files
-from the returned values.
+**Subagent output strategy (Wave 2 only):** Subagents dispatched
+via `Agent()` cannot reliably write to output files —
+`bypassPermissions` does not propagate. Have each subagent
+**return its findings as the Agent result string**, then write
+from the main agent.
 
-**Fallback:** If direct file writes are needed, the user must
-have these rules in their `settings.local.json`:
-```json
-["Write", {"glob": "/tmp/claude/skill-audit/**"}],
-["Read", {"glob": "/tmp/claude/skill-audit/**"}],
-["Edit", {"glob": "/tmp/claude/skill-audit/**"}]
-```
+### Step 6: Wave 1 — Run deterministic scripts (Phase 1 + Phase 4)
 
-Even with these rules, writes may still fail. Always design
-subagent prompts to return complete findings as their result.
+**Phase 1 and Phase 4 use deterministic Python scripts** instead
+of LLM subagents. This prevents rogue subagent actions (GH-565)
+and eliminates permission friction during analysis.
 
-### Step 6: Wave 1 — MUST dispatch parallel subagents
+Run both scripts — they are stdlib-only, require no user approval,
+and produce structured markdown output:
 
-**REQUIRED: Launch both subagents in a single message** so they
-run concurrently. You MUST dispatch subagents — do NOT perform
-the analysis inline in the main session. Inline analysis was the
-#1 deviation in session audits (GH-531). Each subagent reads
-the transcript independently, follows its phase instructions
-from the Phase Reference section below, and writes findings to
-its output file. DO NOT use code blocks for these calls — they
-are mandatory instructions.
+1. **Phase 1 (Action Inventory):**
+   ```bash
+   ${CLAUDE_PLUGIN_ROOT}/skills/skill-audit/scripts/analyze-actions.sh \
+     "<TRANSCRIPT_PATH>" "<PHASE1_OUTPUT>"
+   ```
 
-Include the full text of each phase's instructions from the Phase
-Reference section in the subagent prompt. Replace `<PLACEHOLDERS>`
-with actual paths from previous steps.
+2. **Phase 4 (Permission Friction):**
+   ```bash
+   ${CLAUDE_PLUGIN_ROOT}/skills/skill-audit/scripts/analyze-permissions.sh \
+     "<TRANSCRIPT_PATH>" ~/.claude/settings.local.json "<PHASE4_OUTPUT>"
+   ```
 
-**REQUIRED: Include this output note in every subagent prompt:**
-"Return your complete findings as your response. Also attempt to
-write them to the output file path provided using the Write tool,
-but if the write fails, the main agent will capture your findings
-from the returned result."
+Mark tasks 4 and 5 as `completed` after each script finishes.
+Read the output files to verify they contain valid markdown tables.
 
-1. `Agent(subagent_type="general-purpose", model="sonnet", description="Phase 1: Action inventory", prompt="You are running Phase 1 (Action Inventory) of a skill audit. Return your complete findings as your response. Also attempt to write them to <PHASE1_OUTPUT> using the Write tool — if the write fails, the main agent will capture your findings from the returned result. Read the session transcript at: <TRANSCRIPT_PATH>. Skills directory: <SKILLS_DIR>. [Include full Phase 1: Action Inventory instructions from the Phase Reference section].")`
-
-2. `Agent(subagent_type="general-purpose", model="sonnet", description="Phase 4: Permission friction", prompt="You are running Phase 4 (Permission Friction Analysis) of a skill audit. Return your complete findings as your response. Also attempt to write them to <PHASE4_OUTPUT> using the Write tool — if the write fails, the main agent will capture your findings from the returned result. Read the session transcript at: <TRANSCRIPT_PATH>. Project settings: ~/.claude/settings.local.json. Skills directory: <SKILLS_DIR>. [Include full Phase 4: Permission Friction Analysis instructions from the Phase Reference section, all sub-steps 4a through 4g].")`
-
-Wait for both subagents to complete. Mark tasks 4 and 5 as
-`completed` as each returns. If a subagent's output file was not
-written, use the returned result to write it from the main agent.
+**Note:** The Phase Reference sections for Phase 1 and Phase 4
+below remain as documentation of what the scripts produce. They
+are no longer used as subagent prompts.
 
 ### Step 7: Wave 2 — dispatch dependent subagents
 
