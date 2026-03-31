@@ -79,10 +79,9 @@ class TestDispatcherBlocking:
         )
         assert result.returncode == 0
 
-    def test_blocks_commit_with_arbitrary_f_flag(self) -> None:
+    def test_allows_commit_with_any_file_under_git_namespace(self) -> None:
         result = _run_hook(
             tool_name="Bash",
             command="git commit -F /tmp/claude/git/msg.txt",
         )
-        assert result.returncode == 2
-        assert "Dev10x:git-commit" in result.stderr or "wrong temp file path" in result.stderr
+        assert result.returncode == 0

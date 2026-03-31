@@ -85,6 +85,13 @@ class TestGitCommitRedirect:
         result = validator.validate(inp=inp)
         assert result is None
 
+    def test_allows_git_commit_f_without_mktmp_suffix(
+        self, validator: SkillRedirectValidator
+    ) -> None:
+        inp = _make_input(command="git commit -F /tmp/claude/git/commit-259-v2.txt")
+        result = validator.validate(inp=inp)
+        assert result is None
+
     def test_blocks_git_commit_f_with_arbitrary_path(
         self, validator: SkillRedirectValidator
     ) -> None:
