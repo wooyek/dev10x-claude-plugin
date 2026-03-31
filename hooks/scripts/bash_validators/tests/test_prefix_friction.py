@@ -109,6 +109,15 @@ class TestGitCNoop:
         result = validator.validate(inp=inp)
         assert result is not None
 
+    def test_blocks_git_c_with_quoted_path(self, validator: PrefixFrictionValidator) -> None:
+        inp = _make_input(
+            command='git -C "/work/tt/.worktrees/tt-pos-4" log --oneline -5',
+            cwd="/work/tt/.worktrees/tt-pos-4",
+        )
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "redundant" in result.message
+
 
 class TestCdNoopChain:
     @pytest.fixture()
@@ -145,6 +154,25 @@ class TestCdNoopChain:
         )
         result = validator.validate(inp=inp)
         assert result is not None
+
+    def test_blocks_cd_with_double_quoted_path(self, validator: PrefixFrictionValidator) -> None:
+        inp = _make_input(
+            command='cd "/work/tt/.worktrees/tt-pos-4" && git diff develop...HEAD --stat',
+            cwd="/work/tt/.worktrees/tt-pos-4",
+        )
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "redundant" in result.message
+        assert "git diff develop...HEAD --stat" in result.message
+
+    def test_blocks_cd_with_single_quoted_path(self, validator: PrefixFrictionValidator) -> None:
+        inp = _make_input(
+            command="cd '/work/tt/.worktrees/tt-pos-4' && git status",
+            cwd="/work/tt/.worktrees/tt-pos-4",
+        )
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "redundant" in result.message
 
 
 class TestEnvPrefixGit:

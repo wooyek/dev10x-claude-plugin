@@ -36,12 +36,12 @@ SETTINGS_FILES = [
     os.path.expanduser("~/.claude/settings.json"),
 ]
 
-GIT_C_RE = re.compile(r"\bgit\s+-C\s+(\S+)")
+GIT_C_RE = re.compile(r'\bgit\s+-C\s+("(?:[^"]+)"|\'(?:[^\']+)\'|\S+)')
 ENV_PREFIX_GIT_RE = re.compile(r"^[A-Z_]+=\S*\s+git\b")
 MERGE_BASE_RE = re.compile(r"\$\(git\s+merge-base\s+(\w+)\s+HEAD\)")
 GIT_SUBCOMMAND_RE = re.compile(r"\bgit\s+(log|diff|rebase)\b")
 
-CD_NOOP_RE = re.compile(r"^cd\s+(\S+)\s*&&\s*(.*)")
+CD_NOOP_RE = re.compile(r'^cd\s+("(?:[^"]+)"|\'(?:[^\']+)\'|\S+)\s*&&\s*(.*)')
 CD_REVPARSE_RE = re.compile(r'^cd\s+"?\$\(git\s+rev-parse\s+--show-toplevel\)"?\s*&&\s*(.*)')
 
 CD_REVPARSE_MSG = (
@@ -236,7 +236,7 @@ class PrefixFrictionValidator:
         match = GIT_C_RE.search(command)
         if not match:
             return None
-        target = os.path.normpath(os.path.expanduser(match.group(1)))
+        target = os.path.normpath(os.path.expanduser(match.group(1).strip("\"'")))
         normalized_cwd = os.path.normpath(cwd)
         if target != normalized_cwd:
             return None
@@ -260,7 +260,7 @@ class PrefixFrictionValidator:
         match = CD_NOOP_RE.match(command)
         if not match:
             return None
-        target = os.path.normpath(os.path.expanduser(match.group(1)))
+        target = os.path.normpath(os.path.expanduser(match.group(1).strip("\"'")))
         normalized_cwd = os.path.normpath(cwd)
         if target != normalized_cwd:
             return None
