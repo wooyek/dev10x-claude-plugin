@@ -256,3 +256,20 @@ mappings:
       The --extra dev flag is unnecessary in dev10x-ai repos
       where dev dependencies are available by default. Use
       uv run directly.
+
+  - skill: mcp__plugin_Dev10x_cli__push_safe
+    type: mcp
+    description: Safe git push with protected branch validation via MCP tool
+    patterns:
+      - git-push-safe.sh
+    hook_block: true
+    hook_except: []
+    reason: >
+      Direct git-push-safe.sh script invocation bypasses structured
+      responses and requires Bash permission on every call. The MCP
+      tool provides safe push validation with no permission friction.
+    guardrails: structured responses, protected branch checks, no Bash friction
+    fallback_instructions: >
+      If the MCP server is unavailable, use raw git push with manual
+      validation: verify the target branch is not main/develop, then
+      use --force-with-lease (never --force) if rebased.
