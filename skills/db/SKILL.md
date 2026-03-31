@@ -41,16 +41,34 @@ Before writing any SQL:
 
 ## Context Discovery Convention
 
-Generic skills discover project-specific database context by searching
-for these resources (in order):
+Generic skills discover database context by searching these
+resources (in order, first match wins per resource type):
 
-1. **Schema memory files**: `memory/db-*-schema.md` in the active
-   project's memory directory
-2. **Project db skills**: any skill matching `*:db` pattern (e.g.,
-   `tt:db`, `acme:db`) — these contain project-specific aliases,
-   common queries, and DSN configuration
-3. **CLAUDE.md database sections**: database connection info or
-   references in project instructions
+### Schema files
+
+1. `~/.claude/projects/<project>/memory/db-*-schema.md` — project-
+   level schema docs (one file per database)
+2. `~/.claude/memory/db-*-schema.md` — global schema docs shared
+   across projects
+
+### Database configuration
+
+Handled by `Dev10x:db-psql` — see its SKILL.md for the full
+search order. Key locations:
+
+1. `$DB_CONFIG` environment variable (explicit override)
+2. Plugin skill directory (`skills/db-psql/databases.yaml`)
+3. `~/.claude/memory/databases.yaml` — global, user-level config
+4. Sibling plugin skills (`skills/*/databases.yaml`)
+5. User skill directories (`~/.claude/skills/*/databases.yaml`)
+
+### Additional context
+
+- **Project db skills**: any skill matching `*:db` pattern (e.g.,
+  `tt:db`, `acme:db`) — project-specific aliases, common queries,
+  and DSN configuration
+- **CLAUDE.md database sections**: database connection info or
+  references in project instructions
 
 Always load available context before constructing queries.
 
@@ -78,8 +96,10 @@ Always load available context before constructing queries.
 
 ## Schema Memory File Format
 
-Project-specific schema files should follow this template and be
-placed at `memory/db-<name>-schema.md`:
+Schema files should follow this template. Place them at
+`~/.claude/projects/<project>/memory/db-<name>-schema.md`
+(project-level) or `~/.claude/memory/db-<name>-schema.md`
+(global):
 
 ```markdown
 # <Project> Database Schema — <database-name>
