@@ -324,6 +324,90 @@ class TestMktmp:
         assert "error" in result
 
 
+class TestIssueCreate:
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_creates_issue_with_title_only(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout='{"number":123,"title":"Fix bug","url":"https://github.com/org/repo/issues/123"}',
+            stderr="",
+        )
+
+        result = await cli_server.issue_create(title="Fix bug")
+
+        assert result["number"] == 123
+        assert result["title"] == "Fix bug"
+        call_args = mock_run.call_args[0]
+        assert call_args[0] == "skills/gh-context/scripts/gh-issue-create.sh"
+        assert "Fix bug" in call_args
+
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_creates_issue_with_body_and_labels(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout='{"number":456,"title":"New feature","url":"https://github.com/org/repo/issues/456"}',
+            stderr="",
+        )
+
+        result = await cli_server.issue_create(
+            title="New feature",
+            body="Details here",
+            labels=["enhancement", "priority"],
+            repo="org/repo",
+        )
+
+        assert result["number"] == 456
+        call_args = mock_run.call_args[0]
+        assert "--body" in call_args
+        assert "Details here" in call_args
+        assert "--label" in call_args
+        assert "--repo" in call_args
+
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_returns_error_on_failure(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout="",
+            stderr="Permission denied",
+        )
+
+        result = await cli_server.issue_create(title="Test")
+
+        assert "error" in result
+
+    @pytest.mark.asyncio
+    @patch("cli_server.run_script")
+    async def test_falls_back_to_key_value_on_bad_json(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="NUMBER=789\nTITLE=Test",
+            stderr="",
+        )
+
+        result = await cli_server.issue_create(title="Test")
+
+        assert result["NUMBER"] == "789"
+
+
 class TestPrDetect:
     @pytest.mark.asyncio
     @patch("cli_server.run_script")

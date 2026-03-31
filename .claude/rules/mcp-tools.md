@@ -58,6 +58,7 @@ supporting each tool:
 | `pr_detect` | `cli` | PR #126 | v0.25.0+ |
 | `issue_get` | `cli` | PR #126 | v0.25.0+ |
 | `issue_comments` | `cli` | PR #126 | v0.25.0+ |
+| `issue_create` | `cli` | PR #552 | v0.44.0+ |
 | `pr_comments` | `cli` | PR #126 | v0.25.0+ |
 | `pr_comment_reply` | `cli` | PR #399 | v0.37.0+ |
 | `request_review` | `cli` | PR #126 | v0.25.0+ |

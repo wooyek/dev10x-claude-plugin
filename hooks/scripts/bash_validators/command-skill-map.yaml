@@ -112,6 +112,22 @@ mappings:
       If the MCP server is unavailable, use gh issue view directly
       and parse the JSON output manually with --json flag.
 
+  - skill: mcp__plugin_Dev10x_cli__issue_create
+    type: mcp
+    description: Create GitHub issues via MCP tool for structured responses
+    patterns:
+      - gh issue create
+    hook_block: true
+    hook_except: []
+    reason: >
+      Direct gh issue create requires Bash permission approval on
+      every call. The MCP tool provides structured JSON responses
+      and avoids permission friction.
+    guardrails: structured responses, no Bash permission friction
+    fallback_instructions: >
+      If the MCP server is unavailable, use gh issue create directly
+      with --title and --body flags.
+
   - skill: Dev10x:k8s
     description: Kubernetes cluster operations via aws-vault authenticated kubectl
     patterns:

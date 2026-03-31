@@ -238,6 +238,31 @@ class TestGhIssueViewRedirect:
         assert validator.should_run(inp=inp) is True
 
 
+class TestGhIssueCreateRedirect:
+    def test_blocks_gh_issue_create(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue create --title 'Fix bug' --body 'Details'")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "mcp__plugin_Dev10x_cli__issue_create" in result.message
+
+    def test_blocks_gh_issue_create_minimal(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue create --title 'New feature'")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "mcp__plugin_Dev10x_cli__issue_create" in result.message
+
+    def test_mcp_message_uses_tool_label(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue create --title test")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "MCP tool" in result.message
+        assert "Skill(" not in result.message
+
+    def test_should_run_true_for_gh_issue_create(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue create --title test")
+        assert validator.should_run(inp=inp) is True
+
+
 class TestMessageContent:
     def test_message_includes_skill_name(self, validator: SkillRedirectValidator) -> None:
         inp = _make_input(command="git push origin main")

@@ -190,6 +190,44 @@ async def issue_comments(
 
 
 @server.tool()
+async def issue_create(
+    title: str,
+    body: str | None = None,
+    labels: list[str] | None = None,
+    repo: str | None = None,
+) -> dict:
+    """Create a GitHub issue.
+
+    Args:
+        title: Issue title
+        body: Issue body text (optional)
+        labels: List of label names to apply (optional)
+        repo: Repository (owner/repo). If omitted, uses current repo
+
+    Returns:
+        Dictionary with keys: number, title, url
+    """
+    args = [title]
+    if body:
+        args.extend(["--body", body])
+    if labels:
+        for label in labels:
+            args.extend(["--label", label])
+    if repo:
+        args.extend(["--repo", repo])
+
+    result = run_script("skills/gh-context/scripts/gh-issue-create.sh", *args)
+
+    if result.returncode != 0:
+        return {"error": result.stderr.strip()}
+
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return parse_key_value_output(result.stdout)
+
+
+@server.tool()
 async def pr_comments(
     action: str,
     pr_number: int | None = None,
