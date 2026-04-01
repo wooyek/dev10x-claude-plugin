@@ -55,7 +55,7 @@ def fetch_checks(
         "--repo",
         repo,
         "--json",
-        "name,bucket,state,conclusion",
+        "name,bucket,state",
     ]
     if required_only:
         cmd.append("--required")
