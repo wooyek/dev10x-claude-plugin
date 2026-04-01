@@ -27,6 +27,16 @@ from bash_validators._types import HookInput, HookResult
 
 _YAML_PATH = Path(__file__).parent / "command-skill-map.yaml"
 
+SKIP_ENV_VAR = "DEV10X_SKIP_CMD_VALIDATION"
+
+SKIP_PREFIX_RE = re.compile(rf"^{SKIP_ENV_VAR}=(true|1)\s+", re.IGNORECASE)
+
+OVERRIDE_HINT = (
+    "\n\nTo force this command (e.g., from inside a skill that "
+    "legitimately needs it), prefix it with:\n"
+    f"  {SKIP_ENV_VAR}=true <command>"
+)
+
 
 @dataclass
 class _Compensation:
@@ -130,13 +140,13 @@ def _format_skill_msg(
                 f"Why: Raw CLI bypasses structured responses and causes\n"
                 f"permission friction ({comp.guardrails}).\n\n"
                 f"If the MCP server is unavailable, fall back to:\n"
-                f"{comp.description}{file_issue_hint}"
+                f"{comp.description}{file_issue_hint}{OVERRIDE_HINT}"
             )
         return (
             f"\u26d4  `{label}` blocked — use the MCP tool instead.\n\n"
             f"  Tool: `{comp.tool}`\n\n"
             f"Why: Raw CLI bypasses structured responses and causes\n"
-            f"permission friction ({comp.guardrails}).{file_issue_hint}"
+            f"permission friction ({comp.guardrails}).{file_issue_hint}{OVERRIDE_HINT}"
         )
 
     if friction_level == "guided" and comp.fallback:
@@ -146,13 +156,13 @@ def _format_skill_msg(
             f"Why: Raw CLI bypasses guardrails that the skill enforces\n"
             f"({comp.guardrails}).\n\n"
             f"If the skill fails, apply these guardrails manually:\n"
-            f"{comp.fallback}{file_issue_hint}"
+            f"{comp.fallback}{file_issue_hint}{OVERRIDE_HINT}"
         )
     return (
         f"\u26d4  `{label}` blocked — use the skill instead.\n\n"
         f"  Skill: `Skill({comp.skill})`\n\n"
         f"Why: Raw CLI bypasses guardrails that the skill enforces\n"
-        f"({comp.guardrails}).{file_issue_hint}"
+        f"({comp.guardrails}).{file_issue_hint}{OVERRIDE_HINT}"
     )
 
 
@@ -161,6 +171,8 @@ class SkillRedirectValidator:
     name: str = "skill-redirect"
 
     def should_run(self, inp: HookInput) -> bool:
+        if SKIP_PREFIX_RE.match(inp.command):
+            return False
         cmd_lower = inp.command.lower()
         return any(token in cmd_lower for token in _QUICK_TOKENS)
 

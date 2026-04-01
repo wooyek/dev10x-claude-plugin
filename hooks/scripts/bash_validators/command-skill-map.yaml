@@ -93,7 +93,8 @@ rules:
     matcher: Bash
     patterns:
       - git push
-    except: []
+    except:
+      - "--force-with-lease"
     hook_block: true
     compensations:
       - type: use-skill
@@ -171,7 +172,8 @@ rules:
     matcher: Bash
     patterns:
       - gh issue create
-    except: []
+    except:
+      - "--body-file"
     hook_block: true
     compensations:
       - type: use-tool

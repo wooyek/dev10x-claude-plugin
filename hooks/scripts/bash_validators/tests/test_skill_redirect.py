@@ -154,11 +154,10 @@ class TestGitPushRedirect:
         assert result is not None
         assert "Dev10x:git" in result.message
 
-    def test_blocks_git_push_force(self, validator: SkillRedirectValidator) -> None:
+    def test_allows_git_push_force_with_lease(self, validator: SkillRedirectValidator) -> None:
         inp = _make_input(command="git push --force-with-lease")
         result = validator.validate(inp=inp)
-        assert result is not None
-        assert "Dev10x:git" in result.message
+        assert result is None
 
     def test_blocks_git_push_u(self, validator: SkillRedirectValidator) -> None:
         inp = _make_input(command="git push -u origin feature-branch")
@@ -495,3 +494,145 @@ class TestYamlSchema:
                 assert comp["type"] in valid_types, (
                     f"{entry['name']} has invalid compensation type: {comp['type']}"
                 )
+
+
+class TestLegitimateSkillCommands:
+    """Commands that skills legitimately instruct — must NOT be blocked."""
+
+    @pytest.mark.parametrize(
+        ("command", "description"),
+        [
+            ("git commit --fixup=abc1234", "git-fixup skill creates fixup commits"),
+            ("git commit --amend", "git-groom may amend during rebase"),
+            (
+                "git commit -F /tmp/claude/git/commit-msg.abc123.txt",
+                "git-commit skill uses -F with mktmp path",
+            ),
+            (
+                "git push --force-with-lease origin feature-branch",
+                "git-groom pushes with --force-with-lease",
+            ),
+            (
+                "git push --force-with-lease",
+                "git skill pushes with --force-with-lease",
+            ),
+            (
+                'gh issue create --repo owner/repo --title "Fix bug" --body-file /tmp/body.md',
+                "ticket-create uses --body-file for issue creation",
+            ),
+            ("git rebase --continue", "git-groom continues interrupted rebase"),
+            ("git rebase origin/develop", "git-groom rebases onto base branch"),
+            ("gh pr checks 42", "gh-pr-monitor checks status without --watch"),
+            ("gh pr checks", "checking PR status without --watch flag"),
+        ],
+    )
+    def test_allows_legitimate_skill_command(
+        self,
+        validator: SkillRedirectValidator,
+        command: str,
+        description: str,
+    ) -> None:
+        inp = _make_input(command=command)
+        result = validator.validate(inp=inp)
+        assert result is None, (
+            f"Blocked legitimate command: {command}\n"
+            f"Context: {description}\n"
+            f"Message: {result.message if result else 'N/A'}"
+        )
+
+
+class TestCommandPrefixOverride:
+    """DEV10X_SKIP_CMD_VALIDATION=true prefix bypasses all checks."""
+
+    def test_prefix_bypasses_should_run(
+        self,
+        validator: SkillRedirectValidator,
+    ) -> None:
+        inp = _make_input(command="DEV10X_SKIP_CMD_VALIDATION=true git push origin main")
+        assert validator.should_run(inp=inp) is False
+
+    def test_prefix_case_insensitive(
+        self,
+        validator: SkillRedirectValidator,
+    ) -> None:
+        inp = _make_input(command="DEV10X_SKIP_CMD_VALIDATION=True git commit -m 'test'")
+        assert validator.should_run(inp=inp) is False
+
+    def test_prefix_accepts_1(
+        self,
+        validator: SkillRedirectValidator,
+    ) -> None:
+        inp = _make_input(command="DEV10X_SKIP_CMD_VALIDATION=1 gh pr create --title test")
+        assert validator.should_run(inp=inp) is False
+
+    def test_no_prefix_does_not_bypass(
+        self,
+        validator: SkillRedirectValidator,
+    ) -> None:
+        inp = _make_input(command="git push origin main")
+        assert validator.should_run(inp=inp) is True
+
+    def test_override_hint_in_block_message(
+        self,
+        validator: SkillRedirectValidator,
+    ) -> None:
+        inp = _make_input(command="git push origin main")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "DEV10X_SKIP_CMD_VALIDATION=true" in result.message
+
+    def test_hint_instructs_prefix_not_env_var(
+        self,
+        validator: SkillRedirectValidator,
+    ) -> None:
+        inp = _make_input(command="git push origin main")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "prefix it with" in result.message
+
+
+class TestBlockedVsAllowed:
+    """Verify the boundary between blocked and allowed for each hook rule."""
+
+    @pytest.mark.parametrize(
+        ("command", "should_block"),
+        [
+            ("git push origin main", True),
+            ("git push -u origin feature", True),
+            ("git push --force-with-lease origin feature", False),
+            ("git push --force-with-lease", False),
+            ("git commit -m 'test'", True),
+            ("git commit --fixup=abc", False),
+            ("git commit --amend", False),
+            ("git commit -F /tmp/claude/git/msg.abc.txt", False),
+            ("gh pr create --title test", True),
+            ("gh issue view 42", True),
+            ("gh issue create --title test", True),
+            ("gh issue create --body-file /tmp/body.md --title test", False),
+            ("git rebase -i HEAD~3", True),
+            ("git rebase --interactive develop", True),
+            ("git rebase --continue", False),
+            ("git rebase origin/develop", False),
+            ("gh pr checks --watch", True),
+            ("gh pr checks -w", True),
+            ("gh pr checks 42", False),
+            ("gh pr checks", False),
+        ],
+    )
+    def test_blocked_vs_allowed(
+        self,
+        validator: SkillRedirectValidator,
+        command: str,
+        should_block: bool,
+    ) -> None:
+        inp = _make_input(command=command)
+        result = validator.validate(inp=inp)
+        if should_block:
+            assert result is not None, f"Expected block for: {command}"
+        else:
+            assert result is None, (
+                f"Unexpected block for: {command}\nMessage: {result.message if result else 'N/A'}"
+            )
+
+
+# Make _YAML_PATH accessible for tests above

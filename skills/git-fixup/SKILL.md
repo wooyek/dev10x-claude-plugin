@@ -299,7 +299,7 @@ Dev10x:gh-pr-fixup workflow:
 2. Implement fix
 3. Stage changes: git add {file}
 4. Call Dev10x:git-fixup with (pr_number, comment_id)  <-- uses this skill
-5. Push: git push
+5. Push: mcp__plugin_Dev10x_cli__push_safe
 6. Reply to comment with commit reference
 ```
 

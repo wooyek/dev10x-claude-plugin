@@ -170,9 +170,9 @@ https://github.com/{owner}/{repo}/pull/{pr}#discussion_r{comment_id}
 
 ### Step 6: Push the Fixup Commit
 
-```bash
-git push origin HEAD
-```
+**Primary (MCP tool):** `mcp__plugin_Dev10x_cli__push_safe(args=["origin", "HEAD"])`
+
+**Fallback:** `Skill(Dev10x:git)` for safe push with protected branch checks.
 
 Get the commit hash for the reply:
 ```bash

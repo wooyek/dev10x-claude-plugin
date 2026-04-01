@@ -283,7 +283,7 @@ For each CI fix:
 - Implement the fix
 - Stage changes: `git add {files}`
 - Create fixup commit targeting the appropriate original commit
-- Push: `git push origin HEAD`
+- Push: `mcp__plugin_Dev10x_cli__push_safe(args=["origin", "HEAD"])`
 
 ### Conflict Handling
 
@@ -574,7 +574,7 @@ Include the full output in the agent's final report to the supervisor.
 - **Poll interval**: Wait 30 seconds between CI checks and comment checks.
 - **Max CI retries**: If CI fails 5 times in a row on the same issue,
   stop and report the problem.
-- **No regular force push**: Use `git push origin HEAD` for normal pushes.
+- **No regular force push**: Use `mcp__plugin_Dev10x_cli__push_safe` for normal pushes.
   Exception: after conflict rebase, use `git push --force-with-lease`.
 - **Working directory**: Use `gh pr view {pr_number} --repo {repo}
   --json headRefName` to get the branch. Never hardcode a working

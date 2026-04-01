@@ -223,7 +223,7 @@ in the main session via `WebFetch`, not dispatched to subagents.
 
 | Source type | Agent type | Subagent instructions |
 |-------------|-----------|----------------------|
-| `github-issue` | general-purpose | Run `gh issue view "$NUMBER" --repo "$REPO" --json title,state,body,labels,assignees`. Return title, status, labels, body summary, linked PRs. |
+| `github-issue` | general-purpose | Call `mcp__plugin_Dev10x_cli__issue_get(issue_number=$NUMBER, repo="$REPO")`. Return title, status, labels, body summary, linked PRs. |
 | `github-pr` | general-purpose | Run `gh pr view --json title,body,headRefName,state,mergedAt,reviews`. Return title, status, branch, review comment count. |
 | `linear-ticket` | general-purpose | Call `mcp__claude_ai_Linear__get_issue(issueId)`. Return title, status, parent ID, relations, comment summaries. |
 | `jira-ticket` | general-purpose | Use `Dev10x:jira` skill to fetch ticket. Return title, status, assignee, linked issues. |
