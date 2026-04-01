@@ -219,29 +219,26 @@ The PR body **must** start with a JTBD Job Story as its first paragraph.
 
 Repeat until all CI checks pass:
 
-1. Check for merge conflicts:
-   ```bash
-   gh pr view {pr_number} --repo {repo} --json mergeable -q '.mergeable'
-   ```
-   - `MERGEABLE` → continue to CI check
-   - `CONFLICTING` → rebase onto base branch and force-push (see
-     Conflict Handling below)
-   - `UNKNOWN` → wait 10 seconds, re-check (GitHub is still computing)
-
-2. Check CI status using the structured verdict script:
+1. Check CI and merge conflict status using the structured verdict script
+   (the script checks both CI checks and PR mergeable status):
    ```bash
    ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/ci-check-status.py \
      --pr {pr_number} --repo {repo}
    ```
    The script returns JSON with a `verdict` field:
    ```json
-   {"verdict": "green|pending|failing|empty", "total": 5,
-    "pass": 3, "fail": 0, "pending": 2, "skipping": 0, ...}
+   {"verdict": "green|pending|failing|conflicting|empty",
+    "mergeable": "MERGEABLE|CONFLICTING|UNKNOWN",
+    "total": 5, "pass": 3, "fail": 0, "pending": 2, ...}
    ```
 
-3. Act on the `verdict` field — **nothing else**:
+2. Act on the `verdict` field — **nothing else**:
    - `"green"` → **re-check for review comments before marking
      ready** (see Post-CI Comment Re-check below), then Phase 2
+   - `"conflicting"` → PR has merge conflicts. Rebase onto base
+     branch and force-push (see Conflict Handling below). The
+     script checks `mergeable` status from the GitHub API — this
+     verdict takes priority over CI check results (GH-563).
    - `"pending"` → wait 30 seconds via `sleep 30`, re-run the
      script. **Hard rule: Do NOT exit Phase 1 while verdict is
      "pending".** The loop MUST continue until verdict changes
@@ -257,12 +254,12 @@ Repeat until all CI checks pass:
    Always use the script — it handles bucket classification,
    SKIPPING exclusion, and check counting reliably (GH-553).
 
-4. After fixing CI failures or pushing new commits, wait **60
+3. After fixing CI failures or pushing new commits, wait **60
    seconds** before the first re-check. GitHub needs time to
    register new check suites after a push — checking too early
    returns stale results from the previous commit.
 
-5. **Check count is handled by the script.** The `total` and
+4. **Check count is handled by the script.** The `total` and
    `pass` fields in the verdict JSON include the count. If
    `verdict` is `"empty"` after a push, wait and retry — the
    script already excludes SKIPPING checks from the pass count.

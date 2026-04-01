@@ -3,6 +3,8 @@
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 _spec = importlib.util.spec_from_file_location(
     "ci_check_status",
     Path(__file__).with_name("ci-check-status.py"),
@@ -26,7 +28,7 @@ class TestComputeVerdict:
             {"name": "test", "bucket": "pass"},
             {"name": "lint", "bucket": "pass"},
         ]
-        result = compute_verdict(checks=checks)
+        result = compute_verdict(checks=checks, mergeable="MERGEABLE")
         assert result["verdict"] == "green"
         assert result["total"] == 3
         assert result["pass"] == 3
@@ -116,3 +118,44 @@ class TestComputeVerdict:
         result = compute_verdict(checks=checks)
         assert result["verdict"] == "pending"
         assert result["pending"] == 1
+
+    def test_mergeable_field_included_in_output(self):
+        result = compute_verdict(checks=[], mergeable="MERGEABLE")
+        assert result["mergeable"] == "MERGEABLE"
+
+    def test_default_mergeable_is_unknown(self):
+        result = compute_verdict(checks=[])
+        assert result["mergeable"] == "UNKNOWN"
+
+    def test_conflicting_overrides_green_checks(self):
+        checks = [
+            {"name": "build", "bucket": "pass"},
+            {"name": "test", "bucket": "pass"},
+        ]
+        result = compute_verdict(checks=checks, mergeable="CONFLICTING")
+        assert result["verdict"] == "conflicting"
+        assert result["pass"] == 2
+
+    def test_conflicting_overrides_failing_checks(self):
+        checks = [
+            {"name": "build", "bucket": "fail"},
+        ]
+        result = compute_verdict(checks=checks, mergeable="CONFLICTING")
+        assert result["verdict"] == "conflicting"
+
+    def test_conflicting_overrides_pending_checks(self):
+        checks = [
+            {"name": "build", "bucket": "pending"},
+        ]
+        result = compute_verdict(checks=checks, mergeable="CONFLICTING")
+        assert result["verdict"] == "conflicting"
+
+    def test_conflicting_with_empty_checks(self):
+        result = compute_verdict(checks=[], mergeable="CONFLICTING")
+        assert result["verdict"] == "conflicting"
+
+    @pytest.mark.parametrize("mergeable", ["MERGEABLE", "UNKNOWN"])
+    def test_non_conflicting_mergeable_does_not_affect_verdict(self, mergeable):
+        checks = [{"name": "build", "bucket": "pass"}]
+        result = compute_verdict(checks=checks, mergeable=mergeable)
+        assert result["verdict"] == "green"
