@@ -4,6 +4,7 @@ version = "0.45.0.dev0"
 description = "Claude Code plugin providing reusable skills, hooks, and commands"
 requires-python = ">=3.12"
 dependencies = [
+    "click>=8.0",
     "pyyaml>=6.0",
 ]
 

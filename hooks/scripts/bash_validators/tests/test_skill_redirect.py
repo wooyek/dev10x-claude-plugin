@@ -10,6 +10,7 @@ import yaml
 
 from bash_validators._types import HookInput
 from bash_validators.skill_redirect import (
+    _YAML_PATH,
     SkillRedirectValidator,
     _load_config,
 )
@@ -289,6 +290,13 @@ class TestMessageContent:
         assert result is not None
         assert "blocked" in result.message
 
+    def test_message_includes_file_issue_hint(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="git push origin main")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "file an issue" in result.message
+        assert "Brave-Labs/Dev10x" in result.message
+
 
 class TestFrictionLevels:
     def _make_yaml(
@@ -296,24 +304,26 @@ class TestFrictionLevels:
         *,
         friction_level: str,
         fallback: str = "",
-        mapping_type: str = "skill",
+        comp_type: str = "use-skill",
     ) -> str:
-        fallback_line = f'fallback_instructions: "{fallback}"' if fallback else ""
-        return textwrap.dedent(
-            f"""\
+        skill_or_tool = "skill" if comp_type == "use-skill" else "tool"
+        return textwrap.dedent(f"""\
             config:
               friction_level: {friction_level}
-            mappings:
-              - skill: Dev10x:test-skill
-                type: {mapping_type}
+              plugin_repo: https://github.com/Brave-Labs/Dev10x
+            rules:
+              - name: test-rule
+                matcher: Bash
                 patterns:
                   - test cmd
+                except: []
                 hook_block: true
-                hook_except: []
-                guardrails: test guardrail
-                {fallback_line}
-            """
-        )
+                compensations:
+                  - type: {comp_type}
+                    {skill_or_tool}: Dev10x:test-skill
+                    guardrails: test guardrail
+                    fallback: "{fallback}"
+        """)
 
     def test_guided_mode_includes_fallback(self, tmp_path: Path) -> None:
         yaml_file = tmp_path / "map.yaml"
@@ -369,21 +379,22 @@ class TestFrictionLevels:
     def test_hook_block_false_entries_not_loaded(self, tmp_path: Path) -> None:
         yaml_file = tmp_path / "map.yaml"
         yaml_file.write_text(
-            textwrap.dedent(
-                """\
+            textwrap.dedent("""\
                 config:
                   friction_level: guided
-                mappings:
-                  - skill: Dev10x:ignored
+                rules:
+                  - name: ignored-rule
+                    matcher: Bash
                     patterns:
                       - ignored cmd
                     hook_block: false
-                    guardrails: ""
-                """
-            )
+                    compensations:
+                      - type: use-skill
+                        skill: Dev10x:ignored
+            """)
         )
         config = _load_config(yaml_path=yaml_file)
-        assert config.mappings == []
+        assert config.rules == []
 
     def test_mcp_type_guided_uses_mcp_template(self, tmp_path: Path) -> None:
         yaml_file = tmp_path / "map.yaml"
@@ -391,7 +402,7 @@ class TestFrictionLevels:
             self._make_yaml(
                 friction_level="guided",
                 fallback="Use gh issue view directly.",
-                mapping_type="mcp",
+                comp_type="use-tool",
             )
         )
         config = _load_config(yaml_path=yaml_file)
@@ -417,7 +428,7 @@ class TestFrictionLevels:
         yaml_file.write_text(
             self._make_yaml(
                 friction_level="strict",
-                mapping_type="mcp",
+                comp_type="use-tool",
             )
         )
         config = _load_config(yaml_path=yaml_file)
@@ -438,46 +449,49 @@ class TestFrictionLevels:
         assert "MCP tool" in result.message
         assert "Skill(" not in result.message
 
-    def test_mcp_type_loaded_from_yaml(self, tmp_path: Path) -> None:
-        yaml_file = tmp_path / "map.yaml"
-        yaml_file.write_text(
-            self._make_yaml(
-                friction_level="guided",
-                mapping_type="mcp",
-            )
-        )
-        config = _load_config(yaml_path=yaml_file)
-        assert config.mappings[0].type == "mcp"
-
-    def test_skill_type_is_default(self, tmp_path: Path) -> None:
-        yaml_file = tmp_path / "map.yaml"
-        yaml_file.write_text(self._make_yaml(friction_level="guided"))
-        config = _load_config(yaml_path=yaml_file)
-        assert config.mappings[0].type == "skill"
-
 
 class TestYamlSchema:
     def test_yaml_file_is_valid(self) -> None:
-        data = yaml.safe_load(_YAML_PATH.read_text())  # type: ignore[name-defined]  # noqa: F821
+        data = yaml.safe_load(_YAML_PATH.read_text())
         assert "config" in data
-        assert "mappings" in data
+        assert "rules" in data
         assert data["config"]["friction_level"] in {"strict", "guided", "adaptive"}
 
-    def test_all_hook_block_entries_have_guardrails(self) -> None:
-        data = yaml.safe_load(_YAML_PATH.read_text())  # type: ignore[name-defined]  # noqa: F821
-        for entry in data["mappings"]:
+    def test_all_hook_block_entries_have_compensations(self) -> None:
+        data = yaml.safe_load(_YAML_PATH.read_text())
+        for entry in data["rules"]:
             if entry.get("hook_block"):
-                assert "guardrails" in entry, f"{entry['skill']} missing guardrails"
-                assert entry["guardrails"], f"{entry['skill']} has empty guardrails"
+                assert "compensations" in entry, f"{entry['name']} missing compensations"
+                assert entry["compensations"], f"{entry['name']} has empty compensations"
 
-    def test_type_field_is_valid_when_present(self) -> None:
-        data = yaml.safe_load(_YAML_PATH.read_text())  # type: ignore[name-defined]  # noqa: F821
-        for entry in data["mappings"]:
-            entry_type = entry.get("type", "skill")
-            assert entry_type in {"skill", "mcp"}, (
-                f"{entry['skill']} has invalid type: {entry_type}"
+    def test_all_rules_have_name(self) -> None:
+        data = yaml.safe_load(_YAML_PATH.read_text())
+        for entry in data["rules"]:
+            assert "name" in entry, f"Rule missing name: {entry}"
+            assert entry["name"], f"Rule has empty name: {entry}"
+
+    def test_all_rules_have_matcher(self) -> None:
+        data = yaml.safe_load(_YAML_PATH.read_text())
+        for entry in data["rules"]:
+            assert "matcher" in entry, f"{entry['name']} missing matcher"
+            assert entry["matcher"] in {"Bash", "Edit|Write"}, (
+                f"{entry['name']} has invalid matcher: {entry['matcher']}"
             )
 
-
-# Make _YAML_PATH accessible for tests above
-from bash_validators.skill_redirect import _YAML_PATH  # noqa: E402
+    def test_compensation_types_are_valid(self) -> None:
+        valid_types = {
+            "use-skill",
+            "use-tool",
+            "use-alternative",
+            "split-commands",
+            "change-cwd",
+            "use-alias",
+            "use-file-flag",
+            "file-issue",
+        }
+        data = yaml.safe_load(_YAML_PATH.read_text())
+        for entry in data["rules"]:
+            for comp in entry.get("compensations", []):
+                assert comp["type"] in valid_types, (
+                    f"{entry['name']} has invalid compensation type: {comp['type']}"
+                )
