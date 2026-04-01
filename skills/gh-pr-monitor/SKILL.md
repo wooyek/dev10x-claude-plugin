@@ -322,13 +322,29 @@ unaddressed comments.
 
 1. Fetch unresolved review threads (use the GraphQL query from
    Phase 2's "Counting Unaddressed Comments" section)
-2. If unresolved threads exist → enter Phase 2 to address them.
-   Do NOT mark PR ready yet.
-3. If no unresolved threads → mark PR ready (`gh pr ready
-   {pr_number}`) and proceed to Phase 2 for a final check.
+2. Fetch all reviews and check for **unaddressed body-only
+   findings** (GH-564). For each review, if the body contains
+   structured findings (severity markers like `CRITICAL:`,
+   `BLOCKING:`, `INFO:`, numbered items with file:line refs,
+   or bold-prefixed items like `**[BLOCKING]**`) that have not
+   been replied to with a top-level PR comment, count them as
+   unaddressed. Query reviews via:
+   ```bash
+   gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews \
+     --jq '[.[] | select(.body != "" and .body != null)
+     | {id, user: .user.login, body, state}]'
+   ```
+   Then check if each review body's findings have corresponding
+   top-level PR comment replies (matching `Re:` prefix pattern).
+3. If unresolved threads OR unaddressed body findings exist →
+   enter Phase 2 to address them. Do NOT mark PR ready yet.
+4. If no unresolved threads AND no unaddressed body findings →
+   mark PR ready (`gh pr ready {pr_number}`) and proceed to
+   Phase 2 for a final check.
 
-This re-check adds one API call but prevents the race condition
-where automated reviewers post during CI.
+This re-check prevents the race condition where automated
+reviewers post during CI, and ensures body-only review
+findings are not silently skipped.
 
 ---
 
@@ -384,6 +400,9 @@ report them as needing attention.
 Move to Phase 2.5 when ALL of these are true:
 - All CI checks passing
 - No unresolved review threads (use GraphQL `isResolved` check)
+- No unaddressed body-only review findings (GH-564) — check
+  review bodies for structured findings without corresponding
+  top-level PR comment replies
 - PR has at least one approval OR no reviews yet
 
 ---
