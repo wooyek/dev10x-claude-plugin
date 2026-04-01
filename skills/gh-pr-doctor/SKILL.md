@@ -4,6 +4,12 @@ description: >
   Use when merged PRs may have unresolved review threads
   accumulating as silent tech debt — so unaddressed feedback
   gets surfaced, grouped by theme, and tracked as issues.
+
+  TRIGGER when: reviewing merged PRs for accumulated tech debt,
+  or post-merge as part of maintenance workflow
+
+  DO NOT TRIGGER when: reviewing active draft PRs, or as part of
+  automated PR review (not designed for real-time feedback)
 user-invocable: true
 invocation-name: Dev10x:gh-pr-doctor
 allowed-tools:
