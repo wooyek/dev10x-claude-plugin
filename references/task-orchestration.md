@@ -380,6 +380,31 @@ When a synthesis phase reads output from earlier phases, verify the dependency
 list includes all upstream phase tasks. Example: If synthesis reads `<PHASE1_OUTPUT>`,
 task 4 (Phase 1) must be in the synthesis task's `blockedBy` list.
 
+### Permission-Aware Parallel Dispatch
+
+When executing parallel work streams, classify each task **before dispatch**
+to avoid Write/Edit tool failures in background agents:
+
+| Task type | Write/Edit needed? | Dispatch method |
+|-----------|-------------------|-----------------|
+| Issue implementation | Yes | Main session via `Skill()` |
+| PR with code fixes | Yes | Main session via `Skill()` |
+| Conflict resolution | Yes | Main session via `Skill()` |
+| PR ready-to-merge | No | Background `Agent()` OK |
+| CI monitoring | No | Background `Agent()` OK |
+| Investigation/analysis | No | Background `Agent()` OK |
+
+**Decision rule**: If a task MAY create or edit files, it MUST run in the main
+session via `Skill()`. Background agents are only safe for read-only operations
+due to `bypassPermissions` non-propagation.
+
+**Example**: A `fanout` skill routes a PR with unaddressed review comments
+to `Skill()` for inline fixes, but routes a CI-green PR with no comments to
+background `Agent()` for merge monitoring.
+
+See `.claude/rules/essentials.md` "Permission & Tool Availability Limits"
+for the complete constraint specification.
+
 ## Pattern 5: Teams for Heavy Parallelism
 
 Use `TeamCreate` when multiple agents need to coordinate on
