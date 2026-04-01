@@ -79,6 +79,10 @@ class TestIsShellFragment:
             "Bash(then echo)",
             "Bash(else exit 1)",
             "Bash(if [ -f foo ])",
+            "Bash(case $x in)",
+            "Bash(esac)",
+            "Bash(select item in list)",
+            "Bash(until done)",
         ],
     )
     def test_detects_shell_fragments(self, rule: str) -> None:
@@ -114,6 +118,11 @@ class TestIsOldVersion:
         rule = "Bash(/home/user/.claude/plugins/cache/Brave-Labs/Dev10x/0.16.0/scripts/foo.sh:*)"
 
         assert clean_mod.is_old_version(rule, None) is False
+
+    def test_detects_old_version_with_alternate_org(self) -> None:
+        rule = "Bash(/home/user/.claude/plugins/cache/WooYek/Dev10x/0.16.0/scripts/foo.sh:*)"
+
+        assert clean_mod.is_old_version(rule, "0.33.0") is True
 
 
 class TestHasLeakedSecret:

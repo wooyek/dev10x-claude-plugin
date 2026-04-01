@@ -36,11 +36,27 @@ USERSPACE_CONFIG = (
 PLUGIN_CONFIG = Path(__file__).resolve().parent.parent / "projects.yaml"
 GLOBAL_SETTINGS = Path.home() / ".claude" / "settings.json"
 
-VERSION_PATTERN = re.compile(r"plugins/cache/Brave-Labs/Dev10x/(\d+\.\d+\.\d+)")
+VERSION_PATTERN = re.compile(r"plugins/cache/[^/]+/Dev10x/(\d+\.\d+\.\d+)")
 
 ENV_PREFIX_PATTERN = re.compile(r"^Bash\([A-Z_]+=")
 
-SHELL_FRAGMENTS = frozenset({"do", "done", "fi", "for", "while", "break", "then", "else", "if"})
+SHELL_FRAGMENTS = frozenset(
+    {
+        "do",
+        "done",
+        "fi",
+        "for",
+        "while",
+        "break",
+        "then",
+        "else",
+        "if",
+        "case",
+        "esac",
+        "select",
+        "until",
+    }
+)
 
 DOUBLE_SLASH_PATTERN = re.compile(r"\(//")
 

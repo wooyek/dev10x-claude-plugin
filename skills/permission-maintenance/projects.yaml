@@ -3,7 +3,7 @@
 # versioned plugin paths. Worktree directories (.worktrees/) are
 # included automatically.
 #
-# Copy this file to ~/.claude/skills/Dev10x:update-permission-paths/
+# Copy this file to ~/.claude/skills/Dev10x:permission-maintenance/
 # and customize with your own project roots:
 #   update-paths.py --init
 

@@ -358,7 +358,8 @@ def _ensure_base(
             print("(dry run — no files will be modified)\n")
 
     if not filtered:
-        print("All base permissions already covered by global settings.")
+        if not quiet:
+            print("All base permissions already covered by global settings.")
         return 0
 
     total_added = 0
@@ -422,7 +423,9 @@ def _detect_plugin_cache() -> str:
     cache_root = Path.home() / ".claude" / "plugins" / "cache"
     if not cache_root.is_dir():
         return "~/.claude/plugins/cache/Brave-Labs/Dev10x"
-    candidates = [d / "Dev10x" for d in cache_root.iterdir() if (d / "Dev10x").is_dir()]
+    candidates = [
+        d / "Dev10x" for d in cache_root.iterdir() if d.is_dir() and (d / "Dev10x").is_dir()
+    ]
     if len(candidates) == 1:
         return f"~/.claude/plugins/cache/{candidates[0].parent.name}/Dev10x"
     if len(candidates) > 1:
