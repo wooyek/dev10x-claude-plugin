@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from bash_validators._types import HookInput
-from bash_validators.prefix_friction import PrefixFrictionValidator
+from dev10x.validators.prefix_friction import PrefixFrictionValidator
+from tests.fakers import BashHookInputFaker
 
 
-def _make_input(*, command: str, cwd: str = "") -> HookInput:
-    return HookInput(
-        tool_name="Bash",
+def _make_input(*, command: str, cwd: str = "") -> BashHookInputFaker:
+    return BashHookInputFaker.build(
         command=command,
-        raw={"tool_name": "Bash", "tool_input": {"command": command}},
         cwd=cwd,
     )
 

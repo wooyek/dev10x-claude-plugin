@@ -8,16 +8,16 @@ from pathlib import Path
 import pytest
 import yaml
 
-from bash_validators._types import HookInput
-from bash_validators.skill_redirect import (
+from dev10x.validators.skill_redirect import (
     _YAML_PATH,
     SkillRedirectValidator,
     _load_config,
 )
+from tests.fakers import BashHookInputFaker
 
 
-def _make_input(*, command: str) -> HookInput:
-    return HookInput(
+def _make_input(*, command: str) -> BashHookInputFaker:
+    return BashHookInputFaker.build(
         tool_name="Bash",
         command=command,
         raw={"tool_name": "Bash", "tool_input": {"command": command}},
@@ -338,7 +338,7 @@ class TestFrictionLevels:
         validator = SkillRedirectValidator()
         inp = _make_input(command="test cmd foo")
 
-        import bash_validators.skill_redirect as mod
+        import dev10x.validators.skill_redirect as mod
 
         original = mod._CONFIG
         mod._CONFIG = config
@@ -363,7 +363,7 @@ class TestFrictionLevels:
         validator = SkillRedirectValidator()
         inp = _make_input(command="test cmd foo")
 
-        import bash_validators.skill_redirect as mod
+        import dev10x.validators.skill_redirect as mod
 
         original = mod._CONFIG
         mod._CONFIG = config
@@ -409,7 +409,7 @@ class TestFrictionLevels:
         validator = SkillRedirectValidator()
         inp = _make_input(command="test cmd foo")
 
-        import bash_validators.skill_redirect as mod
+        import dev10x.validators.skill_redirect as mod
 
         original = mod._CONFIG
         mod._CONFIG = config
@@ -435,7 +435,7 @@ class TestFrictionLevels:
         validator = SkillRedirectValidator()
         inp = _make_input(command="test cmd foo")
 
-        import bash_validators.skill_redirect as mod
+        import dev10x.validators.skill_redirect as mod
 
         original = mod._CONFIG
         mod._CONFIG = config
