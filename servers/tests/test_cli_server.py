@@ -15,9 +15,12 @@ import pytest
 # Import the server module — needs mcp available
 cli_server = pytest.importorskip("cli_server", reason="mcp not installed")
 
+# GitHub tools extracted to dev10x.mcp.github
+gh = pytest.importorskip("dev10x.mcp.github", reason="dev10x not installed")
+
 
 class TestDetectRepo:
-    @patch("cli_server.subprocess.run")
+    @patch("dev10x.mcp.github.subprocess.run")
     def test_returns_repo_on_success(
         self,
         mock_run: MagicMock,
@@ -29,11 +32,11 @@ class TestDetectRepo:
             stderr="",
         )
 
-        result = cli_server._detect_repo()
+        result = gh._detect_repo()
 
         assert result == "Brave-Labs/dev10x"
 
-    @patch("cli_server.subprocess.run")
+    @patch("dev10x.mcp.github.subprocess.run")
     def test_returns_none_on_failure(
         self,
         mock_run: MagicMock,
@@ -45,13 +48,13 @@ class TestDetectRepo:
             stderr="not a git repo",
         )
 
-        result = cli_server._detect_repo()
+        result = gh._detect_repo()
 
         assert result is None
 
 
 class TestGhApi:
-    @patch("cli_server.subprocess.run")
+    @patch("dev10x.mcp.github.subprocess.run")
     def test_builds_get_command(
         self,
         mock_run: MagicMock,
@@ -63,7 +66,7 @@ class TestGhApi:
             stderr="",
         )
 
-        cli_server._gh_api(endpoint="/repos/owner/repo")
+        gh._gh_api(endpoint="/repos/owner/repo")
 
         cmd = mock_run.call_args[0][0]
         assert cmd[0] == "gh"
@@ -71,7 +74,7 @@ class TestGhApi:
         assert "/repos/owner/repo" in cmd
         assert "-X" not in cmd
 
-    @patch("cli_server.subprocess.run")
+    @patch("dev10x.mcp.github.subprocess.run")
     def test_adds_method_for_non_get(
         self,
         mock_run: MagicMock,
@@ -83,7 +86,7 @@ class TestGhApi:
             stderr="",
         )
 
-        cli_server._gh_api(
+        gh._gh_api(
             endpoint="/repos/owner/repo/pulls",
             method="POST",
         )
@@ -93,7 +96,7 @@ class TestGhApi:
         post_idx = cmd.index("-X")
         assert cmd[post_idx + 1] == "POST"
 
-    @patch("cli_server.subprocess.run")
+    @patch("dev10x.mcp.github.subprocess.run")
     def test_adds_jq_filter(
         self,
         mock_run: MagicMock,
@@ -105,7 +108,7 @@ class TestGhApi:
             stderr="",
         )
 
-        cli_server._gh_api(
+        gh._gh_api(
             endpoint="/repos/owner/repo",
             jq=".name",
         )
@@ -115,7 +118,7 @@ class TestGhApi:
         jq_idx = cmd.index("--jq")
         assert cmd[jq_idx + 1] == ".name"
 
-    @patch("cli_server.subprocess.run")
+    @patch("dev10x.mcp.github.subprocess.run")
     def test_handles_string_fields(
         self,
         mock_run: MagicMock,
@@ -127,7 +130,7 @@ class TestGhApi:
             stderr="",
         )
 
-        cli_server._gh_api(
+        gh._gh_api(
             endpoint="/repos/owner/repo",
             method="POST",
             fields={"title": "My PR"},
@@ -138,7 +141,7 @@ class TestGhApi:
         f_idx = cmd.index("-f")
         assert cmd[f_idx + 1] == "title=My PR"
 
-    @patch("cli_server.subprocess.run")
+    @patch("dev10x.mcp.github.subprocess.run")
     def test_handles_int_fields(
         self,
         mock_run: MagicMock,
@@ -150,7 +153,7 @@ class TestGhApi:
             stderr="",
         )
 
-        cli_server._gh_api(
+        gh._gh_api(
             endpoint="/repos/owner/repo",
             method="POST",
             fields={"count": 42},
@@ -161,7 +164,7 @@ class TestGhApi:
         f_idx = cmd.index("-F")
         assert cmd[f_idx + 1] == "count=42"
 
-    @patch("cli_server.subprocess.run")
+    @patch("dev10x.mcp.github.subprocess.run")
     def test_handles_list_fields(
         self,
         mock_run: MagicMock,
@@ -173,7 +176,7 @@ class TestGhApi:
             stderr="",
         )
 
-        cli_server._gh_api(
+        gh._gh_api(
             endpoint="/repos/owner/repo",
             method="POST",
             fields={"reviewers": ["alice", "bob"]},
@@ -189,27 +192,27 @@ class TestGhApi:
 
 class TestResolveRepo:
     def test_returns_provided_repo(self) -> None:
-        result, error = cli_server._resolve_repo(repo="owner/repo")
+        result, error = gh._resolve_repo(repo="owner/repo")
 
         assert result == "owner/repo"
         assert error is None
 
-    @patch("cli_server._detect_repo", return_value="detected/repo")
+    @patch("dev10x.mcp.github._detect_repo", return_value="detected/repo")
     def test_detects_repo_when_none_provided(
         self,
         _mock: MagicMock,
     ) -> None:
-        result, error = cli_server._resolve_repo(repo=None)
+        result, error = gh._resolve_repo(repo=None)
 
         assert result == "detected/repo"
         assert error is None
 
-    @patch("cli_server._detect_repo", return_value=None)
+    @patch("dev10x.mcp.github._detect_repo", return_value=None)
     def test_returns_error_when_detection_fails(
         self,
         _mock: MagicMock,
     ) -> None:
-        result, error = cli_server._resolve_repo(repo=None)
+        result, error = gh._resolve_repo(repo=None)
 
         assert result is None
         assert error is not None
@@ -218,7 +221,7 @@ class TestResolveRepo:
 
 class TestDetectTracker:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_returns_parsed_output_on_success(
         self,
         mock_run: MagicMock,
@@ -236,7 +239,7 @@ class TestDetectTracker:
         assert result["TICKET_NUMBER"] == "15"
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_returns_error_on_failure(
         self,
         mock_run: MagicMock,
@@ -326,7 +329,7 @@ class TestMktmp:
 
 class TestIssueCreate:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_creates_issue_with_title_only(
         self,
         mock_run: MagicMock,
@@ -347,7 +350,7 @@ class TestIssueCreate:
         assert "Fix bug" in call_args
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_creates_issue_with_body_and_labels(
         self,
         mock_run: MagicMock,
@@ -374,7 +377,7 @@ class TestIssueCreate:
         assert "--repo" in call_args
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_returns_error_on_failure(
         self,
         mock_run: MagicMock,
@@ -391,7 +394,7 @@ class TestIssueCreate:
         assert "error" in result
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_falls_back_to_key_value_on_bad_json(
         self,
         mock_run: MagicMock,
@@ -410,7 +413,7 @@ class TestIssueCreate:
 
 class TestPrDetect:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_detects_pr_from_number(
         self,
         mock_run: MagicMock,
@@ -428,7 +431,7 @@ class TestPrDetect:
         mock_run.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_handles_detection_error(
         self,
         mock_run: MagicMock,
@@ -522,7 +525,7 @@ class TestSetupAliases:
 
 class TestVerifyPrState:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_verifies_pr_state_before_creation(
         self,
         mock_run: MagicMock,
@@ -540,7 +543,7 @@ class TestVerifyPrState:
         mock_run.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_blocks_pr_on_protected_branch(
         self,
         mock_run: MagicMock,
@@ -559,7 +562,7 @@ class TestVerifyPrState:
 
 class TestPrePrChecks:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_runs_quality_checks_successfully(
         self,
         mock_run: MagicMock,
@@ -578,7 +581,7 @@ class TestPrePrChecks:
         mock_run.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.github.run_script")
     async def test_reports_check_failures(
         self,
         mock_run: MagicMock,

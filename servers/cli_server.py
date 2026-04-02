@@ -6,91 +6,32 @@
 
 """Consolidated MCP server for CLI operations (GitHub, Git, utilities).
 
-Merges gh_server.py + git_server.py + utils_server.py into a single
-process to reduce token overhead and subprocess startup cost.
-See: https://github.com/Brave-Labs/Dev10x/issues/194
+GitHub tools are extracted to dev10x.mcp.github — this file registers
+them as MCP tool handlers via thin async wrappers.
+Git and utility tools remain inline pending GH-601 and GH-602.
 """
 
 import json
-import subprocess
+import sys
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
 lib_path = Path(__file__).parent / "lib"
-import sys
-
 sys.path.insert(0, str(lib_path))
+
+src_path = Path(__file__).parent.parent / "src"
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
+
 from subprocess_utils import parse_key_value_output, run_script
+
+from dev10x.mcp import github as gh
 
 server = FastMCP(name="Dev10x-cli")
 
 
-# ── GitHub helpers ───────────────────────────────────────────────
-
-
-def _detect_repo() -> str | None:
-    """Detect current GitHub repository (owner/repo) from git remote."""
-    result = subprocess.run(
-        ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"],
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=10,
-    )
-    if result.returncode == 0:
-        return result.stdout.strip()
-    return None
-
-
-def _gh_api(
-    endpoint: str,
-    method: str = "GET",
-    fields: dict[str, str | int | list[str]] | None = None,
-    jq: str | None = None,
-) -> subprocess.CompletedProcess[str]:
-    """Call gh api with consistent error handling.
-
-    Args:
-        endpoint: GitHub API endpoint path (e.g., repos/{owner}/{repo}/pulls/...)
-        method: HTTP method (GET, POST, PUT, DELETE)
-        fields: Body fields for POST/PUT. Lists become repeated -f key[]=val args.
-        jq: Optional jq filter expression for response
-    """
-    args = ["gh", "api"]
-    if method != "GET":
-        args.extend(["-X", method])
-    if jq:
-        args.extend(["--jq", jq])
-    if fields:
-        for key, value in fields.items():
-            if isinstance(value, list):
-                for item in value:
-                    args.extend(["-f", f"{key}[]={item}"])
-            elif isinstance(value, int):
-                args.extend(["-F", f"{key}={value}"])
-            else:
-                args.extend(["-f", f"{key}={value}"])
-    args.append(endpoint)
-
-    return subprocess.run(
-        args,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=30,
-    )
-
-
-def _resolve_repo(repo: str | None) -> tuple[str | None, dict | None]:
-    """Resolve repo or return an error dict."""
-    resolved = repo or _detect_repo()
-    if not resolved:
-        return None, {"error": "Could not detect repository. Provide repo parameter."}
-    return resolved, None
-
-
-# ── GitHub tools ─────────────────────────────────────────────────
+# ── GitHub tools (delegated to dev10x.mcp.github) ──────────────
 
 
 @server.tool()
@@ -103,18 +44,11 @@ async def detect_tracker(ticket_id: str) -> dict:
     Returns:
         Dictionary with keys: tracker, ticket_id, ticket_number, fixes_url
     """
-    result = run_script("skills/gh-context/scripts/detect-tracker.sh", ticket_id)
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    return parse_key_value_output(result.stdout)
+    return gh.detect_tracker(ticket_id=ticket_id)
 
 
 @server.tool()
-async def pr_detect(
-    arg: str,
-) -> dict:
+async def pr_detect(arg: str) -> dict:
     """Detect PR context from a PR number, URL, or branch name.
 
     Args:
@@ -123,12 +57,7 @@ async def pr_detect(
     Returns:
         Dictionary with keys: pr_number, repo, branch, state, head_ref
     """
-    result = run_script("skills/gh-context/scripts/gh-pr-detect.sh", arg)
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    return parse_key_value_output(result.stdout)
+    return gh.pr_detect(arg=arg)
 
 
 @server.tool()
@@ -145,19 +74,7 @@ async def issue_get(
     Returns:
         Dictionary with keys: title, state, body, labels, linked_prs
     """
-    args = [str(number)]
-    if repo:
-        args.extend(["--repo", repo])
-
-    result = run_script("skills/gh-context/scripts/gh-issue-get.sh", *args)
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return parse_key_value_output(result.stdout)
+    return gh.issue_get(number=number, repo=repo)
 
 
 @server.tool()
@@ -174,19 +91,7 @@ async def issue_comments(
     Returns:
         Dictionary with key: comments (list of comment objects)
     """
-    args = [str(number)]
-    if repo:
-        args.extend(["--repo", repo])
-
-    result = run_script("skills/gh-context/scripts/gh-issue-comments.sh", *args)
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return {"raw_output": result.stdout}
+    return gh.issue_comments(number=number, repo=repo)
 
 
 @server.tool()
@@ -207,24 +112,7 @@ async def issue_create(
     Returns:
         Dictionary with keys: number, title, url
     """
-    args = [title]
-    if body:
-        args.extend(["--body", body])
-    if labels:
-        for label in labels:
-            args.extend(["--label", label])
-    if repo:
-        args.extend(["--repo", repo])
-
-    result = run_script("skills/gh-context/scripts/gh-issue-create.sh", *args)
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return parse_key_value_output(result.stdout)
+    return gh.issue_create(title=title, body=body, labels=labels, repo=repo)
 
 
 @server.tool()
@@ -247,75 +135,13 @@ async def pr_comments(
     Returns:
         Dictionary with action results (comments list or operation status)
     """
-    resolved_repo, err = _resolve_repo(repo)
-    if err:
-        return err
-
-    if action == "get":
-        if comment_id is None:
-            return {"error": "comment_id required for 'get' action"}
-        result = _gh_api(f"repos/{resolved_repo}/pulls/comments/{comment_id}")
-
-    elif action == "list":
-        if pr_number is None:
-            return {"error": "pr_number required for 'list' action"}
-        result = _gh_api(
-            f"repos/{resolved_repo}/pulls/{pr_number}/comments?per_page=100",
-        )
-
-    elif action == "reply":
-        if pr_number is None or comment_id is None or body is None:
-            return {"error": "pr_number, comment_id, and body required for 'reply'"}
-        result = _gh_api(
-            f"repos/{resolved_repo}/pulls/{pr_number}/comments",
-            method="POST",
-            fields={"body": body, "in_reply_to": comment_id},
-        )
-
-    elif action == "resolve":
-        if comment_id is None:
-            return {"error": "comment_id required for 'resolve' action"}
-        query = """query($id: ID!) {
-          node(id: $id) {
-            ... on PullRequestReviewComment {
-              pullRequestReviewThread { id }
-            }
-          }
-        }"""
-        thread_result = _gh_api(
-            "graphql",
-            fields={"query": query, "id": str(comment_id)},
-            jq=".data.node.pullRequestReviewThread.id",
-        )
-        if thread_result.returncode != 0:
-            return {"error": thread_result.stderr.strip()}
-        thread_id = thread_result.stdout.strip()
-        if not thread_id or not thread_id.startswith("PRRT_"):
-            return {
-                "error": f"Could not find thread for comment {comment_id}. "
-                "The resolve action requires a GraphQL node_id, not a REST "
-                "integer ID. Use the node_id field from a comment response."
-            }
-        mutation = """mutation($threadId: ID!) {
-          resolveReviewThread(input: {threadId: $threadId}) {
-            thread { id isResolved }
-          }
-        }"""
-        result = _gh_api(
-            "graphql",
-            fields={"query": mutation, "threadId": thread_id},
-        )
-
-    else:
-        return {"error": f"Unknown action: {action}. Supported: list, get, reply, resolve"}
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return {"raw_output": result.stdout}
+    return gh.pr_comments(
+        action=action,
+        pr_number=pr_number,
+        comment_id=comment_id,
+        body=body,
+        repo=repo,
+    )
 
 
 @server.tool()
@@ -339,23 +165,12 @@ async def pr_comment_reply(
     Returns:
         Dictionary with reply details (id, body, created_at)
     """
-    resolved_repo, err = _resolve_repo(repo)
-    if err:
-        return err
-
-    result = _gh_api(
-        f"repos/{resolved_repo}/pulls/{pr_number}/comments",
-        method="POST",
-        fields={"body": body, "in_reply_to": comment_id},
+    return gh.pr_comment_reply(
+        pr_number=pr_number,
+        comment_id=comment_id,
+        body=body,
+        repo=repo,
     )
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return {"raw_output": result.stdout}
 
 
 @server.tool()
@@ -376,29 +191,12 @@ async def request_review(
     Returns:
         Dictionary with keys: requested_reviewers (list) or requested_teams (list)
     """
-    resolved_repo, err = _resolve_repo(repo)
-    if err:
-        return err
-
-    fields: dict[str, str | list[str]] = {}
-    if team:
-        fields["team_reviewers"] = [r.split("/")[-1] for r in reviewers]
-    else:
-        fields["reviewers"] = reviewers
-
-    result = _gh_api(
-        f"repos/{resolved_repo}/pulls/{pr_number}/requested_reviewers",
-        method="POST",
-        fields=fields,
+    return gh.request_review(
+        pr_number=pr_number,
+        reviewers=reviewers,
+        team=team,
+        repo=repo,
     )
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return {"raw_output": result.stdout}
 
 
 @server.tool()
@@ -417,25 +215,7 @@ async def detect_base_branch(
     Returns:
         Dictionary with keys: base_branch (str), has_develop (bool)
     """
-    args: list[str] = []
-    if base:
-        args.extend(["--base", base])
-    if force:
-        args.append("--force")
-
-    result = run_script(
-        "skills/gh-pr-create/scripts/detect-base-branch.sh",
-        *args,
-    )
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    parsed = parse_key_value_output(result.stdout)
-    return {
-        "base_branch": parsed.get("BASE_BRANCH", ""),
-        "has_develop": bool(parsed.get("DEV_BRANCH", "")),
-    }
+    return gh.detect_base_branch(base=base, force=force)
 
 
 @server.tool()
@@ -453,19 +233,7 @@ async def verify_pr_state(
     Returns:
         Dictionary with keys: branch_name, issue, base_branch
     """
-    args: list[str] = []
-    if force:
-        args.append("--force")
-
-    result = run_script(
-        "skills/gh-pr-create/scripts/verify-state.sh",
-        *args,
-    )
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    return parse_key_value_output(result.stdout)
+    return gh.verify_pr_state(force=force)
 
 
 @server.tool()
@@ -482,20 +250,7 @@ async def pre_pr_checks(
     Returns:
         Dictionary with keys: success (bool), output (str)
     """
-    args: list[str] = []
-    if base_branch:
-        args.append(base_branch)
-
-    result = run_script(
-        "skills/gh-pr-create/scripts/pre-pr-checks.sh",
-        *args,
-    )
-
-    return {
-        "success": result.returncode == 0,
-        "output": result.stdout.strip(),
-        **({"error": result.stderr.strip()} if result.returncode != 0 else {}),
-    }
+    return gh.pre_pr_checks(base_branch=base_branch)
 
 
 @server.tool()
@@ -521,22 +276,13 @@ async def create_pr(
     Returns:
         Dictionary with keys: pr_number (int), url (str)
     """
-    args = [title, job_story, issue_id]
-    args.append(fixes_url or "")
-    args.append(base_branch or "")
-
-    result = run_script(
-        "skills/gh-pr-create/scripts/create-pr.sh",
-        *args,
+    return gh.create_pr(
+        title=title,
+        job_story=job_story,
+        issue_id=issue_id,
+        fixes_url=fixes_url,
+        base_branch=base_branch,
     )
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    lines = result.stdout.strip().split("\n")
-    pr_number = lines[-1]
-    url = next((l for l in lines if l.startswith("http")), f"PR #{pr_number}")
-    return {"pr_number": int(pr_number), "url": url}
 
 
 @server.tool()
@@ -555,19 +301,7 @@ async def generate_commit_list(
     Returns:
         Dictionary with key: commit_list (str)
     """
-    args = [str(pr_number)]
-    if base_branch:
-        args.append(base_branch)
-
-    result = run_script(
-        "skills/gh-pr-create/scripts/generate-commit-list.sh",
-        *args,
-    )
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    return {"commit_list": result.stdout.strip()}
+    return gh.generate_commit_list(pr_number=pr_number, base_branch=base_branch)
 
 
 @server.tool()
@@ -584,16 +318,7 @@ async def post_summary_comment(
     Returns:
         Dictionary with keys: success (bool), output (str)
     """
-    result = run_script(
-        "skills/gh-pr-create/scripts/post-summary-comment.sh",
-        issue_id,
-        summary_text,
-    )
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    return {"success": True, "output": result.stdout.strip()}
+    return gh.post_summary_comment(issue_id=issue_id, summary_text=summary_text)
 
 
 @server.tool()
@@ -630,55 +355,18 @@ async def pr_notify(
     Returns:
         Dictionary with PR info (prepare) or operation results (send)
     """
-    plugin_root = Path(__file__).parent.parent
-    script_path = plugin_root / "skills" / "gh-pr-monitor" / "scripts" / "pr-notify.py"
-
-    if not script_path.exists():
-        return {"error": f"Script not found: {script_path}"}
-
-    args = [
-        "uv",
-        "run",
-        "--script",
-        str(script_path),
-        action,
-        "--pr",
-        str(pr_number),
-        "--repo",
-        repo,
-    ]
-
-    if action == "send":
-        if channel:
-            args.extend(["--channel", channel])
-        if message:
-            args.extend(["--message", message])
-        if message_file:
-            args.extend(["--message-file", message_file])
-        if reviewer:
-            args.extend(["--reviewer", reviewer])
-        if skip_slack:
-            args.append("--skip-slack")
-        if skip_reviewers:
-            args.append("--skip-reviewers")
-        if skip_checklist:
-            args.append("--skip-checklist")
-
-    proc = subprocess.run(
-        args,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=60,
+    return gh.pr_notify(
+        pr_number=pr_number,
+        repo=repo,
+        action=action,
+        channel=channel,
+        message=message,
+        message_file=message_file,
+        reviewer=reviewer,
+        skip_slack=skip_slack,
+        skip_reviewers=skip_reviewers,
+        skip_checklist=skip_checklist,
     )
-
-    if proc.returncode != 0:
-        return {"error": proc.stderr.strip()}
-
-    try:
-        return json.loads(proc.stdout)
-    except json.JSONDecodeError:
-        return {"success": True, "output": proc.stdout.strip()}
 
 
 # ── Git tools ────────────────────────────────────────────────────
@@ -755,14 +443,14 @@ async def create_worktree(
     Returns:
         Dictionary with keys: worktree_path, branch, created (bool)
     """
-    args = [branch]
+    wt_args = [branch]
 
     if base is not None:
-        args.extend(["--base", base])
+        wt_args.extend(["--base", base])
     if path is not None:
-        args.extend(["--path", path])
+        wt_args.extend(["--path", path])
 
-    result = run_script("skills/git-worktree/scripts/create-worktree.sh", *args)
+    result = run_script("skills/git-worktree/scripts/create-worktree.sh", *wt_args)
 
     if result.returncode != 0:
         return {"created": False, "error": result.stderr.strip()}
@@ -849,11 +537,11 @@ async def next_worktree_name(
     Returns:
         Dictionary with keys: path (str)
     """
-    args = [base_dir] if base_dir else []
+    wt_args = [base_dir] if base_dir else []
 
     result = run_script(
         "skills/git-worktree/scripts/next-worktree-name.sh",
-        *args,
+        *wt_args,
     )
 
     if result.returncode != 0:
@@ -904,14 +592,14 @@ async def mktmp(
     Returns:
         Dictionary with key: path (str) — the created temp file/directory path
     """
-    args = []
+    mk_args = []
     if directory:
-        args.append("-d")
-    args.extend([namespace, prefix])
+        mk_args.append("-d")
+    mk_args.extend([namespace, prefix])
     if ext and not directory:
-        args.append(ext)
+        mk_args.append(ext)
 
-    result = run_script("bin/mktmp.sh", *args)
+    result = run_script("bin/mktmp.sh", *mk_args)
 
     if result.returncode != 0:
         return {"error": result.stderr.strip()}
