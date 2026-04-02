@@ -14,8 +14,8 @@ import os
 import sys
 import traceback
 
-from bash_validators import VALIDATORS
-from bash_validators._types import HookInput
+from dev10x.domain import HookInput
+from dev10x.validators import VALIDATORS
 
 _DEBUG = os.environ.get("HOOK_DEBUG", "") != ""
 
