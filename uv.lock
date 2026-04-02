@@ -260,7 +260,7 @@ wheels = [
 [[package]]
 name = "dev10x"
 version = "0.46.0.dev0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "pyyaml" },
