@@ -258,7 +258,7 @@ class TestDetectTracker:
 
 class TestMktmp:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.utilities.run_script")
     async def test_creates_temp_file(
         self,
         mock_run: MagicMock,
@@ -284,7 +284,7 @@ class TestMktmp:
         assert "commit-msg" in call_args
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.utilities.run_script")
     async def test_creates_temp_directory(
         self,
         mock_run: MagicMock,
@@ -307,7 +307,7 @@ class TestMktmp:
         assert "-d" in call_args
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.utilities.run_script")
     async def test_returns_error_on_failure(
         self,
         mock_run: MagicMock,
@@ -450,7 +450,7 @@ class TestPrDetect:
 
 class TestNextWorktreeName:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.git.run_script")
     async def test_calculates_next_worktree_number(
         self,
         mock_run: MagicMock,
@@ -468,7 +468,7 @@ class TestNextWorktreeName:
         mock_run.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.git.run_script")
     async def test_handles_error_in_calculation(
         self,
         mock_run: MagicMock,
@@ -487,7 +487,7 @@ class TestNextWorktreeName:
 
 class TestSetupAliases:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.git.run_script")
     async def test_sets_up_git_aliases(
         self,
         mock_run: MagicMock,
@@ -506,7 +506,7 @@ class TestSetupAliases:
         mock_run.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.git.run_script")
     async def test_handles_alias_setup_error(
         self,
         mock_run: MagicMock,
@@ -602,7 +602,7 @@ class TestPrePrChecks:
 
 class TestRebaseGroom:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.git.run_script")
     async def test_rebases_and_grooms_commits(
         self,
         mock_run: MagicMock,
@@ -625,7 +625,7 @@ class TestRebaseGroom:
 
 class TestCreateWorktree:
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.git.run_script")
     async def test_creates_worktree(
         self,
         mock_run: MagicMock,
@@ -643,7 +643,7 @@ class TestCreateWorktree:
         mock_run.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("cli_server.run_script")
+    @patch("dev10x.mcp.git.run_script")
     async def test_handles_worktree_creation_error(
         self,
         mock_run: MagicMock,

@@ -4,14 +4,16 @@
 # dependencies = ["mcp>=1.0"]
 # ///
 
-"""Consolidated MCP server for CLI operations (GitHub, Git, utilities).
+"""Consolidated MCP server — thin registration wrapper.
 
-GitHub tools are extracted to dev10x.mcp.github — this file registers
-them as MCP tool handlers via thin async wrappers.
-Git and utility tools remain inline pending GH-601 and GH-602.
+All tool implementations live in src/dev10x/mcp/:
+  - github.py: GitHub API and CLI operations
+  - git.py: Git operations (push, rebase, worktree, aliases)
+  - utilities.py: General utilities (mktmp)
+
+This file registers them as MCP tool handlers via thin async wrappers.
 """
 
-import json
 import sys
 from pathlib import Path
 
@@ -24,9 +26,9 @@ src_path = Path(__file__).parent.parent / "src"
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from subprocess_utils import parse_key_value_output, run_script
-
+from dev10x.mcp import git as git_tools
 from dev10x.mcp import github as gh
+from dev10x.mcp import utilities as util
 
 server = FastMCP(name="Dev10x-cli")
 
@@ -61,10 +63,7 @@ async def pr_detect(arg: str) -> dict:
 
 
 @server.tool()
-async def issue_get(
-    number: int,
-    repo: str | None = None,
-) -> dict:
+async def issue_get(number: int, repo: str | None = None) -> dict:
     """Get GitHub issue details.
 
     Args:
@@ -78,10 +77,7 @@ async def issue_get(
 
 
 @server.tool()
-async def issue_comments(
-    number: int,
-    repo: str | None = None,
-) -> dict:
+async def issue_comments(number: int, repo: str | None = None) -> dict:
     """Get GitHub issue comments.
 
     Args:
@@ -136,25 +132,15 @@ async def pr_comments(
         Dictionary with action results (comments list or operation status)
     """
     return gh.pr_comments(
-        action=action,
-        pr_number=pr_number,
-        comment_id=comment_id,
-        body=body,
-        repo=repo,
+        action=action, pr_number=pr_number, comment_id=comment_id, body=body, repo=repo
     )
 
 
 @server.tool()
 async def pr_comment_reply(
-    pr_number: int,
-    comment_id: int,
-    body: str,
-    repo: str | None = None,
+    pr_number: int, comment_id: int, body: str, repo: str | None = None
 ) -> dict:
     """Reply to a PR review comment thread.
-
-    Dedicated tool for posting replies — eliminates Bash permission
-    friction from raw `gh api` calls in PR response skills.
 
     Args:
         pr_number: PR number
@@ -165,12 +151,7 @@ async def pr_comment_reply(
     Returns:
         Dictionary with reply details (id, body, created_at)
     """
-    return gh.pr_comment_reply(
-        pr_number=pr_number,
-        comment_id=comment_id,
-        body=body,
-        repo=repo,
-    )
+    return gh.pr_comment_reply(pr_number=pr_number, comment_id=comment_id, body=body, repo=repo)
 
 
 @server.tool()
@@ -189,21 +170,13 @@ async def request_review(
         repo: Repository (owner/repo). If omitted, uses current repo
 
     Returns:
-        Dictionary with keys: requested_reviewers (list) or requested_teams (list)
+        Dictionary with keys: requested_reviewers or requested_teams
     """
-    return gh.request_review(
-        pr_number=pr_number,
-        reviewers=reviewers,
-        team=team,
-        repo=repo,
-    )
+    return gh.request_review(pr_number=pr_number, reviewers=reviewers, team=team, repo=repo)
 
 
 @server.tool()
-async def detect_base_branch(
-    base: str | None = None,
-    force: bool = False,
-) -> dict:
+async def detect_base_branch(base: str | None = None, force: bool = False) -> dict:
     """Detect the correct base branch for PRs in the current repository.
 
     Prefers develop/development, falls back to main/master/trunk.
@@ -219,13 +192,8 @@ async def detect_base_branch(
 
 
 @server.tool()
-async def verify_pr_state(
-    force: bool = False,
-) -> dict:
+async def verify_pr_state(force: bool = False) -> dict:
     """Verify branch state before creating a PR.
-
-    Checks: not on protected branch, no uncommitted changes,
-    commits ahead of base, no merge conflicts, no release-branch leaks.
 
     Args:
         force: Allow targeting a non-development base branch
@@ -237,12 +205,8 @@ async def verify_pr_state(
 
 
 @server.tool()
-async def pre_pr_checks(
-    base_branch: str | None = None,
-) -> dict:
+async def pre_pr_checks(base_branch: str | None = None) -> dict:
     """Run pre-PR quality checks (ruff, mypy, pytest).
-
-    Skips if diff contains only non-Python files.
 
     Args:
         base_branch: Base branch for diff comparison. Auto-detected if omitted.
@@ -262,9 +226,6 @@ async def create_pr(
     base_branch: str | None = None,
 ) -> dict:
     """Create a draft PR with two-pass body generation.
-
-    Pushes branch, creates draft PR with job story and commit list,
-    then updates body with linked commit references.
 
     Args:
         title: PR title
@@ -286,13 +247,8 @@ async def create_pr(
 
 
 @server.tool()
-async def generate_commit_list(
-    pr_number: int,
-    base_branch: str | None = None,
-) -> dict:
+async def generate_commit_list(pr_number: int, base_branch: str | None = None) -> dict:
     """Generate a linked commit list for a PR body.
-
-    Each commit gets a clickable link to the PR's commit view.
 
     Args:
         pr_number: PR number for commit links
@@ -305,10 +261,7 @@ async def generate_commit_list(
 
 
 @server.tool()
-async def post_summary_comment(
-    issue_id: str,
-    summary_text: str,
-) -> dict:
+async def post_summary_comment(issue_id: str, summary_text: str) -> dict:
     """Post summary + checklist as first PR comment.
 
     Args:
@@ -335,10 +288,6 @@ async def pr_notify(
     skip_checklist: bool = False,
 ) -> dict:
     """PR notification helper for review requests.
-
-    Two actions:
-    - prepare: Fetch PR info, count threads, format Slack message
-    - send: Post notification, assign reviewers, update checklist
 
     Args:
         pr_number: PR number
@@ -369,14 +318,11 @@ async def pr_notify(
     )
 
 
-# ── Git tools ────────────────────────────────────────────────────
+# ── Git tools (delegated to dev10x.mcp.git) ────────────────────
 
 
 @server.tool()
-async def push_safe(
-    args: list[str],
-    protected_branches: list[str] | None = None,
-) -> dict:
+async def push_safe(args: list[str], protected_branches: list[str] | None = None) -> dict:
     """Safely push git branches with protection for main/develop.
 
     Args:
@@ -386,27 +332,11 @@ async def push_safe(
     Returns:
         Dictionary with keys: success (bool), branch, remote, blocked_reason (if blocked)
     """
-    cmd_args = list(args)
-    if protected_branches:
-        for pb in protected_branches:
-            cmd_args.extend(["--protected", pb])
-
-    result = run_script("skills/git/scripts/git-push-safe.sh", *cmd_args)
-
-    if result.returncode != 0:
-        return {"success": False, "error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return parse_key_value_output(result.stdout)
+    return git_tools.push_safe(args=args, protected_branches=protected_branches)
 
 
 @server.tool()
-async def rebase_groom(
-    seq_path: str,
-    base_ref: str,
-) -> dict:
+async def rebase_groom(seq_path: str, base_ref: str) -> dict:
     """Rebase and groom commits using an interactive sequence file.
 
     Args:
@@ -416,23 +346,11 @@ async def rebase_groom(
     Returns:
         Dictionary with keys: success (bool), commits_rewritten (int)
     """
-    result = run_script("skills/git/scripts/git-rebase-groom.sh", seq_path, base_ref)
-
-    if result.returncode != 0:
-        return {"success": False, "error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return parse_key_value_output(result.stdout)
+    return git_tools.rebase_groom(seq_path=seq_path, base_ref=base_ref)
 
 
 @server.tool()
-async def create_worktree(
-    branch: str,
-    base: str | None = None,
-    path: str | None = None,
-) -> dict:
+async def create_worktree(branch: str, base: str | None = None, path: str | None = None) -> dict:
     """Create a new git worktree.
 
     Args:
@@ -443,61 +361,25 @@ async def create_worktree(
     Returns:
         Dictionary with keys: worktree_path, branch, created (bool)
     """
-    wt_args = [branch]
-
-    if base is not None:
-        wt_args.extend(["--base", base])
-    if path is not None:
-        wt_args.extend(["--path", path])
-
-    result = run_script("skills/git-worktree/scripts/create-worktree.sh", *wt_args)
-
-    if result.returncode != 0:
-        return {"created": False, "error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return parse_key_value_output(result.stdout)
+    return git_tools.create_worktree(branch=branch, base=base, path=path)
 
 
 @server.tool()
-async def mass_rewrite(
-    config_path: str,
-) -> dict:
+async def mass_rewrite(config_path: str) -> dict:
     """Rewrite multiple commit messages in one unattended rebase pass.
 
     Args:
         config_path: Path to JSON config file with rewrite instructions.
-            Config format: {"base": "develop", "commits": {"sha": "new msg", ...}}
 
     Returns:
         Dictionary with keys: success (bool), output (str), error (str if failed)
     """
-    result = run_script(
-        "skills/git-groom/scripts/mass-rewrite.py",
-        config_path,
-    )
-
-    if result.returncode != 0:
-        return {
-            "success": False,
-            "error": result.stderr.strip(),
-            "output": result.stdout.strip(),
-        }
-
-    return {"success": True, "output": result.stdout.strip()}
+    return git_tools.mass_rewrite(config_path=config_path)
 
 
 @server.tool()
-async def start_split_rebase(
-    commit_hash: str,
-    base_branch: str = "develop",
-) -> dict:
-    """Start an interactive rebase to split a commit into multiple atomic commits.
-
-    Marks the specified commit for editing, then resets it to unstage all
-    changes so you can create multiple commits from the original.
+async def start_split_rebase(commit_hash: str, base_branch: str = "develop") -> dict:
+    """Start an interactive rebase to split a commit.
 
     Args:
         commit_hash: The commit hash to split
@@ -506,30 +388,12 @@ async def start_split_rebase(
     Returns:
         Dictionary with keys: success (bool), output (str), error (str if failed)
     """
-    result = run_script(
-        "skills/git-commit-split/scripts/start-split-rebase.sh",
-        commit_hash,
-        base_branch,
-    )
-
-    if result.returncode != 0:
-        return {
-            "success": False,
-            "error": result.stderr.strip(),
-            "output": result.stdout.strip(),
-        }
-
-    return {"success": True, "output": result.stdout.strip()}
+    return git_tools.start_split_rebase(commit_hash=commit_hash, base_branch=base_branch)
 
 
 @server.tool()
-async def next_worktree_name(
-    base_dir: str | None = None,
-) -> dict:
+async def next_worktree_name(base_dir: str | None = None) -> dict:
     """Calculate the next available worktree path.
-
-    Finds the highest existing worktree number for the current project
-    and returns the next incremented path.
 
     Args:
         base_dir: Override worktrees parent directory (default: ../.worktrees)
@@ -537,50 +401,24 @@ async def next_worktree_name(
     Returns:
         Dictionary with keys: path (str)
     """
-    wt_args = [base_dir] if base_dir else []
-
-    result = run_script(
-        "skills/git-worktree/scripts/next-worktree-name.sh",
-        *wt_args,
-    )
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    return {"path": result.stdout.strip()}
+    return git_tools.next_worktree_name(base_dir=base_dir)
 
 
 @server.tool()
 async def setup_aliases() -> dict:
     """Set up global git aliases for branch comparison operations.
 
-    Configures aliases like git develop-log, git develop-diff, git develop-rebase
-    that wrap $(git merge-base ...) subshells into stable command prefixes.
-    Idempotent — safe to call multiple times.
-
     Returns:
         Dictionary with keys: success (bool), output (str)
     """
-    result = run_script(
-        "skills/git-alias-setup/scripts/git-alias-setup.sh",
-    )
-
-    if result.returncode != 0:
-        return {"success": False, "error": result.stderr.strip()}
-
-    return {"success": True, "output": result.stdout.strip()}
+    return git_tools.setup_aliases()
 
 
-# ── Utility tools ────────────────────────────────────────────────
+# ── Utility tools (delegated to dev10x.mcp.utilities) ──────────
 
 
 @server.tool()
-async def mktmp(
-    namespace: str,
-    prefix: str,
-    ext: str = "",
-    directory: bool = False,
-) -> dict:
+async def mktmp(namespace: str, prefix: str, ext: str = "", directory: bool = False) -> dict:
     """Create a unique temp file or directory under /tmp/claude/<namespace>/.
 
     Args:
@@ -592,19 +430,7 @@ async def mktmp(
     Returns:
         Dictionary with key: path (str) — the created temp file/directory path
     """
-    mk_args = []
-    if directory:
-        mk_args.append("-d")
-    mk_args.extend([namespace, prefix])
-    if ext and not directory:
-        mk_args.append(ext)
-
-    result = run_script("bin/mktmp.sh", *mk_args)
-
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    return {"path": result.stdout.strip()}
+    return util.mktmp(namespace=namespace, prefix=prefix, ext=ext, directory=directory)
 
 
 if __name__ == "__main__":
