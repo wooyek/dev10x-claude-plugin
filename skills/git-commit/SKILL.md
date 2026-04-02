@@ -250,39 +250,42 @@ Job Story was already sourced from the Linear ticket earlier in this session
 
 ### Step 3: Determine Commit Type
 
+**Project override check:** Before presenting the type menu,
+check for a strategy override:
+
+1. Read `~/.claude/memory/Dev10x/gitmoji.yaml`
+2. Get repo origin: `git remote get-url origin`
+3. Walk the `projects` list — first `match` glob that fits
+   the origin URL selects the named `strategy`
+4. If no match, check `default-strategy`
+5. If still no match, load `references/gitmoji-defaults.yaml`
+
+If the user config is invalid or unreadable, log a warning
+and fall back to the defaults file — never block the commit.
+
+When a strategy is resolved, use its `gitmoji-mapping` list.
+Each entry has `emoji`, `label`, `description`, and optional
+`release` (patch/minor/major/none). When `release` is present,
+append it as a badge: `"Bug fixes [patch]"`.
+
+See `references/project-override.md` for full schema.
+
 **Unattended mode:** Auto-select the commit type from context
 (e.g., changed file types, session history, orchestrator hints).
-Skip the interactive prompt entirely.
+Skip the interactive prompt entirely. Use `label` matching
+against detected change type. If a project override is loaded,
+match against its entries.
 
 **Attended mode — ask user to select commit type:**
-```
-What type of change is this?
 
-1. ✅ Test - Adding/updating/fixing tests
-2. 🐛 Bug - Bug fixes
-3. ♻️ Refactor - Code refactoring
-4. ✨ Feature - New features
-5. 📝 Docs - Documentation
-6. 🔒 Security - Security fixes
-7. ⚡ Performance - Performance improvements
-8. 💄 UI - UI/styling updates
-9. 🔧 Config - Configuration changes
-10. Other (specify gitmoji)
+Build the `AskUserQuestion` options from the loaded mapping
+(project override or defaults). Present the first 4 entries
+as options. If more exist, mention them in the question text
+as additional choices available via "Other".
 
-Select number (1-10):
-```
-
-**Gitmoji mapping:**
-- 1 → ✅ (`:white_check_mark:`)
-- 2 → 🐛 (`:bug:`)
-- 3 → ♻️ (`:recycle:`)
-- 4 → ✨ (`:sparkles:`)
-- 5 → 📝 (`:memo:`)
-- 6 → 🔒 (`:lock:`)
-- 7 → ⚡ (`:zap:`)
-- 8 → 💄 (`:lipstick:`)
-- 9 → 🔧 (`:wrench:`)
-- 10 → Ask: "Enter gitmoji (e.g., 🎨)"
+**Default gitmoji mapping:** Loaded from
+`references/gitmoji-defaults.yaml` (ships with the plugin).
+The "Other" option is always appended to allow custom gitmoji.
 
 ### Step 4: Get Commit Description
 
@@ -388,9 +391,18 @@ done
 
 ### Step 7: Generate Complete Commit Message
 
+**Title format:** If a project override defines `title-format`,
+use it to assemble the title line. Supported placeholders:
+- `<gitmoji>` — emoji from selected type
+- `<ticket>` — extracted ticket ID
+- `<description>` — user-provided description
+- `<conventional-type>` — label from mapping, lowercased
+
+Default format: `<gitmoji> <ticket> <description>`
+
 **Assemble message:**
 ```
-<gitmoji> <TICKET-ID> <description>
+<title per format>
 
 <problem explanation>
 
@@ -779,6 +791,15 @@ Complete gitmoji reference with usage guidelines.
 ### references/commit-examples.md
 
 Real commit message examples from the project.
+
+### references/gitmoji-defaults.yaml
+
+Default gitmoji-to-type mapping shipped with the plugin.
+
+### references/project-override.md
+
+Project-level gitmoji strategy overrides — schema, resolution
+order, and examples for `~/.claude/memory/Dev10x/gitmoji.yaml`.
 
 ## Success Criteria
 
