@@ -1,49 +1,11 @@
 #!/usr/bin/env python3
 """PreToolUse hook: unified Bash command validator.
 
-Single dispatcher that replaces 7 individual Bash PreToolUse hooks
-with one process. Parses JSON once, iterates registered validators,
-first block wins.
-
-Exit codes: 0=allow, 2=block
+Thin shim that delegates to `dev10x hook validate-bash`.
+Kept for backward compatibility with plugin.json hook config.
 """
 
-from __future__ import annotations
-
-import os
-import sys
-import traceback
-
-from dev10x.domain import HookInput
-from dev10x.validators import VALIDATORS
-
-_DEBUG = os.environ.get("HOOK_DEBUG", "") != ""
-
-
-def main() -> None:
-    inp = HookInput.from_stdin()
-    if inp.tool_name != "Bash":
-        sys.exit(0)
-    if not inp.command:
-        sys.exit(0)
-
-    for validator in VALIDATORS:
-        try:
-            if validator.should_run(inp=inp):
-                result = validator.validate(inp=inp)
-                if result is not None:
-                    result.emit()
-        except Exception:
-            if _DEBUG:
-                print(
-                    f"[HOOK_DEBUG] {validator.name} raised:",
-                    file=sys.stderr,
-                )
-                traceback.print_exc(file=sys.stderr)
-            continue
-
-    sys.exit(0)
-
+from dev10x.commands.hook import validate_bash
 
 if __name__ == "__main__":
-    main()
+    validate_bash()
