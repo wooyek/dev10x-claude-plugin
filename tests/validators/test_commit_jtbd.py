@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from bash_validators._types import HookInput
-from bash_validators.commit_jtbd import CommitJtbdValidator
+from dev10x.validators.commit_jtbd import CommitJtbdValidator
+from tests.fakers import BashHookInputFaker
 
 
-def _make_input(*, command: str) -> HookInput:
-    return HookInput(
-        tool_name="Bash",
+def _make_input(*, command: str) -> BashHookInputFaker:
+    return BashHookInputFaker.build(
         command=command,
-        raw={"tool_name": "Bash", "tool_input": {"command": command}},
     )
 
 
@@ -39,9 +37,7 @@ class TestValidate:
         "verb",
         ["Add", "Update", "Remove", "Refactor", "Implement", "Configure"],
     )
-    def test_blocks_implementation_verbs(
-        self, validator: CommitJtbdValidator, verb: str
-    ) -> None:
+    def test_blocks_implementation_verbs(self, validator: CommitJtbdValidator, verb: str) -> None:
         inp = _make_input(command=f'git commit -m "{verb} something"')
         result = validator.validate(inp=inp)
         assert result is not None
@@ -72,17 +68,11 @@ class TestValidate:
         assert result is None
 
     def test_strips_gitmoji_and_ticket(self, validator: CommitJtbdValidator) -> None:
-        inp = _make_input(
-            command='git commit -m "\u2728 PAY-32 Enable multi-location routing"'
-        )
+        inp = _make_input(command='git commit -m "\u2728 PAY-32 Enable multi-location routing"')
         result = validator.validate(inp=inp)
         assert result is None
 
-    def test_blocks_gitmoji_with_impl_verb(
-        self, validator: CommitJtbdValidator
-    ) -> None:
-        inp = _make_input(
-            command='git commit -m "\u2728 PAY-32 Add multi-location routing"'
-        )
+    def test_blocks_gitmoji_with_impl_verb(self, validator: CommitJtbdValidator) -> None:
+        inp = _make_input(command='git commit -m "\u2728 PAY-32 Add multi-location routing"')
         result = validator.validate(inp=inp)
         assert result is not None

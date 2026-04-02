@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from bash_validators._types import HookInput
-from bash_validators.sql_safety import SqlSafetyValidator
+from dev10x.validators.sql_safety import SqlSafetyValidator
+from tests.fakers import BashHookInputFaker
 
 
-def _make_input(*, command: str) -> HookInput:
-    return HookInput(
-        tool_name="Bash",
+def _make_input(*, command: str) -> BashHookInputFaker:
+    return BashHookInputFaker.build(
         command=command,
-        raw={"tool_name": "Bash", "tool_input": {"command": command}},
     )
 
 

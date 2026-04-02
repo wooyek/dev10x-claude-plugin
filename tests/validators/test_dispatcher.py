@@ -7,7 +7,12 @@ import subprocess
 import sys
 from pathlib import Path
 
-DISPATCHER = Path(__file__).resolve().parent.parent.parent / "validate-bash-command.py"
+DISPATCHER = (
+    Path(__file__).resolve().parent.parent.parent
+    / "hooks"
+    / "scripts"
+    / "validate-bash-command.py"
+)
 
 
 def _run_hook(*, tool_name: str, command: str) -> subprocess.CompletedProcess[str]:

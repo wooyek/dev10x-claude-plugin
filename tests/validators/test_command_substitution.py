@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from bash_validators._types import HookInput
-from bash_validators.command_substitution import CommandSubstitutionValidator
+from dev10x.validators.command_substitution import CommandSubstitutionValidator
+from tests.fakers import BashHookInputFaker
 
 
-def _make_input(*, command: str) -> HookInput:
-    return HookInput(
-        tool_name="Bash",
+def _make_input(*, command: str) -> BashHookInputFaker:
+    return BashHookInputFaker.build(
         command=command,
-        raw={"tool_name": "Bash", "tool_input": {"command": command}},
     )
 
 
