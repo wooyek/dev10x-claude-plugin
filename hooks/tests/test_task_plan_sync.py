@@ -443,6 +443,24 @@ class TestSetContext:
 
 
 class TestArchive:
+    @pytest.fixture(autouse=True)
+    def clean_archive_dir(self) -> None:
+        """Clean archive directory before each test to prevent leakage."""
+        toplevel = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            text=True,
+        ).strip()
+        archive_dir = Path(toplevel) / ".claude" / "session" / "archive"
+        if archive_dir.exists():
+            import shutil
+
+            shutil.rmtree(archive_dir)
+        yield
+        if archive_dir.exists():
+            import shutil
+
+            shutil.rmtree(archive_dir)
+
     def test_archives_completed_plan(self) -> None:
         _seed_task()
         _run_hook(

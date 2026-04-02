@@ -1,19 +1,7 @@
-"""Validator protocol for Bash command validation."""
+"""Thin re-export shim — delegates to dev10x.validators.base."""
 
-from __future__ import annotations
+import sys
 
-from typing import Protocol
+import dev10x.validators.base as _real
 
-from bash_validators._types import HookAllow, HookInput, HookResult
-
-
-class Validator(Protocol):
-    name: str
-
-    def should_run(self, inp: HookInput) -> bool:
-        """Fast predicate — return False to skip this validator entirely."""
-        ...
-
-    def validate(self, inp: HookInput) -> HookResult | HookAllow | None:
-        """Return HookResult to block, HookAllow to auto-approve, None for no opinion."""
-        ...
+sys.modules[__name__] = _real

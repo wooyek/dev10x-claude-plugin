@@ -20,7 +20,7 @@ from typing import Any
 import click
 import yaml
 
-_YAML_PATH = Path(__file__).parent / "bash_validators" / "command-skill-map.yaml"
+_YAML_PATH = Path(__file__).parents[2] / "src" / "dev10x" / "validators" / "command-skill-map.yaml"
 
 
 @dataclass(frozen=True)

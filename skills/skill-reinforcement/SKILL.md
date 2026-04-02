@@ -16,7 +16,7 @@ invocation-name: Dev10x:skill-reinforcement
 allowed-tools:
   - Read(~/.claude/SKILLS.md)
   - Read(${CLAUDE_PLUGIN_ROOT}/skills/skill-reinforcement/references/*)
-  - Read(${CLAUDE_PLUGIN_ROOT}/hooks/scripts/bash_validators/command-skill-map.yaml)
+  - Read(${CLAUDE_PLUGIN_ROOT}/src/dev10x/validators/command-skill-map.yaml)
 ---
 
 # Dev10x:skill-reinforcement
@@ -56,7 +56,7 @@ Store the command string for matching.
 ### Step 2: Match against command-skill map
 
 Read the command-skill mapping from the canonical location:
-`${CLAUDE_PLUGIN_ROOT}/hooks/scripts/bash_validators/command-skill-map.yaml`.
+`${CLAUDE_PLUGIN_ROOT}/src/dev10x/validators/command-skill-map.yaml`.
 
 The YAML in `skills/skill-reinforcement/references/command-skill-map.yaml`
 is a legacy copy — prefer the hook's YAML which is the single
