@@ -2,9 +2,9 @@
 name: Dev10x:verify-acc-dod
 description: >
   Verify that definition-of-done / acceptance criteria are met before
-  closing a task list. Reads playbook-specific criteria from YAML,
-  checks actual state (CI, PR, working copy), and prompts the user
-  to confirm completion.
+  closing a task list. Loads executable checks from plugin defaults,
+  applies project overrides (add/remove/replace), runs each check
+  automatically, and prompts the user only for manual items.
   TRIGGER when: task list is complete and work needs shippability
   verification before handover.
   DO NOT TRIGGER when: mid-implementation, or task list has incomplete
@@ -14,6 +14,9 @@ invocation-name: Dev10x:verify-acc-dod
 allowed-tools:
   - AskUserQuestion
   - Bash(gh:*)
+  - Bash(git status:*)
+  - Bash(git log:*)
+  - Bash(git diff:*)
 ---
 
 # Verify Acceptance Criteria / Definition of Done
@@ -54,88 +57,151 @@ provided, infer from session context:
 
 ## Criteria Resolution
 
-Read the acceptance criteria YAML file:
+Load criteria from two sources and merge them:
 
+### Step 1: Load plugin defaults
+
+Read executable checks from:
 ```
-~/.claude/projects/<project>/memory/acceptance-criteria.yaml
+${CLAUDE_PLUGIN_ROOT}/skills/verify-acc-dod/references/defaults.yaml
 ```
 
-**Resolve criteria** in this order:
-1. Check `overrides` for a matching `work_type` with
-   `persist: false` — use if found, then **remove** the entry
-2. Check `overrides` for a matching `work_type` with
-   `persist: true` — use if found
-3. Fall back to `defaults[work_type].criteria` from the file
-4. If the file is absent or the work type has no entry, use
-   the hardcoded defaults below
+Extract `defaults[work_type].checks` — an array of check objects.
 
-**Hardcoded defaults:**
+### Step 2: Load repo overrides (if present)
+
+Read overrides from a single global file:
+```
+~/.claude/memory/Dev10x/dod-acceptance-criteria.yaml
+```
+
+This file maps repositories to their override deltas:
 
 ```yaml
-defaults:
-  feature:
-    criteria: >
-      PR passing CI with automatic fixups applied to review
-      comments, groomed commit history, and review request
-      published
-  bugfix:
-    criteria: >
-      PR passing CI with automatic fixups applied to review
-      comments, regression test covering the fix, groomed
-      commit history, and review request published
-  pr-continuation:
-    criteria: >
-      PR passing CI with fixups applied to all unaddressed
-      review comments, groomed commit history, and re-review
-      requested
-  local-only:
-    criteria: "Changes verified locally"
-  investigation:
-    criteria: "Findings documented, next steps clear"
-  fanout:
-    criteria: >
-      All child work items have merged PRs or documented
-      outcomes. No orphaned branches or draft PRs remaining.
+repos:
+  tiretutorinc/tt-pos:
+    bugfix:
+      add:
+        - name: Sentry issue linked
+          check: >
+            gh pr view {pr_number} --repo {repo}
+            --json body -q .body
+          expect_contains: "sentry.io"
+      remove:
+        - Slack notification posted
+  Brave-Labs/dev10x:
+    feature:
+      remove:
+        - Review requested
+      add:
+        - name: PR ready (solo maintainer)
+          check: >
+            gh pr view {pr_number} --repo {repo}
+            --json isDraft -q .isDraft
+          expect: "false"
 ```
 
-## Verification Checks
+**Repo detection:** Resolve the current repo via `gh repo view
+--json nameWithOwner -q .nameWithOwner` or session context.
+Look up `repos[nameWithOwner][work_type]` for deltas.
 
-After resolving the criteria text, run automated checks
-against the actual state:
+**Legacy migration:** If the old per-project file
+(`~/.claude/projects/<project>/memory/acceptance-criteria.yaml`)
+exists but the global file does not, warn the user that the
+legacy file is no longer read. Do NOT auto-migrate — the user
+should manually move overrides to the global file.
 
-| Check | Command | Pass condition |
-|-------|---------|----------------|
-| Clean working copy | `git status --porcelain` | No output |
-| CI passing | `gh pr checks` | All checks pass |
-| PR not draft | `gh pr view --json isDraft` | `isDraft: false` |
-| No open review threads | `gh pr view --json reviewDecision` | Not `CHANGES_REQUESTED` |
+### Step 3: Merge with delta semantics
 
-**Skip PR checks** for `local-only` and `investigation` types.
+Apply the repo-scoped deltas from the global file to the
+plugin defaults:
 
-**For `fanout` type:** Instead of PR checks, verify each child
-work item's PR is merged:
-```bash
-gh pr list --state merged --json number,title
-```
+**`add`** — append checks to the defaults list.
+**`remove`** — remove checks by `name` (exact match).
+**`replace`** — replace a check by `name` with the new definition.
 
-Report which checks pass and which fail.
+Apply in order: remove first, then replace, then add. This
+prevents removing a just-added check or replacing a removed one.
+
+### Resolution order (summary)
+
+1. Load plugin defaults for `work_type`
+2. If global file exists and has overrides for current repo +
+   `work_type`: apply remove → replace → add
+3. If global file is absent: use plugin defaults as-is
+4. If `work_type` has no entry in defaults: use empty checks list
+   and warn
+
+## Executing Checks
+
+### Placeholder resolution
+
+Before running each check command, resolve placeholders:
+
+| Placeholder | Source |
+|-------------|--------|
+| `{pr_number}` | Current PR number (from `gh pr view --json number -q .number` or session context) |
+| `{repo}` | Current repo (from `gh repo view --json nameWithOwner -q .nameWithOwner` or session context) |
+
+If no PR exists (e.g., `local-only`), skip checks that reference
+`{pr_number}` and mark them as "skipped (no PR)".
+
+### Run each check
+
+For each check in the merged list:
+
+1. **If `check: manual`** — queue for user confirmation (see
+   Manual Checks below)
+2. **If `check: prompt`** — evaluate the `prompt` contextually
+   from the current session (code state, conversation history,
+   tool outputs). Report pass/fail with a brief rationale.
+   Use this for criteria that require judgment but not user
+   interaction (e.g., "Does the PR description contain a Job
+   Story?").
+3. **Otherwise** — run the command via Bash and evaluate:
+
+| Field | Evaluation |
+|-------|-----------|
+| `expect` | Trim command output; pass if exactly equals the value |
+| `expect_contains` | Pass if output contains the substring |
+| `expect_not_contains` | Pass if output does NOT contain the substring |
+| `expect_gt` | Parse output as number; pass if > value |
+
+If none of the expect fields match the output, the check **fails**.
+Capture the actual output for the failure report.
+
+### Manual checks
+
+Collect all `check: manual` items and present them in a single
+`AskUserQuestion` call after all automated checks complete:
+
+**REQUIRED: Call `AskUserQuestion`** for manual checks (do NOT
+assume pass/fail).
+
+Present each manual check as a yes/no confirmation using its
+`prompt` field.
 
 ## Presentation
 
-Present the resolved criteria alongside check results:
+Present results as a pass/fail table:
 
 ```
 Acceptance criteria (feature):
-  PR passing CI, groomed history, review published
 
 Checks:
   ✅ Working copy clean
-  ✅ CI passing (3/3 checks)
-  ✅ PR marked ready
-  ❌ Review decision: CHANGES_REQUESTED
+  ✅ CI passing
+  ✅ PR not draft
+  ✅ No fixup commits
+  ❌ Review requested — actual: "0" (expected > 0)
+  ⏭️  Slack posted (skipped — no PR)
+  ✋ Findings documented — awaiting confirmation
 
-1 check failed. Address before completing?
+4/5 automated checks passed. 1 manual check pending.
 ```
+
+Show the actual command output on failure so the user can
+diagnose without re-running.
 
 ## Decision Gate
 
@@ -154,7 +220,10 @@ Options:
 - **"Always"** — Save override with `persist: true`
 - **"Just this time"** — Save with `persist: false`
 
-Update the YAML file accordingly. Create the file if absent.
+Update the global YAML file at
+`~/.claude/memory/Dev10x/dod-acceptance-criteria.yaml` accordingly.
+Create the file if absent. Add the override under the current
+repo's key using add/remove/replace semantics.
 
 ## Integration
 
