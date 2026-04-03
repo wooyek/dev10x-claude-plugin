@@ -58,14 +58,19 @@ def block(*, message: str) -> None:
     sys.exit(2)
 
 
+def _load_edit_rules(*, yaml_path: Path) -> list[EditRule]:
+    from dev10x.config.loader import load_config
+
+    config = load_config(yaml_path=yaml_path)
+    return [r for r in config.rules if r.matcher == "Edit|Write" and r.hook_block]
+
+
 def validate_edit_write(
     *,
     data: dict[str, Any],
     yaml_path: Path | None = None,
     debug: bool = False,
 ) -> None:
-    from dev10x.domain.rule_engine import RuleEngine
-
     tool = data.get("tool_name", "")
     if tool not in ("Edit", "Write"):
         sys.exit(0)
@@ -75,15 +80,18 @@ def validate_edit_write(
     content = inp.get("new_string") or inp.get("content", "")
 
     resolved_path = yaml_path or _YAML_PATH
-    engine = RuleEngine.from_yaml(path=resolved_path)
+    rules = _load_edit_rules(yaml_path=resolved_path)
 
     if debug:
-        print(f"[DEBUG] Loaded {len(engine.edit_rules)} Edit|Write rules", file=sys.stderr)
+        print(f"[DEBUG] Loaded {len(rules)} Edit|Write rules", file=sys.stderr)
 
-    match = engine.evaluate(file_path=file_path, content=content)
-    if match:
+    for rule in rules:
+        if not rule.matches_file(file_path=file_path):
+            continue
+        if not rule.matches_content(content=content):
+            continue
         if debug:
-            print(f"[DEBUG] Rule '{match.rule_name}' matched: {file_path}", file=sys.stderr)
-        block(message=match.message)
+            print(f"[DEBUG] Rule '{rule.name}' matched: {file_path}", file=sys.stderr)
+        block(message=rule.format_message(file_path=file_path))
 
     sys.exit(0)
