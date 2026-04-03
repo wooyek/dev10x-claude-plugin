@@ -19,9 +19,8 @@ src_path = Path(__file__).parent.parent / "src"
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from subprocess_utils import run_script  # noqa: E402
-
 from dev10x.domain.sql import is_read_only_sql  # noqa: E402
+from dev10x.mcp.subprocess_utils import run_script  # noqa: E402
 
 server = FastMCP(name="Dev10x-db")
 

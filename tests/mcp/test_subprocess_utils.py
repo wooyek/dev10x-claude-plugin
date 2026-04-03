@@ -1,4 +1,4 @@
-"""Tests for servers/lib/subprocess_utils.py."""
+"""Tests for dev10x.mcp.subprocess_utils."""
 
 from __future__ import annotations
 
@@ -8,7 +8,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from subprocess_utils import (
+
+from dev10x.mcp.subprocess_utils import (
     get_plugin_root,
     parse_json_output,
     parse_key_value_output,
@@ -30,7 +31,7 @@ class TestRunScript:
         with pytest.raises(FileNotFoundError, match="Script not found"):
             run_script("nonexistent/script.sh")
 
-    @patch("subprocess_utils.subprocess.run")
+    @patch("dev10x.mcp.subprocess_utils.subprocess.run")
     def test_calls_subprocess_with_full_path(
         self,
         mock_run: patch,
@@ -52,7 +53,7 @@ class TestRunScript:
         assert cmd[1] == "arg1"
         assert cmd[2] == "arg2"
 
-    @patch("subprocess_utils.subprocess.run")
+    @patch("dev10x.mcp.subprocess_utils.subprocess.run")
     def test_passes_env_vars(
         self,
         mock_run: patch,
@@ -71,7 +72,7 @@ class TestRunScript:
         env = call_args[1]["env"]
         assert env["MY_VAR"] == "my_value"
 
-    @patch("subprocess_utils.subprocess.run")
+    @patch("dev10x.mcp.subprocess_utils.subprocess.run")
     def test_captures_output_as_text(
         self,
         mock_run: patch,
