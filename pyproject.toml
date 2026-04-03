@@ -33,7 +33,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 norecursedirs = ["codex-skills"]
 testpaths = ["tests"]
-addopts = "--cov=dev10x --cov-report=term-missing"
 
 [tool.coverage.run]
 source = ["dev10x"]
