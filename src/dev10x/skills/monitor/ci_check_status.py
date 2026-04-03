@@ -12,6 +12,12 @@ the PR's mergeable status so merge conflicts block the verdict.
 Usage:
     ci-check-status.py --pr 42 --repo owner/repo
     ci-check-status.py --pr 42 --repo owner/repo --required-only
+    ci-check-status.py --pr 42 --repo owner/repo --wait
+
+The --wait flag polls internally until a terminal verdict is
+reached (green, failing, or conflicting). This removes polling
+logic from the agent — haiku agents no longer need to loop and
+can call the script once with --wait to get a definitive answer.
 
 Output (JSON):
     {
@@ -43,6 +49,7 @@ import argparse
 import json
 import subprocess
 import sys
+import time
 
 
 def fetch_mergeable(
@@ -142,6 +149,56 @@ def compute_verdict(
     }
 
 
+def poll_until_terminal(
+    *,
+    pr_number: int,
+    repo: str,
+    required_only: bool = False,
+    poll_interval: int = 30,
+    initial_wait: int = 60,
+    max_polls: int = 60,
+) -> dict:
+    """Poll CI until a terminal verdict (green, failing, conflicting).
+
+    Waits `initial_wait` seconds for checks to register after a push,
+    then polls every `poll_interval` seconds. Returns the final verdict
+    dict. This removes polling logic from the agent — the script handles
+    all waiting internally.
+    """
+    print(
+        f"Waiting {initial_wait}s for checks to register...",
+        file=sys.stderr,
+        flush=True,
+    )
+    time.sleep(initial_wait)
+
+    for attempt in range(1, max_polls + 1):
+        checks = fetch_checks(
+            pr_number=pr_number,
+            repo=repo,
+            required_only=required_only,
+        )
+        mergeable = fetch_mergeable(pr_number=pr_number, repo=repo)
+        result = compute_verdict(checks=checks, mergeable=mergeable)
+        verdict = result["verdict"]
+
+        print(
+            f"[poll {attempt}/{max_polls}] verdict={verdict} "
+            f"pass={result['pass']} fail={result['fail']} "
+            f"pending={result['pending']}",
+            file=sys.stderr,
+            flush=True,
+        )
+
+        if verdict in ("green", "failing", "conflicting"):
+            return result
+
+        if attempt < max_polls:
+            time.sleep(poll_interval)
+
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Check CI status for a PR")
     parser.add_argument("--pr", type=int, required=True, help="PR number")
@@ -151,18 +208,52 @@ def main() -> None:
         action="store_true",
         help="Only check required status checks",
     )
+    parser.add_argument(
+        "--wait",
+        action="store_true",
+        help="Poll until terminal verdict (green/failing/conflicting)",
+    )
+    parser.add_argument(
+        "--poll-interval",
+        type=int,
+        default=30,
+        help="Seconds between polls (default: 30)",
+    )
+    parser.add_argument(
+        "--initial-wait",
+        type=int,
+        default=60,
+        help="Seconds to wait before first poll (default: 60)",
+    )
+    parser.add_argument(
+        "--max-polls",
+        type=int,
+        default=60,
+        help="Max poll attempts before giving up (default: 60)",
+    )
     args = parser.parse_args()
 
-    checks = fetch_checks(
-        pr_number=args.pr,
-        repo=args.repo,
-        required_only=args.required_only,
-    )
-    mergeable = fetch_mergeable(
-        pr_number=args.pr,
-        repo=args.repo,
-    )
-    result = compute_verdict(checks=checks, mergeable=mergeable)
+    if args.wait:
+        result = poll_until_terminal(
+            pr_number=args.pr,
+            repo=args.repo,
+            required_only=args.required_only,
+            poll_interval=args.poll_interval,
+            initial_wait=args.initial_wait,
+            max_polls=args.max_polls,
+        )
+    else:
+        checks = fetch_checks(
+            pr_number=args.pr,
+            repo=args.repo,
+            required_only=args.required_only,
+        )
+        mergeable = fetch_mergeable(
+            pr_number=args.pr,
+            repo=args.repo,
+        )
+        result = compute_verdict(checks=checks, mergeable=mergeable)
+
     print(json.dumps(result, indent=2))
 
 
