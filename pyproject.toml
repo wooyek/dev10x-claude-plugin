@@ -34,6 +34,14 @@ where = ["src"]
 norecursedirs = ["codex-skills"]
 testpaths = ["tests"]
 
+[tool.coverage.run]
+source = ["dev10x"]
+
+[tool.coverage.report]
+fail_under = 30
+show_missing = true
+exclude_lines = ["if __name__", "pragma: no cover"]
+
 [tool.ruff]
 line-length = 99
 src = ["src"]
