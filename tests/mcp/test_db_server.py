@@ -6,7 +6,8 @@ import json
 from unittest.mock import MagicMock, patch
 
 import pytest
-from sql_validation import is_read_only_sql
+
+from dev10x.domain.sql import is_read_only_sql
 
 
 class TestIsReadOnlySql:
