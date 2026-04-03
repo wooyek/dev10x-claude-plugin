@@ -1,3 +1,4 @@
+from dev10x.domain.config_loader import ConfigLoader
 from dev10x.domain.git_context import GitContext
 from dev10x.domain.hook_input import HookAllow, HookInput, HookResult
 from dev10x.domain.plan import Plan
@@ -10,6 +11,7 @@ __all__ = [
     "Compensation",
     "GitContext",
     "Config",
+    "ConfigLoader",
     "HookAllow",
     "HookInput",
     "HookResult",
