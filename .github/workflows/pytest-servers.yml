@@ -37,5 +37,5 @@ jobs:
       - name: Run server tests with coverage
         run: |
           uv run --extra dev pytest tests/mcp/ -v --tb=short \
-            --cov=servers --cov-report=term-missing \
+            -o 'addopts=' --cov=servers --cov-report=term-missing \
             --cov-fail-under=80
