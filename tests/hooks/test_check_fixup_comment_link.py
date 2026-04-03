@@ -6,7 +6,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-HOOK = Path(__file__).resolve().parent.parent / "git" / "check-fixup-comment-link"
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+HOOK = _REPO_ROOT / "hooks" / "git" / "check-fixup-comment-link"
 
 
 def _run_hook(*, commit_msg: str) -> subprocess.CompletedProcess[str]:

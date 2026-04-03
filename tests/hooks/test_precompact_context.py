@@ -6,7 +6,8 @@ import json
 import subprocess
 from pathlib import Path
 
-HOOK = Path(__file__).resolve().parent.parent / "scripts" / "precompact-context.sh"
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+HOOK = _REPO_ROOT / "hooks" / "scripts" / "precompact-context.sh"
 
 
 def _run_hook(*, payload: dict | None = None) -> subprocess.CompletedProcess[str]:

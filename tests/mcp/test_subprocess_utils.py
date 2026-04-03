@@ -42,7 +42,7 @@ class TestRunScript:
             stderr="",
         )
         plugin_root = get_plugin_root()
-        script = "servers/tests/conftest.py"
+        script = "tests/mcp/conftest.py"
 
         run_script(script, "arg1", "arg2")
 
@@ -63,7 +63,7 @@ class TestRunScript:
             stdout="",
             stderr="",
         )
-        script = "servers/tests/conftest.py"
+        script = "tests/mcp/conftest.py"
 
         run_script(script, env_vars={"MY_VAR": "my_value"})
 
@@ -82,7 +82,7 @@ class TestRunScript:
             stdout="output",
             stderr="",
         )
-        script = "servers/tests/conftest.py"
+        script = "tests/mcp/conftest.py"
 
         run_script(script)
 

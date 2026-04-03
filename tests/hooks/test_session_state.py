@@ -6,8 +6,9 @@ import json
 import subprocess
 from pathlib import Path
 
-STOP_HOOK = Path(__file__).resolve().parent.parent / "scripts" / "session-stop-persist.sh"
-START_HOOK = Path(__file__).resolve().parent.parent / "scripts" / "session-start-reload.sh"
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+STOP_HOOK = _REPO_ROOT / "hooks" / "scripts" / "session-stop-persist.sh"
+START_HOOK = _REPO_ROOT / "hooks" / "scripts" / "session-start-reload.sh"
 
 
 def _run_hook(

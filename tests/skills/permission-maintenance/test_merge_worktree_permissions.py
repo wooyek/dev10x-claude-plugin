@@ -1,16 +1,14 @@
 """Tests for the merge-worktree-permissions.py script."""
 
 import importlib.util
-import sys
-import types
 from pathlib import Path
 
 import pytest
 
-if "yaml" not in sys.modules:
-    sys.modules["yaml"] = types.ModuleType("yaml")
-
-SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "merge-worktree-permissions.py"
+_repo_root = Path(__file__).resolve().parent.parent.parent.parent
+SCRIPT_PATH = (
+    _repo_root / "skills" / "permission-maintenance" / "scripts" / "merge-worktree-permissions.py"
+)
 spec = importlib.util.spec_from_file_location("merge_worktree_permissions", SCRIPT_PATH)
 merge_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(merge_mod)

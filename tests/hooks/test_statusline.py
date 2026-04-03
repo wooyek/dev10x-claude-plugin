@@ -5,7 +5,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-SCRIPT = Path(__file__).resolve().parent.parent.parent / "bin" / "statusline.sh"
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+SCRIPT = _REPO_ROOT / "bin" / "statusline.sh"
 
 
 def _run_statusline(*, cwd: str | None = None) -> subprocess.CompletedProcess[str]:

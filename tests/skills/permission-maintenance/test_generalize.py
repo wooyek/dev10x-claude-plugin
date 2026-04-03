@@ -2,16 +2,12 @@
 
 import importlib.util
 import json
-import sys
-import types
 from pathlib import Path
 
 import pytest
 
-if "yaml" not in sys.modules:
-    sys.modules["yaml"] = types.ModuleType("yaml")
-
-SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "update-paths.py"
+_repo_root = Path(__file__).resolve().parent.parent.parent.parent
+SCRIPT_PATH = _repo_root / "skills" / "permission-maintenance" / "scripts" / "update-paths.py"
 spec = importlib.util.spec_from_file_location("update_paths", SCRIPT_PATH)
 update_paths = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(update_paths)

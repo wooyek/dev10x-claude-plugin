@@ -2,16 +2,14 @@
 
 import importlib.util
 import json
-import sys
-import types
 from pathlib import Path
 
 import pytest
 
-if "yaml" not in sys.modules:
-    sys.modules["yaml"] = types.ModuleType("yaml")
-
-SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "clean-project-files.py"
+_repo_root = Path(__file__).resolve().parent.parent.parent.parent
+SCRIPT_PATH = (
+    _repo_root / "skills" / "permission-maintenance" / "scripts" / "clean-project-files.py"
+)
 spec = importlib.util.spec_from_file_location("clean_project_files", SCRIPT_PATH)
 clean_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(clean_mod)

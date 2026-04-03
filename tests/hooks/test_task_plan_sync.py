@@ -8,7 +8,8 @@ from pathlib import Path
 
 import pytest
 
-HOOK = Path(__file__).resolve().parent.parent / "scripts" / "task-plan-sync.py"
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+HOOK = _REPO_ROOT / "hooks" / "scripts" / "task-plan-sync.py"
 
 
 def _run_hook(

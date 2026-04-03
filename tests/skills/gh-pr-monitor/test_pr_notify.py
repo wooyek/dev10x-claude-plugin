@@ -5,9 +5,10 @@ from pathlib import Path
 
 import pytest  # type: ignore[import-not-found]
 
+_repo_root = Path(__file__).resolve().parent.parent.parent.parent
 _spec = importlib.util.spec_from_file_location(
     "pr_notify",
-    Path(__file__).with_name("pr-notify.py"),
+    _repo_root / "skills" / "gh-pr-monitor" / "scripts" / "pr-notify.py",
 )
 assert _spec is not None and _spec.loader is not None
 _mod = importlib.util.module_from_spec(_spec)

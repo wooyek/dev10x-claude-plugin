@@ -5,9 +5,10 @@ from pathlib import Path
 
 import pytest
 
+_repo_root = Path(__file__).resolve().parent.parent.parent.parent
 _spec = importlib.util.spec_from_file_location(
     "ci_check_status",
-    Path(__file__).with_name("ci-check-status.py"),
+    _repo_root / "skills" / "gh-pr-monitor" / "scripts" / "ci-check-status.py",
 )
 assert _spec is not None and _spec.loader is not None
 _mod = importlib.util.module_from_spec(_spec)

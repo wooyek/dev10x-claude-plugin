@@ -32,7 +32,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 norecursedirs = ["codex-skills"]
-testpaths = ["src", "hooks/scripts", "hooks/tests", "servers/tests", "skills"]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 99

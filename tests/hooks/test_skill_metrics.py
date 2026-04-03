@@ -7,7 +7,8 @@ import os
 import subprocess
 from pathlib import Path
 
-HOOK = Path(__file__).resolve().parent.parent / "scripts" / "skill-metrics.sh"
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+HOOK = _REPO_ROOT / "hooks" / "scripts" / "skill-metrics.sh"
 
 
 def _run_hook(
