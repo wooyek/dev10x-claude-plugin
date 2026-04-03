@@ -1,3 +1,4 @@
+from dev10x.domain.git_context import GitContext
 from dev10x.domain.hook_input import HookAllow, HookInput, HookResult
 from dev10x.domain.plan import Plan
 from dev10x.domain.rule_engine import CommandRule, RuleEngine, RuleMatch
@@ -7,6 +8,7 @@ from dev10x.domain.validation_rule import Compensation, Config, Rule
 __all__ = [
     "CommandRule",
     "Compensation",
+    "GitContext",
     "Config",
     "HookAllow",
     "HookInput",

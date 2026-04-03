@@ -17,36 +17,22 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from dev10x.domain.git_context import GitContext
+
+_git = GitContext()
+
 
 def _get_toplevel() -> str | None:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
+    return _git.toplevel
 
 
 def _get_branch() -> str:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return "unknown"
+    return _git.branch
 
 
 def _run_git(*args: str) -> str:
     try:
-        return subprocess.check_output(
-            ["git", *args],
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
+        return GitContext.run(*args)
     except (subprocess.CalledProcessError, FileNotFoundError):
         return ""
 

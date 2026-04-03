@@ -10,24 +10,19 @@ Plan file location:
 from __future__ import annotations
 
 import json
-import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from dev10x.domain.git_context import GitContext
 from dev10x.domain.plan import Plan
+
+_git = GitContext()
 
 
 def get_toplevel() -> str | None:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
+    return _git.toplevel
 
 
 def get_plan_path(*, toplevel: str) -> Path:

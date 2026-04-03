@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 import os
 import re
-import subprocess
 import tempfile
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -25,14 +24,9 @@ def _now_iso() -> str:
 
 
 def _get_branch() -> str:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return "unknown"
+    from dev10x.domain.git_context import GitContext
+
+    return GitContext().branch
 
 
 def _extract_task_id(tool_result: str) -> str | None:
