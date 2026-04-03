@@ -133,7 +133,12 @@ class TestMcpServerImports:
 
 
 class TestStartupTime:
+    BUDGET_MS = 2000
+
     def test_cli_help_under_budget(self) -> None:
+        import time
+
+        start = time.monotonic()
         result = subprocess.run(
             ["uv", "run", "dev10x", "--help"],
             capture_output=True,
@@ -141,6 +146,10 @@ class TestStartupTime:
             timeout=5,
             cwd=str(REPO_ROOT),
         )
+        elapsed_ms = (time.monotonic() - start) * 1000
 
         assert result.returncode == 0
         assert "hook" in result.stdout
+        assert elapsed_ms < self.BUDGET_MS, (
+            f"Startup took {elapsed_ms:.0f}ms (budget: {self.BUDGET_MS}ms)"
+        )
