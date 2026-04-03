@@ -18,6 +18,7 @@ dev = [
     "faker>=33.0",
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
+    "pytest-benchmark>=5.0",
     "pytest-cov>=6.0",
     "mcp>=1.0",
     "ruff>=0.9",

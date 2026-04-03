@@ -14,6 +14,7 @@ from typing import Any
 
 import yaml
 
+from dev10x.domain.validation_rule import Compensation
 from dev10x.hooks.edit_validator import EditRule
 
 
@@ -50,16 +51,22 @@ class RuleEngine:
             if matcher == "Edit|Write":
                 fp = entry.get("file_pattern")
                 cp = entry.get("content_pattern")
+                compensations = [
+                    Compensation(
+                        **{k: v for k, v in c.items() if k in Compensation.__dataclass_fields__}
+                    )
+                    for c in entry.get("compensations", [])
+                ]
                 edit_rules.append(
                     EditRule(
                         name=entry.get("name", ""),
-                        file_pattern=re.compile(fp) if fp else None,
-                        file_names=frozenset(entry.get("file_names", [])),
-                        file_prefixes=tuple(entry.get("file_prefixes", [])),
-                        file_substrings=tuple(entry.get("file_substrings", [])),
-                        content_pattern=re.compile(cp) if cp else None,
+                        file_pattern=fp or "",
+                        file_names=list(entry.get("file_names", [])),
+                        file_prefixes=list(entry.get("file_prefixes", [])),
+                        file_substrings=list(entry.get("file_substrings", [])),
+                        content_pattern=cp or "",
                         message=(entry.get("message") or entry.get("reason") or "BLOCKED").strip(),
-                        compensations=entry.get("compensations", []),
+                        compensations=compensations,
                     )
                 )
             elif matcher == "Bash":
