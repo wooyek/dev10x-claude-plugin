@@ -19,12 +19,9 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-
-import yaml
 
 from dev10x.domain import HookInput, HookResult
-from dev10x.domain.validation_rule import Compensation, Config, Rule
+from dev10x.domain.validation_rule import Compensation, Config
 
 _YAML_PATH = Path(__file__).parent / "command-skill-map.yaml"
 
@@ -39,47 +36,25 @@ OVERRIDE_HINT = (
 )
 
 
+_CONFIG: Config | None = None
+
+
 def _load_config(yaml_path: Path = _YAML_PATH) -> Config:
-    data: dict[str, Any] = yaml.safe_load(yaml_path.read_text())
-    cfg_data = data.get("config", {})
-    friction_level = cfg_data.get("friction_level", "guided")
-    plugin_repo = cfg_data.get("plugin_repo", "")
-    rules: list[Rule] = []
-    for entry in data.get("rules", []):
-        matcher = entry.get("matcher", "Bash")
-        if matcher != "Bash":
-            continue
-        if not entry.get("hook_block", False):
-            continue
-        compensations = [
-            Compensation(
-                type=c.get("type", "use-skill"),
-                skill=c.get("skill", ""),
-                tool=c.get("tool", ""),
-                guardrails=c.get("guardrails", ""),
-                fallback=c.get("fallback", "").strip(),
-                description=c.get("description", "").strip(),
-            )
-            for c in entry.get("compensations", [])
-        ]
-        rules.append(
-            Rule(
-                name=entry.get("name", ""),
-                patterns=entry.get("patterns", []),
-                matcher="Bash",
-                except_=entry.get("except", []),
-                compensations=compensations,
-                hook_block=True,
-            )
-        )
+    from dev10x.config.loader import load_config
+
+    full = load_config(yaml_path=yaml_path)
     return Config(
-        friction_level=friction_level,
-        plugin_repo=plugin_repo,
-        rules=rules,
+        friction_level=full.friction_level,
+        plugin_repo=full.plugin_repo,
+        rules=[r for r in full.rules if r.matcher == "Bash" and r.hook_block],
     )
 
 
-_CONFIG: Config = _load_config()
+def _get_config() -> Config:
+    global _CONFIG
+    if _CONFIG is None:
+        _CONFIG = _load_config()
+    return _CONFIG
 
 
 _QUICK_TOKENS = frozenset(["commit", "create", "push", "rebase", "checks", "issue"])
@@ -156,8 +131,9 @@ class SkillRedirectValidator:
         return any(token in cmd_lower for token in _QUICK_TOKENS)
 
     def validate(self, inp: HookInput) -> HookResult | None:
+        config = _get_config()
         command = inp.command
-        for rule in _CONFIG.rules:
+        for rule in config.rules:
             if not rule.matches_command(command=command):
                 continue
             comp = rule.compensations[0] if rule.compensations else None
@@ -171,8 +147,8 @@ class SkillRedirectValidator:
             msg = _format_skill_msg(
                 label=label,
                 comp=comp,
-                friction_level=_CONFIG.friction_level,
-                plugin_repo=_CONFIG.plugin_repo,
+                friction_level=config.friction_level,
+                plugin_repo=config.plugin_repo,
             )
             return HookResult(message=msg)
         return None
