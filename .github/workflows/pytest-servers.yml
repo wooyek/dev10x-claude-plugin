@@ -5,12 +5,14 @@ on:
     branches: [develop]
     paths:
       - "servers/**"
+      - "tests/mcp/**"
       - "pyproject.toml"
       - ".github/workflows/pytest-servers.yml"
   pull_request:
     branches: [develop]
     paths:
       - "servers/**"
+      - "tests/mcp/**"
       - "pyproject.toml"
       - ".github/workflows/pytest-servers.yml"
 
@@ -34,6 +36,6 @@ jobs:
 
       - name: Run server tests with coverage
         run: |
-          uv run --extra dev pytest servers/ -v --tb=short \
+          uv run --extra dev pytest tests/mcp/ -v --tb=short \
             --cov=servers --cov-report=term-missing \
             --cov-fail-under=80

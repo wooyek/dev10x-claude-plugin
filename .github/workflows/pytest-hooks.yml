@@ -5,12 +5,14 @@ on:
     branches: [develop]
     paths:
       - "hooks/**"
+      - "tests/hooks/**"
       - "pyproject.toml"
       - ".github/workflows/pytest-hooks.yml"
   pull_request:
     branches: [develop]
     paths:
       - "hooks/**"
+      - "tests/hooks/**"
       - "pyproject.toml"
       - ".github/workflows/pytest-hooks.yml"
 
@@ -33,4 +35,4 @@ jobs:
         run: uv python install 3.12
 
       - name: Run hook tests
-        run: uv run --extra dev pytest hooks/ -v --tb=short
+        run: uv run --extra dev pytest tests/hooks/ -v --tb=short
