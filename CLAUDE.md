@@ -11,29 +11,26 @@ the root level.
 
 | Directory        | Purpose                                    |
 |------------------|--------------------------------------------|
+| `src/dev10x/`    | Python package (CLI, validators, hooks, MCP)|
+| `tests/`         | Unified test directory (mirrors src/)      |
 | `skills/`        | Skill definitions (SKILL.md + scripts)     |
 | `commands/`      | Slash command definitions                  |
-| `hooks/`         | PreToolUse / PostToolUse hooks             |
+| `hooks/`         | PreToolUse / PostToolUse hook entry points |
+| `servers/`       | MCP server scripts                         |
 | `bin/`           | Helper scripts (release, CI)               |
 | `.claude-plugin/`| Plugin manifest (`plugin.json`)            |
-| `agents/`        | Plugin-distributed Claude Code sub-agent specs (see `.claude/rules/agents.md`) |
+| `agents/`        | Plugin-distributed sub-agent specs         |
 | `references/`    | Shared docs (git, review, JTBD guides)     |
 | `.claude/rules/` | Always-loaded essentials + path-scoped rules |
-| `.claude/agents/`| Internal domain-specific reviewer agent specs |
+| `.claude/agents/`| Internal domain-specific reviewer agents   |
 
 ## Development
 
 ```bash
 claude --plugin-dir .          # load plugin locally
 claude plugin validate         # validate plugin structure
-```
-
-### Testing MCP Servers
-
-```bash
-for server in servers/*_server.py; do
-  timeout 5 uv run --script "$server" & sleep 2; kill $! 2>/dev/null || true
-done
+dev10x --help                  # CLI entry point
+uv run --extra dev pytest      # run tests with coverage
 ```
 
 MCP migration: shell scripts → MCP tools. See `.claude/rules/mcp-tools.md`.
