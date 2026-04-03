@@ -59,6 +59,84 @@ path:
 The hooks carry educational messages. The AI learns from each
 block. By mid-session, it stops triggering them entirely.
 
+### Orchestration that finishes what it starts
+
+Long AI sessions drift. The agent forgets the plan, skips steps,
+uses raw CLI commands instead of skill wrappers, and produces PRs
+missing ticket links, Job Stories, or CI verification. You come
+back to a branch that *looks* done but isn't merge-worthy.
+
+[`Dev10x:work-on`](skills/work-on/SKILL.md) solves this with a
+four-phase orchestrator — parse inputs, gather context in
+parallel, build a supervisor-approved plan from a YAML playbook,
+then execute with enforced skill routing:
+
+- **Playbook-driven plans** — every work type (feature, bugfix,
+  PR continuation, investigation) has a default play with ordered
+  steps. Override per-project via YAML without touching plugin
+  code.
+- **Skill routing enforcement** — a hard-wired table maps every
+  shipping action (commit, push, PR, CI monitor, groom) to its
+  skill wrapper. The agent cannot fall back to raw `git commit`
+  or `gh pr create` — the table survives context compaction.
+- **Acceptance verification** — the last step in every plan
+  delegates to a structured verification skill that checks CI
+  status, PR state, and working copy before declaring done.
+- **Pause and resume** — walk away mid-session and come back
+  later. Task state persists through context compaction, and
+  deferred work is routed to PR bookmarks or project TODOs.
+
+[`Dev10x:fanout`](skills/fanout/SKILL.md) extends this to
+multiple issues in parallel — each issue gets the **full
+playbook** (branch → implement → test → review → PR → CI →
+merge), not a collapsed shortcut. Issues run in isolated
+worktrees to avoid merge conflicts, with dependency ordering
+so blocking work lands first.
+
+The result: you point at a ticket, walk away, and come back to
+a groomed branch with atomic commits, a Job Story PR, passing
+CI, and a clean review — not a half-finished session that needs
+another hour of hand-holding.
+
+### Planning that spans milestones
+
+Single-ticket features are straightforward. Multi-milestone
+projects — the ones that span bounded contexts, require
+migration sequencing, and involve three teams — are where AI
+sessions usually produce shallow plans that miss dependencies.
+
+[`Dev10x:project-scope`](skills/project-scope/SKILL.md) turns a
+parent ticket or free-text description into a structured project
+with milestones, blocking relationships, and tracker integration
+(Linear, JIRA, or GitHub Issues). Each child ticket gets
+acceptance criteria, story point estimates, and clear dependency
+links so future sessions know what to build next.
+
+[`Dev10x:ticket-scope`](skills/ticket-scope/SKILL.md) goes
+deeper on individual tickets — technical research, architecture
+design, component identification, and implementation strategy.
+The output is a scoping document that replaces ad-hoc
+implementation decisions with structured planning before code is
+written.
+
+[`Dev10x:ddd`](skills/ddd/SKILL.md) supports the earliest phase:
+domain exploration via Event Storming workshops. When a feature
+spans multiple bounded contexts and the right decomposition isn't
+obvious, the skill guides structured discovery of domain events,
+aggregates, and context boundaries — producing models that inform
+how tickets are split and sequenced.
+
+Together, these skills create a planning chain:
+
+```
+Domain exploration (ddd) → Project decomposition (project-scope)
+→ Ticket scoping (ticket-scope) → Implementation (work-on)
+```
+
+Each step produces artifacts (models, tickets, scoping docs) that
+persist across sessions, so the AI picks up context instead of
+starting from scratch every time.
+
 ### A complete scope-to-merge pipeline
 
 Every step produces a precise, artifact-quality message — readable
