@@ -644,8 +644,13 @@ Options:
   each step** — never run raw git/gh commands directly:
   1. `Skill(Dev10x:git-groom)` — squash fixup commits
   2. `Skill(Dev10x:git)` — push with `--force-with-lease`
-  3. `gh pr ready` — mark PR ready for review (if still draft)
-  4. `Skill(Dev10x:gh-pr-monitor)` — watch CI and comments
+  3. `Skill(Dev10x:gh-pr-monitor)` — watch CI after force push
+  4. **CI guard (GH-684):** Only after CI passes, run
+     `gh pr ready` to mark the PR ready for review. Do NOT
+     run `gh pr ready` before CI is green — this was the #1
+     bypass pattern: marking ready then discovering CI failures.
+     Also verify no unresolved review threads remain before
+     marking ready.
   5. If CI passes and no new comments → merge via
      `gh pr merge --squash --delete-branch`
 - **"Groom + push only"** — Groom and push, but stop before

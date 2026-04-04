@@ -41,6 +41,22 @@ This skill follows `references/task-orchestration.md` patterns
 
 Mark completed when done.
 
+## Friction Level Awareness
+
+This skill adapts behavior based on the project's friction level
+(see `references/friction-levels.md`):
+
+| Level | Automated checks | Manual checks | Decision gate |
+|-------|-----------------|---------------|---------------|
+| strict | Run, must all pass | AskUserQuestion per item | AskUserQuestion required |
+| guided | Run, failures shown | AskUserQuestion per item | AskUserQuestion with recommendation |
+| adaptive | Run, auto-pass/fail | Converted to `prompt` (Claude evaluates) | Auto-select "Work complete" if all pass |
+
+**Resolving friction level:** Read from session context or
+playbook step metadata. If not available, default to `guided`.
+Playbook steps may override with `friction_level: adaptive`
+for unattended shipping pipelines.
+
 ## Input
 
 The skill accepts an optional `work_type` argument. If not
@@ -172,6 +188,8 @@ Capture the actual output for the failure report.
 
 ### Manual checks
 
+**At strict/guided level:**
+
 Collect all `check: manual` items and present them in a single
 `AskUserQuestion` call after all automated checks complete:
 
@@ -180,6 +198,14 @@ assume pass/fail).
 
 Present each manual check as a yes/no confirmation using its
 `prompt` field.
+
+**At adaptive level:**
+
+Convert `manual` checks to `prompt` checks — Claude evaluates
+each from session context (code state, conversation history,
+tool outputs). Report pass/fail with a brief rationale. No
+`AskUserQuestion` call. This enables fully unattended ACC
+verification in AFK/solo-maintainer workflows.
 
 ## Presentation
 
@@ -205,6 +231,8 @@ diagnose without re-running.
 
 ## Decision Gate
 
+**At strict/guided level:**
+
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
 Options:
 - **"Work complete" (Recommended)** — All criteria met, close
@@ -212,6 +240,14 @@ Options:
 - **"Override — complete anyway"** — Accept despite failures
   (ask whether to persist this override)
 - **"Go back"** — Return to fix failing checks
+
+**At adaptive level:**
+
+Skip `AskUserQuestion`. Auto-select based on results:
+- All checks pass → auto-complete ("Work complete")
+- Any check fails → auto-select "Go back" and report failures
+  to the parent orchestrator for resolution
+- No user interruption in either case
 
 If the user picks "Override", ask whether to persist:
 

@@ -143,10 +143,21 @@ this comment:
    (PAY-762, PAY-735, PAY-592). For non-Python projects, run
    the project's test runner directly (`npm test`, etc.).
 
+   **LOOP ENFORCEMENT (GH-682):** This rule applies to EVERY
+   test run in the fix-test-fix cycle, not just the first.
+   When tests fail and you iterate (fix code → re-run tests →
+   fix code → re-run tests), EACH re-run MUST use
+   `Skill(Dev10x:py-test)`. The pattern of "first run uses
+   skill, subsequent runs use raw pytest" is the #1 skill
+   routing violation. Before running any test command, check:
+   am I about to type `pytest` or `uv run pytest`? If yes,
+   STOP and use `Skill(Dev10x:py-test)` instead.
+
    Note: `ruff format` and `ruff check --fix` run automatically via PostToolUse hook.
 
    **If tests fail:** Fix the test failure before proceeding to
-   Step 5. If the fix itself is wrong, revert and reply asking
+   Step 5. Re-run tests via `Skill(Dev10x:py-test)` — not raw
+   pytest. If the fix itself is wrong, revert and reply asking
    for clarification (see Error Handling).
 
 ### Step 5: Create Fixup Commit (delegate to Dev10x:git-fixup)

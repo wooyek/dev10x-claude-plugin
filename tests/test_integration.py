@@ -132,6 +132,90 @@ class TestMcpServerImports:
         assert server_path.exists()
 
 
+HOOK_SCRIPTS = [
+    "hooks/scripts/validate-bash-command.py",
+    "hooks/scripts/validate-edit-write.py",
+    "hooks/scripts/task-plan-sync.py",
+    "hooks/scripts/session-start-migrate-permissions.py",
+]
+
+SKILL_SCRIPTS_WITH_SRC_IMPORTS = [
+    "skills/skill-audit/scripts/extract-session.py",
+    "skills/skill-audit/scripts/analyze-actions.py",
+    "skills/skill-audit/scripts/analyze-permissions.py",
+    "skills/git-groom/scripts/mass-rewrite.py",
+]
+
+
+class TestPythonEntryPointLoadability:
+    """GH-681: Verify Python scripts can be loaded from installed plugin context.
+
+    Hook scripts use `from dev10x.xxx import ...` directly and rely on
+    the dev10x package being importable. Skill scripts that insert
+    src/ into sys.path must resolve relative to their own location.
+    """
+
+    @pytest.mark.parametrize("script_path", HOOK_SCRIPTS)
+    def test_hook_script_compiles(self, script_path: str) -> None:
+        path = REPO_ROOT / script_path
+        if not path.exists():
+            pytest.skip(f"{script_path} not found")
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                f"import py_compile; py_compile.compile('{path}', doraise=True)",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        assert result.returncode == 0, f"Compilation failed: {result.stderr}"
+
+    @pytest.mark.parametrize("script_path", SKILL_SCRIPTS_WITH_SRC_IMPORTS)
+    def test_skill_script_compiles(self, script_path: str) -> None:
+        path = REPO_ROOT / script_path
+        if not path.exists():
+            pytest.skip(f"{script_path} not found")
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                f"import py_compile; py_compile.compile('{path}', doraise=True)",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        assert result.returncode == 0, f"Compilation failed: {result.stderr}"
+
+    @pytest.mark.parametrize(
+        "module",
+        [
+            pytest.param(
+                "dev10x.hooks.edit_validator",
+                marks=pytest.mark.xfail(
+                    reason="Circular import: edit_validator → domain → rule_engine → edit_validator"
+                ),
+            ),
+            "dev10x.commands.hook",
+            "dev10x.hooks.task_plan_sync",
+            "dev10x.validators.skill_redirect",
+            "dev10x.skills.audit.extract_session",
+        ],
+    )
+    def test_dev10x_module_importable(self, module: str) -> None:
+        result = subprocess.run(
+            [sys.executable, "-c", f"import {module}"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=str(REPO_ROOT),
+            env={**__import__("os").environ, "PYTHONPATH": str(REPO_ROOT / "src")},
+        )
+        assert result.returncode == 0, f"Import failed for {module}: {result.stderr}"
+
+
 class TestStartupTime:
     BUDGET_MS = 2000
 

@@ -105,7 +105,12 @@ def extract_tool_results(content: list) -> list[dict]:
     return results
 
 
+SKILL_LOAD_PREFIX = "Base directory for this skill:"
+
+
 def check_correction(text: str) -> bool:
+    if text.lstrip().startswith(SKILL_LOAD_PREFIX):
+        return False
     return bool(CORRECTION_PATTERNS.search(text))
 
 
@@ -172,9 +177,7 @@ def process_jsonl(jsonl_path: str, out: TextIO) -> None:
 
         if msg_type == "user":
             text = extract_text_from_content(content)
-            tool_results = extract_tool_results(
-                content if isinstance(content, list) else []
-            )
+            tool_results = extract_tool_results(content if isinstance(content, list) else [])
 
             if text.strip():
                 turn_num += 1

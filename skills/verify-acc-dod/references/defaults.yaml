@@ -32,6 +32,21 @@ defaults:
       - name: No fixup commits
         check: git log --oneline origin/develop..HEAD
         expect_not_contains: "fixup!"
+      - name: Skill routing compliance
+        check: prompt
+        prompt: >
+          Review the session for skill routing violations: were all
+          test runs delegated to the test skill (not raw pytest/uv
+          run pytest)? Were all commits created via Dev10x:git-commit
+          (not raw git commit)? Were all pushes via Dev10x:git (not
+          raw git push)? Check iterative loops especially — the first
+          iteration often uses the skill but subsequent iterations
+          fall back to raw CLI.
+      - name: No unresolved review threads
+        check: >
+          gh pr view {pr_number} --repo {repo}
+          --json reviewThreads -q '[.reviewThreads[] | select(.isResolved == false)] | length'
+        expect: "0"
       - name: Review requested
         check: >
           gh pr view {pr_number} --repo {repo}
@@ -55,6 +70,18 @@ defaults:
       - name: No fixup commits
         check: git log --oneline origin/develop..HEAD
         expect_not_contains: "fixup!"
+      - name: Skill routing compliance
+        check: prompt
+        prompt: >
+          Review the session for skill routing violations: were all
+          test runs delegated to the test skill (not raw pytest/uv
+          run pytest)? Were all commits via Dev10x:git-commit? Were
+          all pushes via Dev10x:git? Check iterative loops especially.
+      - name: No unresolved review threads
+        check: >
+          gh pr view {pr_number} --repo {repo}
+          --json reviewThreads -q '[.reviewThreads[] | select(.isResolved == false)] | length'
+        expect: "0"
       - name: Review requested
         check: >
           gh pr view {pr_number} --repo {repo}
@@ -75,6 +102,17 @@ defaults:
       - name: No fixup commits
         check: git log --oneline origin/develop..HEAD
         expect_not_contains: "fixup!"
+      - name: Skill routing compliance
+        check: prompt
+        prompt: >
+          Review the session for skill routing violations in
+          iterative fix-test loops: did all test runs use the test
+          skill? Did all commits use Dev10x:git-commit?
+      - name: No unresolved review threads
+        check: >
+          gh pr view {pr_number} --repo {repo}
+          --json reviewThreads -q '[.reviewThreads[] | select(.isResolved == false)] | length'
+        expect: "0"
       - name: Re-review requested
         check: >
           gh pr view {pr_number} --repo {repo}
