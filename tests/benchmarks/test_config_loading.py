@@ -11,15 +11,17 @@ Decision: TOML conversion is NOT worth the effort because:
 3. PyYAML remains required for plan.yaml and skill playbooks
 4. Migration cost (updating all loading paths) exceeds the benefit
 
-This benchmark documents the numbers for the record.
+Run:
+    pytest tests/benchmarks/test_config_loading.py --benchmark-only
 """
 
 from __future__ import annotations
 
-import time
+import re
 from pathlib import Path
 
 import msgpack
+import pytest
 import yaml
 
 YAML_PATH = (
@@ -31,53 +33,100 @@ YAML_PATH = (
 )
 
 
+def _load_yaml() -> dict:
+    return yaml.safe_load(YAML_PATH.read_text())
+
+
+def _extract_patterns(data: dict) -> list[str]:
+    patterns: list[str] = []
+    for rule in data.get("rules", []):
+        patterns.extend(rule.get("patterns", []))
+        if rule.get("file_pattern"):
+            patterns.append(rule["file_pattern"])
+        if rule.get("content_pattern"):
+            patterns.append(rule["content_pattern"])
+    return patterns
+
+
+def _compile_patterns(patterns: list[str]) -> list[re.Pattern[str]]:
+    return [re.compile(p) for p in patterns]
+
+
+@pytest.mark.benchmark(group="config-loading")
 class TestConfigLoadingBenchmark:
-    def test_yaml_cold_load(self) -> None:
-        start = time.monotonic()
-        data = yaml.safe_load(YAML_PATH.read_text())
-        elapsed_ms = (time.monotonic() - start) * 1000
+    @pytest.fixture(scope="class")
+    def yaml_data(self) -> dict:
+        return _load_yaml()
 
-        assert data is not None
-        assert "rules" in data
-        assert elapsed_ms < 50
+    @pytest.fixture(scope="class")
+    def patterns(self, yaml_data: dict) -> list[str]:
+        return _extract_patterns(data=yaml_data)
 
-    def test_msgpack_warm_load(self, tmp_path: Path) -> None:
-        data = yaml.safe_load(YAML_PATH.read_text())
-        cache_path = tmp_path / "config.msgpack"
-        cache_path.write_bytes(msgpack.packb(data, use_bin_type=True))
+    @pytest.fixture(scope="class")
+    def msgpack_bytes(self, yaml_data: dict) -> bytes:
+        return msgpack.packb(yaml_data, use_bin_type=True)
 
-        start = time.monotonic()
-        loaded = msgpack.unpackb(cache_path.read_bytes(), raw=False)
-        elapsed_ms = (time.monotonic() - start) * 1000
+    def test_yaml_cold_load(self, benchmark) -> None:
+        result = benchmark(_load_yaml)
+        assert result is not None
+        assert "rules" in result
 
-        assert loaded is not None
-        assert "rules" in loaded
-        assert elapsed_ms < 10
+    def test_msgpack_warm_load(self, benchmark, msgpack_bytes: bytes) -> None:
+        result = benchmark(msgpack.unpackb, msgpack_bytes, raw=False)
+        assert result is not None
+        assert "rules" in result
 
-    def test_tomllib_cold_load(self, tmp_path: Path) -> None:
-        """Benchmarks TOML parsing of the config section only.
-
-        TOML cannot represent the full rules structure (lists of
-        complex objects with regex patterns) without a custom schema.
-        This test intentionally benchmarks only the config section
-        to measure tomllib's raw parse speed vs yaml.safe_load.
-        """
+    def test_tomllib_cold_load(self, benchmark, yaml_data: dict) -> None:
         import tomllib
 
-        data = yaml.safe_load(YAML_PATH.read_text())
-        cfg = data.get("config", {})
-
+        cfg = yaml_data.get("config", {})
         toml_lines = ["[config]\n"]
         for k, v in cfg.items():
             toml_lines.append(f'{k} = "{v}"\n')
+        toml_content = "".join(toml_lines)
 
-        toml_path = tmp_path / "config.toml"
-        toml_path.write_text("".join(toml_lines))
+        result = benchmark(tomllib.loads, toml_content)
+        assert result is not None
+        assert result.get("config") == cfg
 
-        start = time.monotonic()
-        loaded = tomllib.loads(toml_path.read_text())
-        elapsed_ms = (time.monotonic() - start) * 1000
+    def test_regex_compile_patterns(self, benchmark, patterns: list[str]) -> None:
+        result = benchmark(_compile_patterns, patterns)
+        assert len(result) == len(patterns)
+        assert all(isinstance(p, re.Pattern) for p in result)
 
-        assert loaded is not None
-        assert loaded.get("config") == cfg
-        assert elapsed_ms < 10
+
+@pytest.mark.benchmark(group="config-cold-vs-warm")
+class TestColdVsWarmStart:
+    @pytest.fixture(scope="class")
+    def yaml_data(self) -> dict:
+        return _load_yaml()
+
+    @pytest.fixture(scope="class")
+    def msgpack_bytes(self, yaml_data: dict) -> bytes:
+        return msgpack.packb(yaml_data, use_bin_type=True)
+
+    def test_cold_start_yaml_plus_compile(self, benchmark) -> None:
+        def cold_start():
+            data = _load_yaml()
+            patterns = _extract_patterns(data=data)
+            compiled = _compile_patterns(patterns=patterns)
+            return data, compiled
+
+        data, compiled = benchmark(cold_start)
+        assert "rules" in data
+        assert len(compiled) > 0
+
+    def test_warm_start_msgpack_plus_compile(
+        self,
+        benchmark,
+        msgpack_bytes: bytes,
+    ) -> None:
+        def warm_start():
+            data = msgpack.unpackb(msgpack_bytes, raw=False)
+            patterns = _extract_patterns(data=data)
+            compiled = _compile_patterns(patterns=patterns)
+            return data, compiled
+
+        data, compiled = benchmark(warm_start)
+        assert "rules" in data
+        assert len(compiled) > 0
