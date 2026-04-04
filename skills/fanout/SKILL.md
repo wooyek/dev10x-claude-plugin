@@ -63,6 +63,41 @@ next. Never pause between items to ask "should I continue?"
 5. `TaskCreate(subject="Verify: confirm all items resolved", activeForm="Verifying")`
 6. `TaskCreate(subject="Audit: review session skill usage", activeForm="Auditing")`
 
+## Phase 0: Session Friction Level (GH-689)
+
+**At the very start** — before Phase 1 — prompt the user to set
+the session friction level. This controls how aggressively the
+skill auto-advances vs pauses for confirmation.
+
+**Skip this prompt when:**
+- Session config already exists at `.claude/Dev10x/session.yaml`
+  (loaded after compaction or from a prior invocation)
+
+**REQUIRED: Call `AskUserQuestion`** (ALWAYS_ASK — fires at all
+friction levels, including adaptive).
+
+Options:
+- Guided (Recommended) — Gates fire with recommendations,
+  user can override. Default for attended sessions.
+- Adaptive (AFK) — Auto-select recommended options at all
+  gates. No `AskUserQuestion` interruptions except
+  `ALWAYS_ASK` gates. Best for walk-away sessions.
+- Strict — All gates fire, no auto-selection. Every
+  decision requires explicit user input.
+
+**Persist the choice** to `.claude/Dev10x/session.yaml`:
+
+```yaml
+friction_level: guided  # strict | guided | adaptive
+```
+
+Write this file using the Write tool. The PreCompact hook
+reads it to inject friction context into recovery summaries.
+
+When `adaptive` is selected, propagate to all `Dev10x:work-on`
+delegations — nested work-on invocations skip their own
+Phase 0 prompt and inherit the fanout session level.
+
 ## Phase 1: Scan
 
 Discover all open work items in the current repo or
@@ -345,6 +380,36 @@ same sequential chain are affected:
    `git rebase origin/develop`
 3. If rebase conflicts → resolve, commit, force-push
 4. If rebase succeeds → continue processing
+
+### Merge Mode (GH-688)
+
+Controls whether PRs are merged autonomously after CI passes.
+
+| Mode | Behavior |
+|------|----------|
+| `manual` | Mark ready, stop. User merges explicitly. |
+| `autonomous` | After CI green + no comments → invoke `Dev10x:gh-pr-merge` |
+| `cascade` | Autonomous + auto-rebase downstream PRs in the same fanout chain |
+
+**Resolution order** (first match wins):
+1. **Session friction level:** If `adaptive` (AFK mode from
+   Phase 0), default to `cascade`
+2. **Playbook override:** `merge_mode` in the user's
+   `work-on.yaml` playbook
+3. **Default:** `manual`
+
+**Cascade logic** (when merge_mode is `cascade`):
+1. Merge PR N via `Skill(Dev10x:gh-pr-merge)`
+2. `git fetch origin develop`
+3. Rebase PR N+1 onto `origin/develop`
+4. Force-push, wait for CI (60s initial delay)
+5. Merge PR N+1
+6. Repeat for all PRs in the sequential chain
+
+**Autonomous and cascade modes** skip the Phase 4 monitor's
+`AskUserQuestion` gate — merges proceed without confirmation.
+The `ALWAYS_ASK` marker on Phase 5's verification gate still
+fires to confirm final session state.
 
 ### Merge Strategy
 
