@@ -120,11 +120,21 @@ Use the **Task tool** with these parameters:
 ```
 subagent_type: "general-purpose"
 model: "haiku"
+mode: "dontAsk"
 run_in_background: true
 max_turns: 200
 description: "Monitor PR #{pr_number}"
 prompt: <see "Agent Prompt Template" below, with variables filled in>
 ```
+
+**REQUIRED: `mode: "dontAsk"` on the Agent call.** Without
+this, background agents lack Bash permissions to run CI
+polling scripts and `gh` commands. They fall back to raw
+alternatives which also hit permission friction, effectively
+skipping the re-monitoring step (GH-695). The `dontAsk` mode
+grants the agent permission to execute tools without prompts
+— safe here because the agent only runs read-only CI checks
+and `gh pr ready`.
 
 **REQUIRED: `max_turns: 200` on the Agent call.** Without this,
 haiku agents exhaust their default budget (~19 Bash calls) before
@@ -595,14 +605,13 @@ Include the full output in the agent's final report to the supervisor.
 - **Working directory**: Use `gh pr view {pr_number} --repo {repo}
   --json headRefName` to get the branch. Never hardcode a working
   directory — the PR branch may live in a different worktree.
-- **Background agent push limitation**: Background agents dispatched
-  with `run_in_background` may lack Bash permissions to run `git
-  commit` and `git push`. If the agent identifies CI failures but
-  cannot push fixes, it should report the failures and required fixes
-  back to the main session for manual application. Consider using
-  `mode: "dontAsk"` on the Agent call when fixes are expected, or
-  run the monitor in foreground mode for PRs that are likely to need
-  CI fixes.
+- **Background agent permissions**: Background agents are launched
+  with `mode: "dontAsk"` (GH-695) to avoid permission friction
+  on CI polling scripts and `gh` commands. This is safe because
+  the agent only runs read-only operations (CI checks, PR status)
+  and `gh pr ready`. If the agent needs to push fixes (CI failure
+  handling), it uses `mcp__plugin_Dev10x_cli__push_safe` which
+  is already permitted via MCP.
 
 ---
 
