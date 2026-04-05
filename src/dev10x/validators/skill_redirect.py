@@ -19,9 +19,34 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from dev10x.domain import HookInput, HookResult
 from dev10x.domain.validation_rule import Compensation, Config
+
+if TYPE_CHECKING:
+    from dev10x.domain import HookRetry
+
+
+def _format_correction_msg(
+    *,
+    label: str,
+    comp: Compensation,
+) -> str:
+    if comp.type == "use-tool":
+        return (
+            f"Permission denied for `{label}`. Use the MCP tool instead:\n\n"
+            f"  Tool: `{comp.tool}`\n\n"
+            f"The raw CLI command was denied because it bypasses structured\n"
+            f"responses and causes permission friction ({comp.guardrails})."
+        )
+    return (
+        f"Permission denied for `{label}`. Use the skill instead:\n\n"
+        f"  Skill: `Skill({comp.skill})`\n\n"
+        f"The raw CLI command was denied because it bypasses guardrails\n"
+        f"that the skill enforces ({comp.guardrails})."
+    )
+
 
 _YAML_PATH = Path(__file__).parent / "command-skill-map.yaml"
 
@@ -151,4 +176,22 @@ class SkillRedirectValidator:
                 plugin_repo=config.plugin_repo,
             )
             return HookResult(message=msg)
+        return None
+
+    def correct(self, inp: HookInput) -> HookRetry | None:
+        from dev10x.domain import HookRetry as _HookRetry
+
+        config = _get_config()
+        command = inp.command
+        for rule in config.rules:
+            if not rule.matches_command(command=command):
+                continue
+            comp = rule.compensations[0] if rule.compensations else None
+            if not comp:
+                continue
+            if comp.skill == "Dev10x:git-commit" and _SKILL_COMMIT_FILE_RE.search(command):
+                continue
+            label = rule.compiled_patterns[0].pattern
+            msg = _format_correction_msg(label=label, comp=comp)
+            return _HookRetry(message=msg)
         return None

@@ -15,8 +15,12 @@ import json
 import os
 import re
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from dev10x.domain import HookInput, HookResult
+
+if TYPE_CHECKING:
+    from dev10x.domain import HookRetry
 
 SETUP_TOKENS = frozenset(
     ["mkdir", "cd", "export", "source", ".", "pushd", "popd", "touch", "unset"]
@@ -317,3 +321,11 @@ class PrefixFrictionValidator:
                 )
 
         return None
+
+    def correct(self, inp: HookInput) -> HookRetry | None:
+        from dev10x.domain import HookRetry as _HookRetry
+
+        result = self.validate(inp=inp)
+        if result is None:
+            return None
+        return _HookRetry(message=result.message)

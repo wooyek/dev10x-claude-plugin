@@ -75,3 +75,23 @@ class HookAllow:
 
     def to_dict(self) -> dict[str, str]:
         return {"message": self.message, "decision": "allow"}
+
+
+@dataclass(frozen=True)
+class HookRetry:
+    message: str
+
+    def emit(self) -> NoReturn:
+        result: dict[str, Any] = {
+            "hookSpecificOutput": {
+                "hookEventName": "PermissionDenied",
+                "retry": True,
+            },
+        }
+        if self.message:
+            result["systemMessage"] = self.message
+        print(json.dumps(result), file=sys.stderr)
+        sys.exit(0)
+
+    def to_dict(self) -> dict[str, str]:
+        return {"message": self.message, "decision": "retry"}

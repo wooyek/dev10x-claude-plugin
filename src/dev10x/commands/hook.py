@@ -87,6 +87,42 @@ def plan_archive() -> None:
     cmd_archive()
 
 
+@hook.command(name="permission-denied")
+def permission_denied() -> None:
+    """Handle PermissionDenied events via the validator registry.
+
+    Reads JSON from stdin, dispatches to validators that implement
+    correct(). Returns retry=true with corrective guidance when a
+    validator recognizes the denied command.
+    Exit codes: 0 always (retry decision is in JSON output).
+    """
+    from dev10x.validators.base import Corrector
+
+    inp = HookInput.from_stdin()
+    if not inp.command:
+        sys.exit(0)
+
+    for validator in get_validators():
+        try:
+            if not validator.should_run(inp=inp):
+                continue
+            if not isinstance(validator, Corrector):
+                continue
+            result = validator.correct(inp=inp)
+            if result is not None:
+                result.emit()
+        except Exception:
+            if _DEBUG:
+                print(
+                    f"[HOOK_DEBUG] {validator.name} correct() raised:",
+                    file=sys.stderr,
+                )
+                traceback.print_exc(file=sys.stderr)
+            continue
+
+    sys.exit(0)
+
+
 @hook.command(name="validate-edit")
 @click.option(
     "--config",

@@ -1,6 +1,6 @@
 from dev10x.domain.config_loader import ConfigLoader
 from dev10x.domain.git_context import GitContext
-from dev10x.domain.hook_input import HookAllow, HookInput, HookResult
+from dev10x.domain.hook_input import HookAllow, HookInput, HookResult, HookRetry
 from dev10x.domain.plan import Plan
 from dev10x.domain.rule_engine import CommandRule, RuleEngine, RuleMatch
 from dev10x.domain.sql import SqlStatement, is_read_only_sql
@@ -15,6 +15,7 @@ __all__ = [
     "HookAllow",
     "HookInput",
     "HookResult",
+    "HookRetry",
     "Plan",
     "Rule",
     "RuleEngine",
