@@ -29,6 +29,14 @@ Per-project overrides via:
 ~/.claude/projects/<project>/memory/playbooks/skill-reinforcement.yaml
 ```
 
+Session-level overrides (set by Phase 0 of `Dev10x:work-on`
+and `Dev10x:fanout`):
+```
+~/.claude/Dev10x/session.yaml
+```
+
+Resolution order: session override > project override > default.
+
 ## Skill Decision Gates
 
 Skills with `AskUserQuestion` gates adapt behavior based on level:

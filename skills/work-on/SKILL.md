@@ -16,6 +16,7 @@ allowed-tools:
   - Read(~/.claude/projects/**/memory/playbooks/work-on.yaml)
   - Read(${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml)
   - Write(~/.claude/projects/**/**)
+  - Write(~/.claude/Dev10x/**)
   - Skill(skill="Dev10x:verify-acc-dod")
   - Bash(${CLAUDE_PLUGIN_ROOT}/hooks/scripts/task-plan-sync.py:*)
 ---
