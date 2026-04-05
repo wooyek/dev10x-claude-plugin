@@ -17,6 +17,7 @@ allowed-tools:
   - mcp__plugin_Dev10x_cli__pr_detect
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-merge/scripts/:*)
   - Bash(gh:*)
   - Skill(Dev10x:qa-scope)
   - Skill(Dev10x:request-review)
@@ -343,15 +344,29 @@ unaddressed comments.
    ```
    Then check if each review body's findings have corresponding
    top-level PR comment replies (matching `Re:` prefix pattern).
-3. If unresolved threads OR unaddressed body findings exist →
-   enter Phase 2 to address them. Do NOT mark PR ready yet.
-4. If no unresolved threads AND no unaddressed body findings →
-   mark PR ready (`gh pr ready {pr_number}`) and proceed to
-   Phase 2 for a final check.
+3. Fetch top-level PR comments (GH-698) and check for
+   unaddressed automated review findings:
+   ```bash
+   ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-merge/scripts/check-top-level-comments.sh \
+     {owner} {repo} {pr_number}
+   ```
+   Returns a JSON array of unaddressed findings (empty = pass).
+   Top-level comments are invisible to the `reviewThreads`
+   GraphQL query — they use a separate API surface
+   (`issueComments`). Without this check, automated review
+   findings posted as top-level comments are silently skipped.
+4. If unresolved threads OR unaddressed body findings OR
+   unaddressed top-level comments exist → enter Phase 2 to
+   address them. Do NOT mark PR ready yet.
+5. If no unresolved threads AND no unaddressed body findings
+   AND no unaddressed top-level comments → mark PR ready
+   (`gh pr ready {pr_number}`) and proceed to Phase 2 for
+   a final check.
 
 This re-check prevents the race condition where automated
 reviewers post during CI, and ensures body-only review
-findings are not silently skipped.
+findings and top-level automated comments are not silently
+skipped.
 
 ---
 
@@ -410,6 +425,8 @@ Move to Phase 2.5 when ALL of these are true:
 - No unaddressed body-only review findings (GH-564) — check
   review bodies for structured findings without corresponding
   top-level PR comment replies
+- No unaddressed top-level automated review comments (GH-698)
+  — check `issueComments` for severity markers from bot users
 - PR has at least one approval OR no reviews yet
 
 ---
