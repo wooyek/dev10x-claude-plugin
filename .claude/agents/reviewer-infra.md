@@ -37,8 +37,9 @@ Files matching: `Makefile`, `**/*.sh`, `bin/**`, `hooks/**`,
 11. **hooks.json integrity** — for `hooks/hooks.json` changes: verify
     all referenced script paths exist, matcher patterns are valid
     (Bash, Edit|Write, Skill, SessionStart), no duplicate entries,
-    all hook commands use `python3 $CLAUDE_PLUGIN_ROOT/...` (not direct
-    shebangs like `uv` or `pipenv`), and all scripts reside in
+    all Python hook scripts use a uv shebang (`#!/usr/bin/env -S uv run
+    --script`) and are invoked directly (not via `python3` prefix), and
+    all scripts reside in
     `hooks/scripts/` not `skills/` (cross-dir references break when a
     skill is removed)
 11d. **Hook error handling** — for PreToolUse hooks that parse input
