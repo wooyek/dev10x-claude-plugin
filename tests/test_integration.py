@@ -122,14 +122,100 @@ class TestEditValidatorRules:
         assert all(r.name for r in rules)
 
 
-class TestMcpServerImports:
-    def test_cli_server_importable(self) -> None:
-        server_path = REPO_ROOT / "servers" / "cli_server.py"
-        assert server_path.exists()
+def _script_imports_dev10x(script: Path) -> bool:
+    import ast
 
-    def test_db_server_importable(self) -> None:
-        server_path = REPO_ROOT / "servers" / "db_server.py"
-        assert server_path.exists()
+    try:
+        tree = ast.parse(script.read_text())
+    except SyntaxError:
+        return False
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith("dev10x"):
+            return True
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name.startswith("dev10x"):
+                    return True
+    return False
+
+
+def _extract_dev10x_imports(script: Path) -> list[str]:
+    import ast
+
+    tree = ast.parse(script.read_text())
+    lines: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith("dev10x"):
+            names = ", ".join(alias.name for alias in node.names if alias.name != "*")
+            if names:
+                lines.append(f"from {node.module} import {names}")
+            else:
+                lines.append(f"import {node.module}")
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name.startswith("dev10x"):
+                    lines.append(f"import {alias.name}")
+    return lines
+
+
+def _collect_python_entry_points() -> list[Path]:
+    dirs = [
+        REPO_ROOT / "hooks" / "scripts",
+        REPO_ROOT / "servers",
+    ]
+    for skill_dir in sorted((REPO_ROOT / "skills").iterdir()):
+        scripts_dir = skill_dir / "scripts"
+        if scripts_dir.is_dir():
+            dirs.append(scripts_dir)
+
+    scripts: list[Path] = []
+    for d in dirs:
+        for p in sorted(d.glob("*.py")):
+            if p.name == "__init__.py":
+                continue
+            scripts.append(p)
+    return scripts
+
+
+PYTHON_ENTRY_POINTS = _collect_python_entry_points()
+
+
+class TestScriptLoadability:
+    @pytest.mark.parametrize(
+        "script",
+        PYTHON_ENTRY_POINTS,
+        ids=lambda p: str(p.relative_to(REPO_ROOT)),
+    )
+    def test_compiles_without_error(self, script: Path) -> None:
+        result = subprocess.run(
+            [sys.executable, "-m", "py_compile", str(script)],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        assert result.returncode == 0, (
+            f"{script.relative_to(REPO_ROOT)} failed to compile:\n{result.stderr}"
+        )
+
+    @pytest.mark.parametrize(
+        "script",
+        [s for s in PYTHON_ENTRY_POINTS if _script_imports_dev10x(s)],
+        ids=lambda p: str(p.relative_to(REPO_ROOT)),
+    )
+    def test_dev10x_imports_resolve(self, script: Path) -> None:
+        import_lines = _extract_dev10x_imports(script=script)
+        for line in import_lines:
+            result = subprocess.run(
+                [sys.executable, "-c", line],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+
+            assert result.returncode == 0, (
+                f"{script.relative_to(REPO_ROOT)}: import failed: {line}\n{result.stderr}"
+            )
 
 
 class TestStartupTime:
