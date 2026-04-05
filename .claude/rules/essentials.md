@@ -29,7 +29,8 @@ Universal rules for every session. Detailed guides live in
   **so** ... **can** ...`)
 - Optional: Compact commit list (one line per commit)
 - Last line: `Fixes:` link (issue URL or `none — self-motivated`)
-- Do NOT add separators (`---`) or blank lines between sections
+- Do NOT add extra separators (`---`) between Job Story and
+  commit list — `create-pr.sh` template handles separators
 - Full guide: `references/git-pr.md`
 
 ## Decision Gates & Orchestration
