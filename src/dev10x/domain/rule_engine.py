@@ -14,8 +14,9 @@ from typing import Any
 
 import yaml
 
-from dev10x.domain.validation_rule import Compensation
-from dev10x.hooks.edit_validator import EditRule
+from dev10x.domain.validation_rule import Compensation, Rule
+
+EditRule = Rule
 
 
 @dataclass(frozen=True)
