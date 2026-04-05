@@ -333,15 +333,33 @@ unaddressed comments.
    ```
    Then check if each review body's findings have corresponding
    top-level PR comment replies (matching `Re:` prefix pattern).
-3. If unresolved threads OR unaddressed body findings exist →
-   enter Phase 2 to address them. Do NOT mark PR ready yet.
-4. If no unresolved threads AND no unaddressed body findings →
-   mark PR ready (`gh pr ready {pr_number}`) and proceed to
-   Phase 2 for a final check.
+3. Fetch top-level PR comments (GH-698) and check for
+   unaddressed automated review findings:
+   ```bash
+   gh api repos/{owner}/{repo}/issues/{pr_number}/comments \
+     --jq '[.[] | select(
+       (.body | test("REQUIRED|CRITICAL|BLOCKING"))
+       and (.user.type == "Bot"
+         or (.user.login | test("claude|github-actions")))
+     ) | {id, user: .user.login,
+       snippet: (.body | split("\n")[0][:80])}]'
+   ```
+   Top-level comments are invisible to the `reviewThreads`
+   GraphQL query — they use a separate API surface
+   (`issueComments`). Without this check, automated review
+   findings posted as top-level comments are silently skipped.
+4. If unresolved threads OR unaddressed body findings OR
+   unaddressed top-level comments exist → enter Phase 2 to
+   address them. Do NOT mark PR ready yet.
+5. If no unresolved threads AND no unaddressed body findings
+   AND no unaddressed top-level comments → mark PR ready
+   (`gh pr ready {pr_number}`) and proceed to Phase 2 for
+   a final check.
 
 This re-check prevents the race condition where automated
 reviewers post during CI, and ensures body-only review
-findings are not silently skipped.
+findings and top-level automated comments are not silently
+skipped.
 
 ---
 
@@ -400,6 +418,8 @@ Move to Phase 2.5 when ALL of these are true:
 - No unaddressed body-only review findings (GH-564) — check
   review bodies for structured findings without corresponding
   top-level PR comment replies
+- No unaddressed top-level automated review comments (GH-698)
+  — check `issueComments` for severity markers from bot users
 - PR has at least one approval OR no reviews yet
 
 ---

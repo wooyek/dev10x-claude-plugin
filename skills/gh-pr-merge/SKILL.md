@@ -14,6 +14,7 @@ allowed-tools:
   - Bash(gh pr merge:*)
   - Bash(gh pr checks:*)
   - Bash(gh api graphql:*)
+  - Bash(gh api repos:*)
   - Bash(gh repo view:*)
   - Bash(git status:*)
   - Bash(git log:*)
@@ -32,9 +33,10 @@ Mark completed when done: `TaskUpdate(taskId, status="completed")`
 
 ## Overview
 
-Pre-merge validation gate that checks 7 conditions before
+Pre-merge validation gate that checks 8 conditions before
 executing `gh pr merge`. Prevents premature merges like PR #633
-(merged with 7 unaddressed review comments).
+(merged with 7 unaddressed review comments) and PRs #690-692
+(merged with unaddressed top-level automated review comments).
 
 ## Merge Strategy Resolution
 
@@ -60,7 +62,7 @@ All fields are optional. Defaults:
 
 ## Pre-Merge Validation Checks
 
-Run ALL 7 checks before merging. Report results as a checklist.
+Run ALL 8 checks before merging. Report results as a checklist.
 If ANY check fails, refuse to merge and report which failed.
 
 ### Check 1: No unresolved review threads
@@ -88,6 +90,32 @@ gh api graphql -f query='
 
 Count threads where `isResolved` is `false`. If any exist,
 report the count and first comment of each unresolved thread.
+
+### Check 1b: No unaddressed top-level PR comments (GH-698)
+
+Top-level PR comments (posted via `gh pr comment`, not inline
+review threads) are invisible to Check 1's `reviewThreads`
+query. Automated reviewers (claude-review, hygiene-review)
+post findings as top-level comments with severity markers.
+
+```bash
+gh api repos/OWNER/REPO/issues/NUMBER/comments \
+  --jq '[.[] | select(
+    (.body | test("REQUIRED|CRITICAL|BLOCKING|\\*\\*\\[BLOCKING\\]\\*\\*|\\*\\*\\[CRITICAL\\]\\*\\*"))
+    and (.user.type == "Bot" or (.user.login | test("claude|github-actions")))
+  ) | {id, user: .user.login, snippet: (.body | split("\n")[0][:80])}]'
+```
+
+If any automated review comments contain unaddressed severity
+markers (`REQUIRED`, `CRITICAL`, `BLOCKING`), report the count
+and first line of each. A comment is considered "addressed" if
+a subsequent comment replies to it (contains `Re:` or quotes
+the finding).
+
+**Heuristic for addressed comments:** Check if any later
+comment in the thread references the automated comment's ID
+or quotes its content. If no reply exists, the finding is
+unaddressed.
 
 ### Check 2: CI checks passing
 
@@ -181,6 +209,7 @@ Present results as a checklist:
 ## Pre-Merge Validation
 
 - [x] No unresolved review threads (0 unresolved)
+- [x] No unaddressed automated review comments (0 found)
 - [x] CI checks passing (12/12 green)
 - [x] PR is not in draft
 - [x] No merge conflicts (MERGEABLE)
@@ -215,6 +244,7 @@ appropriate skill for remediation:
 | Failed check | Remediation |
 |-------------|-------------|
 | Unresolved threads | `Dev10x:gh-pr-respond` |
+| Unaddressed automated comments | Review and address findings |
 | CI failing | `Dev10x:gh-pr-monitor` |
 | Still in draft | `gh pr ready` |
 | Merge conflicts | Rebase onto base branch |
@@ -243,10 +273,10 @@ error and let the calling skill decide how to proceed.
 
 ## Important Notes
 
-- Never merge without running ALL 7 checks first
+- Never merge without running ALL 8 checks first
 - Never bypass checks even if "it looks fine"
-- The solo-maintainer override only skips check 7 (approval),
-  not the other 6 checks
+- The solo-maintainer override only skips check 8 (approval),
+  not the other 7 checks
 - This skill must NOT be called from background agents
   (`Dev10x:gh-pr-monitor` explicitly forbids merge operations)
 - Always use `gh pr merge` (not `git merge`) to ensure GitHub
