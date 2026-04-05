@@ -21,6 +21,7 @@ allowed-tools:
   - Bash(gh:*)
   - Skill(Dev10x:qa-scope)
   - Skill(Dev10x:request-review)
+  - Skill(Dev10x:verify-acc-dod)
 ---
 
 # PR Review Monitor (Background Agent)
@@ -52,6 +53,7 @@ executes these `TaskCreate` calls before any monitoring work:
 5. `TaskCreate(subject="Assess QA scope (Phase 2.5)", activeForm="Assessing QA scope")`
 6. `TaskCreate(subject="Notify re-review (Phase 2.7)", activeForm="Notifying re-review")`
 7. `TaskCreate(subject="Send review notification (Phase 3)", activeForm="Sending notification")`
+8. `TaskCreate(subject="Verify acceptance criteria (Phase 4)", activeForm="Verifying acceptance criteria")`
 
 Set dependencies: each phase blocked by its predecessor. Phases
 2.5 and 2.7 are conditional — skip via TaskUpdate status="deleted"
@@ -78,7 +80,8 @@ User invokes /Dev10x:gh-pr-monitor
                 ├── Phase 2: Comment handling (autonomous)
                 ├── Phase 2.5: QA scope assessment (asks user)
                 ├── Phase 2.7: Re-review notification (asks user)
-                └── Phase 3: Notification (asks user first)
+                ├── Phase 3: Notification (asks user first)
+                └── Phase 4: Acceptance criteria verification (autonomous)
 ```
 
 ## Launch Instructions
@@ -594,6 +597,32 @@ This outputs a markdown report with three sections:
 
 Include the full output in the agent's final report to the supervisor.
 
+---
+
+## Phase 4: Acceptance Criteria Verification
+
+After Phase 3 completes, verify acceptance criteria before the
+agent's final status report. This catches uncommitted files,
+failing checks, or incomplete work that earlier phases missed.
+
+1. Invoke the verification skill:
+   ```
+   Skill(skill="Dev10x:verify-acc-dod")
+   ```
+
+   The skill auto-detects the work type from session context and
+   adapts to the current friction level. At `adaptive` level it
+   runs fully unattended — auto-passing or auto-failing without
+   blocking the agent.
+
+2. If all checks pass → include "Acceptance criteria: PASSED" in
+   the final status report.
+
+3. If any check fails → include "Acceptance criteria: FAILED" with
+   the failing checks in the final status report. Do NOT re-enter
+   earlier phases — report the failures and let the supervisor
+   decide next steps.
+
 ````
 
 ---
@@ -601,10 +630,11 @@ Include the full output in the agent's final report to the supervisor.
 ## Important Rules
 
 - **Monitoring scope**: This skill monitors CI checks and review
-  comments up through review request (Phase 3). It does NOT
-  monitor through to merge. After Phase 3 completes, the agent
-  exits. To monitor post-approval activity or wait for merge,
-  re-invoke the skill or check manually.
+  comments up through review request (Phase 3), then verifies
+  acceptance criteria (Phase 4). It does NOT monitor through to
+  merge. After Phase 4 completes, the agent exits. To monitor
+  post-approval activity or wait for merge, re-invoke the skill
+  or check manually.
 - **Do NOT merge PRs.** The monitoring agent must never run
   `gh pr merge`, `git merge`, or any merge operation. Merging
   is the supervisor's responsibility. If the agent merges
@@ -640,7 +670,8 @@ Include the full output in the agent's final report to the supervisor.
 4. **Dev10x:qa-scope** — Delegated to by the agent for QA risk assessment (Phase 2.5)
 5. **Dev10x:request-review** — Delegated to by the agent in Phase 3 (combined GitHub + Slack review request)
 6. **Dev10x:slack-review-request** — Delegated to by the agent in Phase 2.7 (re-review notification)
-7. **pr-notify.py** — Phase 3 helper script (checklist update only)
+7. **Dev10x:verify-acc-dod** — Delegated to by the agent in Phase 4 (acceptance criteria)
+8. **pr-notify.py** — Phase 3 helper script (checklist update only)
 
 ## Delegation Pattern
 
@@ -665,9 +696,12 @@ Include the full output in the agent's final report to the supervisor.
         │       ├── AskUserQuestion → confirm notification
         │       └── Skill(skill="Dev10x:slack-review-request") → post to Slack
         │
-        └── Phase 3: Notification (initial review request)
-                ├── AskUserQuestion → confirm message
-                └── If approved, execute two delegated steps:
-                    ├── Skill(skill="Dev10x:request-review") → assign GitHub reviewers + post Slack
-                    └── pr-notify.py send (checklist-only mode)
+        ├── Phase 3: Notification (initial review request)
+        │       ├── AskUserQuestion → confirm message
+        │       └── If approved, execute two delegated steps:
+        │           ├── Skill(skill="Dev10x:request-review") → assign GitHub reviewers + post Slack
+        │           └── pr-notify.py send (checklist-only mode)
+        │
+        └── Phase 4: Acceptance criteria verification
+                └── Skill(skill="Dev10x:verify-acc-dod") → auto-pass/fail at adaptive level
 ```
