@@ -94,7 +94,6 @@ _COMMIT_HEAL_MSG = (
     "`git`), that is why this was blocked."
 )
 
-_SKILL_COMMIT_FILE_RE = re.compile(r"-F\s+/tmp/claude/git/\S+")
 _WRONG_TEMP_PATH_RE = re.compile(r"-F\s+/tmp/claude/(?!git/)\S+/\S+\.\S+")
 
 
@@ -164,8 +163,6 @@ class SkillRedirectValidator:
             comp = rule.compensations[0] if rule.compensations else None
             if not comp:
                 continue
-            if comp.skill == "Dev10x:git-commit" and _SKILL_COMMIT_FILE_RE.search(command):
-                continue
             if comp.skill == "Dev10x:git-commit" and _WRONG_TEMP_PATH_RE.search(command):
                 return HookResult(message=_COMMIT_HEAL_MSG)
             label = rule.compiled_patterns[0].pattern
@@ -188,8 +185,6 @@ class SkillRedirectValidator:
                 continue
             comp = rule.compensations[0] if rule.compensations else None
             if not comp:
-                continue
-            if comp.skill == "Dev10x:git-commit" and _SKILL_COMMIT_FILE_RE.search(command):
                 continue
             label = rule.compiled_patterns[0].pattern
             msg = _format_correction_msg(label=label, comp=comp)
