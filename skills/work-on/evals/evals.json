@@ -643,6 +643,47 @@
         }
       ]
     }
+    ,
+    {
+      "id": 14,
+      "name": "phase0-friction-gate",
+      "prompt": "/Dev10x:work-on https://github.com/tiretutorinc/tt-pos/issues/300",
+      "description": "Tests that Phase 0 friction level gate fires via AskUserQuestion (not plain text) before Phase 1, and persists the choice to session.yaml.",
+      "expected_output": "AskUserQuestion is called with friction level options (Guided, Adaptive, Strict) before any Phase 1 work begins. Choice is persisted to ~/.claude/Dev10x/session.yaml.",
+      "dimensions": ["orchestration-guardrails"],
+      "assertions": [
+        {
+          "id": "phase0-uses-askuserquestion",
+          "text": "Phase 0 friction level prompt uses AskUserQuestion tool call, not plain text",
+          "check": "tool_called",
+          "signals": ["AskUserQuestion", "friction", "Guided"]
+        },
+        {
+          "id": "phase0-fires-before-phase1",
+          "text": "AskUserQuestion for friction level fires before Phase 1 classification begins",
+          "check": "tool_called_before",
+          "signals": ["AskUserQuestion", "Phase 1"]
+        },
+        {
+          "id": "phase0-offers-three-levels",
+          "text": "Gate presents all three friction levels: Guided, Adaptive, Strict",
+          "check": "output_contains",
+          "signals": ["Guided", "Adaptive", "Strict"]
+        },
+        {
+          "id": "phase0-persists-choice",
+          "text": "After user selects a level, the choice is persisted to ~/.claude/Dev10x/session.yaml via Write tool",
+          "check": "tool_called",
+          "signals": ["Write", "session.yaml", "friction_level"]
+        },
+        {
+          "id": "phase0-skips-when-nested",
+          "text": "Phase 0 is skipped when running as nested invocation from Dev10x:fanout",
+          "check": "behavioral",
+          "signals": ["skip", "nested", "fanout"]
+        }
+      ]
+    }
   ],
   "trigger_evals": {
     "description": "Queries that should/should-not trigger the work-on skill",
