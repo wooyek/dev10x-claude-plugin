@@ -81,7 +81,14 @@ Options:
 
 ```yaml
 friction_level: guided  # strict | guided | adaptive
+active_modes: []        # e.g., [solo-maintainer]
 ```
+
+Also persist `active_modes` from the project playbook file
+(`memory/playbooks/work-on.yaml`) if present — copy them into
+session.yaml so skills can read modes without loading the full
+playbook. If the project file declares `active_modes`, merge
+them into the session config.
 
 Write this file using the Write tool. The PreCompact hook
 reads it to inject friction context into recovery summaries.
@@ -411,14 +418,30 @@ play definitions. If you cannot confirm this, STOP.
    any `condition` override from the reference to each expanded
    step. Error on missing fragments; detect circular refs
    (max depth 3).
-6. For each step, create a `TaskCreate` with the step's `subject`,
-   `type` in metadata, and `agent`/`skills` in metadata if present
-7. If a step has child `steps`, store them in metadata for
+6. **Apply active modes:** Read `active_modes` from
+   `.claude/Dev10x/session.yaml` (session) and the project
+   playbook file. For each step with a `modes:` mapping:
+   - If any active mode says `skip`, remove the step
+   - Otherwise merge field overrides from active modes
+     (last-listed mode wins on conflicts)
+   - Apply `mode_extensions` from project file on top
+   See `references/execution-modes.md` for precedence rules.
+7. **Apply friction-level adaptations:** Read `friction_level`
+   from `.claude/Dev10x/session.yaml`. For each step with a
+   `friction:` mapping matching the current level:
+   - If `skip: true`, remove the step
+   - Otherwise merge field overrides (prompt, subject, etc.)
+   See `references/friction-levels.md` § Playbook Integration.
+8. For each remaining step, create a `TaskCreate` with the
+   step's `subject`, `type` in metadata, and `agent`/`skills`
+   in metadata if present
+9. If a step has child `steps`, store them in metadata for
    expansion when the epic is reached (Phase 4)
-8. **VERIFY: Call `TaskList` and count Phase 4 subtasks.** The count
-   must match the number of steps in the loaded play (including
-   expanded fragment steps). If fewer tasks exist than play steps,
-   you skipped steps — go back and create the missing ones.
+10. **VERIFY: Call `TaskList` and count Phase 4 subtasks.** The
+    count must match the number of steps after mode/friction
+    resolution (not the raw play step count). If fewer tasks
+    exist than resolved steps, go back and create the missing
+    ones.
 
 **Work type classification:**
 

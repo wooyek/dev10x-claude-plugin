@@ -15,6 +15,12 @@ gates, acceptance criteria, and loop enforcement.
 
 Default: `guided` (balances enforcement with practical flexibility).
 
+`adaptive` = the supervisor is AFK. The agent should auto-advance
+through all non-ALWAYS_ASK gates without interruption, making
+best-effort decisions autonomously. This replaces the former
+`--unattended`, `afk`, and `auto-advance` concepts — they are
+all expressed as `friction_level: adaptive`.
+
 ## Configuration
 
 Friction level is set in `command-skill-map.yaml`:
@@ -99,10 +105,50 @@ The `adaptive` relaxation for loops exists because iterative
 debugging sometimes requires raw commands for speed. The warning
 log ensures skill-audit can detect and report deviations.
 
+## Playbook Integration
+
+Friction levels and execution modes are **orthogonal dimensions**.
+Friction controls *how gates behave*; modes control *what steps
+exist*. See `references/execution-modes.md` for the mode system.
+
+### Per-step friction overrides
+
+Playbook steps can declare per-friction-level behavior:
+
+```yaml
+- subject: Draft Job Story
+  type: detailed
+  friction:
+    adaptive:
+      skip: true    # JTBD not needed in auto mode
+    strict:
+      prompt: >
+        Present draft for approval. Block until confirmed.
+```
+
+### Resolution order with modes
+
+1. Load defaults and resolve fragments
+2. Apply active modes (skip/override per step)
+3. Apply friction-level adaptations (skip/override per step)
+4. Apply full overrides (escape hatch)
+
+Modes run before friction so mode-added steps can have their
+own `friction:` mappings.
+
 ## Reading Friction Level in Skills
 
-Skills that need friction-level awareness should read it from
-the command-skill-map config. The recommended approach:
+Skills read friction level and active modes from
+`.claude/Dev10x/session.yaml`:
+
+```yaml
+friction_level: adaptive
+active_modes: [solo-maintainer]
+```
+
+Resolution order: session override > project override > default.
+
+The recommended approach:
 
 1. **Hook-based enforcement** (preferred): The PreToolUse hook
    already reads friction_level and blocks/allows accordingly.
@@ -110,11 +156,10 @@ the command-skill-map config. The recommended approach:
 
 2. **Skill-level awareness** (for gate behavior): Skills that
    modify their `AskUserQuestion` behavior based on friction
-   level should document the adaptive behavior in their SKILL.md
-   and check session context for the level.
+   level should read `.claude/Dev10x/session.yaml` and adapt.
 
 3. **Playbook-level override**: Playbook steps can include
-   `friction_level: adaptive` to override the global setting
+   `friction:` mappings to override the global setting
    for specific steps.
 
 ## Examples
@@ -158,6 +203,7 @@ Skills adopting friction-level awareness should:
 ## References
 
 - ADR-0002: Data-driven skill redirect with friction levels
+- `references/execution-modes.md`: Structural modes (orthogonal)
 - `src/dev10x/validators/command-skill-map.yaml`: Config source
 - `src/dev10x/validators/skill_redirect.py`: Hook implementation
 - `skills/verify-acc-dod/SKILL.md`: First skill-level adopter

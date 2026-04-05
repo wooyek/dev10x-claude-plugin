@@ -33,6 +33,14 @@
 #   steps     — child steps for pre-templated epic expansion (optional)
 #   condition — hint for conditional execution (optional)
 #   fragment  — reference to a named fragment (replaces subject/type)
+#   modes     — per-mode behavioral overrides (optional). Map of
+#               mode name to either "skip" (remove step) or a dict
+#               of field overrides {subject, prompt, skills, ...}.
+#               See references/execution-modes.md for the full spec.
+#   friction  — per-friction-level overrides (optional). Map of
+#               friction level (strict/guided/adaptive) to either
+#               "skip" or a dict of field overrides.
+#               See references/friction-levels.md § Playbook Integration.
 #
 # Fragments — reusable step sequences referenced via `- fragment: <name>`.
 # A fragment reference copies the fragment's steps inline at resolution
@@ -48,9 +56,17 @@ fragments:
       type: detailed
       prompt: >
         Self-review the current branch to catch issues before
-        creating the PR. In unattended mode, auto-fix all
-        findings. In attended mode, present findings for approval.
+        creating the PR.
       skills: [Dev10x:review, Dev10x:review-fix]
+      friction:
+        adaptive:
+          prompt: >
+            Self-review with --unattended flag. Auto-fix all
+            findings. Auto-advance without supervisor gate.
+      modes:
+        supervised:
+          prompt: >
+            Present findings for approval before auto-fixing.
     - subject: Commit outstanding changes
       type: detailed
       prompt: >
@@ -96,12 +112,23 @@ fragments:
         Assign reviewers and post Slack notification per project
         config.
       skills: [Dev10x:gh-pr-request-review]
+      modes:
+        solo-maintainer:
+          subject: Mark PR ready for review
+          prompt: >
+            Run `gh pr ready`. No reviewers, no Slack.
+      friction:
+        adaptive:
+          prompt: >
+            Auto-assign reviewers from CODEOWNERS. No
+            AskUserQuestion for reviewer selection.
     - subject: Verify acceptance criteria
       type: detailed
       prompt: >
-        Check resolved acceptance criteria from
-        acceptance-criteria.yaml. Confirm all items are met
-        before declaring work complete.
+        Always delegate to Dev10x:verify-acc-dod skill
+        regardless of mode or friction level. The skill
+        reads friction_level and adapts its own gates.
+      skills: [Dev10x:verify-acc-dod]
 
   shipping-pipeline-continuation:
     - subject: Code review
@@ -126,6 +153,12 @@ fragments:
       type: detailed
       prompt: Squash fixups into their parent commits.
       skills: [Dev10x:git-groom]
+      friction:
+        adaptive:
+          prompt: >
+            Choose the best grooming option and auto-advance.
+            No strategy gate — select fixup autosquash if
+            fixup commits exist, mass rewrite otherwise.
     - subject: Update PR description
       type: detailed
       prompt: >
@@ -137,11 +170,42 @@ fragments:
         Notify reviewers that feedback has been addressed
         and request re-review.
       skills: [Dev10x:gh-pr-request-review]
+      modes:
+        solo-maintainer:
+          subject: Mark PR ready for review
+          prompt: >
+            Run `gh pr ready` if still draft. No reviewer
+            assignment, no Slack.
     - subject: Verify acceptance criteria
       type: detailed
       prompt: >
-        Confirm all review comments are addressed, CI passes,
-        and the PR is ready for merge.
+        Always delegate to Dev10x:verify-acc-dod skill
+        regardless of mode or friction level. The skill
+        reads friction_level and adapts its own gates.
+      skills: [Dev10x:verify-acc-dod]
+
+# Mode definitions — structural modes that adapt step behavior.
+# Activated via active_modes in session.yaml or project playbook.
+# See references/execution-modes.md for the full spec.
+#
+# Modes (structural — who's involved, what steps exist):
+#   solo-maintainer — no reviewer, no Slack, self-merge
+#   supervised   — extra approval gates at design/PR/merge
+#   cautious     — extra verification, confirm destructive ops
+#   pair-review  — human review at implementation checkpoints
+#
+# Friction levels (pacing — how gates behave):
+#   strict / guided / adaptive
+#   Declared via `friction:` on steps, NOT as modes.
+#   afk = adaptive, auto-advance = adaptive.
+#
+# Per-step modes and friction are declared inline (see above).
+# Project-level mode activation:
+#   active_modes: [solo-maintainer]
+#   mode_extensions:
+#     solo-maintainer:
+#       steps:
+#         "Step subject": {prompt: ..., skills: [...]}
 
 defaults:
   feature:
@@ -166,6 +230,21 @@ defaults:
           redundant API calls. If approved, write back to the
           ticket as a comment.
         skills: [Dev10x:jtbd]
+        friction:
+          adaptive:
+            prompt: >
+              Accept what the skill produces, use in the session,
+              and improve if needed. Auto-advance without approval.
+        modes:
+          solo-maintainer:
+            prompt: >
+              Draft JTBD as a documentation artifact. It does not
+              need approval in adaptive mode, but serves as an
+              indicator of how well the agent understood the task.
+          supervised:
+            prompt: >
+              Present JTBD draft for approval. Do not write to
+              ticket without explicit user sign-off.
       - subject: Design implementation approach
         type: epic
         prompt: >
@@ -173,6 +252,21 @@ defaults:
           For small changes (single file, < 50 lines), collapse
           into a single "read and propose" step. For large changes,
           produce an approach summary before implementing.
+        friction:
+          adaptive:
+            prompt: >
+              Choose the best option and auto-advance. Make
+              design decisions autonomously without asking
+              for approach approval.
+        modes:
+          supervised:
+            prompt: >
+              Present approach options via AskUserQuestion
+              before implementing.
+          cautious:
+            prompt: >
+              Verify approach against existing patterns in the
+              codebase. Present findings before proceeding.
         steps:
           - subject: Read relevant code
             type: detailed
