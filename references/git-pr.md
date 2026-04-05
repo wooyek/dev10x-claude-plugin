@@ -80,7 +80,9 @@ The body should be **compact** to avoid cluttering Slack previews.
      (for issue-tracked work)
    - `Fixes: none — self-motivated refactor` (for internal improvements,
      features, or experiments without a tracking issue)
-   - Do NOT add `---`, blank lines, or separators after `Fixes:`
+   - Do NOT manually add `---`, blank lines, or separators after `Fixes:`
+     (Note: The `create-pr.sh` template automatically adds separators as
+     part of standard formatting. Do not remove them.)
 
 **Optional elements** (keep brief):
 - Compact commit list with links (one line per commit)
