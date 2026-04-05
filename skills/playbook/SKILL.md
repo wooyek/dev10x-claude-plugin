@@ -253,23 +253,58 @@ defaults:
     steps:
       - subject: Step title (required)
         type: detailed | epic (required)
-        prompt: >
-          Expansion guidance for the agent executing
-          this step (optional)
+        prompt: ... (optional)
         skills: [skill1, skill2] (optional)
         steps: [] (optional — pre-templated epic children)
         condition: hint (optional)
+        modes:            # per-mode overrides (optional)
+          <mode-name>: skip | {subject, prompt, skills, ...}
+        friction:         # per-friction-level overrides (optional)
+          adaptive: skip: true | {prompt, subject, skills, ...}
+          strict: {prompt, ...}
       - fragment: <fragment-name> (optional — inline reference)
         condition: hint (optional — applied to all expanded steps)
         prompt: ... (optional — overrides prompt on all expanded steps)
 
 overrides: []  # populated by this skill when user customizes
 
-# User override files may also define fragments:
+# User override files may also define:
+# active_modes: [solo-maintainer]  — activate structural modes
+# mode_extensions:                 — extend modes per project
+#   <mode-name>:
+#     steps:
+#       "Step subject": {prompt: ..., skills: [...]}
 # fragments:
 #   <fragment-name>:
 #     - subject: ... (same schema as default fragments)
 # These shadow default fragments with the same name.
+```
+
+### Modes and Friction
+
+**Modes** are structural — they change *what* steps exist and
+*who* is involved (e.g., solo-maintainer removes reviewer steps).
+**Friction levels** are behavioral — they change *how* gates fire
+(strict/guided/adaptive). These are orthogonal dimensions.
+
+Steps declare `modes:` and `friction:` inline. The resolver
+applies modes first, then friction, so mode-added steps can
+have their own friction mappings.
+
+See `references/execution-modes.md` for the full mode taxonomy
+and `references/friction-levels.md` for friction behavior.
+
+**Project activation:**
+```yaml
+# ~/.claude/projects/<project>/memory/playbooks/work-on.yaml
+active_modes: [solo-maintainer]
+```
+
+**Session activation (set by work-on Phase 0):**
+```yaml
+# .claude/Dev10x/session.yaml
+friction_level: adaptive
+active_modes: [solo-maintainer]
 ```
 
 ### Fragment References
