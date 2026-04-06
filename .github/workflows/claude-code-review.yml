@@ -47,14 +47,27 @@ jobs:
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Checkout repository
+      - name: Skip if PR already merged or closed
         if: steps.dedup.outputs.skip != 'true'
+        id: pr-state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          STATE=$(gh pr view ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} --json state -q '.state')
+          if [ "$STATE" != "OPEN" ]; then
+            echo "::notice::Skipping — PR #${{ github.event.pull_request.number }} is $STATE"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout repository
+        if: steps.dedup.outputs.skip != 'true' && steps.pr-state.outputs.skip != 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: Run Claude Code Review
-        if: steps.dedup.outputs.skip != 'true'
+        if: steps.dedup.outputs.skip != 'true' && steps.pr-state.outputs.skip != 'true'
         id: claude-review
         uses: anthropics/claude-code-action@v1
         env:
