@@ -122,6 +122,20 @@ class TestScriptLoadability:
         )
 
 
+EXECUTABLE_SCRIPTS = sorted(
+    [p for p in REPO_ROOT.glob("skills/**/scripts/*") if p.suffix in (".py", ".sh")]
+    + [p for p in (REPO_ROOT / "hooks" / "scripts").iterdir() if p.suffix in (".py", ".sh")]
+)
+
+
+@pytest.mark.parametrize("script", EXECUTABLE_SCRIPTS, ids=_script_id)
+class TestScriptPermissions:
+    def test_script_has_execute_permission(self, script: Path) -> None:
+        assert script.stat().st_mode & 0o111, (
+            f"{script} lacks execute permission — run `chmod +x {script.relative_to(REPO_ROOT)}`"
+        )
+
+
 SCRIPTS_WITH_DEV10X_IMPORTS = [
     s
     for s in ALL_ENTRY_POINTS
