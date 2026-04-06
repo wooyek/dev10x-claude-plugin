@@ -93,6 +93,11 @@ report the count and first comment of each unresolved thread.
 
 ### Check 1b: No unaddressed top-level PR comments (GH-698)
 
+**REQUIRED:** This check MUST run after Check 1. Top-level PR
+comments are invisible to the `reviewThreads` GraphQL query —
+skipping this check silently misses automated review findings
+(GH-728). Do NOT proceed to Check 2 until this script runs.
+
 Top-level PR comments (posted via `gh pr comment`, not inline
 review threads) are invisible to Check 1's `reviewThreads`
 query. Automated reviewers (claude-review, hygiene-review)
@@ -195,11 +200,13 @@ Read the per-project config file. If it does not exist, use
 defaults (`strategy: squash`, `delete_branch: true`,
 `solo_maintainer: false`).
 
-### Step 3: Run all 7 validation checks
+### Step 3: Run all 8 validation checks
 
 Run checks in parallel where possible (checks 1-4 use `gh`
 commands, check 5-6 use `git` commands). Collect all results
-before reporting.
+before reporting. **Check 1b MUST be run as a separate step
+after Check 1** — it calls `check-top-level-comments.sh` and
+is NOT part of the GraphQL batch (GH-728).
 
 ### Step 4: Report validation results
 
