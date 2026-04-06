@@ -10,10 +10,6 @@
   "repository": "https://github.com/Brave-Labs/Dev10x",
   "license": "MIT",
   "keywords": ["git", "commits", "pull-requests", "code-review", "workflow", "tasks"],
-  "statusLine": {
-    "command": "bash ${CLAUDE_PLUGIN_ROOT}/bin/statusline.sh",
-    "timeout": 2
-  },
   "mcpServers": {
     "cli": {
       "command": "${CLAUDE_PLUGIN_ROOT}/servers/cli_server.py",
