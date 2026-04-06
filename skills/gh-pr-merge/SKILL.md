@@ -132,6 +132,22 @@ All required checks must have `conclusion` of `SUCCESS` or
 `NEUTRAL`. No checks should be `PENDING` or `IN_PROGRESS`.
 Report any failing or pending checks by name.
 
+**Infrastructure failure override (GH-730):** If a check
+fails with an infrastructure error (API billing outage,
+OIDC token validation failure, external service unavailable),
+the failure is non-code-related. In this case:
+
+**REQUIRED: Call `AskUserQuestion`** before proceeding:
+- Question: "CI check `{check-name}` failed due to an
+  infrastructure issue: `{error-summary}`. This is not
+  caused by the code change. Merge anyway?"
+- Options: "Merge anyway" / "Abort — fix CI first"
+
+Infrastructure failure signals: "Credit balance is too low",
+"OIDC token validation", "Resource not accessible by
+integration". Never auto-classify — show the error to the
+user and let them decide.
+
 ### Check 3: PR is not in draft
 
 ```bash
@@ -281,7 +297,10 @@ error and let the calling skill decide how to proceed.
 ## Important Notes
 
 - Never merge without running ALL 8 checks first
-- Never bypass checks even if "it looks fine"
+- Never bypass checks even if "it looks fine" — the only
+  exception is the infrastructure failure override (Check 2)
+  which still requires explicit user confirmation via
+  `AskUserQuestion` (GH-730)
 - The solo-maintainer override only skips check 8 (approval),
   not the other 7 checks
 - This skill must NOT be called from background agents
