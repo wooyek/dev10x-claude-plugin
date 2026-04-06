@@ -335,6 +335,18 @@ Work-on executes the pr-continuation play:
 4. `Dev10x:git-groom` to clean commit history
 5. Mark ready via `gh pr ready`
 6. Monitor CI — fix failures with fixup commits
+
+**Fixup race condition guard (GH-724):** Before creating any
+fixup commit for a PR that is also being monitored in Phase 4,
+verify the PR is still open:
+```bash
+gh pr view N --json state -q '.state'
+```
+If the result is not `OPEN`, the PR was merged by the monitor
+while you were preparing the fix. Do NOT push the fixup commit
+to the dead branch — create a follow-up branch from develop
+and open a new PR instead.
+
 7. **Pre-merge gate (REQUIRED):** Before merging, verify ALL:
    - CI checks pass (`gh pr checks`)
    - No unaddressed review comments
@@ -482,6 +494,14 @@ TaskCreate(subject="Monitor: PR #101 — GH-10 implementation",
     parentTaskId=phase4TaskId)
 ```
 
+**REQUIRED: Use `Skill(Dev10x:gh-pr-monitor)` for every PR
+(GH-724).** Raw `Agent(general-purpose)` monitoring bypasses
+CI failure detection, review comment handling, and merge safety
+gates — it is NOT a valid substitute. If the named skill is
+unavailable, use `Agent(subagent_type="gh-pr-monitor")` with
+the agent spec. Never use a bare `Agent(general-purpose)` for
+PR monitoring.
+
 For each PR:
 1. Invoke `Dev10x:gh-pr-monitor` to watch CI and review status
 2. If CI fails → fix with fixup commits, push, re-monitor
@@ -535,6 +555,13 @@ type or complexity.
 **REQUIRED:** Invoke `Skill(skill="Dev10x:skill-audit")` to
 analyze skill usage, compliance rates, and identify process
 improvements.
+
+**Hard self-check before marking Phase 6 complete (GH-724):**
+Verify that `Skill(Dev10x:skill-audit)` was **actually called**
+in this session (check your tool-use history). Saving findings
+as memory notes or task descriptions is NOT a substitute —
+only a real `Skill()` invocation counts. If the call is missing,
+invoke it now before marking this task completed.
 
 **Skip this phase** only when the session processed 0, 1, or
 2 work items, or when the user explicitly declines.
