@@ -148,3 +148,29 @@ Check for inconsistent patterns across modules:
 
 **Output:** List of inconsistencies with module pairs showing the
 divergence and a recommended standard.
+
+## Phase I: Cross-Context Query Use Cases
+
+Detect functions that resolve multiple DI protocols from different
+bounded contexts — candidates for extraction into query use cases.
+
+1. **Find multi-protocol resolvers** — scan for functions that
+   inject or resolve 3+ protocols from the DI container, especially
+   from different bounded contexts
+2. **Find data assembly hotspots** — functions with 20+ lines
+   assembling data from multiple protocol return values
+3. **Find N+1 patterns** — `get_by_id()` or similar single-item
+   lookups called inside loops where batch methods exist
+4. **Find API type leakage** — modules outside `api/` importing
+   from `api/types.py` (framework types in domain layer)
+
+See `references/detection-heuristics.md` § Cross-Context Query
+Use Case Candidates for grep patterns.
+
+**Guidance per finding:**
+- Extract into `<bc>/queries.py` query use case class
+- Return domain DTOs (`<bc>/dtos.py`), not API framework types
+- Replace N+1 lookups with batch protocol methods
+
+**Output:** Table of candidate functions with location, protocol
+count, estimated assembly lines, and recommended extraction.

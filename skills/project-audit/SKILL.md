@@ -111,7 +111,7 @@ phases.
 **REQUIRED: Call `AskUserQuestion`** (do NOT use plain text, call
 spec: [ask-phase-selection.md](./tool-calls/ask-phase-selection.md)).
 
-Present all 8 phases with descriptions. User selects which to run.
+Present all 9 phases with descriptions. User selects which to run.
 
 | Phase | Name | What it finds |
 |-------|------|---------------|
@@ -123,6 +123,7 @@ Present all 8 phases with descriptions. User selects which to run.
 | F | Behavioral Pattern Fit | Strategy, CoR, Template Method opportunities |
 | G | JTBD Coverage Matrix | Feature JTBD vs test coverage gaps |
 | H | Cross-Cutting Consistency | Inconsistent patterns across modules |
+| I | Cross-Context Queries | Multi-protocol resolvers, N+1 patterns, API type leaks |
 
 ---
 

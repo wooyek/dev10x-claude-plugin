@@ -105,6 +105,37 @@ Primitives with scattered validation:
 - Functions named `validate_*`, `normalize_*`, `format_*` for
   domain concepts
 
+## Cross-Context Query Use Case Candidates
+
+Functions that resolve multiple DI protocols from different bounded
+contexts to assemble a response — candidates for extraction into a
+dedicated query use case class (per ADR-052 pattern).
+
+**Detection rules — flag when ANY condition is met:**
+
+1. **3+ protocol lookups** — same function body resolves 3+ published
+   protocols from the DI container (`container[IXxxQuery]`,
+   `container.get(IXxxRepository)`, or injected via constructor)
+2. **20+ lines of data assembly** — function body spans 20+ lines
+   assembling data from multiple bounded context protocols
+3. **N+1 query patterns** — `get_by_id()` or `get_class()` called
+   inside a loop where a batch variant exists (`get_by_ids()`,
+   `get_classes()`)
+4. **Domain→API type import** — a module outside `api/` imports from
+   `api/types.py` (Strawberry types leaking into domain layer)
+
+**Grep patterns:**
+- `container\[I\w+Query\]` or `container\.get\(I\w+` (DI lookups)
+- `for .* in .*:\n.*get_by_id\(` (N+1 in loop)
+- `from.*api\.types import` in non-`api/` modules
+- Functions with 3+ distinct `I\w+(Query|Repository)` type annotations
+
+**Guidance when flagged:**
+- Extract into a query use case class in `<bc>/queries.py`
+- Return domain DTOs from `<bc>/dtos.py`, not Strawberry types
+- Use batch protocol methods to eliminate N+1
+- Reference ADR-052 for the full pattern
+
 ## Cross-Cutting Inconsistency
 
 Same concept implemented differently across modules:
