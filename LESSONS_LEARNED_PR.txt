@@ -1,0 +1,53 @@
+DRAFT PR CONTENT: Lessons Learned Implementation (PR #727)
+
+WHEN: Job Story
+========
+
+**When** a developer modifies GitHub Actions workflows that trigger expensive operations,
+**wants to** understand the three-layer filtering pattern for preventing wasted CI minutes,
+**so** that can implement robust state checks and guard output chaining,
+**can** avoid resource waste on merged PRs and stale review comments.
+
+SUMMARY
+=======
+
+This draft PR implements three high-value improvements from the PR #727 lessons learned analysis:
+
+1. Document the three-layer workflow filtering pattern (runtime PR state validation)
+2. Explain guard output chaining for multi-condition workflows
+3. Clarify race condition limitations and acceptable trade-offs
+
+All items passed the value filter (3/3) and are production-tested patterns from PR #727.
+
+CHANGES APPLIED
+===============
+
+File: .claude/rules/github-workflows.md
+- Current: 132 lines / 200 budget
+- Proposed: +43 lines = 175 / 200 (87.5% budget use)
+- Section: "Conditional Execution Pattern" expanded from 2-layer to 3-layer documentation
+
+The new documentation includes:
+- Runtime PR State Validation subsection with YAML example
+- Guard Output Chaining subsection explaining pattern and syntax
+- Race Condition Limitations subsection clarifying scope and trade-offs
+
+All content is derived from implemented patterns in PR #727.
+
+FILTERED ITEMS (SKIPPED)
+=======================
+
+None. All 3 items from the lessons learned analysis survived the value filter:
+- Deduplication check: ✅ (new content not duplicated in file)
+- Recurrence test: ✅ (GH-721 issue; patterns in 2 workflows)
+- Actionability test: ✅ (concrete patterns with code examples)
+- Budget gate: ✅ (175 lines < 200 line budget)
+
+Based on: https://github.com/Brave-Labs/dev10x/pull/727
+
+---
+
+STATUS: Awaiting file modification permission for .claude/rules/github-workflows.md
+BRANCH: claude/lessons-pr-727
+TARGET: develop
+DRAFT: Yes (do not merge)
