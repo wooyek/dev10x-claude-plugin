@@ -52,6 +52,13 @@ Files matching: `**/tests/**/*.py`
 13. **Factory inheritance patterns** — verify factories use inheritance
     for specialized variants; base class should have sensible defaults
     for all required fields; subclasses should override only what differs.
+14. **New class without test suite** — when a PR adds a new
+    production class (excluding tests/, migrations/, pure DTOs,
+    and abstract base classes), flag if no corresponding
+    `test_{module}.py` exists or is modified in the same PR.
+    WARNING. Indirect coverage via caller tests is fragile —
+    when the caller changes, extracted class coverage silently
+    disappears.
 
 ## Output Format
 

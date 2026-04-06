@@ -56,6 +56,10 @@ code.
 
 **Testing:**
 - Does new code have corresponding tests?
+- **New class = new test suite** — every new production class
+  must have a colocated test class. Indirect coverage via
+  caller tests is fragile. Excludes pure DTOs, ABCs tested
+  via subclasses, and config modules.
 - Do tests follow project conventions (AAA, fixtures, fakers)?
 - Are test doubles properly isolating the SUT?
 - Is parametrization used instead of similar test methods?

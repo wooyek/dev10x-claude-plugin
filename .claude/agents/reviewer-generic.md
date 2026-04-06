@@ -42,6 +42,13 @@ domain-specific reviewers).
     verify that session-guidance.md or .claude/rules/* are updated
     with the same pattern name, reason, and alternative. Mismatch
     between code behavior and documentation causes user confusion.
+10. **New class without test suite** — when a PR adds a new `.py`
+    file with production logic (classes or functions), or adds
+    behavior methods to an existing model, check whether a
+    corresponding `test_*.py` file exists or is modified in the
+    same PR. WARNING when missing. Does NOT apply to: pure data
+    classes/DTOs with no methods, abstract base classes tested
+    via concrete subclasses, or config/registration modules.
 
 ## MCP Server Implementations
 
