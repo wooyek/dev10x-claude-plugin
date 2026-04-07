@@ -95,7 +95,7 @@ Classify them as `HOOK_ENABLED`, not `DEAD_RULE`.
 
 ## References
 
-- [GH-419](https://github.com/Brave-Labs/Dev10x/issues/419)
+- [GH-419](https://github.com/Dev10x-Guru/dev10x-claude/issues/419)
 - `hooks/scripts/bash_validators/skill_redirect.py` — the hook
 - `feedback_allow_rules_as_hook_enablers.md` — original user feedback
 - [ADR-0001](0001-trust-skill-instructions-for-destructive-git-commands.md) — related permission decision

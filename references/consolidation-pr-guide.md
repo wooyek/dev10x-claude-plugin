@@ -110,7 +110,7 @@ distribution complexity and improve maintainability.
 
 [Brief summary of changes]
 
-Fixes: https://github.com/Brave-Labs/dev10x/issues/...
+Fixes: https://github.com/Dev10x-Guru/dev10x-claude/issues/...
 ```
 
 ## Testing Consolidation PRs

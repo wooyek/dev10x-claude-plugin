@@ -105,7 +105,7 @@ repos:
           expect_contains: "sentry.io"
       remove:
         - Slack notification posted
-  Brave-Labs/dev10x:
+  Dev10x-Guru/dev10x-claude:
     feature:
       remove:
         - Review requested

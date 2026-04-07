@@ -424,18 +424,20 @@ def _generalize(
 def _detect_plugin_cache() -> str:
     cache_root = Path.home() / ".claude" / "plugins" / "cache"
     if not cache_root.is_dir():
-        return "~/.claude/plugins/cache/Brave-Labs/Dev10x"
+        return "~/.claude/plugins/cache/Dev10x-Guru/dev10x-claude"
     candidates = [
-        d / "Dev10x" for d in cache_root.iterdir() if d.is_dir() and (d / "Dev10x").is_dir()
+        d / "dev10x-claude"
+        for d in cache_root.iterdir()
+        if d.is_dir() and (d / "dev10x-claude").is_dir()
     ]
     if len(candidates) == 1:
-        return f"~/.claude/plugins/cache/{candidates[0].parent.name}/Dev10x"
+        return f"~/.claude/plugins/cache/{candidates[0].parent.name}/dev10x-claude"
     if len(candidates) > 1:
         names = ", ".join(c.parent.name for c in candidates)
         print(f"Multiple plugin cache orgs found: {names}")
         print(f"Using first match: {candidates[0].parent.name}")
-        return f"~/.claude/plugins/cache/{candidates[0].parent.name}/Dev10x"
-    return "~/.claude/plugins/cache/Brave-Labs/Dev10x"
+        return f"~/.claude/plugins/cache/{candidates[0].parent.name}/dev10x-claude"
+    return "~/.claude/plugins/cache/Dev10x-Guru/dev10x-claude"
 
 
 def _init_userspace_config() -> int:
@@ -449,7 +451,7 @@ def _init_userspace_config() -> int:
     content = PLUGIN_CONFIG.read_text()
     detected_cache = _detect_plugin_cache()
     content = content.replace(
-        "~/.claude/plugins/cache/Brave-Labs/Dev10x",
+        "~/.claude/plugins/cache/Dev10x-Guru/dev10x-claude",
         detected_cache,
     )
     USERSPACE_CONFIG.write_text(content)

@@ -38,7 +38,7 @@ PLUGIN_CONFIG = (
 )
 GLOBAL_SETTINGS = Path.home() / ".claude" / "settings.json"
 
-VERSION_PATTERN = re.compile(r"plugins/cache/[^/]+/Dev10x/(\d+\.\d+\.\d+)")
+VERSION_PATTERN = re.compile(r"plugins/cache/[^/]+/dev10x-claude/(\d+\.\d+\.\d+)")
 
 ENV_PREFIX_PATTERN = re.compile(r"^Bash\([A-Z_]+=")
 

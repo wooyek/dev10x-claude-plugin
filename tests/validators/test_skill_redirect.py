@@ -216,7 +216,7 @@ class TestGhPrChecksWatchRedirect:
 
 class TestGhIssueViewRedirect:
     def test_blocks_gh_issue_view(self, validator: SkillRedirectValidator) -> None:
-        inp = _make_input(command="gh issue view 539 --repo Brave-Labs/dev10x")
+        inp = _make_input(command="gh issue view 539 --repo Dev10x-Guru/dev10x-claude")
         result = validator.validate(inp=inp)
         assert result is not None
         assert "mcp__plugin_Dev10x_cli__issue_get" in result.message
@@ -294,7 +294,7 @@ class TestMessageContent:
         result = validator.validate(inp=inp)
         assert result is not None
         assert "file an issue" in result.message
-        assert "Brave-Labs/Dev10x" in result.message
+        assert "Dev10x-Guru/dev10x-claude" in result.message
 
 
 class TestFrictionLevels:
@@ -309,7 +309,7 @@ class TestFrictionLevels:
         return textwrap.dedent(f"""\
             config:
               friction_level: {friction_level}
-              plugin_repo: https://github.com/Brave-Labs/Dev10x
+              plugin_repo: https://github.com/Dev10x-Guru/dev10x-claude
             rules:
               - name: test-rule
                 matcher: Bash

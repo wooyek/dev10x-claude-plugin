@@ -7,7 +7,7 @@
 # and customize with your own project roots:
 #   update-paths.py --init
 
-plugin_cache: ~/.claude/plugins/cache/Brave-Labs/Dev10x
+plugin_cache: ~/.claude/plugins/cache/Dev10x-Guru/dev10x-claude
 
 roots: []
 #  - /work/my-projects

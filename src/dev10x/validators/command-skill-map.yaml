@@ -42,7 +42,7 @@
 
 config:
   friction_level: guided  # strict | guided | adaptive
-  plugin_repo: https://github.com/Brave-Labs/Dev10x
+  plugin_repo: https://github.com/Dev10x-Guru/dev10x-claude
 
 rules:
   # ── Bash command rules ─────────────────────────────────────

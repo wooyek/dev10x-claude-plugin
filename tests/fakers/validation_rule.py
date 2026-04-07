@@ -38,5 +38,5 @@ class ConfigFaker(factory.Factory):
         "random_element",
         elements=["strict", "guided", "adaptive"],
     )
-    plugin_repo = "https://github.com/Brave-Labs/dev10x"
+    plugin_repo = "https://github.com/Dev10x-Guru/dev10x-claude"
     rules = factory.LazyFunction(list)

@@ -172,7 +172,7 @@ checkpoints, and existing wrapper for force-push.
 
 ### Internal References
 
-- [GH-269](https://github.com/Brave-Labs/Dev10x/issues/269)
+- [GH-269](https://github.com/Dev10x-Guru/dev10x-claude/issues/269)
 - `skills/git-groom/` — primary consumer of destructive git commands
 - `skills/git-commit-split/` — secondary consumer
 - `skills/git/scripts/git-push-safe.sh` — force-push wrapper

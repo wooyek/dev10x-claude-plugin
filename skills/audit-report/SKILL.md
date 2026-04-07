@@ -19,7 +19,7 @@ allowed-tools:
 # Audit Report — File Findings Upstream
 
 Generate a structured GitHub issue from skill-audit findings
-and file it at `Brave-Labs/Dev10x`.
+and file it at `Dev10x-Guru/dev10x-claude`.
 
 ## When to Use
 
@@ -65,7 +65,7 @@ If empty or missing, inform the user and exit.
 ### Step 2: Determine plugin version
 
 ```bash
-ls ~/.claude/plugins/cache/Brave-Labs/Dev10x/
+ls ~/.claude/plugins/cache/Dev10x-Guru/dev10x-claude/
 ```
 
 Use the version directory name (e.g., `0.19.0.dev0`). If the
@@ -122,7 +122,7 @@ characters in the args string:
 
 ```
 Skill(skill="Dev10x:ticket-create",
-  args="--repo Brave-Labs/Dev10x --body-file {temp-file-path} --label enhancement")
+  args="--repo Dev10x-Guru/dev10x-claude --body-file {temp-file-path} --label enhancement")
 ```
 
 The ticket-create skill reads the first line as the title when

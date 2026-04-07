@@ -32,14 +32,14 @@
 Add the marketplace source and install the plugin:
 
 ```
-/plugin marketplace add Brave-Labs/Dev10x
-/plugin install Dev10x@Brave-Labs
+/plugin marketplace add Dev10x-Guru/dev10x-claude
+/plugin install Dev10x@Dev10x-Guru
 ```
 
 Update to the latest version:
 
 ```
-/plugin update Dev10x@Brave-Labs
+/plugin update Dev10x@Dev10x-Guru
 ```
 
 ### Install the develop (pre-release) version
@@ -47,17 +47,17 @@ Update to the latest version:
 To test the latest develop branch before it's released:
 
 ```
-/plugin marketplace remove WooYek
-/plugin marketplace add Brave-Labs/Dev10x#develop
-/plugin install Dev10x@Brave-Labs
+/plugin marketplace remove Dev10x-Guru
+/plugin marketplace add Dev10x-Guru/dev10x-claude#develop
+/plugin install Dev10x@Dev10x-Guru
 ```
 
 Switch back to stable releases:
 
 ```
-/plugin marketplace remove WooYek
-/plugin marketplace add Brave-Labs/Dev10x
-/plugin install Dev10x@Brave-Labs
+/plugin marketplace remove Dev10x-Guru
+/plugin marketplace add Dev10x-Guru/dev10x-claude
+/plugin install Dev10x@Dev10x-Guru
 ```
 
 ## Option B: Manual clone
@@ -67,12 +67,12 @@ the [Dev10x community](https://www.skool.com/Dev10x-1892). Once you
 have access:
 
 ```bash
-git clone git@github.com:Brave-Labs/Dev10x.git \
+git clone git@github.com:Dev10x-Guru/dev10x-claude.git \
   ~/.claude/plugins/Dev10x
 ```
 
 > **Using HTTPS?** Replace the URL with
-> `https://github.com/Brave-Labs/Dev10x.git` and
+> `https://github.com/Dev10x-Guru/dev10x-claude.git` and
 > authenticate when prompted.
 
 Register the plugin so Claude Code loads it on every session:

@@ -294,7 +294,7 @@ Consolidate into YAML with configurable enforcement levels.
 
 ### Internal References
 
-- [GH-417](https://github.com/Brave-Labs/Dev10x/issues/417) — Spike: investigate hooks usage
+- [GH-417](https://github.com/Dev10x-Guru/dev10x-claude/issues/417) — Spike: investigate hooks usage
 - `hooks/scripts/bash_validators/skill_redirect.py` — current hook
 - `skills/skill-reinforcement/references/command-skill-map.yaml` — current YAML map
 - [ADR-0001](0001-trust-skill-instructions-for-destructive-git-commands.md) — related decision on hook enforcement scope

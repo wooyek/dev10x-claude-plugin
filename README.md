@@ -204,8 +204,8 @@ Code CLI to run it. Run `/Dev10x:skill-index` for the full reference.
 ## Installation
 
 ```
-/plugin marketplace add Brave-Labs/Dev10x
-/plugin install Dev10x@Brave-Labs
+/plugin marketplace add Dev10x-Guru/dev10x-claude
+/plugin install Dev10x@Dev10x-Guru
 ```
 
 [Full installation guide →](docs/installation.md) — prerequisites,
@@ -237,10 +237,10 @@ gatekeeper for repo access.
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=Brave-Labs%2FDev10x&type=date&legend=bottom-right">
+<a href="https://www.star-history.com/?repos=Dev10x-Guru%2Fdev10x-claude&type=date&legend=bottom-right">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=Brave-Labs/Dev10x&type=date&theme=dark&legend=bottom-right" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=Brave-Labs/Dev10x&type=date&legend=bottom-right" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=Brave-Labs/Dev10x&type=date&legend=bottom-right" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=Dev10x-Guru/dev10x-claude&type=date&theme=dark&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=Dev10x-Guru/dev10x-claude&type=date&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=Dev10x-Guru/dev10x-claude&type=date&legend=bottom-right" />
  </picture>
 </a>

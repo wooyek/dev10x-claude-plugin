@@ -76,7 +76,7 @@ The body should be **compact** to avoid cluttering Slack previews.
 **Required elements** (in this order):
 1. A JTBD Job Story as the **first paragraph** (1-3 lines, see `git-jtbd.md`)
 2. `Fixes:` link — must be the **absolute last line** of the body:
-   - `Fixes: https://github.com/Brave-Labs/Dev10x/issues/NUMBER`
+   - `Fixes: https://github.com/Dev10x-Guru/dev10x-claude/issues/NUMBER`
      (for issue-tracked work)
    - `Fixes: none — self-motivated refactor` (for internal improvements,
      features, or experiments without a tracking issue)
@@ -128,7 +128,7 @@ Claude review code quality, **so I can** catch issues before merging.
 [`b3a015a`](REPO_URL/commit/HASH) ✨ GH-7 Enable code review
 [`fec4999`](REPO_URL/commit/HASH) 📝 GH-7 Document review agents
 
-Fixes: https://github.com/Brave-Labs/Dev10x/issues/7
+Fixes: https://github.com/Dev10x-Guru/dev10x-claude/issues/7
 ```
 
 *Why?* The JTBD Job Story must be the first paragraph because the

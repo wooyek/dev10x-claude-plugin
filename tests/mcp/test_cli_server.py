@@ -28,13 +28,13 @@ class TestDetectRepo:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[],
             returncode=0,
-            stdout="Brave-Labs/dev10x\n",
+            stdout="Dev10x-Guru/dev10x-claude\n",
             stderr="",
         )
 
         result = gh._detect_repo()
 
-        assert result == "Brave-Labs/dev10x"
+        assert result == "Dev10x-Guru/dev10x-claude"
 
     @patch("dev10x.mcp.github.subprocess.run")
     def test_returns_none_on_failure(
