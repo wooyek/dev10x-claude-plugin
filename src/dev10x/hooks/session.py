@@ -467,3 +467,73 @@ def session_migrate_permissions() -> None:
             f"Migrated {total_migrated} stale permission rule(s) "
             f"to current plugin version in {files_str}"
         )
+
+
+def session_persist() -> None:
+    """Persist session state to disk for next-session reload (SessionStop hook)."""
+    try:
+        data = json.load(sys.stdin)
+    except (json.JSONDecodeError, EOFError):
+        sys.exit(0)
+
+    session_id = data.get("session_id") or ""
+    if not session_id:
+        sys.exit(0)
+
+    toplevel = _get_toplevel()
+    if not toplevel:
+        sys.exit(0)
+
+    project_hash = hashlib.md5(toplevel.encode()).hexdigest()
+    state_dir = Path.home() / ".claude" / "projects" / "_session_state"
+    state_dir.mkdir(parents=True, exist_ok=True)
+    state_dir.chmod(0o700)
+    state_file = state_dir / f"{project_hash}.json"
+
+    branch = _run_git("rev-parse", "--abbrev-ref", "HEAD") or "unknown"
+
+    worktree_name = ""
+    git_file = Path(toplevel) / ".git"
+    if git_file.is_file():
+        worktree_name = Path(toplevel).name
+
+    modified = _run_git("diff", "--name-only").splitlines()[:20]
+    staged = _run_git("diff", "--cached", "--name-only").splitlines()[:20]
+    recent_commits = _run_git("log", "--oneline", "-5").splitlines()
+
+    has_plan = (Path(toplevel) / ".claude" / "session" / "plan.yaml").exists()
+
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    state: dict[str, Any] = {
+        "session_id": session_id,
+        "branch": branch,
+        "worktree": worktree_name,
+        "working_directory": toplevel,
+        "timestamp": timestamp,
+        "modified_files": modified,
+        "staged_files": staged,
+        "recent_commits": recent_commits,
+        "has_plan": has_plan,
+    }
+    state_file.write_text(json.dumps(state, indent=2))
+
+
+def session_goodbye() -> None:
+    """Output goodbye message with community link and resume hint (SessionStop hook)."""
+    try:
+        data = json.load(sys.stdin)
+    except (json.JSONDecodeError, EOFError):
+        data = {}
+
+    session_id = data.get("session_id") or ""
+
+    url = "https://www.skool.com/Dev10x-1892"
+    print()
+    print("Thank you for using Dev10x. Join the community to get the most out of the plugin:")
+    print(f"\033]8;;{url}\033\\{url}\033]8;;\033\\")
+
+    if session_id:
+        print()
+        print("Resume this session with:")
+        print(f"  claude --resume {session_id}")
