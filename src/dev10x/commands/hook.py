@@ -220,3 +220,32 @@ def session_goodbye_cmd() -> None:
     from dev10x.hooks.session import session_goodbye
 
     session_goodbye()
+
+
+@hook.group(name="skill")
+def skill() -> None:
+    """Skill lifecycle commands."""
+
+
+@skill.command(name="tmpdir")
+def skill_tmpdir_cmd() -> None:
+    """Create scratch directory for skill (PreToolUse hook)."""
+    from dev10x.hooks.skill import skill_tmpdir
+
+    skill_tmpdir()
+
+
+@skill.command(name="metrics")
+def skill_metrics_cmd() -> None:
+    """Append skill invocation metric to JSONL file (PostToolUse hook)."""
+    from dev10x.hooks.skill import skill_metrics
+
+    skill_metrics()
+
+
+@hook.command(name="ruff-format")
+def ruff_format_cmd() -> None:
+    """Auto-format Python files with ruff after Edit/Write (PostToolUse hook)."""
+    from dev10x.hooks.skill import ruff_format
+
+    ruff_format()
