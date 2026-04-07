@@ -204,3 +204,19 @@ def session_migrate_permissions_cmd() -> None:
     from dev10x.hooks.session import session_migrate_permissions
 
     session_migrate_permissions()
+
+
+@session.command(name="persist")
+def session_persist_cmd() -> None:
+    """Persist session state to disk for next-session reload (SessionStop hook)."""
+    from dev10x.hooks.session import session_persist
+
+    session_persist()
+
+
+@session.command(name="goodbye")
+def session_goodbye_cmd() -> None:
+    """Output goodbye message with community link and resume hint (SessionStop hook)."""
+    from dev10x.hooks.session import session_goodbye
+
+    session_goodbye()
