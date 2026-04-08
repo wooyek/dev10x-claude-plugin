@@ -193,12 +193,14 @@ https://github.com/{owner}/{repo}/pull/{pr}#discussion_r{comment_id}
 
 **Fallback:** `Skill(Dev10x:git)` for safe push with protected branch checks.
 
-Get the commit hash for the reply:
+Get the commit hash and build both link types for the reply:
 ```bash
 commit_hash=$(git rev-parse --short HEAD)
 full_hash=$(git rev-parse HEAD)
-# Use PR-based URL so reviewers can comment on the diff within the PR context.
-commit_url="https://github.com/{owner}/{repo}/pull/{pr_number}/commits/${full_hash}"
+# PR-relative link — shows diff within PR context (becomes 404 after groom)
+pr_commit_url="https://github.com/{owner}/{repo}/pull/{pr_number}/commits/${full_hash}"
+# Absolute repo link — survives grooming, useful for post-groom audit
+repo_commit_url="https://github.com/{owner}/{repo}/commit/${full_hash}"
 ```
 
 ### Step 7: Reply to Comment Thread
@@ -210,7 +212,7 @@ Reply **in the review comment thread** (not as a top-level PR comment).
 mcp__plugin_Dev10x_cli__pr_comment_reply(
     pr_number={pr_number},
     comment_id={comment_id},
-    body="Fixed in [`{short_hash}`]({commit_url}) - {brief_explanation}"
+    body="Fixed in [`{short_hash}`]({pr_commit_url}) · [permalink]({repo_commit_url}) - {brief_explanation}"
 )
 ```
 
@@ -218,13 +220,19 @@ mcp__plugin_Dev10x_cli__pr_comment_reply(
 ```bash
 gh api --method POST \
   repos/{owner}/{repo}/pulls/{pr_number}/comments/{comment_id}/replies \
-  -f body="Fixed in [\`{short_hash}\`]({commit_url}) - {brief_explanation}"
+  -f body="Fixed in [\`{short_hash}\`]({pr_commit_url}) · [permalink]({repo_commit_url}) - {brief_explanation}"
 ```
 
-**Reply format:**
+**Reply format (GH-777):**
 ```markdown
-Fixed in [`{short_hash}`]({commit_url}) - {brief explanation of change}.
+Fixed in [`{short_hash}`]({pr_commit_url}) · [permalink]({repo_commit_url}) - {brief explanation}.
 ```
+
+Both links are included because:
+- **PR link** (`/pull/N/commits/HASH`): shows diff within PR
+  context, allows reviewers to comment on the change
+- **Permalink** (`/commit/HASH`): survives grooming (rebase
+  rewrites SHAs, breaking PR-relative links)
 
 **When reusing a fixup for another comment:**
 - Reference the same commit
