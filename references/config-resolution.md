@@ -34,14 +34,17 @@ Shipped with the plugin. Used when no user override exists.
 ## Project Mapping Format
 
 Global config files (Tier 2) use a `projects` list with glob
-matching on the repo's `nameWithOwner` (e.g., `tiretutorinc/tt-pos`):
+matching on the repo's `nameWithOwner` (e.g., `org/repo`).
+Match uses standard Unix glob syntax (`fnmatch`): `*` matches any
+string, `?` matches a single character, `[seq]` matches any character
+in *seq*.
 
 ```yaml
 projects:
   - match: "Dev10x-Guru/dev10x-claude"
     # config specific to this repo
 
-  - match: "tiretutorinc/*"
+  - match: "org/*"
     # config shared across all TireTutor repos
 ```
 
