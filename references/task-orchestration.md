@@ -70,6 +70,23 @@ in parallel with their own pending decisions. The orchestrator
 them as a batch. This ensures the supervisor is interrupted
 once with N questions, not N times with 1 question each.
 
+### Anti-Pattern: Orchestrator Self-Assessment
+
+**Pattern**: Orchestrator inspects state (commit history, PR status,
+file contents) to decide whether a delegated step is needed, then
+optionally skips the delegation.
+
+**Why this fails**: Skills contain decision gates (AskUserQuestion,
+conditional logic) that represent team policy and operational
+constraints. Bypassing them via orchestrator assessment loses:
+- Audit trail of decision rationale
+- User interaction (user never sees the gate)
+- Regression prevention (no evals track this decision)
+
+**Required pattern**: Always delegate; let the skill run its own
+analysis and return a decision. The orchestrator must NOT
+pre-assess or post-assess to override.
+
 ## Mandatory Task Tracking — Universal Rule
 
 **Every skill MUST use TaskCreate** — even single-step skills.
