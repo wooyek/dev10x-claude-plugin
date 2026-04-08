@@ -204,9 +204,19 @@ If resolution fails, ask the user to provide the JSONL path explicitly.
 
 ### Step 1.5: Self-session guard
 
-After resolving the JSONL path, check if the resolved file is the
-**current session** by testing whether the file was modified within
-the last 60 seconds (active sessions write continuously):
+**Skip this guard when the user provided an explicit JSONL path
+as the argument** (i.e., `arg.endswith(".jsonl")` was true in
+Step 1). An explicit path means the user deliberately chose
+which session to audit — the mtime heuristic would false-positive
+on any active session being audited from a separate terminal,
+which is the documented workflow.
+
+**Only apply this guard when the path was auto-resolved** via the
+`latest` fallback (no arg, or arg is a directory). In that case,
+the resolved file might be the current session's own JSONL.
+
+When the guard applies, check if the resolved file was modified
+within the last 60 seconds (active sessions write continuously):
 
 ```bash
 find "$SESSION_FILE" -mmin -1 -print
