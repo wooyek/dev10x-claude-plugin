@@ -1,4 +1,4 @@
-"""Tests for precompact-context.sh hook."""
+"""Tests for precompact-context.py hook."""
 
 from __future__ import annotations
 
@@ -7,13 +7,13 @@ import subprocess
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-HOOK = _REPO_ROOT / "hooks" / "scripts" / "precompact-context.sh"
+HOOK = _REPO_ROOT / "hooks" / "scripts" / "precompact-context.py"
 
 
 def _run_hook(*, payload: dict | None = None) -> subprocess.CompletedProcess[str]:
     stdin_data = json.dumps(payload or {})
     return subprocess.run(
-        ["bash", str(HOOK)],
+        [str(HOOK)],
         input=stdin_data,
         capture_output=True,
         text=True,

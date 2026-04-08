@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["msgpack", "pyyaml"]
+# ///
 """PreToolUse hook: thin shim delegating to dev10x.hooks.edit_validator.
 
 Kept for backward compatibility with plugin.json hook config.

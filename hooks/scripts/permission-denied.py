@@ -1,7 +1,7 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = []
+# dependencies = ["click", "msgpack", "pyyaml"]
 # ///
 """PermissionDenied hook: provide corrective guidance after auto-mode denial.
 

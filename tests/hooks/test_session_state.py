@@ -1,4 +1,4 @@
-"""Tests for session-stop-persist.sh and session-start-reload.sh hooks."""
+"""Tests for session-stop-persist.sh and session-start-reload.py hooks."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 STOP_HOOK = _REPO_ROOT / "hooks" / "scripts" / "session-stop-persist.sh"
-START_HOOK = _REPO_ROOT / "hooks" / "scripts" / "session-start-reload.sh"
+START_HOOK = _REPO_ROOT / "hooks" / "scripts" / "session-start-reload.py"
 
 
 def _run_hook(
@@ -21,8 +21,9 @@ def _run_hook(
 
     run_env = {**os.environ, **(env or {})}
     stdin_data = json.dumps(payload or {})
+    cmd = ["bash", str(hook)] if hook.suffix == ".sh" else [str(hook)]
     return subprocess.run(
-        ["bash", str(hook)],
+        cmd,
         input=stdin_data,
         capture_output=True,
         text=True,
