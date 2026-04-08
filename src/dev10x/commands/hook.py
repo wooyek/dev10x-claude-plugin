@@ -7,9 +7,6 @@ from pathlib import Path
 
 import click
 
-from dev10x.domain import HookInput
-from dev10x.validators import get_validators
-
 _DEBUG = os.environ.get("HOOK_DEBUG", "") != ""
 
 
@@ -25,6 +22,9 @@ def validate_bash() -> None:
     Reads JSON from stdin, dispatches to registered validators.
     Exit codes: 0=allow, 2=block.
     """
+    from dev10x.domain import HookInput
+    from dev10x.validators import get_validators
+
     inp = HookInput.from_stdin()
     if inp.tool_name != "Bash":
         sys.exit(0)
@@ -96,6 +96,8 @@ def permission_denied() -> None:
     validator recognizes the denied command.
     Exit codes: 0 always (retry decision is in JSON output).
     """
+    from dev10x.domain import HookInput
+    from dev10x.validators import get_validators
     from dev10x.validators.base import Corrector
 
     inp = HookInput.from_stdin()
