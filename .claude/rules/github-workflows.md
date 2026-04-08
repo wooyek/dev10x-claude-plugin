@@ -50,12 +50,60 @@ Workflows should reference these files rather than duplicating content.
 
 ## Conditional Execution Pattern
 
-### Two-Layer Filtering
+### Three-Layer Filtering
+
+Expensive PR-triggered workflows use a three-layer filtering
+strategy to prevent wasted CI execution:
 
 1. **Event-level filtering** (`paths:`) — prevents workflow from
    queuing, saving GitHub Actions minutes
 2. **Step-level conditional** (`if:`) — skips steps when no relevant
    files changed, providing additional safety
+3. **Runtime PR state validation** — exits before expensive operations
+   (checkout, Claude API calls) if PR is already merged/closed
+
+### Runtime PR State Validation
+
+Add a state-check step early in your workflow to gate expensive
+operations:
+
+```yaml
+- id: pr-state
+  name: Check PR state
+  run: |
+    STATE=$(gh pr view ${{ github.event.pull_request.number }} \
+      --json state -q '.state')
+    if [ "$STATE" != "OPEN" ]; then
+      echo "skip=true" >> $GITHUB_OUTPUT
+    fi
+  env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Chain this check into downstream step conditionals to prevent
+wasted operations on merged/closed PRs.
+
+### Guard Output Chaining
+
+When multiple guard conditions exist, chain them using AND logic:
+
+```yaml
+- name: Expensive operation
+  if: >-
+    steps.dedup.outputs.skip != 'true' &&
+    steps.pr-state.outputs.skip != 'true'
+  run: expensive-operation
+```
+
+Each guard step sets `skip=true` in `$GITHUB_OUTPUT`. Downstream
+steps reference all guards with `&&`.
+
+### Race Condition Limitations
+
+The PR state check protects against PRs merged *before* the
+expensive step runs. A small race window remains if a PR is merged
+*during* an in-flight step. This is acceptable — the 99% case is
+prevented, and the 1% case causes only redundant review comments.
 
 ## Concurrency Groups
 
