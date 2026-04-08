@@ -160,7 +160,15 @@ Write the findings array as JSON to the temp file path.
 
 **REQUIRED: Call `AskUserQuestion`** even when no findings exist.
 This confirms the clean review to the user and prevents silent
-skip-through (GH-447 F5). Options:
+skip-through (GH-447 F5).
+
+**Unattended mode exemption (GH-760 F6):** When invoked with
+`--unattended` flag (e.g., from `Dev10x:work-on` shipping
+pipeline), skip this gate and auto-advance. The parent
+orchestrator already approved the work plan — pausing for
+zero-findings confirmation adds friction without safety value.
+
+**Attended mode** options:
 - Continue (Recommended) — Proceed to next pipeline step
 - Re-review — Run the review again with different scope
 

@@ -142,6 +142,24 @@ comment in the thread references the automated comment's ID
 or quotes its content. If no reply exists, the finding is
 unaddressed.
 
+### Check 1c: No unaddressed inline review comments (GH-760)
+
+Inline review comments posted via `pulls/{n}/comments` are
+invisible to both Check 1 (GraphQL `reviewThreads`) and
+Check 1b (`issueComments`). Query them directly:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{number}/comments \
+  --jq '[.[] | select(.in_reply_to_id == null)
+  | {id, user: .user.login, body: .body[:100], path}]'
+```
+
+Filter for bot users with unaddressed severity markers
+(`CRITICAL`, `BLOCKING`, `REQUIRED`). A comment is
+addressed if a reply exists (same `in_reply_to_id`).
+If unaddressed findings remain, report them and block
+merge.
+
 ### Check 2: CI checks passing
 
 ```bash

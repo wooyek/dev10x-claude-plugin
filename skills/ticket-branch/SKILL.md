@@ -243,6 +243,9 @@ Branch details:
 - **Worktree detection**: Always check if running in a worktree and include the worktree name in the branch
 - Worktree name should be placed between the ticket ID and the slug (e.g., `janusz/PAY-133/tt-pos-7/slug`)
 - **Terminal title**: The Konsole tab title and statusline show the ticket ID from the branch name. The title updates on session start, so mid-session branch switches won't refresh it automatically.
+- **Never `git -C <path>`** (GH-760 F5): `git -C` breaks
+  allow-rule matching in `settings.local.json`. The CWD is
+  always set correctly — run git commands without `-C`.
 
 ## Example Usage
 

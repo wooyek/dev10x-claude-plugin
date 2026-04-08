@@ -633,6 +633,15 @@ failing checks, or incomplete work that earlier phases missed.
    earlier phases — report the failures and let the supervisor
    decide next steps.
 
+**Permission failure propagation (GH-760 F4):** If the
+background agent hits permission limits and cannot complete
+`verify-acc-dod`, it MUST report this explicitly as
+"Acceptance criteria: INCOMPLETE — permission failure" in the
+final status report. The parent orchestrator MUST re-invoke
+`Skill(Dev10x:verify-acc-dod)` in the main session when it
+sees this status. Do NOT mark the parent's acceptance task
+as `completed` when the agent reports incomplete.
+
 ````
 
 ---

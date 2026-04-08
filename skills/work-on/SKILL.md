@@ -644,27 +644,18 @@ After approval, set task dependencies where appropriate (use
 
 ### Persist Plan Context
 
-**REQUIRED after plan approval:** Store the plan context in the
-persisted plan file so it survives context compaction and session
-restarts. Run:
+**REQUIRED after plan approval (GH-760 F2).** Execute these
+calls immediately — do NOT defer or skip:
 
-```bash
-task-plan-sync.py --set-context \
-    work_type=<detected_work_type> \
-    tickets='<JSON array of ticket IDs>' \
-    routing_table='{"commit":"Skill(Dev10x:git-commit)","create_pr":"Skill(Dev10x:gh-pr-create)","monitor_ci":"Skill(Dev10x:gh-pr-monitor)","push":"Skill(Dev10x:git)","groom":"Skill(Dev10x:git-groom)","branch":"Skill(Dev10x:ticket-branch)","verify_acceptance":"Skill(Dev10x:verify-acc-dod)","merge_pr":"Skill(Dev10x:gh-pr-merge)"}'
-```
+1. `task-plan-sync.py --set-context work_type=<detected_work_type> tickets='<JSON array of ticket IDs>' routing_table='{"commit":"Skill(Dev10x:git-commit)","create_pr":"Skill(Dev10x:gh-pr-create)","monitor_ci":"Skill(Dev10x:gh-pr-monitor)","push":"Skill(Dev10x:git)","groom":"Skill(Dev10x:git-groom)","branch":"Skill(Dev10x:ticket-branch)","verify_acceptance":"Skill(Dev10x:verify-acc-dod)","merge_pr":"Skill(Dev10x:gh-pr-merge)"}'`
+2. `task-plan-sync.py --set-context gathered_summary='<1-3 sentence summary>'`
 
-This ensures the PreCompact hook can inject the routing table and
-work type into the recovery context. Without this, the agent loses
-skill-to-action mappings after compaction (GH-477).
-
-After gathering context in Phase 2, also store a brief summary:
-
-```bash
-task-plan-sync.py --set-context \
-    gathered_summary='<1-3 sentence summary of what was gathered>'
-```
+This ensures the PreCompact hook can inject the routing table
+and work type into the recovery context. Without this, the
+agent loses skill-to-action mappings after compaction (GH-477).
+Prior code-block formatting was treated as advisory — the
+numbered list enforces execution per
+`skill-orchestration-format.md`.
 
 ---
 
