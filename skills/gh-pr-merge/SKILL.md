@@ -152,6 +152,14 @@ All required checks must have `conclusion` of `SUCCESS` or
 `NEUTRAL`. No checks should be `PENDING` or `IN_PROGRESS`.
 Report any failing or pending checks by name.
 
+**Pending CI delegation (GH-775):** If any checks are `PENDING`
+or `IN_PROGRESS`, do NOT poll inline with `sleep` + `gh pr
+checks`. Instead, delegate to `Skill(Dev10x:gh-pr-monitor)` to
+wait for CI to complete, then retry the merge validation from
+Check 1. The monitor skill handles CI polling, failure fixing,
+and re-checking reliably — inline sleep loops bypass these
+guardrails.
+
 **Infrastructure failure override (GH-730):** If a check
 fails with an infrastructure error (API billing outage,
 OIDC token validation failure, external service unavailable),
