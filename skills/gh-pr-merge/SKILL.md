@@ -145,12 +145,12 @@ unaddressed.
 ### Check 2: CI checks passing
 
 ```bash
-gh pr checks NUMBER --json name,state,conclusion
+gh pr checks NUMBER --json name,state,bucket
 ```
 
-All required checks must have `conclusion` of `SUCCESS` or
-`NEUTRAL`. No checks should be `PENDING` or `IN_PROGRESS`.
-Report any failing or pending checks by name.
+All required checks must have `bucket` of `pass`. No checks
+should be `PENDING` or `IN_PROGRESS`. Report any failing or
+pending checks by name.
 
 **Infrastructure failure override (GH-730):** If a check
 fails with an infrastructure error (API billing outage,
