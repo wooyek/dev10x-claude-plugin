@@ -132,18 +132,22 @@ class TestCdNoopChain:
         assert "redundant" in result.message
         assert "GIT_SEQUENCE_EDITOR=true git develop-rebase --autosquash" in result.message
 
-    def test_allows_cd_to_different_path(self, validator: PrefixFrictionValidator) -> None:
+    def test_blocks_cd_to_different_path_with_git(
+        self, validator: PrefixFrictionValidator
+    ) -> None:
         inp = _make_input(
             command="cd /work/tt/other-repo && git status",
             cwd="/work/tt/.worktrees/tt-pos-4",
         )
         result = validator.validate(inp=inp)
-        assert result is None
+        assert result is not None
+        assert "git -C" in result.message
 
-    def test_allows_cd_without_cwd(self, validator: PrefixFrictionValidator) -> None:
+    def test_blocks_cd_without_cwd_with_git(self, validator: PrefixFrictionValidator) -> None:
         inp = _make_input(command="cd /some/path && git status")
         result = validator.validate(inp=inp)
-        assert result is None
+        assert result is not None
+        assert "git -C" in result.message
 
     def test_blocks_cd_with_trailing_slash(self, validator: PrefixFrictionValidator) -> None:
         inp = _make_input(
@@ -171,6 +175,54 @@ class TestCdNoopChain:
         result = validator.validate(inp=inp)
         assert result is not None
         assert "redundant" in result.message
+
+
+class TestCdGitChain:
+    @pytest.fixture()
+    def validator(self) -> PrefixFrictionValidator:
+        return PrefixFrictionValidator()
+
+    def test_blocks_cd_different_path_and_git(self, validator: PrefixFrictionValidator) -> None:
+        inp = _make_input(
+            command="cd /work/tt/other-repo && git push origin HEAD",
+            cwd="/work/tt/.worktrees/tt-pos-4",
+        )
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "git -C" in result.message
+        assert "push origin HEAD" in result.message
+
+    def test_blocks_cd_git_without_cwd(self, validator: PrefixFrictionValidator) -> None:
+        inp = _make_input(command="cd /some/path && git status")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "git -C" in result.message
+
+    def test_blocks_cd_git_with_quoted_path(self, validator: PrefixFrictionValidator) -> None:
+        inp = _make_input(
+            command='cd "/work/tt/other repo" && git log --oneline',
+            cwd="/work/tt/.worktrees/tt-pos-4",
+        )
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "git -C" in result.message
+
+    def test_cd_same_path_caught_by_noop_first(self, validator: PrefixFrictionValidator) -> None:
+        inp = _make_input(
+            command="cd /work/tt/.worktrees/tt-pos-4 && git push origin HEAD",
+            cwd="/work/tt/.worktrees/tt-pos-4",
+        )
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "redundant" in result.message
+
+    def test_allows_cd_and_non_git_command(self, validator: PrefixFrictionValidator) -> None:
+        inp = _make_input(
+            command="cd /some/path && ls -la",
+            cwd="/work/somewhere-else",
+        )
+        result = validator.validate(inp=inp)
+        assert result is None
 
 
 class TestEnvPrefixGit:

@@ -47,6 +47,7 @@ GIT_SUBCOMMAND_RE = re.compile(r"\bgit\s+(log|diff|rebase)\b")
 
 CD_NOOP_RE = re.compile(r'^cd\s+("(?:[^"]+)"|\'(?:[^\']+)\'|\S+)\s*&&\s*(.*)')
 CD_REVPARSE_RE = re.compile(r'^cd\s+"?\$\(git\s+rev-parse\s+--show-toplevel\)"?\s*&&\s*(.*)')
+CD_GIT_CHAIN_RE = re.compile(r'^cd\s+("(?:[^"]+)"|\'(?:[^\']+)\'|\S+)\s*&&\s*git\b\s*(.*)')
 
 CD_REVPARSE_MSG = (
     '\u26a0\ufe0f  `cd "$(git rev-parse --show-toplevel)"` is unnecessary.\n\n'
@@ -67,6 +68,15 @@ GIT_C_NOOP_MSG = (
     "\u26a0\ufe0f  `git -C {path}` is redundant — CWD is already `{cwd}`.\n\n"
     "Drop the `-C` flag and run the command directly:\n"
     "    {bare_command}"
+)
+
+CD_GIT_CHAIN_MSG = (
+    "\u26a0\ufe0f  `cd {path} && git {args}` chaining blocked \u2014 use `git -C` instead.\n\n"
+    "`cd` before `&&` shifts the effective command prefix, breaking\n"
+    "allow-rule matching.\n\n"
+    "Replace with:\n"
+    "    git -C {path} {args}\n\n"
+    "This keeps it as a single command without chaining."
 )
 
 AND_CHAIN_ADVICE = """\
@@ -214,6 +224,10 @@ class PrefixFrictionValidator:
         if result:
             return result
 
+        result = self._check_cd_git_chain(command=inp.command)
+        if result:
+            return result
+
         return self._check_and_chaining(command=inp.command)
 
     def _check_cd_revparse_chain(
@@ -292,6 +306,16 @@ class PrefixFrictionValidator:
         subcommand = sub_match.group(1) if sub_match else None
         alias = _suggest_alias(branch=branch, subcommand=subcommand)
         return HookResult(message=MERGE_BASE_MSG.format(alias=alias))
+
+    def _check_cd_git_chain(self, *, command: str) -> HookResult | None:
+        match = CD_GIT_CHAIN_RE.match(command)
+        if not match:
+            return None
+        path = match.group(1)
+        args = match.group(2).strip()
+        return HookResult(
+            message=CD_GIT_CHAIN_MSG.format(path=path, args=args),
+        )
 
     def _check_and_chaining(self, *, command: str) -> HookResult | None:
         if "&&" not in command:
