@@ -102,7 +102,8 @@ Controls the `gh pr merge` flag passed during merge.
 
 ### Playbook Configuration
 
-Add these fields to `~/.claude/projects/<project>/memory/playbooks/work-on.yaml`:
+Add these fields to your playbook override (see
+`references/config-resolution.md` for paths):
 
 ```yaml
 merge_mode: cascade

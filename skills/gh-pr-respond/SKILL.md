@@ -67,9 +67,11 @@ This skill is playbook-powered. The workflow steps are defined in
 `references/playbook.yaml` with two plays: `single` (Mode A) and
 `batch` (Mode B).
 
-**Loading order:**
-1. User overrides: `~/.claude/projects/<project>/memory/playbooks/gh-pr-respond.yaml`
-2. Defaults: `${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-respond/references/playbook.yaml`
+**Loading order** (see `references/config-resolution.md`):
+1. `.claude/Dev10x/playbooks/gh-pr-respond.yaml` (project-local)
+2. `~/.claude/memory/Dev10x/playbooks/gh-pr-respond.yaml` (global + repo match)
+3. `~/.claude/projects/<project>/memory/playbooks/gh-pr-respond.yaml` (legacy)
+4. `${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-respond/references/playbook.yaml`
 
 Customize with `/Dev10x:playbook edit gh-pr-respond <play>`.
 

@@ -11,7 +11,11 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:playbook
 allowed-tools:
+  - Read(.claude/Dev10x/playbooks/*.yaml)
+  - Read(~/.claude/memory/Dev10x/playbooks/*.yaml)
   - Read(~/.claude/projects/**/memory/playbooks/*.yaml)
+  - Write(.claude/Dev10x/playbooks/*.yaml)
+  - Write(~/.claude/memory/Dev10x/playbooks/*.yaml)
   - Write(~/.claude/projects/**/memory/playbooks/*.yaml)
   - AskUserQuestion
   - TaskCreate
@@ -41,20 +45,35 @@ presence is sufficient.
 
 ### Storage
 
-Each skill's user overrides live in a separate file:
-```
-~/.claude/projects/<project>/memory/playbooks/<skill-key>.yaml
-```
+User overrides follow the 3-tier resolution in
+`references/config-resolution.md`:
 
-Where `<skill-key>` is the skill directory name (e.g., `work-on`,
-`tt-e2e-debug`). This keeps overrides isolated per skill.
+| Tier | Path | Scope |
+|------|------|-------|
+| 1 | `.claude/Dev10x/playbooks/<key>.yaml` | Project-local |
+| 2 | `~/.claude/memory/Dev10x/playbooks/<key>.yaml` | Global with repo mapping |
+| 3 | `~/.claude/projects/<project>/memory/playbooks/<key>.yaml` | Legacy (deprecated) |
+
+Where `<key>` is the skill directory name (e.g., `work-on`,
+`release-notes`).
+
+**Tier 2 (global)** uses `projects[].match` globs so one file
+can serve multiple repos. See `references/config-resolution.md`
+for the YAML format.
 
 ### Resolution Order
 
 When loading a play, resolve in this order:
-1. User overrides (`persist: false`) — use once, then remove
-2. User overrides (`persist: true`) — reuse across sessions
-3. Defaults from the skill's `references/playbook.yaml`
+1. Project-local (`.claude/Dev10x/playbooks/<key>.yaml`)
+2. Global with repo matching (`~/.claude/memory/Dev10x/playbooks/<key>.yaml`)
+3. Legacy per-project (`~/.claude/projects/<project>/memory/playbooks/<key>.yaml`)
+   — log deprecation notice if found
+4. Defaults from the skill's `references/playbook.yaml`
+
+Within the resolved file, apply overrides in this order:
+1. Non-persistent overrides (`persist: false`) — use once, then remove
+2. Persistent overrides (`persist: true`) — reuse across sessions
+3. Defaults section
 
 ## Orchestration
 
@@ -196,7 +215,9 @@ language rather than editing YAML.
    - Read the user's playbook file for this skill (create if absent)
    - Add/update the override entry for this play
    - Set `persist: true` and `added: <today's date>`
-   - Write to `~/.claude/projects/<project>/memory/playbooks/<skill-key>.yaml`
+   - Write to `~/.claude/memory/Dev10x/playbooks/<skill-key>.yaml`
+     (global — preferred) or `.claude/Dev10x/playbooks/<skill-key>.yaml`
+     (project-local). See `references/config-resolution.md`.
 
 **Override format:**
 
@@ -294,10 +315,12 @@ have their own friction mappings.
 See `references/execution-modes.md` for the full mode taxonomy
 and `references/friction-levels.md` for friction behavior.
 
-**Project activation:**
+**Project activation** (global playbook with repo mapping):
 ```yaml
-# ~/.claude/projects/<project>/memory/playbooks/work-on.yaml
-active_modes: [solo-maintainer]
+# ~/.claude/memory/Dev10x/playbooks/work-on.yaml
+projects:
+  - match: "tiretutorinc/*"
+    active_modes: [solo-maintainer]
 ```
 
 **Session activation (set by work-on Phase 0):**
@@ -338,18 +361,21 @@ with all 5 plays as a reference implementation.
 
 1. Create `skills/<your-skill>/references/playbook.yaml`
 2. Define one or more plays with steps following the schema above
-3. In your SKILL.md orchestration section, load the playbook:
+3. In your SKILL.md orchestration section, load the playbook using
+   the 4-tier resolution in `references/config-resolution.md`:
    ```
-   1. Read user overrides from
-      ~/.claude/projects/<project>/memory/playbooks/<skill-key>.yaml
-   2. Fall back to references/playbook.yaml
-   3. Create TaskCreate per step in the resolved play
+   1. .claude/Dev10x/playbooks/<key>.yaml (project-local)
+   2. ~/.claude/memory/Dev10x/playbooks/<key>.yaml (global + repo match)
+   3. ~/.claude/projects/<project>/memory/playbooks/<key>.yaml (legacy)
+   4. ${CLAUDE_PLUGIN_ROOT}/skills/<skill>/references/playbook.yaml
    ```
 4. The `Dev10x:playbook` skill automatically discovers your skill
 
 **Loading pattern for orchestration skills:**
 ```
-Read(~/.claude/projects/<project>/memory/playbooks/<key>.yaml)
+Read(.claude/Dev10x/playbooks/<key>.yaml)
+  → if absent, Read(~/.claude/memory/Dev10x/playbooks/<key>.yaml) + repo match
+  → if absent, Read(~/.claude/projects/<project>/memory/playbooks/<key>.yaml)
   → if absent, Read(${CLAUDE_PLUGIN_ROOT}/skills/<skill>/references/playbook.yaml)
   → resolve: overrides first, then defaults
   → create tasks from steps
@@ -400,7 +426,7 @@ and skill delegations in a readable tree format.
 4. Skill creates the step with `skills: [tt:e2e-debug]`
 5. Shows preview with 11 steps
 6. User selects "Save"
-7. Writes override to `~/.claude/projects/.../memory/playbooks/work-on.yaml`
+7. Writes override to `~/.claude/memory/Dev10x/playbooks/work-on.yaml`
 
 ### Example 5: Future — e2e-debug with a playbook
 

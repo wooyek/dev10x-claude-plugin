@@ -1,6 +1,9 @@
 # playbook.yaml — Respond workflow plays for Dev10x:gh-pr-respond
 # Default location: ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-respond/references/playbook.yaml
-# User overrides: ~/.claude/projects/<project>/memory/playbooks/gh-pr-respond.yaml
+# User overrides (see references/config-resolution.md):
+#   1. .claude/Dev10x/playbooks/gh-pr-respond.yaml (project-local)
+#   2. ~/.claude/memory/Dev10x/playbooks/gh-pr-respond.yaml (global + repo match)
+#   3. ~/.claude/projects/<project>/memory/playbooks/gh-pr-respond.yaml (legacy)
 # Managed by Dev10x:playbook skill.
 #
 # Play names match the mode detection in SKILL.md:

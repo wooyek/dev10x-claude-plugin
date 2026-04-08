@@ -68,6 +68,7 @@ Scan both the plugin directory and user-space locations.
 | MEMORY.md (global) | `~/.claude/memory/MEMORY.md` | 200 lines |
 | MEMORY.md (project) | `~/.claude/projects/*/memory/MEMORY.md` | 200 lines |
 | Memory files | `~/.claude/projects/*/memory/*.md` | No per-file budget |
+| Dev10x global config | `~/.claude/memory/Dev10x/**` | No per-file budget |
 
 ### 1.3 Collect Metrics
 

@@ -13,10 +13,12 @@ user-invocable: true
 invocation-name: Dev10x:work-on
 allowed-tools:
   - mcp__plugin_Dev10x_cli__*
+  - Read(.claude/Dev10x/playbooks/work-on.yaml)
+  - Read(~/.claude/memory/Dev10x/playbooks/work-on.yaml)
   - Read(~/.claude/projects/**/memory/playbooks/work-on.yaml)
   - Read(${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml)
+  - Write(.claude/Dev10x/**)
   - Write(~/.claude/projects/**/**)
-  - Write(~/.claude/Dev10x/**)
   - Skill(skill="Dev10x:verify-acc-dod")
   - Bash(${CLAUDE_PLUGIN_ROOT}/hooks/scripts/task-plan-sync.py:*)
 ---
@@ -361,10 +363,14 @@ Play templates are loaded from the `Dev10x:playbook` system.
 Each work type has a default play with parent-child steps
 that can be overridden per project.
 
-**Play source** (resolved in order):
-1. `~/.claude/projects/<project>/memory/playbooks/work-on.yaml` —
-   check `overrides` for matching play first, then defaults
-2. `${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml`
+**Play source** (resolved in order — see `references/config-resolution.md`):
+1. `.claude/Dev10x/playbooks/work-on.yaml` — project-local override
+2. `~/.claude/memory/Dev10x/playbooks/work-on.yaml` — global with
+   repo matching (get repo via `git remote get-url origin`, walk
+   `projects[].match` globs, use first hit's `overrides`/`fragments`)
+3. `~/.claude/projects/<project>/memory/playbooks/work-on.yaml` —
+   legacy per-project (deprecated; log notice if found)
+4. `${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml`
 
 **Playbook schema:** See the `Dev10x:playbook` skill's
 `references/playbook.yaml` for the full schema with all 5 plays.
@@ -396,13 +402,20 @@ play definitions. If you cannot confirm this, STOP.
 
 **Loading the play:**
 1. Determine the `work_type` from gathered context (see table below)
-2. Read the user's playbook at
-   `~/.claude/projects/<project>/memory/playbooks/work-on.yaml`;
-   if absent, read from
-   `${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml`
+2. Resolve the playbook using the 4-tier resolution order above:
+   a. Try `.claude/Dev10x/playbooks/work-on.yaml` (project-local)
+   b. Try `~/.claude/memory/Dev10x/playbooks/work-on.yaml` (global)
+      — if found, get repo via `git remote get-url origin`, walk
+      `projects[].match` globs; use first matching entry's config.
+      Top-level `fragments` are shared across all matched projects.
+   c. Try `~/.claude/projects/<project>/memory/playbooks/work-on.yaml`
+      (legacy — log deprecation notice if found)
+   d. Fall back to `${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml`
 3. **VERIFY: Confirm the playbook loaded successfully.** Check that
-   the read returned YAML with `defaults.<work_type>.steps` present.
-   If BOTH paths fail (file missing or unreadable), STOP and report
+   the read returned YAML with play steps present (either under
+   `defaults.<work_type>.steps`, `overrides[].steps`, or
+   `projects[].overrides[].steps`).
+   If ALL paths fail (file missing or unreadable), STOP and report
    the error to the user. Do NOT fall back to generating an ad-hoc
    plan. The playbook IS the plan — without it, Phase 3 cannot
    produce a correct task list.

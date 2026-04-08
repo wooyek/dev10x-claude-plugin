@@ -80,6 +80,7 @@ Always apply `references/review-checks-common.md`.
 | `friction-levels.md` | Friction levels, gate behavior, playbook integration | `work-on` skill, `verify-acc-dod` skill | Referenced, not auto-loaded |
 | `model-tiers.md` | Model assignments, tier framework, per-project overrides | `model-selection.md` rule, playbook system | Referenced, not auto-loaded |
 | `skill-pipelines.md` | Skill composition pipelines, standalone invocation | `Dev10x:work-on` skill, pipeline documentation | Referenced, not auto-loaded |
+| `config-resolution.md` | 3-tier config paths, project mapping format | All playbook/settings skills | Referenced, not auto-loaded |
 
 ## Agent Specs (`.claude/agents/`)
 

@@ -19,3 +19,4 @@ __pycache__/
 .claude/settings.local.json
 .claude/worktrees/
 .claude/session/
+.claude/Dev10x/

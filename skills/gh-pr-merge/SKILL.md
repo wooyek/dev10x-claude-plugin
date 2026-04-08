@@ -40,14 +40,34 @@ executing `gh pr merge`. Prevents premature merges like PR #633
 
 ## Merge Strategy Resolution
 
-The merge strategy is resolved in this order:
+The merge strategy is resolved using the config resolution order
+(see `references/config-resolution.md`):
 
-1. **Per-project config** — read
+1. **Global with repo matching** — read
+   `~/.claude/memory/Dev10x/settings-pr-merge.yaml`, match current
+   repo against `projects[].match` globs
+2. **Legacy per-project** — read
    `~/.claude/projects/<project>/memory/settings-pr-merge.yaml`
-2. **Default** — `squash`
+   (deprecated; log notice if found)
+3. **Default** — `squash`
 
 ### Config file format
 
+**Global format** (preferred — one file for all repos):
+```yaml
+# ~/.claude/memory/Dev10x/settings-pr-merge.yaml
+projects:
+  - match: "Dev10x-Guru/*"
+    strategy: rebase
+    delete_branch: true
+    solo_maintainer: true
+  - match: "tiretutorinc/*"
+    strategy: rebase
+    delete_branch: true
+    solo_maintainer: true
+```
+
+**Legacy format** (per-project, deprecated):
 ```yaml
 # ~/.claude/projects/<project>/memory/settings-pr-merge.yaml
 strategy: squash        # squash | rebase | merge

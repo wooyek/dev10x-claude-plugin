@@ -1,6 +1,9 @@
 # playbook.yaml — Reusable play templates for orchestration skills
 # Default location: ${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml
-# User overrides: ~/.claude/projects/<project>/memory/playbooks/<skill-key>.yaml
+# User overrides (resolution order — see references/config-resolution.md):
+#   1. .claude/Dev10x/playbooks/<skill-key>.yaml (project-local)
+#   2. ~/.claude/memory/Dev10x/playbooks/<skill-key>.yaml (global + repo match)
+#   3. ~/.claude/projects/<project>/memory/playbooks/<skill-key>.yaml (legacy)
 # Managed by Dev10x:playbook skill.
 #
 # Structure:
