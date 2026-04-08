@@ -272,11 +272,20 @@ If any check fails, show `[ ]` with failure details:
 **All checks pass:** Execute merge with configured strategy:
 
 ```bash
-gh pr merge NUMBER --STRATEGY --delete-branch
+gh pr merge NUMBER --repo OWNER/REPO --STRATEGY --delete-branch
 ```
 
 Where `--STRATEGY` is one of `--squash`, `--rebase`, or
 `--merge` based on config.
+
+**Worktree safety (GH-773):** Always include `--repo OWNER/REPO`
+in the merge command. Without it, `gh pr merge` tries to check
+out the base branch locally, which fails in worktree setups
+where the base branch is already checked out in another
+worktree (`fatal: 'develop' is already used by worktree`).
+The `--repo` flag bypasses local checkout entirely. Detect
+the repo via `gh repo view --json nameWithOwner -q
+.nameWithOwner`.
 
 If `delete_branch` is `false`, omit `--delete-branch`.
 
