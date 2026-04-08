@@ -45,7 +45,7 @@ defaults:
 - A skill supports 2+ distinct modes (single item vs. batch)
 - Workflow steps differ significantly per mode
 - SKILL.md orchestration would exceed ~100 lines
-- Customization via `~/.claude/projects/<project>/memory/playbooks/` is needed
+- Customization via playbook overrides is needed
 
 **Don't use playbooks when:**
 - Skill has simple linear orchestration
@@ -53,13 +53,18 @@ defaults:
 
 ## User Customization
 
-Users can override playbooks by creating a custom version in their project:
+Users can override playbooks using the 3-tier resolution order
+(see `references/config-resolution.md`):
 
-```
-~/.claude/projects/<project>/memory/playbooks/<skill-name>.yaml
-```
+| Tier | Path | Scope |
+|------|------|-------|
+| 1 | `.claude/Dev10x/playbooks/<skill-name>.yaml` | Project-local |
+| 2 | `~/.claude/memory/Dev10x/playbooks/<skill-name>.yaml` | Global + repo mapping |
+| 3 | `~/.claude/projects/<project>/memory/playbooks/<skill-name>.yaml` | Legacy (deprecated) |
 
-The skill loads this file at invocation, allowing users to customize
+Tier 2 (global) is preferred — one file serves multiple repos via
+`projects[].match` globs. The skill loads this file at invocation,
+allowing users to customize
 behavior without editing the plugin.
 
 ## Reviewer Expectations

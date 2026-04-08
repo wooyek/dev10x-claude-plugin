@@ -47,8 +47,8 @@ in a `references/` subdirectory.
 - Playbook files (`playbook.yaml`) define multi-mode workflows separately
 - API documentation files (`.md`) provide implementation details for steps
 - Loaded and referenced by the skill itself and SKILL.md
-- Users may customize by overriding files in
-  `~/.claude/projects/<project>/memory/playbooks/`
+- Users may customize via 3-tier resolution
+  (see `references/config-resolution.md`)
 
 **Reviewer expectations**:
 - Verify YAML syntax and structure for playbook files

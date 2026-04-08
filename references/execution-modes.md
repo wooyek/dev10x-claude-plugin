@@ -61,7 +61,8 @@ active_modes: [solo-maintainer]
 ### Project-level (persistent across sessions)
 
 ```yaml
-# ~/.claude/projects/<project>/memory/playbooks/work-on.yaml
+# ~/.claude/memory/Dev10x/playbooks/work-on.yaml (global, preferred)
+# or .claude/Dev10x/playbooks/work-on.yaml (project-local)
 active_modes: [solo-maintainer]
 
 mode_extensions:

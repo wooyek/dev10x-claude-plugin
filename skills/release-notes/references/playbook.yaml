@@ -1,6 +1,9 @@
 # release-notes playbook — plays for generating release notes
 # Default location: ${CLAUDE_PLUGIN_ROOT}/skills/release-notes/references/playbook.yaml
-# User overrides: ~/.claude/projects/<project>/memory/playbooks/release-notes.yaml
+# User overrides (see references/config-resolution.md):
+#   1. .claude/Dev10x/playbooks/release-notes.yaml (project-local)
+#   2. ~/.claude/memory/Dev10x/playbooks/release-notes.yaml (global + repo match)
+#   3. ~/.claude/projects/<project>/memory/playbooks/release-notes.yaml (legacy)
 # Managed by Dev10x:playbook skill.
 #
 # Play-level `config` block holds structured settings that the

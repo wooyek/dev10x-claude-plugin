@@ -46,10 +46,10 @@ resources (in order, first match wins per resource type):
 
 ### Schema files
 
-1. `~/.claude/projects/<project>/memory/db-*-schema.md` — project-
-   level schema docs (one file per database)
-2. `~/.claude/memory/db-*-schema.md` — global schema docs shared
-   across projects
+1. `~/.claude/memory/Dev10x/db-*-schema.md` — global schema docs
+   (preferred, see `references/config-resolution.md`)
+2. `~/.claude/projects/<project>/memory/db-*-schema.md` — legacy
+   project-level schema docs (deprecated)
 
 ### Database configuration
 
@@ -97,9 +97,8 @@ Always load available context before constructing queries.
 ## Schema Memory File Format
 
 Schema files should follow this template. Place them at
-`~/.claude/projects/<project>/memory/db-<name>-schema.md`
-(project-level) or `~/.claude/memory/db-<name>-schema.md`
-(global):
+`~/.claude/memory/Dev10x/db-<name>-schema.md` (preferred global
+path per `references/config-resolution.md`):
 
 ```markdown
 # <Project> Database Schema — <database-name>

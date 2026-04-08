@@ -69,8 +69,8 @@ modifying plugin files.
 
 ### Playbook Step Override
 
-Add `model:` to any step in your playbook override file at
-`~/.claude/projects/<project>/memory/playbooks/work-on.yaml`:
+Add `model:` to any step in your playbook override file
+(see `references/config-resolution.md` for paths):
 
 ```yaml
 overrides:

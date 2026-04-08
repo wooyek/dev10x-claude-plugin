@@ -46,7 +46,9 @@ summaries instead of technical commit logs.
 
 This skill is driven by playbook configuration. The default playbook
 lives at `${CLAUDE_PLUGIN_ROOT}/skills/release-notes/references/playbook.yaml`.
-Projects can override via `~/.claude/projects/<project>/memory/playbooks/release-notes.yaml`.
+Projects can override via the 4-tier resolution in
+`references/config-resolution.md` (global preferred:
+`~/.claude/memory/Dev10x/playbooks/release-notes.yaml`).
 
 ### Plays
 
@@ -78,8 +80,7 @@ Each play has a `config` block with:
 4. Extract the `config` block for script args and formatting
 
 **Missing override detection:** After loading, check whether a
-project-specific override exists at
-`~/.claude/projects/<project>/memory/playbooks/release-notes.yaml`.
+user override exists (at any tier per `references/config-resolution.md`).
 If **no override exists** AND the resolved config has
 `output_target: stdout` with empty `ticket_links`:
 
