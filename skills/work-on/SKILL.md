@@ -734,16 +734,23 @@ missing, re-read this section before proceeding.
 
 ### Groom Step: Always Delegate, Never Self-Assess
 
-**Hard rule (GH-505, recurrence of GH-458):** When the plan
-includes a "Groom commit history" step, you MUST invoke
-`Skill(Dev10x:git-groom)`. Do NOT run `git develop-log` or
-`git log` to self-assess whether grooming is needed and then
-skip the step. The groom skill itself contains the strategy
-gate (`AskUserQuestion`) that determines whether grooming is
-required — that decision belongs to the skill, not to the
-orchestrator. Bypassing with "checked the log, no grooming
-needed" skips the skill's decision gate and fixup squash
-logic.
+**Hard rule (GH-505, GH-776, recurrence of GH-458):** When the
+plan includes a "Groom commit history" step, you MUST invoke
+`Skill(Dev10x:git-groom)` and let the skill run its own
+analysis. Do NOT run `git develop-log`, `git log`, or any
+commit inspection to pre-assess whether grooming is needed —
+not before invoking the skill, and not after invoking the
+skill to override its decision. The groom skill's Phase 2
+strategy gate determines whether grooming is required — that
+decision belongs to the skill, not to the orchestrator.
+
+**Anti-pattern (GH-776):** The orchestrator invoked the groom
+skill but then ran `git log --oneline develop..HEAD` itself,
+concluded "single commit, nothing to groom", and marked the
+task complete — pre-empting the skill's own Phase 2 analysis.
+Even when the groom skill is expected to be a no-op, the
+skill must run its own logic. The orchestrator must not
+inspect commit history to predict the outcome.
 
 ### CI Re-Monitoring After Force Push
 

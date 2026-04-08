@@ -119,6 +119,9 @@ Options:
 **At adaptive level (GH-530):**
 
 Auto-select strategy based on commit analysis:
+- Single clean commit, no fixups, message OK → **fast exit**
+  with "Nothing to groom" (GH-776). This keeps the decision
+  within the groom skill rather than the orchestrator.
 - Only fixup commits present → auto-select "Fixup"
 - No fixups, only message issues → auto-select "Mass rewrite"
 - Mixed structural issues → auto-select "Fixup" (safest default)
