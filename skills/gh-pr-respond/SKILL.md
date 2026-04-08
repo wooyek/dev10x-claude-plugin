@@ -107,7 +107,8 @@ step description. If you see that marker, you MUST call the
 4. Gate 4 (resolve threads): `AskUserQuestion` — MANDATORY
 5. Gate 5 (shipping pipeline): `AskUserQuestion` — MANDATORY
 6. Gate 6 (hide comments): `AskUserQuestion` — MANDATORY
-7. VALID comments: `Skill(Dev10x:gh-pr-fixup)` — NEVER inline
+7. VALID comments: `Skill(Dev10x:gh-pr-fixup)` — NEVER inline,
+   invoke immediately after triage verdict (no pause, no report)
 8. Triage: `Skill(Dev10x:gh-pr-triage)` — NEVER inline, even
    for "obviously invalid" or bot-generated comments (GH-463)
 9. Pre-action checkpoint: BEFORE any `Edit` or `git commit` on
@@ -265,8 +266,11 @@ delegate to triage as normal.
 
 `Dev10x:gh-pr-triage` returns a verdict: `VALID`, `INVALID`, `QUESTION`, or `OUT_OF_SCOPE`.
 
-- If **VALID** → **REQUIRED: Call `Skill(Dev10x:gh-pr-fixup)`** —
-  never implement fixes manually or post replies via raw `gh api`.
+- If **VALID** → **REQUIRED: Call `Skill(Dev10x:gh-pr-fixup)`
+  immediately in the same turn** — do NOT report the verdict and
+  wait for user input. The triage-to-fixup transition is atomic:
+  verdict received → `Skill()` invoked, no pause between. Never
+  implement fixes manually or post replies via raw `gh api`.
   The fixup skill handles the entire lifecycle: fix, commit, push,
   and reply.
 - If **not VALID** → `Dev10x:gh-pr-triage` has posted a reply but has NOT resolved the
@@ -463,10 +467,13 @@ Mark phase transition: `TaskUpdate(taskId=execute_task, status="in_progress")`
 
 For each approved comment:
 
-- **VALID** → **REQUIRED: Call `Skill(Dev10x:gh-pr-fixup)`** —
-  never manually implement fixes or post replies via raw commands.
-  The fixup skill handles the entire lifecycle (one fixup commit
-  per comment).
+- **VALID** → **REQUIRED: Call `Skill(Dev10x:gh-pr-fixup)`
+  immediately after verdict** — do NOT report the verdict and
+  wait for user input between comments. The triage-to-fixup
+  transition is atomic: verdict received → `Skill()` invoked,
+  no pause. Never manually implement fixes or post replies via
+  raw commands. The fixup skill handles the entire lifecycle
+  (one fixup commit per comment).
 - **INVALID / QUESTION / OUT_OF_SCOPE** → post reply using MCP tool:
   ```
   mcp__plugin_Dev10x_cli__pr_comment_reply(
