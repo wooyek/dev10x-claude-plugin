@@ -471,3 +471,78 @@ class TestCleanFile:
 
         assert result.total_removed == 0
         assert messages == []
+
+
+class TestIsStalePublisher:
+    def test_detects_stale_publisher(self, tmp_path: Path) -> None:
+        cache_root = tmp_path / "cache"
+        (cache_root / "Dev10x-Guru").mkdir(parents=True)
+        rule = "Bash(~/.claude/plugins/cache/WooYek/Dev10x/0.48.0/skills/foo.sh:*)"
+
+        assert clean_mod.is_stale_publisher(rule, cache_root=cache_root) is True
+
+    def test_returns_false_for_existing_publisher(self, tmp_path: Path) -> None:
+        cache_root = tmp_path / "cache"
+        (cache_root / "Dev10x-Guru").mkdir(parents=True)
+        rule = "Bash(~/.claude/plugins/cache/Dev10x-Guru/Dev10x/0.54.0/skills/foo.sh:*)"
+
+        assert clean_mod.is_stale_publisher(rule, cache_root=cache_root) is False
+
+    def test_returns_false_for_non_plugin_rule(self, tmp_path: Path) -> None:
+        cache_root = tmp_path / "cache"
+        (cache_root / "Dev10x-Guru").mkdir(parents=True)
+
+        assert clean_mod.is_stale_publisher("Bash(git log:*)", cache_root=cache_root) is False
+
+    def test_returns_false_when_cache_root_is_none(self) -> None:
+        rule = "Bash(~/.claude/plugins/cache/WooYek/Dev10x/0.48.0/skills/foo.sh:*)"
+
+        assert clean_mod.is_stale_publisher(rule, cache_root=None) is False
+
+    def test_matches_dev10x_claude_plugin_name(self, tmp_path: Path) -> None:
+        cache_root = tmp_path / "cache"
+        (cache_root / "Dev10x-Guru").mkdir(parents=True)
+        rule = "Bash(~/.claude/plugins/cache/WooYek/dev10x-claude/0.30.0/scripts/x.sh:*)"
+
+        assert clean_mod.is_stale_publisher(rule, cache_root=cache_root) is True
+
+
+class TestClassifyRulesStalePublisher:
+    GLOBAL_RULES: set[str] = set()
+
+    def test_classifies_stale_publisher_rules(self, tmp_path: Path) -> None:
+        cache_root = tmp_path / "cache"
+        (cache_root / "Dev10x-Guru").mkdir(parents=True)
+        rules = [
+            "Bash(~/.claude/plugins/cache/WooYek/Dev10x/0.48.0/skills/foo.sh:*)",
+        ]
+
+        result = clean_mod.classify_rules(
+            rules,
+            global_rules=self.GLOBAL_RULES,
+            current_version="0.54.0",
+            cache_root=cache_root,
+        )
+
+        assert len(result.stale_publisher) == 1
+        assert result.total_removed == 1
+
+    def test_stale_publisher_takes_precedence_over_old_version(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        cache_root = tmp_path / "cache"
+        (cache_root / "Dev10x-Guru").mkdir(parents=True)
+        rules = [
+            "Bash(~/.claude/plugins/cache/WooYek/Dev10x/0.30.0/skills/foo.sh:*)",
+        ]
+
+        result = clean_mod.classify_rules(
+            rules,
+            global_rules=self.GLOBAL_RULES,
+            current_version="0.54.0",
+            cache_root=cache_root,
+        )
+
+        assert len(result.stale_publisher) == 1
+        assert len(result.old_versions) == 0

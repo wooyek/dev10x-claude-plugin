@@ -38,7 +38,9 @@ PLUGIN_CONFIG = (
 )
 GLOBAL_SETTINGS = Path.home() / ".claude" / "settings.json"
 
-VERSION_PATTERN = re.compile(r"plugins/cache/[^/]+/dev10x-claude/(\d+\.\d+\.\d+)")
+PLUGIN_NAMES = r"(?:Dev10x|dev10x-claude)"
+VERSION_PATTERN = re.compile(rf"plugins/cache/[^/]+/{PLUGIN_NAMES}/(\d+\.\d+\.\d+)")
+PUBLISHER_PATTERN = re.compile(rf"plugins/cache/([^/]+)/{PLUGIN_NAMES}/")
 
 ENV_PREFIX_PATTERN = re.compile(r"^Bash\([A-Z_]+=")
 
@@ -86,6 +88,7 @@ class RemovalResult:
     exact_duplicates: list[str] = field(default_factory=list)
     wildcard_covered: list[tuple[str, str]] = field(default_factory=list)
     old_versions: list[str] = field(default_factory=list)
+    stale_publisher: list[str] = field(default_factory=list)
     env_noise: list[str] = field(default_factory=list)
     shell_fragments: list[str] = field(default_factory=list)
     double_slash: list[str] = field(default_factory=list)
@@ -99,6 +102,7 @@ class RemovalResult:
             len(self.exact_duplicates)
             + len(self.wildcard_covered)
             + len(self.old_versions)
+            + len(self.stale_publisher)
             + len(self.env_noise)
             + len(self.shell_fragments)
             + len(self.double_slash)
@@ -172,6 +176,20 @@ def is_shell_fragment(rule: str) -> bool:
     return False
 
 
+def is_stale_publisher(
+    rule: str,
+    *,
+    cache_root: Path | None,
+) -> bool:
+    if cache_root is None:
+        return False
+    match = PUBLISHER_PATTERN.search(rule)
+    if not match:
+        return False
+    publisher = match.group(1)
+    return not (cache_root / publisher).is_dir()
+
+
 def is_old_version(
     rule: str,
     current_version: str | None,
@@ -199,6 +217,7 @@ def classify_rules(
     global_rules: set[str],
     current_version: str | None,
     base_permissions: set[str] | None = None,
+    cache_root: Path | None = None,
 ) -> RemovalResult:
     result = RemovalResult()
     _base = base_permissions or set()
@@ -223,6 +242,10 @@ def classify_rules(
         covering = is_covered_by_wildcard(rule, global_rules)
         if covering is not None:
             result.wildcard_covered.append((rule, covering))
+            continue
+
+        if is_stale_publisher(rule, cache_root=cache_root):
+            result.stale_publisher.append(rule)
             continue
 
         if is_old_version(rule, current_version):
@@ -252,6 +275,7 @@ def clean_file(
     global_rules: set[str],
     current_version: str | None,
     base_permissions: set[str] | None = None,
+    cache_root: Path | None = None,
     dry_run: bool = False,
 ) -> tuple[RemovalResult | None, list[str]]:
     content = path.read_text()
@@ -269,6 +293,7 @@ def clean_file(
         global_rules=global_rules,
         current_version=current_version,
         base_permissions=base_permissions,
+        cache_root=cache_root,
     )
 
     if result.total_removed == 0:
@@ -298,6 +323,9 @@ def _format_messages(result: RemovalResult) -> list[str]:
 
     if result.old_versions:
         messages.append(f"  - {len(result.old_versions)} old plugin versions")
+
+    if result.stale_publisher:
+        messages.append(f"  - {len(result.stale_publisher)} stale publisher paths")
 
     if result.env_noise:
         messages.append(f"  - {len(result.env_noise)} env-prefixed session noise")
@@ -360,6 +388,7 @@ def main() -> int:
     print(f"Global rules: {len(global_rules)}")
 
     cache_dir = Path(config.get("plugin_cache", "")).expanduser()
+    cache_root = cache_dir.parent.parent if cache_dir.parts else None
     current_version = detect_current_version(cache_dir)
     if current_version:
         print(f"Current plugin version: {current_version}")
@@ -389,6 +418,7 @@ def main() -> int:
             global_rules=global_rules,
             current_version=current_version,
             base_permissions=base_permissions,
+            cache_root=cache_root,
             dry_run=args.dry_run,
         )
         if result is None:

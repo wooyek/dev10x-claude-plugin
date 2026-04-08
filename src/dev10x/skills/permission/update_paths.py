@@ -29,7 +29,18 @@ USERSPACE_CONFIG = (
 PLUGIN_CONFIG = (
     Path(__file__).resolve().parents[4] / "skills" / "permission-maintenance" / "projects.yaml"
 )
-VERSION_PATTERN = re.compile(r"(plugins/cache/[^/]+/Dev10x/)(\d+\.\d+\.\d+)")
+PLUGIN_NAMES = r"(?:Dev10x|dev10x-claude)"
+VERSION_PATTERN = re.compile(rf"(plugins/cache/)([^/]+)(/{PLUGIN_NAMES}/)(\d+\.\d+\.\d+)")
+
+
+def extract_cache_publisher(plugin_cache: str) -> str | None:
+    path = Path(plugin_cache).expanduser()
+    parts = list(path.parts)
+    for i, part in enumerate(parts):
+        if part == "cache" and i >= 2 and parts[i - 1] == "plugins":
+            if i + 1 < len(parts):
+                return parts[i + 1]
+    return None
 
 
 def find_config() -> Path:
@@ -103,19 +114,38 @@ def update_file(
     path: Path,
     target_version: str,
     *,
+    target_publisher: str | None = None,
     dry_run: bool = False,
 ) -> tuple[int, list[str]]:
     content = path.read_text()
     old_versions: set[str] = set()
+    old_publishers: set[str] = set()
     count = 0
 
     def replacer(match: re.Match) -> str:
         nonlocal count
-        old_ver = match.group(2)
+        prefix = match.group(1)
+        publisher = match.group(2)
+        plugin_slug = match.group(3)
+        old_ver = match.group(4)
+
+        new_publisher = publisher
+        new_ver = old_ver
+        changed = False
+
+        if target_publisher and publisher != target_publisher:
+            old_publishers.add(publisher)
+            new_publisher = target_publisher
+            changed = True
+
         if old_ver != target_version:
             old_versions.add(old_ver)
+            new_ver = target_version
+            changed = True
+
+        if changed:
             count += 1
-            return match.group(1) + target_version
+            return prefix + new_publisher + plugin_slug + new_ver
         return match.group(0)
 
     new_content = VERSION_PATTERN.sub(replacer, content)
@@ -129,6 +159,8 @@ def update_file(
         path.write_text(new_content)
 
     messages = []
+    for old_pub in sorted(old_publishers):
+        messages.append(f"  publisher: {old_pub} -> {target_publisher}")
     for old_ver in sorted(old_versions):
         messages.append(f"  {old_ver} -> {target_version} ({count} replacements)")
     return count, messages
@@ -298,8 +330,11 @@ def main() -> int:
         print(f"ERROR: No versions found in {cache_dir}", file=sys.stderr)
         return 1
 
+    publisher = extract_cache_publisher(config["plugin_cache"])
     if not args.quiet:
         print(f"Target version: {target}")
+        if publisher:
+            print(f"Target publisher: {publisher}")
     if args.dry_run and not args.quiet:
         print("(dry run — no files will be modified)\n")
 
@@ -307,7 +342,12 @@ def main() -> int:
     files_changed = 0
 
     for path in sorted(settings_files):
-        count, messages = update_file(path, target, dry_run=args.dry_run)
+        count, messages = update_file(
+            path,
+            target,
+            target_publisher=publisher,
+            dry_run=args.dry_run,
+        )
         if count > 0:
             if not args.quiet:
                 print(f"\n{path}")
@@ -421,23 +461,30 @@ def _generalize(
     return 0
 
 
+KNOWN_PLUGIN_DIRS = ("Dev10x", "dev10x-claude")
+
+
 def _detect_plugin_cache() -> str:
     cache_root = Path.home() / ".claude" / "plugins" / "cache"
     if not cache_root.is_dir():
-        return "~/.claude/plugins/cache/Dev10x-Guru/dev10x-claude"
-    candidates = [
-        d / "dev10x-claude"
-        for d in cache_root.iterdir()
-        if d.is_dir() and (d / "dev10x-claude").is_dir()
-    ]
+        return "~/.claude/plugins/cache/Dev10x-Guru/Dev10x"
+    candidates: list[Path] = []
+    for org_dir in cache_root.iterdir():
+        if not org_dir.is_dir():
+            continue
+        for plugin_name in KNOWN_PLUGIN_DIRS:
+            plugin_dir = org_dir / plugin_name
+            if plugin_dir.is_dir():
+                candidates.append(plugin_dir)
+                break
     if len(candidates) == 1:
-        return f"~/.claude/plugins/cache/{candidates[0].parent.name}/dev10x-claude"
+        return f"~/.claude/plugins/cache/{candidates[0].parent.name}/{candidates[0].name}"
     if len(candidates) > 1:
-        names = ", ".join(c.parent.name for c in candidates)
-        print(f"Multiple plugin cache orgs found: {names}")
-        print(f"Using first match: {candidates[0].parent.name}")
-        return f"~/.claude/plugins/cache/{candidates[0].parent.name}/dev10x-claude"
-    return "~/.claude/plugins/cache/Dev10x-Guru/dev10x-claude"
+        names = ", ".join(f"{c.parent.name}/{c.name}" for c in candidates)
+        print(f"Multiple plugin cache entries found: {names}")
+        print(f"Using first match: {candidates[0].parent.name}/{candidates[0].name}")
+        return f"~/.claude/plugins/cache/{candidates[0].parent.name}/{candidates[0].name}"
+    return "~/.claude/plugins/cache/Dev10x-Guru/Dev10x"
 
 
 def _init_userspace_config() -> int:
