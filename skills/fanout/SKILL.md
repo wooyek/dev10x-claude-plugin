@@ -278,6 +278,15 @@ this is a compliance violation — do NOT proceed to the next
 item. The same rule applies to merge operations: each PR
 MUST use `Skill(Dev10x:gh-pr-merge)`, never raw `gh pr merge`.
 
+**Post-item comment check (GH-829):** After each item's PR is
+merged, call `mcp__plugin_Dev10x_cli__pr_comments(pr_number=N)`
+and verify zero unaddressed comments. If comments exist, invoke
+`Skill(skill="Dev10x:gh-pr-respond", args="{pr_url}")` before advancing
+to the next item. This catches unaddressed comments early —
+agents degrade after item 3+ and skip per-item acceptance
+criteria under auto-advance pressure. The Phase 5 enforcement
+loop is a safety net; this per-item check is the primary gate.
+
 Fanout agents degrade after the first 1–2 items, falling back
 to inline implementation and raw CLI commands for the rest of
 the batch. This check catches the drift before it cascades.
@@ -519,13 +528,23 @@ handed off for external review.
 After all items are processed and PRs merged:
 
 1. Call `TaskList` to show the full task list
-2. **REQUIRED: Check PR comments for every PR.** For each PR
-   processed in this session, call
-   `mcp__plugin_Dev10x_cli__pr_comments(pr_number=N)` and
-   verify zero unaddressed comments remain. CI-green is NOT
-   sufficient — unaddressed review comments (including bot
-   comments) must be resolved before declaring work complete
-   (GH-549 F-01).
+2. **REQUIRED: Enforce PR comment resolution for every PR
+   (GH-829).** For each PR processed in this session:
+   a. Call `mcp__plugin_Dev10x_cli__pr_comments(pr_number=N)`
+   b. If unaddressed comments exist, invoke
+      `Skill(skill="Dev10x:gh-pr-respond", args="{pr_url}")` to
+      address them — do NOT skip or defer
+   c. After responding, re-check with `pr_comments()` to
+      confirm zero unaddressed comments remain
+   d. Repeat b-c until all comments are resolved
+   e. **Do NOT proceed to step 3 while any PR has unaddressed
+      comments.** This is a hard gate, not advisory.
+   CI-green is NOT sufficient — unaddressed review comments
+   (including bot comments) must be resolved before declaring
+   work complete (GH-549 F-01). Under context pressure in
+   large batches (5+ PRs), agents skip acting on comment
+   check results — the loop in steps b-d prevents this by
+   making resolution mandatory before advancing.
 3. Verify all items are either merged, closed, or have
    research comments posted
 4. Show summary table:
