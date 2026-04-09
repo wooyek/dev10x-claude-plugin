@@ -161,6 +161,25 @@ these projects.
 
 **DO NOT SKIP this step in any mode (full agent or poll).**
 
+**REQUIRED: Create a caller-side tracking task (GH-854).**
+After launching the background agent, create a visible task
+in the calling session so the supervisor sees ongoing work:
+
+```
+TaskCreate(
+    subject="PR #{pr_number} monitor running (background)",
+    description="Background agent monitoring CI and review "
+                "cycle. Output at {output_file}",
+    activeForm="Monitoring PR #{pr_number}")
+TaskUpdate(taskId=..., status="in_progress")
+```
+
+Mark this task `completed` ONLY when the background agent's
+completion notification arrives. Do NOT mark it completed on
+dispatch — the task must remain `in_progress` while the agent
+runs. Without this task, the session appears idle and the
+supervisor may close it prematurely.
+
 Tell the user:
 - PR monitor is running in the background
 - Show the output file path from the Task result

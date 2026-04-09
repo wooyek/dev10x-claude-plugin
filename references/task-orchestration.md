@@ -311,6 +311,28 @@ Agent(description="Triage comment r104", prompt="...", run_in_background=true)
 
 Collect results as notifications arrive. Update tasks accordingly.
 
+### Background Agent Tracking (GH-854)
+
+When launching a background agent via `run_in_background=true`,
+the caller session MUST create a visible tracking task so the
+supervisor knows work is ongoing:
+
+```
+TaskCreate(
+    subject="PR #N monitor running (background)",
+    description="Background agent monitoring CI. "
+                "Output at {output_file}",
+    activeForm="Monitoring PR #N")
+TaskUpdate(taskId=..., status="in_progress")
+```
+
+Mark `completed` ONLY when the agent's completion notification
+arrives — NOT on dispatch. Without this task, the session
+appears idle and may be closed prematurely.
+
+This pattern applies to ALL skills that launch background
+agents, not just `gh-pr-monitor`.
+
 ### Subagent Dispatch Patterns: Wave-Based Orchestration
 
 When orchestrating multiple independent analysis phases, structure
