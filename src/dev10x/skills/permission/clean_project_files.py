@@ -300,8 +300,10 @@ def clean_file(
         return result, []
 
     if not dry_run:
-        data["permissions"]["allow"] = result.kept
-        path.write_text(json.dumps(data, indent=2) + "\n")
+        from dev10x.skills.permission.file_lock import locked_json_update
+
+        with locked_json_update(path=path) as live_data:
+            live_data["permissions"]["allow"] = result.kept
 
     messages = _format_messages(result)
     return result, messages
