@@ -2,16 +2,17 @@
 
 Extracted from cli_server.py — general-purpose utility tools
 (mktmp, etc.) that don't belong to GitHub or Git domains.
+All public functions are async to avoid blocking the MCP event loop.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from dev10x.mcp.subprocess_utils import run_script
+from dev10x.mcp.subprocess_utils import async_run_script
 
 
-def mktmp(
+async def mktmp(
     *,
     namespace: str,
     prefix: str,
@@ -25,7 +26,7 @@ def mktmp(
     if ext and not directory:
         mk_args.append(ext)
 
-    result = run_script("bin/mktmp.sh", *mk_args)
+    result = await async_run_script("bin/mktmp.sh", *mk_args)
 
     if result.returncode != 0:
         return {"error": result.stderr.strip()}
