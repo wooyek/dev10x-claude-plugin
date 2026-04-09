@@ -132,6 +132,54 @@ This blocks execution until the user responds. Options:
 If "Revise": incorporate feedback and re-present.
 If "More research": return to Phase 1.4 with user guidance.
 
+## Agent Delegation (Phases 3-4)
+
+**REQUIRED:** Delegate Phases 3 and 4 to a single background
+haiku agent. Raw tracker API responses consume ~26k tokens for
+a 6-issue project — the agent absorbs them and returns only a
+compact summary.
+
+**Dispatch after Phase 2 approval:**
+
+1. Compose the agent prompt with:
+   - Tracker type and configuration (team UUID, project UUID)
+   - The full approved scope (milestones, tickets, blocking chain)
+   - Creation instructions from Phase 3 below
+   - Verification instructions from Phase 4 below
+
+2. Dispatch:
+
+```
+Agent(
+    subagent_type="general-purpose",
+    model="haiku",
+    description="Create {tracker} structure for {project}",
+    prompt="<composed from approved scope + Phase 3-4 instructions>",
+    run_in_background=true
+)
+```
+
+3. When the agent completes, present its compact summary to the
+   user. The main session never sees raw API response bodies.
+
+**Agent return format (include verbatim in the prompt):**
+
+```
+Return ONLY a compact summary (max 200 words):
+- Parent ticket: ID + URL
+- Project entity: ID + URL (or "skipped")
+- Per milestone: name → ID
+- Per ticket: ID → URL → milestone
+- Blocking chain: confirmed/failed pairs
+- Failures: entity + reason + remediation
+Do NOT return full API response bodies or descriptions.
+```
+
+Phases 3 and 4 below describe what the agent executes — include
+the relevant instructions in the agent's prompt.
+
+---
+
 ## Phase 3: Create Structure
 
 ### 3.1 Tracker Dispatch

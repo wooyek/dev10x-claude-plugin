@@ -160,6 +160,55 @@ Select appropriate labels based on the context:
 
 ### Step 5: Create the Ticket
 
+**REQUIRED:** Delegate ticket creation to a background haiku agent.
+This prevents raw API responses (full issue JSON, project lookups)
+from consuming main session context. The agent returns only the
+ticket ID and URL.
+
+**Dispatch:**
+
+```
+Agent(
+    subagent_type="general-purpose",
+    model="haiku",
+    description="Create {tracker} ticket: {short_title}",
+    prompt="""
+    Create a ticket with the following details:
+
+    Tracker: {tracker_type}
+    Title: {title}
+    Description: {description}
+    Labels: {labels}
+    {tracker-specific config: team UUID, project UUID, repo}
+
+    {include the tracker-specific instructions below}
+
+    Return ONLY:
+    - Tracker: {GitHub Issues | Linear | JIRA}
+    - ID: {ticket ID}
+    - URL: {ticket URL}
+    Do NOT return full API response bodies.
+    """,
+    run_in_background=true
+)
+```
+
+The main session waits for the agent result and passes it to
+Step 6. The tracker-specific instructions below describe what
+the agent executes — include the relevant section in its prompt.
+
+**Nested invocation:** When invoked from a background agent
+(e.g., from `project-scope`'s Phase 3 agent), skip the
+delegation wrapper and execute creation directly. Detection:
+if the skill is running as a Skill() call within an Agent()
+prompt (vs. in main session), this SKILL.md is your read
+context — your caller (the agent prompt) already optimizes
+the session context, so you execute creation directly per
+tracker-specific instructions below without wrapping in
+Agent().
+
+**Tracker-specific creation instructions:**
+
 Dispatch to the detected tracker:
 
 **GitHub Issues:**
