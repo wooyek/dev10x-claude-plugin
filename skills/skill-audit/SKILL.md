@@ -202,6 +202,48 @@ else:
 Implement this logic using Bash (ls -t + head) rather than running Python inline.
 If resolution fails, ask the user to provide the JSONL path explicitly.
 
+**Do NOT silently fall back to alternate path encodings.** If the
+primary encoded CWD has no JSONL files, STOP and ask the user for
+the path. Do not try other encodings (e.g., parent directory,
+worktree main repo) — falling back silently can resolve to a
+completely different project's session (GH-805).
+
+### Step 1.1: Confirm auto-resolved session (ALWAYS_ASK)
+
+**Skip this gate when the user provided an explicit JSONL path.**
+An explicit path means the user deliberately chose the session.
+
+**When the path was auto-resolved** (no arg, or arg is a
+directory), extract the session ID from the filename (the UUID
+portion before `.jsonl`) and the file's modification time, then
+confirm with the user before proceeding.
+
+**REQUIRED: Call `AskUserQuestion`** (ALWAYS_ASK — fires at all
+friction levels, do NOT use plain text).
+
+Display the resolved path, session ID, and mtime in the question
+so the user can verify it's the correct session:
+
+```
+AskUserQuestion(questions=[{
+    question: "Is this the session you want to audit?\n\n"
+              "Session: <session-id>\n"
+              "Path: <resolved-path>\n"
+              "Last modified: <mtime>",
+    header: "Session",
+    options: [
+        {label: "Yes, audit this session (Recommended)",
+         description: "Proceed with the resolved session file"},
+        {label: "No, let me provide the path",
+         description: "I'll specify the correct JSONL path"}
+    ],
+    multiSelect: false
+}])
+```
+
+If the user selects "No", ask for the correct path and restart
+resolution from Step 1 with the provided path.
+
 ### Step 1.5: Self-session guard
 
 **Skip this guard when the user provided an explicit JSONL path
