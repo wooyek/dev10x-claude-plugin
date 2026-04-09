@@ -65,7 +65,9 @@ skill auto-advances vs pauses for confirmation.
 - Running as a nested invocation from `Dev10x:fanout` (fanout
   sets friction level once for the entire session)
 - Session config already exists at `.claude/Dev10x/session.yaml`
-  (loaded after compaction or from a prior invocation)
+  with a valid `friction_level` value (loaded after compaction
+  or from a prior invocation). When skipping, also skip the
+  write — the existing file is authoritative.
 
 **REQUIRED: Call `AskUserQuestion`** (ALWAYS_ASK — fires at all
 friction levels, including adaptive).
@@ -92,8 +94,23 @@ session.yaml so skills can read modes without loading the full
 playbook. If the project file declares `active_modes`, merge
 them into the session config.
 
-Write this file using the Write tool. The PreCompact hook
-reads it to inject friction context into recovery summaries.
+**Read-before-write (GH-846):** Before writing `session.yaml`,
+read the existing file (if present) and compare the desired
+`friction_level` and `active_modes` with what is already on
+disk. **Skip the write entirely** if both values already match.
+This avoids unnecessary permission prompts and prevents
+overwriting existing `active_modes` with empty defaults.
+
+Resolution order for `active_modes`:
+1. Existing `active_modes` in `session.yaml` (preserve)
+2. `active_modes` from project playbook file (merge new entries)
+3. Empty `[]` only if neither source provides modes
+
+Never overwrite a non-empty `active_modes` list with `[]`.
+
+Write this file using the Write tool only when the content
+actually needs to change. The PreCompact hook reads it to
+inject friction context into recovery summaries.
 
 **How skills consume the level:**
 - Gates marked `(Recommended)` auto-select at `adaptive`
