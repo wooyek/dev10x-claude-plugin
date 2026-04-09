@@ -596,7 +596,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
 Run the status report command and include its output in the final report:
 
 ```bash
-/home/janusz/.claude/plugins/cache/Dev10x-Guru/dev10x-claude/0.35.0/skills/gh-pr-monitor/scripts/pr-notify.py \
+${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/pr-notify.py \
   status --pr {pr_number} --repo {repo}
 ```
 
