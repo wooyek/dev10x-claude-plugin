@@ -2,6 +2,7 @@
 
 Extracted from cli_server.py — cohesive GitHub API and CLI operations.
 Each function takes explicit parameters and returns typed dicts.
+All public functions are async to avoid blocking the MCP event loop.
 """
 
 from __future__ import annotations
@@ -9,17 +10,21 @@ from __future__ import annotations
 import json
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from dev10x.mcp.subprocess_utils import parse_key_value_output, run_script
+from dev10x.mcp.subprocess_utils import (
+    async_run,
+    async_run_script,
+    parse_key_value_output,
+)
+
+if TYPE_CHECKING:
+    pass
 
 
-def _detect_repo() -> str | None:
-    result = subprocess.run(
-        ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"],
-        capture_output=True,
-        text=True,
-        check=False,
+async def _detect_repo() -> str | None:
+    result = await async_run(
+        args=["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"],
         timeout=10,
     )
     if result.returncode == 0:
@@ -27,7 +32,7 @@ def _detect_repo() -> str | None:
     return None
 
 
-def _gh_api(
+async def _gh_api(
     endpoint: str,
     *,
     method: str = "GET",
@@ -50,37 +55,39 @@ def _gh_api(
                 args.extend(["-f", f"{key}={value}"])
     args.append(endpoint)
 
-    return subprocess.run(
-        args,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=30,
-    )
+    return await async_run(args=args, timeout=30)
 
 
-def _resolve_repo(repo: str | None) -> tuple[str | None, dict[str, str] | None]:
-    resolved = repo or _detect_repo()
+async def _resolve_repo(
+    repo: str | None,
+) -> tuple[str | None, dict[str, str] | None]:
+    resolved = repo or await _detect_repo()
     if not resolved:
         return None, {"error": "Could not detect repository. Provide repo parameter."}
     return resolved, None
 
 
-def detect_tracker(*, ticket_id: str) -> dict[str, Any]:
-    result = run_script("skills/gh-context/scripts/detect-tracker.sh", ticket_id)
+async def detect_tracker(*, ticket_id: str) -> dict[str, Any]:
+    result = await async_run_script(
+        "skills/gh-context/scripts/detect-tracker.sh",
+        ticket_id,
+    )
     if result.returncode != 0:
         return {"error": result.stderr.strip()}
     return parse_key_value_output(result.stdout)
 
 
-def pr_detect(*, arg: str) -> dict[str, Any]:
-    result = run_script("skills/gh-context/scripts/gh-pr-detect.sh", arg)
+async def pr_detect(*, arg: str) -> dict[str, Any]:
+    result = await async_run_script(
+        "skills/gh-context/scripts/gh-pr-detect.sh",
+        arg,
+    )
     if result.returncode != 0:
         return {"error": result.stderr.strip()}
     return parse_key_value_output(result.stdout)
 
 
-def issue_get(
+async def issue_get(
     *,
     number: int,
     repo: str | None = None,
@@ -88,7 +95,10 @@ def issue_get(
     args = [str(number)]
     if repo:
         args.append(repo)
-    result = run_script("skills/gh-context/scripts/gh-issue-get.sh", *args)
+    result = await async_run_script(
+        "skills/gh-context/scripts/gh-issue-get.sh",
+        *args,
+    )
     if result.returncode != 0:
         return {"error": result.stderr.strip()}
     try:
@@ -97,7 +107,7 @@ def issue_get(
         return parse_key_value_output(result.stdout)
 
 
-def issue_comments(
+async def issue_comments(
     *,
     number: int,
     repo: str | None = None,
@@ -105,7 +115,10 @@ def issue_comments(
     args = [str(number)]
     if repo:
         args.append(repo)
-    result = run_script("skills/gh-context/scripts/gh-issue-comments.sh", *args)
+    result = await async_run_script(
+        "skills/gh-context/scripts/gh-issue-comments.sh",
+        *args,
+    )
     if result.returncode != 0:
         return {"error": result.stderr.strip()}
     try:
@@ -114,7 +127,7 @@ def issue_comments(
         return {"raw_output": result.stdout}
 
 
-def issue_create(
+async def issue_create(
     *,
     title: str,
     body: str | None = None,
@@ -129,7 +142,10 @@ def issue_create(
             args.extend(["--label", label])
     if repo:
         args.extend(["--repo", repo])
-    result = run_script("skills/gh-context/scripts/gh-issue-create.sh", *args)
+    result = await async_run_script(
+        "skills/gh-context/scripts/gh-issue-create.sh",
+        *args,
+    )
     if result.returncode != 0:
         return {"error": result.stderr.strip()}
     try:
@@ -138,7 +154,7 @@ def issue_create(
         return parse_key_value_output(result.stdout)
 
 
-def pr_comments(
+async def pr_comments(
     *,
     action: str,
     pr_number: int | None = None,
@@ -147,26 +163,26 @@ def pr_comments(
     body: str | None = None,
     repo: str | None = None,
 ) -> dict[str, Any]:
-    resolved_repo, err = _resolve_repo(repo)
+    resolved_repo, err = await _resolve_repo(repo)
     if err:
         return err
 
     if action == "get":
         if comment_id is None:
             return {"error": "comment_id required for 'get' action"}
-        result = _gh_api(f"repos/{resolved_repo}/pulls/comments/{comment_id}")
+        result = await _gh_api(f"repos/{resolved_repo}/pulls/comments/{comment_id}")
 
     elif action == "list":
         if pr_number is None:
             return {"error": "pr_number required for 'list' action"}
-        result = _gh_api(
+        result = await _gh_api(
             f"repos/{resolved_repo}/pulls/{pr_number}/comments?per_page=100",
         )
 
     elif action == "reply":
         if pr_number is None or comment_id is None or body is None:
             return {"error": "pr_number, comment_id, and body required for 'reply'"}
-        result = _gh_api(
+        result = await _gh_api(
             f"repos/{resolved_repo}/pulls/{pr_number}/comments",
             method="POST",
             fields={"body": body, "in_reply_to": comment_id},
@@ -187,7 +203,7 @@ def pr_comments(
             f"{{ pullRequestReviewThread {{ id }} }} }}"
             for i, cid in enumerate(ids_to_resolve)
         )
-        query_result = _gh_api(
+        query_result = await _gh_api(
             "graphql",
             fields={"query": f"{{ {node_fragments} }}"},
         )
@@ -217,7 +233,7 @@ def pr_comments(
             f"{{ thread {{ id isResolved }} }}"
             for i, tid in enumerate(thread_ids)
         )
-        result = _gh_api(
+        result = await _gh_api(
             "graphql",
             fields={"query": f"mutation {{ {resolve_fragments} }}"},
         )
@@ -242,18 +258,18 @@ def pr_comments(
         return {"raw_output": result.stdout}
 
 
-def pr_comment_reply(
+async def pr_comment_reply(
     *,
     pr_number: int,
     comment_id: int,
     body: str,
     repo: str | None = None,
 ) -> dict[str, Any]:
-    resolved_repo, err = _resolve_repo(repo)
+    resolved_repo, err = await _resolve_repo(repo)
     if err:
         return err
 
-    result = _gh_api(
+    result = await _gh_api(
         f"repos/{resolved_repo}/pulls/{pr_number}/comments",
         method="POST",
         fields={"body": body, "in_reply_to": comment_id},
@@ -268,14 +284,14 @@ def pr_comment_reply(
         return {"raw_output": result.stdout}
 
 
-def request_review(
+async def request_review(
     *,
     pr_number: int,
     reviewers: list[str],
     team: bool | None = None,
     repo: str | None = None,
 ) -> dict[str, Any]:
-    resolved_repo, err = _resolve_repo(repo)
+    resolved_repo, err = await _resolve_repo(repo)
     if err:
         return err
 
@@ -285,7 +301,7 @@ def request_review(
     else:
         fields["reviewers"] = reviewers
 
-    result = _gh_api(
+    result = await _gh_api(
         f"repos/{resolved_repo}/pulls/{pr_number}/requested_reviewers",
         method="POST",
         fields=fields,
@@ -300,7 +316,7 @@ def request_review(
         return {"raw_output": result.stdout}
 
 
-def detect_base_branch(
+async def detect_base_branch(
     *,
     base: str | None = None,
     force: bool = False,
@@ -311,7 +327,7 @@ def detect_base_branch(
     if force:
         args.append("--force")
 
-    result = run_script(
+    result = await async_run_script(
         "skills/gh-pr-create/scripts/detect-base-branch.sh",
         *args,
     )
@@ -326,12 +342,12 @@ def detect_base_branch(
     }
 
 
-def verify_pr_state(*, force: bool = False) -> dict[str, Any]:
+async def verify_pr_state(*, force: bool = False) -> dict[str, Any]:
     args: list[str] = []
     if force:
         args.append("--force")
 
-    result = run_script(
+    result = await async_run_script(
         "skills/gh-pr-create/scripts/verify-state.sh",
         *args,
     )
@@ -342,12 +358,12 @@ def verify_pr_state(*, force: bool = False) -> dict[str, Any]:
     return parse_key_value_output(result.stdout)
 
 
-def pre_pr_checks(*, base_branch: str | None = None) -> dict[str, Any]:
+async def pre_pr_checks(*, base_branch: str | None = None) -> dict[str, Any]:
     args: list[str] = []
     if base_branch:
         args.append(base_branch)
 
-    result = run_script(
+    result = await async_run_script(
         "skills/gh-pr-create/scripts/pre-pr-checks.sh",
         *args,
     )
@@ -359,7 +375,7 @@ def pre_pr_checks(*, base_branch: str | None = None) -> dict[str, Any]:
     }
 
 
-def create_pr(
+async def create_pr(
     *,
     title: str,
     job_story: str,
@@ -371,7 +387,7 @@ def create_pr(
     args.append(fixes_url or "")
     args.append(base_branch or "")
 
-    result = run_script(
+    result = await async_run_script(
         "skills/gh-pr-create/scripts/create-pr.sh",
         *args,
     )
@@ -385,7 +401,7 @@ def create_pr(
     return {"pr_number": int(pr_number), "url": url}
 
 
-def generate_commit_list(
+async def generate_commit_list(
     *,
     pr_number: int,
     base_branch: str | None = None,
@@ -394,7 +410,7 @@ def generate_commit_list(
     if base_branch:
         args.append(base_branch)
 
-    result = run_script(
+    result = await async_run_script(
         "skills/gh-pr-create/scripts/generate-commit-list.sh",
         *args,
     )
@@ -405,12 +421,12 @@ def generate_commit_list(
     return {"commit_list": result.stdout.strip()}
 
 
-def post_summary_comment(
+async def post_summary_comment(
     *,
     issue_id: str,
     summary_text: str,
 ) -> dict[str, Any]:
-    result = run_script(
+    result = await async_run_script(
         "skills/gh-pr-create/scripts/post-summary-comment.sh",
         issue_id,
         summary_text,
@@ -422,7 +438,7 @@ def post_summary_comment(
     return {"success": True, "output": result.stdout.strip()}
 
 
-def pr_notify(
+async def pr_notify(
     *,
     pr_number: int,
     repo: str,
@@ -469,13 +485,7 @@ def pr_notify(
         if skip_checklist:
             args.append("--skip-checklist")
 
-    proc = subprocess.run(
-        args,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=60,
-    )
+    proc = await async_run(args=args, timeout=60)
 
     if proc.returncode != 0:
         return {"error": proc.stderr.strip()}

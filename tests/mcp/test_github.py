@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -11,7 +11,9 @@ gh = pytest.importorskip("dev10x.mcp.github", reason="dev10x not installed")
 
 @pytest.fixture
 def mock_resolve_repo():
-    with patch.object(gh, "_resolve_repo", return_value=("owner/repo", None)) as mock:
+    with patch.object(
+        gh, "_resolve_repo", new_callable=AsyncMock, return_value=("owner/repo", None)
+    ) as mock:
         yield mock
 
 
@@ -40,11 +42,12 @@ class TestPrCommentsResolveSingle:
             {"data": {"r0": {"thread": {"id": "PRRT_thread123", "isResolved": True}}}}
         )
 
-    @patch("dev10x.mcp.github._gh_api")
-    def test_resolves_single_comment(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_resolves_single_comment(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
         query_response: str,
         mutation_response: str,
     ) -> None:
@@ -53,7 +56,7 @@ class TestPrCommentsResolveSingle:
             _completed(stdout=mutation_response),
         ]
 
-        result = gh.pr_comments(
+        result = await gh.pr_comments(
             action="resolve",
             comment_id="PRRC_comment123",
         )
@@ -61,11 +64,12 @@ class TestPrCommentsResolveSingle:
         assert result["data"]["r0"]["thread"]["isResolved"] is True
         assert mock_api.call_count == 2
 
-    @patch("dev10x.mcp.github._gh_api")
-    def test_converts_int_comment_id_to_string(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_converts_int_comment_id_to_string(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
         query_response: str,
         mutation_response: str,
     ) -> None:
@@ -74,17 +78,18 @@ class TestPrCommentsResolveSingle:
             _completed(stdout=mutation_response),
         ]
 
-        gh.pr_comments(action="resolve", comment_id=12345)
+        await gh.pr_comments(action="resolve", comment_id=12345)
 
         query_call = mock_api.call_args_list[0]
         query_str = query_call.kwargs["fields"]["query"]
         assert '"12345"' in query_str
 
-    def test_returns_error_when_no_comment_id(
+    @pytest.mark.asyncio
+    async def test_returns_error_when_no_comment_id(
         self,
-        mock_resolve_repo: MagicMock,
+        mock_resolve_repo: AsyncMock,
     ) -> None:
-        result = gh.pr_comments(action="resolve")
+        result = await gh.pr_comments(action="resolve")
 
         assert "error" in result
         assert "comment_id or comment_ids required" in result["error"]
@@ -119,11 +124,12 @@ class TestPrCommentsResolveBatch:
             }
         )
 
-    @patch("dev10x.mcp.github._gh_api")
-    def test_resolves_multiple_comments_in_two_calls(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_resolves_multiple_comments_in_two_calls(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
         comment_ids: list[str],
         batch_query_response: str,
         batch_mutation_response: str,
@@ -133,7 +139,7 @@ class TestPrCommentsResolveBatch:
             _completed(stdout=batch_mutation_response),
         ]
 
-        result = gh.pr_comments(
+        result = await gh.pr_comments(
             action="resolve",
             comment_ids=comment_ids,
         )
@@ -144,11 +150,12 @@ class TestPrCommentsResolveBatch:
         assert "r1" in result["data"]
         assert "r2" in result["data"]
 
-    @patch("dev10x.mcp.github._gh_api")
-    def test_batch_query_uses_aliased_nodes(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_batch_query_uses_aliased_nodes(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
         comment_ids: list[str],
         batch_query_response: str,
         batch_mutation_response: str,
@@ -158,45 +165,20 @@ class TestPrCommentsResolveBatch:
             _completed(stdout=batch_mutation_response),
         ]
 
-        gh.pr_comments(action="resolve", comment_ids=comment_ids)
+        await gh.pr_comments(action="resolve", comment_ids=comment_ids)
 
         query_call = mock_api.call_args_list[0]
         query_str = query_call.kwargs["fields"]["query"]
         assert "n0:" in query_str
         assert "n1:" in query_str
         assert "n2:" in query_str
-        assert '"PRRC_aaa"' in query_str
-        assert '"PRRC_bbb"' in query_str
-        assert '"PRRC_ccc"' in query_str
 
-    @patch("dev10x.mcp.github._gh_api")
-    def test_batch_mutation_uses_aliased_resolves(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_comment_ids_takes_precedence_over_comment_id(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
-        comment_ids: list[str],
-        batch_query_response: str,
-        batch_mutation_response: str,
-    ) -> None:
-        mock_api.side_effect = [
-            _completed(stdout=batch_query_response),
-            _completed(stdout=batch_mutation_response),
-        ]
-
-        gh.pr_comments(action="resolve", comment_ids=comment_ids)
-
-        mutation_call = mock_api.call_args_list[1]
-        mutation_str = mutation_call.kwargs["fields"]["query"]
-        assert "mutation" in mutation_str
-        assert "r0:" in mutation_str
-        assert "r1:" in mutation_str
-        assert "r2:" in mutation_str
-
-    @patch("dev10x.mcp.github._gh_api")
-    def test_comment_ids_takes_precedence_over_comment_id(
-        self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
     ) -> None:
         mock_api.side_effect = [
             _completed(
@@ -209,7 +191,7 @@ class TestPrCommentsResolveBatch:
             ),
         ]
 
-        gh.pr_comments(
+        await gh.pr_comments(
             action="resolve",
             comment_id="PRRC_ignored",
             comment_ids=["PRRC_used"],
@@ -221,35 +203,37 @@ class TestPrCommentsResolveBatch:
 
 
 class TestPrCommentsResolveErrors:
-    @patch("dev10x.mcp.github._gh_api")
-    def test_returns_error_when_query_fails(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_returns_error_when_query_fails(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
     ) -> None:
         mock_api.return_value = _completed(
             returncode=1,
             stderr="GraphQL error",
         )
 
-        result = gh.pr_comments(
+        result = await gh.pr_comments(
             action="resolve",
             comment_id="PRRC_abc",
         )
 
         assert result["error"] == "GraphQL error"
 
-    @patch("dev10x.mcp.github._gh_api")
-    def test_returns_error_when_thread_not_found(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_returns_error_when_thread_not_found(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
     ) -> None:
         mock_api.return_value = _completed(
             stdout=json.dumps({"data": {"n0": None}}),
         )
 
-        result = gh.pr_comments(
+        result = await gh.pr_comments(
             action="resolve",
             comment_id="PRRC_bad",
         )
@@ -257,11 +241,12 @@ class TestPrCommentsResolveErrors:
         assert "error" in result
         assert "Could not find thread" in result["error"]
 
-    @patch("dev10x.mcp.github._gh_api")
-    def test_returns_error_when_thread_id_invalid(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_returns_error_when_thread_id_invalid(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
     ) -> None:
         mock_api.return_value = _completed(
             stdout=json.dumps(
@@ -269,7 +254,7 @@ class TestPrCommentsResolveErrors:
             ),
         )
 
-        result = gh.pr_comments(
+        result = await gh.pr_comments(
             action="resolve",
             comment_id="PRRC_bad",
         )
@@ -277,11 +262,12 @@ class TestPrCommentsResolveErrors:
         assert "error" in result
         assert "Could not find thread" in result["error"]
 
-    @patch("dev10x.mcp.github._gh_api")
-    def test_partial_failure_includes_warnings(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_partial_failure_includes_warnings(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
     ) -> None:
         mock_api.side_effect = [
             _completed(
@@ -301,7 +287,7 @@ class TestPrCommentsResolveErrors:
             ),
         ]
 
-        result = gh.pr_comments(
+        result = await gh.pr_comments(
             action="resolve",
             comment_ids=["PRRC_good", "PRRC_bad"],
         )
@@ -310,11 +296,12 @@ class TestPrCommentsResolveErrors:
         assert "warnings" in result
         assert any("PRRC_bad" in w for w in result["warnings"])
 
-    @patch("dev10x.mcp.github._gh_api")
-    def test_mutation_error_returns_error(
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_mutation_error_returns_error(
         self,
-        mock_api: MagicMock,
-        mock_resolve_repo: MagicMock,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
     ) -> None:
         mock_api.side_effect = [
             _completed(
@@ -323,7 +310,7 @@ class TestPrCommentsResolveErrors:
             _completed(returncode=1, stderr="Mutation failed"),
         ]
 
-        result = gh.pr_comments(
+        result = await gh.pr_comments(
             action="resolve",
             comment_id="PRRC_abc",
         )

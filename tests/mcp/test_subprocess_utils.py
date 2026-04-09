@@ -148,3 +148,57 @@ class TestParseJsonOutput:
     def test_raises_on_invalid_json(self) -> None:
         with pytest.raises(json.JSONDecodeError):
             parse_json_output("not json")
+
+
+class TestAsyncRun:
+    @pytest.fixture
+    def sut(self):
+        from dev10x.mcp.subprocess_utils import async_run
+
+        return async_run
+
+    @pytest.mark.asyncio
+    async def test_runs_command_and_captures_output(self, sut) -> None:
+        result = await sut(args=["echo", "hello"])
+
+        assert result.returncode == 0
+        assert result.stdout.strip() == "hello"
+
+    @pytest.mark.asyncio
+    async def test_captures_stderr(self, sut) -> None:
+        result = await sut(args=["sh", "-c", "echo err >&2"])
+
+        assert result.stderr.strip() == "err"
+
+    @pytest.mark.asyncio
+    async def test_returns_nonzero_on_failure(self, sut) -> None:
+        result = await sut(args=["false"])
+
+        assert result.returncode != 0
+
+    @pytest.mark.asyncio
+    async def test_timeout_returns_negative_returncode(self, sut) -> None:
+        result = await sut(args=["sleep", "10"], timeout=0.1)
+
+        assert result.returncode == -1
+        assert "timed out" in result.stderr.lower()
+
+
+class TestAsyncRunScript:
+    @pytest.fixture
+    def sut(self):
+        from dev10x.mcp.subprocess_utils import async_run_script
+
+        return async_run_script
+
+    @pytest.mark.asyncio
+    async def test_raises_file_not_found_for_missing_script(self, sut) -> None:
+        with pytest.raises(FileNotFoundError, match="Script not found"):
+            await sut("nonexistent/script.sh")
+
+    @pytest.mark.asyncio
+    async def test_runs_existing_script(self, sut) -> None:
+        result = await sut("bin/mktmp.sh", "test-ns", "test-prefix", ".txt")
+
+        assert result.returncode == 0
+        assert result.stdout.strip().startswith("/tmp/")

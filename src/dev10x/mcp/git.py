@@ -2,7 +2,8 @@
 
 Extracted from cli_server.py — cohesive Git operations (push, rebase,
 worktree, aliases). Each function delegates to shell scripts via
-subprocess_utils.run_script().
+subprocess_utils.async_run_script().
+All public functions are async to avoid blocking the MCP event loop.
 """
 
 from __future__ import annotations
@@ -10,10 +11,10 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from dev10x.mcp.subprocess_utils import parse_key_value_output, run_script
+from dev10x.mcp.subprocess_utils import async_run_script, parse_key_value_output
 
 
-def push_safe(
+async def push_safe(
     *,
     args: list[str],
     protected_branches: list[str] | None = None,
@@ -23,7 +24,7 @@ def push_safe(
         for pb in protected_branches:
             cmd_args.extend(["--protected", pb])
 
-    result = run_script("skills/git/scripts/git-push-safe.sh", *cmd_args)
+    result = await async_run_script("skills/git/scripts/git-push-safe.sh", *cmd_args)
 
     if result.returncode != 0:
         return {"success": False, "error": result.stderr.strip()}
@@ -34,8 +35,12 @@ def push_safe(
         return parse_key_value_output(result.stdout)
 
 
-def rebase_groom(*, seq_path: str, base_ref: str) -> dict[str, Any]:
-    result = run_script("skills/git/scripts/git-rebase-groom.sh", seq_path, base_ref)
+async def rebase_groom(*, seq_path: str, base_ref: str) -> dict[str, Any]:
+    result = await async_run_script(
+        "skills/git/scripts/git-rebase-groom.sh",
+        seq_path,
+        base_ref,
+    )
 
     if result.returncode != 0:
         stdout = result.stdout.strip()
@@ -58,7 +63,7 @@ def rebase_groom(*, seq_path: str, base_ref: str) -> dict[str, Any]:
         return parse_key_value_output(result.stdout)
 
 
-def create_worktree(
+async def create_worktree(
     *,
     branch: str,
     base: str | None = None,
@@ -71,7 +76,10 @@ def create_worktree(
     if path is not None:
         wt_args.extend(["--path", path])
 
-    result = run_script("skills/git-worktree/scripts/create-worktree.sh", *wt_args)
+    result = await async_run_script(
+        "skills/git-worktree/scripts/create-worktree.sh",
+        *wt_args,
+    )
 
     if result.returncode != 0:
         return {"created": False, "error": result.stderr.strip()}
@@ -82,8 +90,8 @@ def create_worktree(
         return parse_key_value_output(result.stdout)
 
 
-def mass_rewrite(*, config_path: str) -> dict[str, Any]:
-    result = run_script(
+async def mass_rewrite(*, config_path: str) -> dict[str, Any]:
+    result = await async_run_script(
         "skills/git-groom/scripts/mass-rewrite.py",
         config_path,
     )
@@ -111,12 +119,12 @@ def mass_rewrite(*, config_path: str) -> dict[str, Any]:
     return {"success": True, "output": result.stdout.strip()}
 
 
-def start_split_rebase(
+async def start_split_rebase(
     *,
     commit_hash: str,
     base_branch: str = "develop",
 ) -> dict[str, Any]:
-    result = run_script(
+    result = await async_run_script(
         "skills/git-commit-split/scripts/start-split-rebase.sh",
         commit_hash,
         base_branch,
@@ -132,10 +140,10 @@ def start_split_rebase(
     return {"success": True, "output": result.stdout.strip()}
 
 
-def next_worktree_name(*, base_dir: str | None = None) -> dict[str, Any]:
+async def next_worktree_name(*, base_dir: str | None = None) -> dict[str, Any]:
     wt_args = [base_dir] if base_dir else []
 
-    result = run_script(
+    result = await async_run_script(
         "skills/git-worktree/scripts/next-worktree-name.sh",
         *wt_args,
     )
@@ -146,8 +154,8 @@ def next_worktree_name(*, base_dir: str | None = None) -> dict[str, Any]:
     return {"path": result.stdout.strip()}
 
 
-def setup_aliases() -> dict[str, Any]:
-    result = run_script(
+async def setup_aliases() -> dict[str, Any]:
+    result = await async_run_script(
         "skills/git-alias-setup/scripts/git-alias-setup.sh",
     )
 
