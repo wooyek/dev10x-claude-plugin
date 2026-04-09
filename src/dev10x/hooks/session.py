@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -46,6 +47,18 @@ def _read_json(path: Path) -> dict[str, Any]:
         return {}
 
 
+def _claim_state_file(path: Path) -> dict[str, Any]:
+    claimed = path.with_suffix(f".{os.getpid()}.claimed")
+    try:
+        os.rename(path, claimed)
+    except FileNotFoundError:
+        return {}
+    try:
+        return _read_json(path=claimed)
+    finally:
+        claimed.unlink(missing_ok=True)
+
+
 def _read_plan_summary(*, toplevel: str) -> dict[str, Any]:
     from dev10x.hooks.task_plan_sync import get_plan_path, read_plan
 
@@ -73,20 +86,17 @@ def session_reload() -> None:
     state_file = state_dir / f"{project_hash}.json"
     plan_file = Path(toplevel) / ".claude" / "session" / "plan.yaml"
 
-    has_state = state_file.exists()
+    state = _claim_state_file(path=state_file)
     has_plan = plan_file.exists()
 
-    if not has_state and not has_plan:
+    if not state and not has_plan:
         sys.exit(0)
 
     context = ""
 
-    if has_state:
-        state = _read_json(path=state_file)
+    if state:
         timestamp = state.get("timestamp", "")
-        if not timestamp:
-            state_file.unlink(missing_ok=True)
-        else:
+        if timestamp:
             try:
                 file_dt = datetime.fromisoformat(timestamp)
                 now_dt = datetime.now(UTC)
@@ -171,9 +181,6 @@ def session_reload() -> None:
         f'"additionalContext":"{escaped}"}}}}'
     )
     print(output)
-
-    if has_state:
-        state_file.unlink(missing_ok=True)
 
 
 def context_compact() -> None:
