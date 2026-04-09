@@ -182,7 +182,7 @@ def pr_comments(
             return {"error": "comment_id or comment_ids required for 'resolve' action"}
 
         node_fragments = " ".join(
-            f'n{i}: node(id: "{cid}") '
+            f"n{i}: node(id: {json.dumps(cid)}) "
             f"{{ ... on PullRequestReviewComment "
             f"{{ pullRequestReviewThread {{ id }} }} }}"
             for i, cid in enumerate(ids_to_resolve)
@@ -213,7 +213,7 @@ def pr_comments(
             return {"error": "; ".join(errors)}
 
         resolve_fragments = " ".join(
-            f'r{i}: resolveReviewThread(input: {{threadId: "{tid}"}}) '
+            f"r{i}: resolveReviewThread(input: {{threadId: {json.dumps(tid)}}}) "
             f"{{ thread {{ id isResolved }} }}"
             for i, tid in enumerate(thread_ids)
         )
