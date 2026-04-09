@@ -216,13 +216,6 @@ dependencies, manual clone, develop branch, and verification.
 [Why Dev10x →](docs/why-dev10x.md) — who it's for, what problems
 it solves, and how it compares to alternatives.
 
-## Codex Skills
-
-A Codex-native pack is available in `codex-skills/` for use outside
-Claude Code.
-
-[Codex skills guide →](docs/codex.md)
-
 ## Community
 
 The [Dev10x community on Skool](https://www.skool.com/Dev10x-1892)

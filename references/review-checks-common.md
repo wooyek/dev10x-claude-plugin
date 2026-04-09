@@ -142,7 +142,7 @@ instructions, code examples):
 - **Commands**: Verify they appear in `CLAUDE.md` Development section or
   are known Claude Code CLI built-ins
 - **Files and directories**: Use Glob to verify they exist in the current
-  commit (e.g., `codex-skills/`, `scripts/install-skill.py`)
+  commit (e.g., `scripts/install-skill.py`)
 - **Planned features**: If documenting future features not yet implemented,
   clearly mark as `[PLANNED]` or `[NOT YET IMPLEMENTED]` to prevent
   user confusion when they attempt to use non-existent functionality

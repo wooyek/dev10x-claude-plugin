@@ -49,7 +49,7 @@ Files matching: `docs/**/*.md`, `.claude/**/*.md`, `CLAUDE.md`,
    CLAUDE.md Development section or are known Claude Code built-ins
 6. **Code example verification** — For any code block referencing files,
    directories, or commands: Use Glob to verify directories exist
-   (e.g., `codex-skills/`, `scripts/`); verify scripts are executable
+   (e.g., `scripts/`); verify scripts are executable
    and present; if documenting future features, clearly mark as
    `[PLANNED]` or `[NOT YET IMPLEMENTED]` to prevent user confusion
 7. **PR hygiene** — do NOT flag `Fixes:` links, PR title format, or
