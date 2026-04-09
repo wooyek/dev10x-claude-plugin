@@ -18,7 +18,7 @@ Token resolution order:
     2. SLACK_TOKEN environment variable
 
 Configuration:
-    ~/.claude/memory/slack-config.yaml — user groups, self_user_id, bot_username
+    ~/.claude/memory/Dev10x/slack-config.yaml — user groups, self_user_id, bot_username
 """
 
 from __future__ import annotations

@@ -7,9 +7,7 @@ from pathlib import Path
 import pytest
 
 _repo_root = Path(__file__).resolve().parent.parent.parent.parent
-SCRIPT_PATH = (
-    _repo_root / "skills" / "permission-maintenance" / "scripts" / "clean-project-files.py"
-)
+SCRIPT_PATH = _repo_root / "skills" / "upgrade-cleanup" / "scripts" / "clean-project-files.py"
 spec = importlib.util.spec_from_file_location("clean_project_files", SCRIPT_PATH)
 clean_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(clean_mod)

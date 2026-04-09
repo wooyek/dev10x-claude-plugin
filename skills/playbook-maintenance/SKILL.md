@@ -56,7 +56,6 @@ Scan for all playbook-powered skills and their user overrides.
    `references/config-resolution.md`):
    - `.claude/Dev10x/playbooks/*.yaml` (project-local)
    - `~/.claude/memory/Dev10x/playbooks/*.yaml` (global)
-   - `~/.claude/projects/<project>/memory/playbooks/*.yaml` (legacy)
 3. Match override files to default playbooks by filename
    (e.g., `work-on.yaml` matches `skills/work-on/references/playbook.yaml`)
 4. Report skills with overrides vs. skills without

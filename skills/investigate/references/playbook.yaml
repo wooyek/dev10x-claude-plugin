@@ -3,7 +3,6 @@
 # User overrides (see references/config-resolution.md):
 #   1. .claude/Dev10x/playbooks/investigate.yaml (project-local)
 #   2. ~/.claude/memory/Dev10x/playbooks/investigate.yaml (global + repo match)
-#   3. ~/.claude/projects/<project>/memory/playbooks/investigate.yaml (legacy)
 # Managed by Dev10x:playbook skill.
 #
 # Play names match mode detection in SKILL.md:

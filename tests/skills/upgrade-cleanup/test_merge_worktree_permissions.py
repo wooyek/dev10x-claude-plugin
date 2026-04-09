@@ -7,7 +7,7 @@ import pytest
 
 _repo_root = Path(__file__).resolve().parent.parent.parent.parent
 SCRIPT_PATH = (
-    _repo_root / "skills" / "permission-maintenance" / "scripts" / "merge-worktree-permissions.py"
+    _repo_root / "skills" / "upgrade-cleanup" / "scripts" / "merge-worktree-permissions.py"
 )
 spec = importlib.util.spec_from_file_location("merge_worktree_permissions", SCRIPT_PATH)
 merge_mod = importlib.util.module_from_spec(spec)

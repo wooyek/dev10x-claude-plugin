@@ -31,7 +31,7 @@ with appropriate team and user mentions.
 
 ## Config
 
-Configuration lives in `~/.claude/memory/slack-config-code-review-requests.yaml`:
+Configuration lives in `~/.claude/memory/Dev10x/slack-config-code-review-requests.yaml`:
 
 ```yaml
 default_action: ask  # "skip" or "ask" for unconfigured projects
@@ -47,7 +47,7 @@ projects:
     skip: true              # no Slack notification
 ```
 
-Mentions are resolved against `~/.claude/memory/slack-config.yaml`
+Mentions are resolved against `~/.claude/memory/Dev10x/slack-config.yaml`
 `user_groups` and `users` mappings.
 
 ### Per-Project Actions

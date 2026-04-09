@@ -57,7 +57,6 @@ Check what's already set up (skip configured items in tour):
 |-------|---------|---------------|
 | Git aliases | `git config alias.develop-log` | Non-empty output |
 | SKILLS.md | `test -f ~/.claude/SKILLS.md` | File exists |
-| Memory files | `ls ~/.claude/projects/*/memory/*.md 2>/dev/null` | Files found |
 | Global Dev10x config | `ls ~/.claude/memory/Dev10x/ 2>/dev/null` | Directory exists |
 | Playbook overrides | `ls ~/.claude/memory/Dev10x/playbooks/*.yaml .claude/Dev10x/playbooks/*.yaml 2>/dev/null` | Files found |
 | Worktree context | `test -f .git` | `.git` is file = worktree |

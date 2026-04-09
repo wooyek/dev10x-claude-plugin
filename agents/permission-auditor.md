@@ -132,7 +132,7 @@ dangerous-looking operations (e.g., `Dev10x:git` needs force-push,
 | `git clean` | **ask** | Rarely legitimate, but not never |
 | `git push --force` (bare) | **ask** | `Dev10x:git` handles with branch checks |
 | `git push --force-with-lease` | **skip** | Legitimately used by skills |
-| Settings file writes | **skip** | `update-config`/`permission-maintenance` need this |
+| Settings file writes | **skip** | `update-config`/`upgrade-cleanup` need this |
 | Hook/plugin file writes | **skip** | `update-config` needs this |
 | `rm -rf` on non-temp paths | **deny** | No legitimate skill usage |
 | Direct database writes | **deny** if not hook-protected | Check if `sql_safety.py` covers it |
@@ -220,7 +220,7 @@ Present findings in a structured report:
 3. **Plugin hooks run alongside user hooks** — check for double execution and version drift
 4. **Variable assignment prefixes are wildcards** — `Bash(VAR=:*)` matches anything starting with `VAR=`, including `VAR=x; destructive_command`
 5. **`for` loop prefixes are wildcards** — `Bash(for x in:*)` pre-approves the entire loop body
-6. **Settings file write access requires nuance** — `Write(~/.claude/**)` without a deny on `settings*` is a concern, but skills like `update-config` and `permission-maintenance` legitimately need settings access. Recommend **ask** rules (not deny) for settings files when these skills are installed. Only recommend deny if no installed skill requires the access.
+6. **Settings file write access requires nuance** — `Write(~/.claude/**)` without a deny on `settings*` is a concern, but skills like `update-config` and `upgrade-cleanup` legitimately need settings access. Recommend **ask** rules (not deny) for settings files when these skills are installed. Only recommend deny if no installed skill requires the access.
 7. **Deny rules are absolute and non-overridable** — unlike ask rules (which prompt the user) or hooks (which can apply context-aware logic), deny rules cannot be bypassed by skills, hooks, or explicit user intent within a session. Always prefer ask rules over deny rules unless the operation should truly never succeed. Warn the user when proposing any deny rule.
 8. **Never propose allow rules for structurally broken patterns** — if a command is PREFIX_POISONED, the fix is the skill/hook pattern, not a wider rule
 9. **Script paths in instruction files are leaks** — `~/.claude/skills/*/scripts/*` or plugin cache paths in CLAUDE.md/memory files bypass skill context and break on version updates. Suggest the skill invocation name instead.

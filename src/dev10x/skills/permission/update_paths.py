@@ -11,8 +11,8 @@ Modes:
   - --generalize: Replace session-specific args with wildcard patterns
 
 Config lookup order:
-  1. ~/.claude/skills/Dev10x:permission-maintenance/projects.yaml (userspace)
-  2. ${CLAUDE_PLUGIN_ROOT}/skills/permission-maintenance/projects.yaml (plugin default)
+  1. ~/.claude/skills/Dev10x:upgrade-cleanup/projects.yaml (userspace)
+  2. ${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/projects.yaml (plugin default)
 """
 
 import argparse
@@ -23,11 +23,9 @@ from pathlib import Path
 
 import yaml
 
-USERSPACE_CONFIG = (
-    Path.home() / ".claude" / "skills" / "Dev10x:permission-maintenance" / "projects.yaml"
-)
+USERSPACE_CONFIG = Path.home() / ".claude" / "skills" / "Dev10x:upgrade-cleanup" / "projects.yaml"
 PLUGIN_CONFIG = (
-    Path(__file__).resolve().parents[4] / "skills" / "permission-maintenance" / "projects.yaml"
+    Path(__file__).resolve().parents[4] / "skills" / "upgrade-cleanup" / "projects.yaml"
 )
 PLUGIN_NAMES = r"(?:Dev10x|dev10x-claude)"
 VERSION_PATTERN = re.compile(rf"(plugins/cache/)([^/]+)(/{PLUGIN_NAMES}/)(\d+\.\d+\.\d+)")

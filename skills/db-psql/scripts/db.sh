@@ -62,7 +62,7 @@ discover_configs() {
 
   load_config "$SKILL_DIR/databases.yaml"
 
-  load_config "$HOME/.claude/memory/databases.yaml"
+  load_config "$HOME/.claude/memory/Dev10x/databases.yaml"
 
   for cfg in "$SKILLS_DIR"/*/databases.yaml; do
     [[ -f "$cfg" ]] || continue

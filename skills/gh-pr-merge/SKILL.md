@@ -46,10 +46,7 @@ The merge strategy is resolved using the config resolution order
 1. **Global with repo matching** — read
    `~/.claude/memory/Dev10x/settings-pr-merge.yaml`, match current
    repo against `projects[].match` globs
-2. **Legacy per-project** — read
-   `~/.claude/projects/<project>/memory/settings-pr-merge.yaml`
-   (deprecated; log notice if found)
-3. **Default** — `squash`
+2. **Default** — `squash`
 
 ### Config file format
 
@@ -65,14 +62,6 @@ projects:
     strategy: rebase
     delete_branch: true
     solo_maintainer: true
-```
-
-**Legacy format** (per-project, deprecated):
-```yaml
-# ~/.claude/projects/<project>/memory/settings-pr-merge.yaml
-strategy: squash        # squash | rebase | merge
-delete_branch: true     # delete remote branch after merge
-solo_maintainer: false  # skip external approval requirement
 ```
 
 All fields are optional. Defaults:

@@ -34,7 +34,7 @@ allowed-tools:
 
 Check what's already configured:
 
-1. Check if `~/.claude/memory/slack-config.yaml` exists
+1. Check if `~/.claude/memory/Dev10x/slack-config.yaml` exists
 2. Try retrieving a token from the system keyring:
    - Linux: `secret-tool lookup service slack key bot_token`
    - macOS: `security find-generic-password -s slack -a bot_token -w`
@@ -125,7 +125,7 @@ export SLACK_TOKEN="xoxb-your-token-here"
 
 ## Step 4: Generate slack-config.yaml
 
-Create `~/.claude/memory/slack-config.yaml` with:
+Create `~/.claude/memory/Dev10x/slack-config.yaml` with:
 
 ```yaml
 self_user_id: ""  # Your Slack user ID (for DM reminders)

@@ -33,7 +33,7 @@ Auto-resolves reviewers from per-project config when available.
 The skill resolves reviewers in this order:
 
 1. **Explicit argument** — if the user passes reviewer names, use those
-2. **Config file** — read `~/.claude/memory/github-reviewers-config.yaml`
+2. **Config file** — read `~/.claude/memory/Dev10x/github-reviewers-config.yaml`
    and look up the current repo's project entry
 3. **Ask the user** — if no config entry exists and `default_action: ask`
 
@@ -44,7 +44,7 @@ for the current repo, the skill falls back to `default_action`
 behavior (ask or skip).
 
 ```yaml
-# ~/.claude/memory/github-reviewers-config.yaml
+# ~/.claude/memory/Dev10x/github-reviewers-config.yaml
 default_action: ask  # "skip" or "ask" for unconfigured projects
 
 projects:
@@ -66,7 +66,7 @@ projects:
 
 1. Detect the current repo: `gh repo view --json name --jq .name`
 2. Read and parse the config file using `yq`:
-   `yq '.projects["REPO_NAME"]' ~/.claude/memory/github-reviewers-config.yaml`
+   `yq '.projects["REPO_NAME"]' ~/.claude/memory/Dev10x/github-reviewers-config.yaml`
 3. Look up the repo name in `projects`:
    - **Found with `skip: true`** → print "Skipping review request
      for {repo}" and stop

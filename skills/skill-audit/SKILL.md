@@ -259,13 +259,7 @@ This is the session you are auditing.
 
 ### Step 4: Detect project context
 
-From the transcript header, extract the **Project** path. Encode it to determine
-the correct memory directory:
-```
-~/.claude/projects/<encoded-project-path>/memory/
-```
-
-Also locate the skills directory: `~/.claude/skills/`
+Locate the skills directory: `~/.claude/skills/`
 
 ### Step 5: Create output files
 

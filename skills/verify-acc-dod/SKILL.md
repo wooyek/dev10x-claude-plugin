@@ -121,12 +121,6 @@ repos:
 --json nameWithOwner -q .nameWithOwner` or session context.
 Look up `repos[nameWithOwner][work_type]` for deltas.
 
-**Legacy migration:** If the old per-project file
-(`~/.claude/projects/<project>/memory/acceptance-criteria.yaml`)
-exists but the global file does not, warn the user that the
-legacy file is no longer read. Do NOT auto-migrate — the user
-should manually move overrides to the global file.
-
 ### Step 3: Merge with delta semantics
 
 Apply the repo-scoped deltas from the global file to the

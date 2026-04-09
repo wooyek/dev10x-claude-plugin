@@ -94,11 +94,11 @@ from:<@U0AD92X4X1S> after:LOOKBACK_DATE defer OR TODO OR reminder
 
 #### 2d. Memory files
 
-Grep the project memory directory for in-progress or deferred items:
+Grep the global memory directory for in-progress or deferred items:
 
 ```bash
 grep -rn "defer\|TODO\|in-progress\|pick up" \
-  ~/.claude/projects/<encoded-path>/memory/ \
+  ~/.claude/memory/ \
   --include="*.md" || true
 ```
 

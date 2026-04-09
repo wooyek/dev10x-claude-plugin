@@ -84,7 +84,7 @@ Classify them as `HOOK_ENABLED`, not `DEAD_RULE`.
   rules in `settings.json`
 - Permission audits must classify hook-redirected allow rules as
   `HOOK_ENABLED`, not `DEAD_RULE`
-- The `permission-maintenance` skill must not strip these rules
+- The `upgrade-cleanup` skill must not strip these rules
 
 ### When to revisit
 

@@ -66,7 +66,7 @@ The script auto-detects the token type from its prefix.
 
 ## Configuration
 
-Create `~/.claude/memory/slack-config.yaml`:
+Create `~/.claude/memory/Dev10x/slack-config.yaml`:
 
 ```yaml
 # Your Slack user ID (for --remind self-DMs)

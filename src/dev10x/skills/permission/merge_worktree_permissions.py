@@ -21,11 +21,9 @@ from pathlib import Path
 
 import yaml
 
-USERSPACE_CONFIG = (
-    Path.home() / ".claude" / "skills" / "Dev10x:permission-maintenance" / "projects.yaml"
-)
+USERSPACE_CONFIG = Path.home() / ".claude" / "skills" / "Dev10x:upgrade-cleanup" / "projects.yaml"
 PLUGIN_CONFIG = (
-    Path(__file__).resolve().parents[4] / "skills" / "permission-maintenance" / "projects.yaml"
+    Path(__file__).resolve().parents[4] / "skills" / "upgrade-cleanup" / "projects.yaml"
 )
 
 NOISE_PATTERNS = [

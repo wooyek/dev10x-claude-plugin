@@ -13,10 +13,8 @@ invocation-name: Dev10x:playbook
 allowed-tools:
   - Read(.claude/Dev10x/playbooks/*.yaml)
   - Read(~/.claude/memory/Dev10x/playbooks/*.yaml)
-  - Read(~/.claude/projects/**/memory/playbooks/*.yaml)
   - Write(.claude/Dev10x/playbooks/*.yaml)
   - Write(~/.claude/memory/Dev10x/playbooks/*.yaml)
-  - Write(~/.claude/projects/**/memory/playbooks/*.yaml)
   - AskUserQuestion
   - TaskCreate
   - TaskUpdate
@@ -45,14 +43,13 @@ presence is sufficient.
 
 ### Storage
 
-User overrides follow the 3-tier resolution in
+User overrides follow the resolution order in
 `references/config-resolution.md`:
 
 | Tier | Path | Scope |
 |------|------|-------|
 | 1 | `.claude/Dev10x/playbooks/<key>.yaml` | Project-local |
 | 2 | `~/.claude/memory/Dev10x/playbooks/<key>.yaml` | Global with repo mapping |
-| 3 | `~/.claude/projects/<project>/memory/playbooks/<key>.yaml` | Legacy (deprecated) |
 
 Where `<key>` is the skill directory name (e.g., `work-on`,
 `release-notes`).
@@ -66,9 +63,7 @@ for the YAML format.
 When loading a play, resolve in this order:
 1. Project-local (`.claude/Dev10x/playbooks/<key>.yaml`)
 2. Global with repo matching (`~/.claude/memory/Dev10x/playbooks/<key>.yaml`)
-3. Legacy per-project (`~/.claude/projects/<project>/memory/playbooks/<key>.yaml`)
-   — log deprecation notice if found
-4. Defaults from the skill's `references/playbook.yaml`
+3. Defaults from the skill's `references/playbook.yaml`
 
 Within the resolved file, apply overrides in this order:
 1. Non-persistent overrides (`persist: false`) — use once, then remove
@@ -362,12 +357,11 @@ with all 5 plays as a reference implementation.
 1. Create `skills/<your-skill>/references/playbook.yaml`
 2. Define one or more plays with steps following the schema above
 3. In your SKILL.md orchestration section, load the playbook using
-   the 4-tier resolution in `references/config-resolution.md`:
+   the 3-tier resolution in `references/config-resolution.md`:
    ```
    1. .claude/Dev10x/playbooks/<key>.yaml (project-local)
    2. ~/.claude/memory/Dev10x/playbooks/<key>.yaml (global + repo match)
-   3. ~/.claude/projects/<project>/memory/playbooks/<key>.yaml (legacy)
-   4. ${CLAUDE_PLUGIN_ROOT}/skills/<skill>/references/playbook.yaml
+   3. ${CLAUDE_PLUGIN_ROOT}/skills/<skill>/references/playbook.yaml
    ```
 4. The `Dev10x:playbook` skill automatically discovers your skill
 
@@ -375,7 +369,6 @@ with all 5 plays as a reference implementation.
 ```
 Read(.claude/Dev10x/playbooks/<key>.yaml)
   → if absent, Read(~/.claude/memory/Dev10x/playbooks/<key>.yaml) + repo match
-  → if absent, Read(~/.claude/projects/<project>/memory/playbooks/<key>.yaml)
   → if absent, Read(${CLAUDE_PLUGIN_ROOT}/skills/<skill>/references/playbook.yaml)
   → resolve: overrides first, then defaults
   → create tasks from steps
