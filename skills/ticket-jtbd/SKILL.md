@@ -139,7 +139,7 @@ Delegate to the `Dev10x:jira` skill for JIRA updates.
 
 1. Use the Write tool to create `/tmp/claude/jira-payload-{TICKET_ID}.json`
    with the JIRA REST API v3 ADF document format
-2. Invoke `Skill(Dev10x:jira)` to apply the payload to the ticket
+2. Invoke `Skill(skill="Dev10x:jira")` to apply the payload to the ticket
 
 ### Step 5: Confirm
 

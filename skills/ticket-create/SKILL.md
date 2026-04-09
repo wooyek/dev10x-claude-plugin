@@ -207,7 +207,7 @@ mcp__claude_ai_Linear__save_issue(
 Delegate to the `Dev10x:jira` skill:
 
 ```
-Skill(Dev10x:jira)
+Skill(skill="Dev10x:jira")
 ```
 
 Pass the ticket ID and payload path as arguments.
