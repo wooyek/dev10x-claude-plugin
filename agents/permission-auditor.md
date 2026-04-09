@@ -153,7 +153,7 @@ that bypass skill invocations:
 **Files to scan:**
 - `CLAUDE.md` in project root and `.claude/` directories
 - `~/.claude/CLAUDE.md` (global instructions)
-- `~/.claude/projects/*/memory/**/*.md` (memory files)
+- `~/.claude/memory/Dev10x/**/*.md` (memory files)
 
 **Patterns to flag:**
 

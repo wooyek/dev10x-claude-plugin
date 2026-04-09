@@ -65,8 +65,8 @@ Files matching: `skills/**`
     enumerate ALL changed SKILL.md files and verify each has a matching
     `Bash(${CLAUDE_PLUGIN_ROOT}/bin/<script>:*)` entry.
 8f. **Memory file Write coverage** — when a skill writes to
-    `~/.claude/projects/<project>/memory/<file>`, verify `allowed-tools:`
-    includes a matching `Write(~/.claude/projects/**/<file>)` entry.
+    `~/.claude/memory/Dev10x/<file>`, verify `allowed-tools:`
+    includes a matching `Write(~/.claude/memory/Dev10x/**)` entry.
 8g. **Cross-skill delegation** — when a skill delegates via `Skill()`:
     (a) delegated skill's `allowed-tools` includes `Read()` for findings
     (b) both skills declare compatible temp namespace

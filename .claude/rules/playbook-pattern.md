@@ -60,12 +60,11 @@ Users can override playbooks using the 3-tier resolution order
 |------|------|-------|
 | 1 | `.claude/Dev10x/playbooks/<skill-name>.yaml` | Project-local |
 | 2 | `~/.claude/memory/Dev10x/playbooks/<skill-name>.yaml` | Global + repo mapping |
-| 3 | `~/.claude/projects/<project>/memory/playbooks/<skill-name>.yaml` | Legacy (deprecated) |
+| 3 | `${CLAUDE_PLUGIN_ROOT}/skills/<name>/references/playbook.yaml` | Plugin defaults |
 
 Tier 2 (global) is preferred — one file serves multiple repos via
 `projects[].match` globs. The skill loads this file at invocation,
-allowing users to customize
-behavior without editing the plugin.
+allowing users to customize behavior without editing the plugin.
 
 ## Reviewer Expectations
 

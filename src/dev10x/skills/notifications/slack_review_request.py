@@ -11,8 +11,8 @@ Subcommands:
     prepare  — Resolve project config, format message, output JSON.
     send     — Post message via slack-notify.py.
 
-Config: ~/.claude/memory/slack-config-code-review-requests.yaml
-Slack config: ~/.claude/memory/slack-config.yaml
+Config: ~/.claude/memory/Dev10x/slack-config-code-review-requests.yaml
+Slack config: ~/.claude/memory/Dev10x/slack-config.yaml
 """
 
 from __future__ import annotations
