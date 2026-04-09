@@ -86,6 +86,8 @@ BLOCK_MSG = (
 GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b")
 TICKET_RE = re.compile(r"^[A-Z]+-\d+\s+")
 
+BYPASS_GITMOJI: frozenset[str] = frozenset({"🔖", "📝", "🔀"})
+
 
 def _expand_verbs(bases: list[str]) -> list[str]:
     expanded: list[str] = []
@@ -136,6 +138,13 @@ def _extract_title(command: str) -> str | None:
     return None
 
 
+def _extract_gitmoji(title: str) -> str:
+    i = 0
+    while i < len(title) and not title[i].isascii():
+        i += 1
+    return title[:i].strip()
+
+
 def _strip_prefix(title: str) -> str:
     i = 0
     while i < len(title) and not title[i].isascii():
@@ -156,6 +165,7 @@ def _check_jtbd(title: str) -> tuple[bool, str]:
 @dataclass
 class CommitJtbdValidator:
     name: str = "commit-jtbd"
+    bypass_gitmoji: frozenset[str] = BYPASS_GITMOJI
 
     def should_run(self, inp: HookInput) -> bool:
         return GIT_COMMIT_RE.search(inp.command) is not None
@@ -171,6 +181,10 @@ class CommitJtbdValidator:
             return None
 
         if title.startswith(("fixup!", "squash!", "Merge ")):
+            return None
+
+        gitmoji = _extract_gitmoji(title)
+        if gitmoji in self.bypass_gitmoji:
             return None
 
         is_ok, verb = _check_jtbd(title)
