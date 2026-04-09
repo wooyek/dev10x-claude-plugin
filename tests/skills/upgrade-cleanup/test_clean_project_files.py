@@ -544,3 +544,38 @@ class TestClassifyRulesStalePublisher:
 
         assert len(result.stale_publisher) == 1
         assert len(result.old_versions) == 0
+
+
+class TestBasePermissionsPreserved:
+    def test_base_permissions_kept_even_when_covered_by_global_wildcard(self) -> None:
+        global_rules = {"Bash(git develop-:*)"}
+        base_permissions = {
+            "Bash(git develop-log:*)",
+            "Bash(git develop-diff:*)",
+        }
+        rules = ["Bash(git develop-log:*)", "Bash(git develop-diff:*)"]
+
+        result = clean_mod.classify_rules(
+            rules,
+            global_rules=global_rules,
+            current_version="0.57.0",
+            base_permissions=base_permissions,
+        )
+
+        assert result.kept == rules
+        assert result.total_removed == 0
+
+    def test_base_permissions_kept_even_when_exact_duplicate_of_global(self) -> None:
+        global_rules = {"Bash(git checkout:*)"}
+        base_permissions = {"Bash(git checkout:*)"}
+        rules = ["Bash(git checkout:*)"]
+
+        result = clean_mod.classify_rules(
+            rules,
+            global_rules=global_rules,
+            current_version="0.57.0",
+            base_permissions=base_permissions,
+        )
+
+        assert result.kept == rules
+        assert result.total_removed == 0

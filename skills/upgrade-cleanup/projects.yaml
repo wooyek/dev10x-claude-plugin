@@ -66,6 +66,16 @@ base_permissions:
   - "Bash(git symbolic-ref:*)"
   - "Bash(git reset --soft:*)"
   - "Bash(git reset --hard:*)"
+  - "Bash(git rebase:*)"
+
+  # --- Git aliases (GH-852, GH-853) ---
+  # These are subsumed by global wildcards like Bash(git develop-:*)
+  # but must be preserved at project level as safety anchors — they
+  # enable hook feedback and branch-specific allow rules.
+  - "Bash(git develop-log:*)"
+  - "Bash(git develop-diff:*)"
+  - "Bash(git develop-rebase:*)"
+  - "Bash(git autosquash-develop:*)"
 
   # --- Dev10x skills ---
   - "Skill(Dev10x:*)"
