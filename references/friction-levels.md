@@ -62,9 +62,18 @@ Skills with `AskUserQuestion` gates adapt behavior based on level:
 ### adaptive
 
 - Gates with a `(Recommended)` option auto-select it
-- No `AskUserQuestion` call — execution continues uninterrupted
+- Auto-select means the agent **proceeds as if the user chose the
+  recommended option** — it does NOT mean skip the gate entirely.
+  The gate still resolves (the decision is recorded), but no
+  `AskUserQuestion` call interrupts execution.
 - Exceptions: gates marked `ALWAYS_ASK` still fire (e.g., destructive
   operations like branch deletion, data loss scenarios)
+
+**Common mistake (GH-808):** Agents interpret "auto-select" as
+"skip the gate and do nothing." This is wrong. Auto-select means
+execute the recommended option's action (e.g., approve the plan,
+start execution). Skipping the gate entirely means the plan is
+never approved and execution never starts.
 
 **How to mark a gate as ALWAYS_ASK:**
 
