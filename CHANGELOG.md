@@ -3,6 +3,47 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.58.0 — Session Safety & Config Hygiene
+
+Released 2026-04-09
+
+### Features
+
+- **Surface background agent progress in caller** — add
+  caller-side task tracking for background monitor agents so
+  supervisors see in-progress work instead of an idle session
+  ([GH-854])
+- **Prevent auditing wrong session via gate** — skill-audit
+  now confirms resolved session identity before proceeding,
+  blocking silent fallback to alternate path encodings
+  ([GH-805])
+
+### Improvements
+
+- **Normalize config paths to canonical locations** — remove
+  deprecated Tier 3 path references from 16 skills, consolidate
+  bare memory configs under Dev10x/ subdirectory, and align
+  config-resolution docs with actual resolution order ([GH-849])
+
+### Fixes
+
+- **Preserve git alias rules from cleanup** — permission
+  maintenance no longer removes git alias allow rules that
+  worktree sessions depend on for branch-switching and commit
+  grooming ([GH-852], [GH-853])
+- **Prevent session.yaml overwrite of active modes** — Phase 0
+  now reads before writing, preserving existing active_modes
+  instead of overwriting with empty defaults ([GH-846])
+
+## 0.57.0 — Plugin Naming Consistency
+
+Released 2026-04-09
+
+### Improvements
+
+- **Update plugin naming for Dev10x consistency** — align
+  plugin.json and marketplace.json name fields to "Dev10x"
+
 ## 0.56.0 — Concurrency Safety & Context Efficiency
 
 Released 2026-04-09
