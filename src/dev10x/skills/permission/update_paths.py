@@ -186,12 +186,14 @@ def ensure_base_permissions(
         return 0, []
 
     if not dry_run:
-        if "permissions" not in data:
-            data["permissions"] = {}
-        if "allow" not in data["permissions"]:
-            data["permissions"]["allow"] = []
-        data["permissions"]["allow"].extend(missing)
-        path.write_text(json.dumps(data, indent=2) + "\n")
+        from dev10x.skills.permission.file_lock import locked_json_update
+
+        with locked_json_update(path=path) as live_data:
+            if "permissions" not in live_data:
+                live_data["permissions"] = {}
+            if "allow" not in live_data["permissions"]:
+                live_data["permissions"]["allow"] = []
+            live_data["permissions"]["allow"].extend(missing)
 
     messages = [f"  + {p}" for p in missing]
     return len(missing), messages

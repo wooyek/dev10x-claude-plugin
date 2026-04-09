@@ -164,16 +164,17 @@ def merge_permissions(
         messages.append(f"    + {entry}")
 
     if not dry_run:
-        if "permissions" not in main_data:
-            main_data["permissions"] = {}
-        if "allow" not in main_data["permissions"]:
-            main_data["permissions"]["allow"] = []
+        from dev10x.skills.permission.file_lock import locked_json_update
 
-        allow_list = main_data["permissions"]["allow"]
-        allow_list.extend(stable_entries)
-
-        main_settings.parent.mkdir(parents=True, exist_ok=True)
-        main_settings.write_text(json.dumps(main_data, indent=2) + "\n")
+        with locked_json_update(path=main_settings) as live_data:
+            if "permissions" not in live_data:
+                live_data["permissions"] = {}
+            if "allow" not in live_data["permissions"]:
+                live_data["permissions"]["allow"] = []
+            existing = set(live_data["permissions"]["allow"])
+            live_data["permissions"]["allow"].extend(
+                e for e in stable_entries if e not in existing
+            )
 
     return len(stable_entries), messages
 
