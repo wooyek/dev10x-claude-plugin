@@ -636,11 +636,21 @@ or use Claude Code's built-in plan mode.
 **REQUIRED: Call `AskUserQuestion`** when the plan was
 agent-generated (do NOT use plain text).
 
+**Adaptive friction behavior (GH-808):** At adaptive level,
+auto-select "Approve (Recommended)" — proceed directly to
+Phase 4 without calling `AskUserQuestion`. This means: approve
+the plan and start execution immediately. Do NOT skip the gate
+entirely (which would leave the plan unapproved and execution
+blocked). Auto-select = execute the recommended action.
+
+**Guided/Strict friction:** Call `AskUserQuestion`:
+
 1. `AskUserQuestion(questions=[{question: "How would you like to proceed with the work plan?", header: "Plan", options: [{label: "Approve (Recommended)", description: "Start execution immediately"}, {label: "Edit", description: "Describe what to change (add/remove/reorder steps)"}], multiSelect: false}])`
 
-After approval, set task dependencies where appropriate (use
-`TaskUpdate` with `addBlockedBy`). Mark the first task as
-`in_progress` and begin Phase 4.
+After approval (explicit or auto-selected), set task
+dependencies where appropriate (use `TaskUpdate` with
+`addBlockedBy`). Mark the first task as `in_progress` and
+begin Phase 4.
 
 ### Persist Plan Context
 
