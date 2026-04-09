@@ -142,7 +142,8 @@ def pr_comments(
     *,
     action: str,
     pr_number: int | None = None,
-    comment_id: int | None = None,
+    comment_id: int | str | None = None,
+    comment_ids: list[str] | None = None,
     body: str | None = None,
     repo: str | None = None,
 ) -> dict[str, Any]:
@@ -172,38 +173,62 @@ def pr_comments(
         )
 
     elif action == "resolve":
-        if comment_id is None:
-            return {"error": "comment_id required for 'resolve' action"}
-        query = """query($id: ID!) {
-          node(id: $id) {
-            ... on PullRequestReviewComment {
-              pullRequestReviewThread { id }
-            }
-          }
-        }"""
-        thread_result = _gh_api(
-            "graphql",
-            fields={"query": query, "id": str(comment_id)},
-            jq=".data.node.pullRequestReviewThread.id",
+        ids_to_resolve: list[str] = []
+        if comment_ids:
+            ids_to_resolve = comment_ids
+        elif comment_id is not None:
+            ids_to_resolve = [str(comment_id)]
+        else:
+            return {"error": "comment_id or comment_ids required for 'resolve' action"}
+
+        node_fragments = " ".join(
+            f'n{i}: node(id: "{cid}") '
+            f"{{ ... on PullRequestReviewComment "
+            f"{{ pullRequestReviewThread {{ id }} }} }}"
+            for i, cid in enumerate(ids_to_resolve)
         )
-        if thread_result.returncode != 0:
-            return {"error": thread_result.stderr.strip()}
-        thread_id = thread_result.stdout.strip()
-        if not thread_id or not thread_id.startswith("PRRT_"):
-            return {
-                "error": f"Could not find thread for comment {comment_id}. "
-                "The resolve action requires a GraphQL node_id, not a REST "
-                "integer ID. Use the node_id field from a comment response."
-            }
-        mutation = """mutation($threadId: ID!) {
-          resolveReviewThread(input: {threadId: $threadId}) {
-            thread { id isResolved }
-          }
-        }"""
+        query_result = _gh_api(
+            "graphql",
+            fields={"query": f"{{ {node_fragments} }}"},
+        )
+        if query_result.returncode != 0:
+            return {"error": query_result.stderr.strip()}
+
+        query_data = json.loads(query_result.stdout)
+        thread_ids: list[str] = []
+        errors: list[str] = []
+        for i, cid in enumerate(ids_to_resolve):
+            node = query_data.get("data", {}).get(f"n{i}")
+            thread = node.get("pullRequestReviewThread") if node else None
+            if thread and thread["id"].startswith("PRRT_"):
+                thread_ids.append(thread["id"])
+            else:
+                errors.append(
+                    f"Could not find thread for comment {cid}. "
+                    "The resolve action requires a GraphQL node_id, not a REST "
+                    "integer ID. Use the node_id field from a comment response."
+                )
+
+        if not thread_ids:
+            return {"error": "; ".join(errors)}
+
+        resolve_fragments = " ".join(
+            f'r{i}: resolveReviewThread(input: {{threadId: "{tid}"}}) '
+            f"{{ thread {{ id isResolved }} }}"
+            for i, tid in enumerate(thread_ids)
+        )
         result = _gh_api(
             "graphql",
-            fields={"query": mutation, "threadId": thread_id},
+            fields={"query": f"mutation {{ {resolve_fragments} }}"},
         )
+
+        if result.returncode != 0:
+            return {"error": result.stderr.strip()}
+
+        response: dict[str, Any] = json.loads(result.stdout)
+        if errors:
+            response["warnings"] = errors
+        return response
 
     else:
         return {"error": f"Unknown action: {action}. Supported: list, get, reply, resolve"}

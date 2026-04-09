@@ -104,7 +104,8 @@ async def issue_create(
 async def pr_comments(
     action: str,
     pr_number: int | None = None,
-    comment_id: int | None = None,
+    comment_id: int | str | None = None,
+    comment_ids: list[str] | None = None,
     body: str | None = None,
     repo: str | None = None,
 ) -> dict:
@@ -113,7 +114,8 @@ async def pr_comments(
     Args:
         action: One of: list, get, reply, resolve
         pr_number: PR number (required for list, reply)
-        comment_id: Comment ID (required for get, reply, resolve)
+        comment_id: Comment ID (required for get, reply, resolve single)
+        comment_ids: List of GraphQL node_ids for batch resolve
         body: Comment body text (required for reply)
         repo: Repository (owner/repo). If omitted, uses current repo
 
@@ -126,6 +128,7 @@ async def pr_comments(
         action=action,
         pr_number=pr_number,
         comment_id=comment_id,
+        comment_ids=comment_ids,
         body=body,
         repo=repo,
     )
