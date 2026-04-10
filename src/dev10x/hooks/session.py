@@ -77,83 +77,15 @@ def _escape_for_json(s: str) -> str:
 
 
 def _format_session_state(state: dict[str, Any]) -> str:
-    timestamp = state.get("timestamp", "")
-    if not timestamp:
-        return ""
+    from dev10x.domain.session_state import SessionState
 
-    try:
-        file_dt = datetime.fromisoformat(timestamp)
-        now_dt = datetime.now(UTC)
-        age_hours = int((now_dt - file_dt).total_seconds() / 3600)
-    except (ValueError, TypeError):
-        age_hours = 0
-
-    stale_flag = f" (STALE — {age_hours}h old, may be outdated)" if age_hours > 24 else ""
-
-    branch = state.get("branch", "unknown")
-    worktree = state.get("worktree", "")
-    session_id = state.get("session_id", "")
-    modified = state.get("modified_files", [])
-    staged = state.get("staged_files", [])
-    commits = state.get("recent_commits", [])
-
-    modified_str = "\n".join(f"- {f}" for f in modified) if modified else "none"
-    staged_str = "\n".join(f"- {f}" for f in staged) if staged else "none"
-    commits_str = "\n".join(commits) if commits else "none"
-
-    lines = [f"Prior session state detected{stale_flag}:", f"- Branch: {branch}"]
-    if worktree:
-        lines.append(f"- Worktree: {worktree}")
-    lines.append(f"- Last active: {timestamp}")
-    lines.append(f"- Session ID: {session_id}")
-    lines.append(f"\nModified files:\n{modified_str}")
-    lines.append(f"\nStaged files:\n{staged_str}")
-    lines.append(f"\nRecent commits:\n{commits_str}")
-    lines.append(f"\nResume prior session with: claude --resume {session_id}")
-    return "\n".join(lines)
+    return SessionState.from_dict(data=state).format_for_display()
 
 
 def _format_plan_summary(plan: dict[str, Any]) -> str:
-    plan_meta = plan.get("plan", {})
-    plan_status = plan_meta.get("status", "unknown")
-    plan_branch = plan_meta.get("branch", "unknown")
-    plan_synced = plan_meta.get("last_synced", "unknown")
-    tasks = plan.get("tasks", [])
-    task_count = len(tasks)
-    completed_count = sum(1 for t in tasks if t.get("status") == "completed")
-    pending_tasks = [
-        f"  - [{t.get('status')}] #{t.get('id')} {t.get('subject')}"
-        for t in tasks
-        if t.get("status") not in ("completed", "deleted")
-    ]
+    from dev10x.domain.session_state import PlanSummary
 
-    lines = [f"Persisted plan detected ({completed_count}/{task_count} tasks completed):"]
-    lines.append(f"- Plan branch: {plan_branch}")
-    lines.append(f"- Plan status: {plan_status}")
-    lines.append(f"- Last synced: {plan_synced}")
-
-    if pending_tasks:
-        lines.append("- Remaining tasks:\n" + "\n".join(pending_tasks))
-
-    plan_context = plan_meta.get("context", {})
-    work_type = plan_context.get("work_type")
-    if work_type:
-        lines.append(f"- Work type: {work_type}")
-
-    tickets = plan_context.get("tickets", [])
-    if tickets:
-        ticket_str = ", ".join(tickets) if isinstance(tickets, list) else tickets
-        lines.append(f"- Tickets: {ticket_str}")
-
-    routing = plan_context.get("routing_table", {})
-    if routing and isinstance(routing, dict):
-        routing_lines = [f"  {k} → {v}" for k, v in routing.items()]
-        lines.append("- Skill routing:\n" + "\n".join(routing_lines))
-
-    if plan_status == "completed":
-        lines.append("- All tasks completed. Plan can be archived.")
-
-    return "\n".join(lines)
+    return PlanSummary.from_dict(data=plan).format_for_display()
 
 
 def session_reload() -> None:
@@ -240,45 +172,17 @@ def context_compact() -> None:
 
     plan_file = Path(toplevel) / ".claude" / "session" / "plan.yaml"
     if plan_file.exists():
-        plan = _read_plan_summary(toplevel=toplevel)
-        plan_meta = plan.get("plan", {})
-        plan_branch = plan_meta.get("branch", "unknown")
-        plan_status = plan_meta.get("status", "unknown")
-        plan_context = plan_meta.get("context", {})
-        work_type = plan_context.get("work_type", "unknown")
-        tasks = plan.get("tasks", [])
+        from dev10x.domain.session_state import PlanSummary
 
-        task_lines = []
-        for t in tasks:
-            line = f"- [{t.get('status')}] #{t.get('id')} {t.get('subject')}"
-            meta = t.get("metadata", {})
-            if meta.get("type"):
-                line += f" ({meta['type']})"
-            if meta.get("skills"):
-                line += f" → {', '.join(meta['skills'])}"
-            task_lines.append(line)
+        plan_data = _read_plan_summary(toplevel=toplevel)
+        plan = PlanSummary.from_dict(data=plan_data)
 
-        if task_lines:
-            summary += "\n\n## Persisted Plan State"
-            summary += f"\n- **Branch:** {plan_branch}"
-            summary += f"\n- **Plan status:** {plan_status}"
-            summary += f"\n- **Work type:** {work_type}"
-            summary += "\n\n### Tasks\n" + "\n".join(task_lines)
+        summary += "\n\n" + plan.format_for_compaction()
 
-        routing = plan_context.get("routing_table", {})
-        if routing and isinstance(routing, dict):
-            routing_lines = [f"{k} → {v}" for k, v in routing.items()]
-            summary += "\n\n### Skill Routing Table (from plan context)\n" + "\n".join(
-                routing_lines
-            )
-        else:
+        if not plan.context.routing_table:
             recovery_file = plugin_root / "references" / "compaction-recovery.md"
             if recovery_file.exists():
                 summary += f"\n\n{recovery_file.read_text()}"
-
-        gathered = plan_context.get("gathered_summary")
-        if gathered:
-            summary += f"\n\n### Gathered Context (from Phase 2)\n{gathered}"
 
         summary += (
             "\n\n> Reconstructed from persisted plan file. Use TaskList to verify\n"
