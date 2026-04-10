@@ -70,6 +70,11 @@ Files matching: `**/tests/**/*.py`
     WARNING. Indirect coverage via caller tests is fragile —
     when the caller changes, extracted class coverage silently
     disappears.
+15. **Playbook mode coverage** — when a skill uses `playbook.yaml`
+    with multiple plays (e.g., `single`, `batch`), verify tests
+    cover: (a) mode detection logic, (b) correct play selection,
+    (c) condition field evaluation. Test at least one mode transition
+    (e.g., single → batch). Flag missing mode coverage as WARNING.
 
 ## Output Format
 
