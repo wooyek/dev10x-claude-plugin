@@ -122,6 +122,11 @@ class TestIsOldVersion:
 
         assert clean_mod.is_old_version(rule, "0.33.0") is True
 
+    def test_detects_old_version_with_lowercase_plugin_name(self) -> None:
+        rule = "Bash(/home/user/.claude/plugins/cache/Dev10x-Guru/dev10x/0.56.0/scripts/foo.sh:*)"
+
+        assert clean_mod.is_old_version(rule, "0.58.0") is True
+
 
 class TestHasLeakedSecret:
     @pytest.mark.parametrize(

@@ -36,9 +36,9 @@ PLUGIN_CONFIG = (
 )
 GLOBAL_SETTINGS = Path.home() / ".claude" / "settings.json"
 
-PLUGIN_NAMES = r"(?:Dev10x|dev10x-claude)"
-VERSION_PATTERN = re.compile(rf"plugins/cache/[^/]+/{PLUGIN_NAMES}/(\d+\.\d+\.\d+)")
-PUBLISHER_PATTERN = re.compile(rf"plugins/cache/([^/]+)/{PLUGIN_NAMES}/")
+PLUGIN_NAMES = r"(?:Dev10x|dev10x(?:-claude)?)"
+VERSION_PATTERN = re.compile(rf"plugins/cache/[^/]+/{PLUGIN_NAMES}/(\d+\.\d+\.\d+)", re.IGNORECASE)
+PUBLISHER_PATTERN = re.compile(rf"plugins/cache/([^/]+)/{PLUGIN_NAMES}/", re.IGNORECASE)
 
 ENV_PREFIX_PATTERN = re.compile(r"^Bash\([A-Z_]+=")
 
