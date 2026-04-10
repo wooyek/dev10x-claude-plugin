@@ -62,6 +62,17 @@ projects:
 - `default_action: ask` prompts the user for unconfigured projects;
   `skip` silently skips them
 
+### Pre-flight: Draft State Check (GH-851 F7)
+
+Before requesting review, verify the PR is not in draft state.
+GitHub silently accepts review requests on draft PRs but does
+NOT notify the requested reviewers — the request is lost.
+
+1. Check draft state via MCP: `mcp__plugin_Dev10x_cli__pr_detect`
+   or `gh pr view --json isDraft --jq .isDraft`
+2. If `isDraft == true`: run `gh pr ready` first, then proceed
+3. If `isDraft == false`: proceed to reviewer resolution
+
 ### Resolution workflow
 
 1. Detect the current repo: `gh repo view --json name --jq .name`

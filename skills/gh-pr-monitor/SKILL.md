@@ -540,6 +540,13 @@ The Dev10x:slack-review-request skill will:
 
 **CRITICAL: Do NOT post notifications without user confirmation.**
 
+**Background agent auto-advance (GH-851 F1):** When dispatched
+as a background agent with `mode: dontAsk`, auto-advance through
+Phase 3 without stopping for confirmation. The `dontAsk` mode
+from the parent implies blanket authorization for shipping
+pipeline steps. Skip Step 2 (AskUserQuestion) and proceed
+directly to Step 3 (execute notification).
+
 ### Step 0: Verify PR state via MCP
 
 **Hard rule: Verify final PR state with the MCP tool — NEVER use

@@ -235,13 +235,19 @@ Options:
   (ask whether to persist this override)
 - **"Go back"** — Return to fix failing checks
 
-**At adaptive level:**
+**At adaptive level (GH-851 F4):**
 
 Skip `AskUserQuestion`. Auto-select based on results:
 - All checks pass → auto-complete ("Work complete")
 - Any check fails → auto-select "Go back" and report failures
   to the parent orchestrator for resolution
+- Any check pending → auto-select "Go back" and report pending
+  checks to the parent orchestrator
 - No user interruption in either case
+- **No "non-blocking" exception category exists.** Every check
+  in pending or fail state triggers "Go back". Do NOT invent
+  exceptions for pending CI review checks or classify failures
+  as non-blocking — that category is not part of this spec.
 
 If the user picks "Override", ask whether to persist:
 
