@@ -7,7 +7,7 @@
 # and customize with your own project roots:
 #   update-paths.py --init
 
-plugin_cache: ~/.claude/plugins/cache/Dev10x-Guru/dev10x-claude
+plugin_cache: ~/.claude/plugins/cache/Dev10x-Guru/Dev10x
 
 roots: []
 #  - /work/my-projects
