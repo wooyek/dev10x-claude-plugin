@@ -94,6 +94,10 @@ def split_title_jtbd(pr_title: str) -> tuple[str, str | None]:
     return pr_title, None
 
 
+def _repo_name(repo: str) -> str:
+    return repo.split("/")[-1]
+
+
 def format_slack_message(
     pr_number: int,
     repo: str,
@@ -101,7 +105,7 @@ def format_slack_message(
     pr_title: str,
     jtbd: str | None,
 ) -> str:
-    repo_short = repo.split("/")[-1]
+    repo_short = _repo_name(repo)
     link = f"<{pr_url}|{repo_short}#{pr_number}>"
     short_title, title_jtbd = split_title_jtbd(pr_title=pr_title)
     effective_jtbd = jtbd or title_jtbd

@@ -6,13 +6,18 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from dev10x.domain.repository_ref import RepositoryRef
+
 gh = pytest.importorskip("dev10x.mcp.github", reason="dev10x not installed")
 
 
 @pytest.fixture
 def mock_resolve_repo():
     with patch.object(
-        gh, "_resolve_repo", new_callable=AsyncMock, return_value=("owner/repo", None)
+        gh,
+        "_resolve_repo",
+        new_callable=AsyncMock,
+        return_value=(RepositoryRef(owner="owner", name="repo"), None),
     ) as mock:
         yield mock
 
@@ -316,3 +321,38 @@ class TestPrCommentsResolveErrors:
         )
 
         assert result["error"] == "Mutation failed"
+
+
+class TestResolveRepo:
+    @pytest.mark.asyncio
+    async def test_returns_repository_ref(self) -> None:
+        with patch.object(gh, "_detect_repo", new_callable=AsyncMock, return_value="owner/repo"):
+            ref, err = await gh._resolve_repo(None)
+
+        assert err is None
+        assert isinstance(ref, RepositoryRef)
+        assert ref.owner == "owner"
+        assert ref.name == "repo"
+
+    @pytest.mark.asyncio
+    async def test_explicit_repo_param(self) -> None:
+        ref, err = await gh._resolve_repo("my-org/my-repo")
+
+        assert err is None
+        assert ref == RepositoryRef(owner="my-org", name="my-repo")
+
+    @pytest.mark.asyncio
+    async def test_returns_error_when_no_repo(self) -> None:
+        with patch.object(gh, "_detect_repo", new_callable=AsyncMock, return_value=None):
+            ref, err = await gh._resolve_repo(None)
+
+        assert ref is None
+        assert "error" in err
+
+    @pytest.mark.asyncio
+    async def test_returns_error_for_invalid_format(self) -> None:
+        ref, err = await gh._resolve_repo("invalid-repo-no-slash")
+
+        assert ref is None
+        assert "error" in err
+        assert "Invalid repository reference" in err["error"]

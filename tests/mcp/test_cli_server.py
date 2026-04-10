@@ -12,6 +12,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from dev10x.domain.repository_ref import RepositoryRef
+
 cli_server = pytest.importorskip("dev10x.mcp.server_cli", reason="mcp not installed")
 
 gh = pytest.importorskip("dev10x.mcp.github", reason="dev10x not installed")
@@ -169,7 +171,7 @@ class TestResolveRepo:
     async def test_returns_provided_repo(self) -> None:
         result, error = await gh._resolve_repo(repo="owner/repo")
 
-        assert result == "owner/repo"
+        assert result == RepositoryRef(owner="owner", name="repo")
         assert error is None
 
     @pytest.mark.asyncio
@@ -180,7 +182,7 @@ class TestResolveRepo:
     ) -> None:
         result, error = await gh._resolve_repo(repo=None)
 
-        assert result == "detected/repo"
+        assert result == RepositoryRef(owner="detected", name="repo")
         assert error is None
 
     @pytest.mark.asyncio

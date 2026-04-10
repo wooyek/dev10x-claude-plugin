@@ -12,6 +12,7 @@ import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from dev10x.domain.repository_ref import RepositoryRef
 from dev10x.mcp.subprocess_utils import (
     async_run,
     async_run_script,
@@ -60,11 +61,14 @@ async def _gh_api(
 
 async def _resolve_repo(
     repo: str | None,
-) -> tuple[str | None, dict[str, str] | None]:
+) -> tuple[RepositoryRef | None, dict[str, str] | None]:
     resolved = repo or await _detect_repo()
     if not resolved:
         return None, {"error": "Could not detect repository. Provide repo parameter."}
-    return resolved, None
+    try:
+        return RepositoryRef.parse(resolved), None
+    except ValueError as exc:
+        return None, {"error": str(exc)}
 
 
 async def detect_tracker(*, ticket_id: str) -> dict[str, Any]:
