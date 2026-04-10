@@ -77,6 +77,9 @@ supporting each tool:
 | `next_worktree_name` | `cli` | PR #126 | v0.25.0+ |
 | `setup_aliases` | `cli` | PR #288 | v0.30.0+ |
 | `mktmp` | `cli` | PR #160 | v0.26.0+ |
+| `plan_sync_set_context` | `cli` | GH-802 | v0.60.0+ |
+| `plan_sync_json_summary` | `cli` | GH-802 | v0.60.0+ |
+| `plan_sync_archive` | `cli` | GH-802 | v0.60.0+ |
 | `query` | `db` | PR #126 | v0.25.0+ |
 
 When adding a new tool, update this table and note any dependencies on

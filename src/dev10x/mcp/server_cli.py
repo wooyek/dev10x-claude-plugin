@@ -499,5 +499,50 @@ async def mktmp(
     return await util.mktmp(namespace=namespace, prefix=prefix, ext=ext, directory=directory)
 
 
+# ── Plan/Task tools ────────────────────────────────────────────
+
+
+@server.tool()
+async def plan_sync_set_context(
+    args: list[str],
+) -> dict:
+    """Update plan context with key=value pairs.
+
+    Args:
+        args: K=V pairs (e.g., ["work_type=feature", "tickets=[...]"])
+
+    Returns:
+        Dictionary with keys: success (bool), updated_keys (list[str])
+    """
+    from dev10x.mcp import plan as plan_tools
+
+    return await plan_tools.set_context(args=args)
+
+
+@server.tool()
+async def plan_sync_json_summary() -> dict:
+    """Retrieve the current plan as a JSON summary.
+
+    Returns:
+        Dictionary with plan metadata, context, and task list.
+        Empty dict if no plan exists.
+    """
+    from dev10x.mcp import plan as plan_tools
+
+    return await plan_tools.json_summary()
+
+
+@server.tool()
+async def plan_sync_archive() -> dict:
+    """Archive the current plan to a timestamped file and remove active plan.
+
+    Returns:
+        Dictionary with keys: success (bool), archive_name (str)
+    """
+    from dev10x.mcp import plan as plan_tools
+
+    return await plan_tools.archive()
+
+
 def main() -> None:
     server.run()

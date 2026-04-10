@@ -18,7 +18,8 @@ allowed-tools:
   - Read(${CLAUDE_PLUGIN_ROOT}/skills/playbook/references/playbook.yaml)
   - Write(.claude/Dev10x/**)
   - Skill(skill="Dev10x:verify-acc-dod")
-  - Bash(${CLAUDE_PLUGIN_ROOT}/hooks/scripts/task-plan-sync.py:*)
+  - mcp__plugin_Dev10x_cli__plan_sync_set_context
+  - mcp__plugin_Dev10x_cli__plan_sync_json_summary
 ---
 
 # Dev10x:work-on — Adaptive Work Orchestrator
@@ -668,8 +669,8 @@ begin Phase 4.
 **REQUIRED after plan approval (GH-760 F2).** Execute these
 calls immediately — do NOT defer or skip:
 
-1. `task-plan-sync.py --set-context work_type=<detected_work_type> tickets='<JSON array of ticket IDs>' routing_table='{"commit":"Skill(Dev10x:git-commit)","create_pr":"Skill(Dev10x:gh-pr-create)","monitor_ci":"Skill(Dev10x:gh-pr-monitor)","push":"Skill(Dev10x:git)","groom":"Skill(Dev10x:git-groom)","branch":"Skill(Dev10x:ticket-branch)","verify_acceptance":"Skill(Dev10x:verify-acc-dod)","merge_pr":"Skill(Dev10x:gh-pr-merge)"}'`
-2. `task-plan-sync.py --set-context gathered_summary='<1-3 sentence summary>'`
+1. `mcp__plugin_Dev10x_cli__plan_sync_set_context(args=["work_type=<detected_work_type>", "tickets=<JSON array of ticket IDs>", "routing_table={\"commit\":\"Skill(Dev10x:git-commit)\",\"create_pr\":\"Skill(Dev10x:gh-pr-create)\",\"monitor_ci\":\"Skill(Dev10x:gh-pr-monitor)\",\"push\":\"Skill(Dev10x:git)\",\"groom\":\"Skill(Dev10x:git-groom)\",\"branch\":\"Skill(Dev10x:ticket-branch)\",\"verify_acceptance\":\"Skill(Dev10x:verify-acc-dod)\",\"merge_pr\":\"Skill(Dev10x:gh-pr-merge)\"}"])`
+2. `mcp__plugin_Dev10x_cli__plan_sync_set_context(args=["gathered_summary=<1-3 sentence summary>"])`
 
 This ensures the PreCompact hook can inject the routing table
 and work type into the recovery context. Without this, the
