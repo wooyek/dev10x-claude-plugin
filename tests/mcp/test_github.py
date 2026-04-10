@@ -336,6 +336,182 @@ class TestResolveRepo:
         assert result.value.owner == "owner"
         assert result.value.name == "repo"
 
+
+class TestPrCommentReply:
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_posts_reply(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        mock_api.return_value = _completed(
+            stdout=json.dumps({"id": 999, "body": "reply text"}),
+        )
+
+        result = await gh.pr_comment_reply(
+            pr_number=42,
+            comment_id=123,
+            body="reply text",
+        )
+
+        assert isinstance(result, SuccessResult)
+        mock_api.assert_called_once()
+        call_kwargs = mock_api.call_args.kwargs
+        assert call_kwargs["method"] == "POST"
+        assert call_kwargs["fields"]["body"] == "reply text"
+        assert call_kwargs["fields"]["in_reply_to"] == 123
+
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_returns_error_on_api_failure(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        mock_api.return_value = _completed(
+            returncode=1,
+            stderr="Not Found",
+        )
+
+        result = await gh.pr_comment_reply(
+            pr_number=42,
+            comment_id=123,
+            body="text",
+        )
+
+        assert isinstance(result, ErrorResult)
+
+
+class TestRequestReview:
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_requests_user_reviewers(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        mock_api.return_value = _completed(
+            stdout=json.dumps({"requested_reviewers": [{"login": "alice"}]}),
+        )
+
+        result = await gh.request_review(
+            pr_number=42,
+            reviewers=["alice"],
+        )
+
+        assert isinstance(result, SuccessResult)
+        fields = mock_api.call_args.kwargs["fields"]
+        assert fields["reviewers"] == ["alice"]
+
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_requests_team_reviewers(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        mock_api.return_value = _completed(
+            stdout=json.dumps({"requested_teams": [{"slug": "backend"}]}),
+        )
+
+        result = await gh.request_review(
+            pr_number=42,
+            reviewers=["org/backend"],
+            team=True,
+        )
+
+        assert isinstance(result, SuccessResult)
+        fields = mock_api.call_args.kwargs["fields"]
+        assert fields["team_reviewers"] == ["backend"]
+
+
+class TestPrCommentsStrategyDispatch:
+    @pytest.mark.asyncio
+    async def test_unknown_action_returns_error(
+        self,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        result = await gh.pr_comments(action="invalid")
+
+        assert isinstance(result, ErrorResult)
+        assert "Unknown action" in result.error
+        assert "get, list, reply, resolve" in result.error
+
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_get_action_requires_comment_id(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        result = await gh.pr_comments(action="get")
+
+        assert isinstance(result, ErrorResult)
+        assert "comment_id required" in result.error
+
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_list_action_requires_pr_number(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        result = await gh.pr_comments(action="list")
+
+        assert isinstance(result, ErrorResult)
+        assert "pr_number required" in result.error
+
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_get_action_fetches_comment(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        mock_api.return_value = _completed(
+            stdout=json.dumps({"id": 42, "body": "comment"}),
+        )
+
+        result = await gh.pr_comments(action="get", comment_id=42)
+
+        assert isinstance(result, SuccessResult)
+
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_list_action_fetches_comments(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        mock_api.return_value = _completed(
+            stdout=json.dumps([{"id": 1}, {"id": 2}]),
+        )
+
+        result = await gh.pr_comments(action="list", pr_number=10)
+
+        assert isinstance(result, SuccessResult)
+
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_reply_action_posts_comment(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        mock_api.return_value = _completed(
+            stdout=json.dumps({"id": 99, "body": "thanks"}),
+        )
+
+        result = await gh.pr_comments(
+            action="reply",
+            pr_number=10,
+            comment_id=5,
+            body="thanks",
+        )
+
+        assert isinstance(result, SuccessResult)
+
     @pytest.mark.asyncio
     async def test_explicit_repo_param(self) -> None:
         result = await gh._resolve_repo("my-org/my-repo")
