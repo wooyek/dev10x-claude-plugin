@@ -26,6 +26,7 @@ from dev10x.domain.validation_rule import Compensation, Config
 
 if TYPE_CHECKING:
     from dev10x.domain import HookRetry
+    from dev10x.domain.rule_engine import RuleEngine
 
 
 def _format_correction_msg(
@@ -62,24 +63,28 @@ OVERRIDE_HINT = (
 
 
 _CONFIG: Config | None = None
+_ENGINE: RuleEngine | None = None
 
 
-def _load_config(yaml_path: Path = _YAML_PATH) -> Config:
+def _load_config(yaml_path: Path = _YAML_PATH) -> tuple[Config, RuleEngine]:
     from dev10x.config.loader import load_config
+    from dev10x.domain.rule_engine import RuleEngine
 
     full = load_config(yaml_path=yaml_path)
-    return Config(
+    engine = RuleEngine.from_config(config=full)
+    config = Config(
         friction_level=full.friction_level,
         plugin_repo=full.plugin_repo,
-        rules=[r for r in full.rules if r.matcher == "Bash" and r.hook_block],
+        rules=engine.command_rules,
     )
+    return config, engine
 
 
-def _get_config() -> Config:
-    global _CONFIG
-    if _CONFIG is None:
-        _CONFIG = _load_config()
-    return _CONFIG
+def _get_config_and_engine() -> tuple[Config, RuleEngine]:
+    global _CONFIG, _ENGINE
+    if _CONFIG is None or _ENGINE is None:
+        _CONFIG, _ENGINE = _load_config()
+    return _CONFIG, _ENGINE
 
 
 _QUICK_TOKENS = frozenset(["commit", "create", "push", "rebase", "checks", "issue"])
@@ -155,38 +160,34 @@ class SkillRedirectValidator:
         return any(token in cmd_lower for token in _QUICK_TOKENS)
 
     def validate(self, inp: HookInput) -> HookResult | None:
-        config = _get_config()
-        command = inp.command
-        for rule in config.rules:
-            if not rule.matches_command(command=command):
-                continue
-            comp = rule.compensations[0] if rule.compensations else None
-            if not comp:
-                continue
-            if comp.skill == "Dev10x:git-commit" and _WRONG_TEMP_PATH_RE.search(command):
-                return HookResult(message=_COMMIT_HEAL_MSG)
-            label = rule.compiled_patterns[0].pattern
-            msg = _format_skill_msg(
-                label=label,
-                comp=comp,
-                friction_level=config.friction_level,
-                plugin_repo=config.plugin_repo,
-            )
-            return HookResult(message=msg)
-        return None
+        config, engine = _get_config_and_engine()
+        rule = engine.evaluate_command(command=inp.command)
+        if rule is None:
+            return None
+        comp = rule.compensations[0] if rule.compensations else None
+        if not comp:
+            return None
+        if comp.skill == "Dev10x:git-commit" and _WRONG_TEMP_PATH_RE.search(inp.command):
+            return HookResult(message=_COMMIT_HEAL_MSG)
+        label = rule.compiled_patterns[0].pattern
+        msg = _format_skill_msg(
+            label=label,
+            comp=comp,
+            friction_level=config.friction_level,
+            plugin_repo=config.plugin_repo,
+        )
+        return HookResult(message=msg)
 
     def correct(self, inp: HookInput) -> HookRetry | None:
         from dev10x.domain import HookRetry as _HookRetry
 
-        config = _get_config()
-        command = inp.command
-        for rule in config.rules:
-            if not rule.matches_command(command=command):
-                continue
-            comp = rule.compensations[0] if rule.compensations else None
-            if not comp:
-                continue
-            label = rule.compiled_patterns[0].pattern
-            msg = _format_correction_msg(label=label, comp=comp)
-            return _HookRetry(message=msg)
-        return None
+        _, engine = _get_config_and_engine()
+        rule = engine.evaluate_command(command=inp.command)
+        if rule is None:
+            return None
+        comp = rule.compensations[0] if rule.compensations else None
+        if not comp:
+            return None
+        label = rule.compiled_patterns[0].pattern
+        msg = _format_correction_msg(label=label, comp=comp)
+        return _HookRetry(message=msg)

@@ -332,7 +332,7 @@ class TestFrictionLevels:
                 fallback="Apply manual guardrail here.",
             )
         )
-        config = _load_config(yaml_path=yaml_file)
+        config, engine = _load_config(yaml_path=yaml_file)
         assert config.friction_level == "guided"
 
         validator = SkillRedirectValidator()
@@ -340,12 +340,12 @@ class TestFrictionLevels:
 
         import dev10x.validators.skill_redirect as mod
 
-        original = mod._CONFIG
-        mod._CONFIG = config
+        orig_config, orig_engine = mod._CONFIG, mod._ENGINE
+        mod._CONFIG, mod._ENGINE = config, engine
         try:
             result = validator.validate(inp=inp)
         finally:
-            mod._CONFIG = original
+            mod._CONFIG, mod._ENGINE = orig_config, orig_engine
 
         assert result is not None
         assert "Apply manual guardrail here." in result.message
@@ -358,19 +358,19 @@ class TestFrictionLevels:
                 fallback="Apply manual guardrail here.",
             )
         )
-        config = _load_config(yaml_path=yaml_file)
+        config, engine = _load_config(yaml_path=yaml_file)
 
         validator = SkillRedirectValidator()
         inp = _make_input(command="test cmd foo")
 
         import dev10x.validators.skill_redirect as mod
 
-        original = mod._CONFIG
-        mod._CONFIG = config
+        orig_config, orig_engine = mod._CONFIG, mod._ENGINE
+        mod._CONFIG, mod._ENGINE = config, engine
         try:
             result = validator.validate(inp=inp)
         finally:
-            mod._CONFIG = original
+            mod._CONFIG, mod._ENGINE = orig_config, orig_engine
 
         assert result is not None
         assert "Apply manual guardrail here." not in result.message
@@ -392,7 +392,7 @@ class TestFrictionLevels:
                         skill: Dev10x:ignored
             """)
         )
-        config = _load_config(yaml_path=yaml_file)
+        config, engine = _load_config(yaml_path=yaml_file)
         assert config.rules == []
 
     def test_mcp_type_guided_uses_mcp_template(self, tmp_path: Path) -> None:
@@ -404,19 +404,19 @@ class TestFrictionLevels:
                 comp_type="use-tool",
             )
         )
-        config = _load_config(yaml_path=yaml_file)
+        config, engine = _load_config(yaml_path=yaml_file)
 
         validator = SkillRedirectValidator()
         inp = _make_input(command="test cmd foo")
 
         import dev10x.validators.skill_redirect as mod
 
-        original = mod._CONFIG
-        mod._CONFIG = config
+        orig_config, orig_engine = mod._CONFIG, mod._ENGINE
+        mod._CONFIG, mod._ENGINE = config, engine
         try:
             result = validator.validate(inp=inp)
         finally:
-            mod._CONFIG = original
+            mod._CONFIG, mod._ENGINE = orig_config, orig_engine
 
         assert result is not None
         assert "MCP tool" in result.message
@@ -430,19 +430,19 @@ class TestFrictionLevels:
                 comp_type="use-tool",
             )
         )
-        config = _load_config(yaml_path=yaml_file)
+        config, engine = _load_config(yaml_path=yaml_file)
 
         validator = SkillRedirectValidator()
         inp = _make_input(command="test cmd foo")
 
         import dev10x.validators.skill_redirect as mod
 
-        original = mod._CONFIG
-        mod._CONFIG = config
+        orig_config, orig_engine = mod._CONFIG, mod._ENGINE
+        mod._CONFIG, mod._ENGINE = config, engine
         try:
             result = validator.validate(inp=inp)
         finally:
-            mod._CONFIG = original
+            mod._CONFIG, mod._ENGINE = orig_config, orig_engine
 
         assert result is not None
         assert "MCP tool" in result.message
