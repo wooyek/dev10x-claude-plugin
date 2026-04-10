@@ -76,6 +76,86 @@ def _escape_for_json(s: str) -> str:
     )
 
 
+def _format_session_state(state: dict[str, Any]) -> str:
+    timestamp = state.get("timestamp", "")
+    if not timestamp:
+        return ""
+
+    try:
+        file_dt = datetime.fromisoformat(timestamp)
+        now_dt = datetime.now(UTC)
+        age_hours = int((now_dt - file_dt).total_seconds() / 3600)
+    except (ValueError, TypeError):
+        age_hours = 0
+
+    stale_flag = f" (STALE — {age_hours}h old, may be outdated)" if age_hours > 24 else ""
+
+    branch = state.get("branch", "unknown")
+    worktree = state.get("worktree", "")
+    session_id = state.get("session_id", "")
+    modified = state.get("modified_files", [])
+    staged = state.get("staged_files", [])
+    commits = state.get("recent_commits", [])
+
+    modified_str = "\n".join(f"- {f}" for f in modified) if modified else "none"
+    staged_str = "\n".join(f"- {f}" for f in staged) if staged else "none"
+    commits_str = "\n".join(commits) if commits else "none"
+
+    lines = [f"Prior session state detected{stale_flag}:", f"- Branch: {branch}"]
+    if worktree:
+        lines.append(f"- Worktree: {worktree}")
+    lines.append(f"- Last active: {timestamp}")
+    lines.append(f"- Session ID: {session_id}")
+    lines.append(f"\nModified files:\n{modified_str}")
+    lines.append(f"\nStaged files:\n{staged_str}")
+    lines.append(f"\nRecent commits:\n{commits_str}")
+    lines.append(f"\nResume prior session with: claude --resume {session_id}")
+    return "\n".join(lines)
+
+
+def _format_plan_summary(plan: dict[str, Any]) -> str:
+    plan_meta = plan.get("plan", {})
+    plan_status = plan_meta.get("status", "unknown")
+    plan_branch = plan_meta.get("branch", "unknown")
+    plan_synced = plan_meta.get("last_synced", "unknown")
+    tasks = plan.get("tasks", [])
+    task_count = len(tasks)
+    completed_count = sum(1 for t in tasks if t.get("status") == "completed")
+    pending_tasks = [
+        f"  - [{t.get('status')}] #{t.get('id')} {t.get('subject')}"
+        for t in tasks
+        if t.get("status") not in ("completed", "deleted")
+    ]
+
+    lines = [f"Persisted plan detected ({completed_count}/{task_count} tasks completed):"]
+    lines.append(f"- Plan branch: {plan_branch}")
+    lines.append(f"- Plan status: {plan_status}")
+    lines.append(f"- Last synced: {plan_synced}")
+
+    if pending_tasks:
+        lines.append("- Remaining tasks:\n" + "\n".join(pending_tasks))
+
+    plan_context = plan_meta.get("context", {})
+    work_type = plan_context.get("work_type")
+    if work_type:
+        lines.append(f"- Work type: {work_type}")
+
+    tickets = plan_context.get("tickets", [])
+    if tickets:
+        ticket_str = ", ".join(tickets) if isinstance(tickets, list) else tickets
+        lines.append(f"- Tickets: {ticket_str}")
+
+    routing = plan_context.get("routing_table", {})
+    if routing and isinstance(routing, dict):
+        routing_lines = [f"  {k} → {v}" for k, v in routing.items()]
+        lines.append("- Skill routing:\n" + "\n".join(routing_lines))
+
+    if plan_status == "completed":
+        lines.append("- All tasks completed. Plan can be archived.")
+
+    return "\n".join(lines)
+
+
 def session_reload() -> None:
     toplevel = _get_toplevel()
     if not toplevel:
@@ -92,86 +172,20 @@ def session_reload() -> None:
     if not state and not has_plan:
         sys.exit(0)
 
-    context = ""
+    parts: list[str] = []
 
     if state:
-        timestamp = state.get("timestamp", "")
-        if timestamp:
-            try:
-                file_dt = datetime.fromisoformat(timestamp)
-                now_dt = datetime.now(UTC)
-                age_hours = int((now_dt - file_dt).total_seconds() / 3600)
-            except (ValueError, TypeError):
-                age_hours = 0
-
-            stale_flag = f" (STALE — {age_hours}h old, may be outdated)" if age_hours > 24 else ""
-
-            branch = state.get("branch", "unknown")
-            worktree = state.get("worktree", "")
-            session_id = state.get("session_id", "")
-            modified = state.get("modified_files", [])
-            staged = state.get("staged_files", [])
-            commits = state.get("recent_commits", [])
-
-            modified_str = "\n".join(f"- {f}" for f in modified) if modified else "none"
-            staged_str = "\n".join(f"- {f}" for f in staged) if staged else "none"
-            commits_str = "\n".join(commits) if commits else "none"
-
-            context = f"Prior session state detected{stale_flag}:\n- Branch: {branch}"
-            if worktree:
-                context += f"\n- Worktree: {worktree}"
-            context += f"\n- Last active: {timestamp}"
-            context += f"\n- Session ID: {session_id}"
-            context += f"\n\nModified files:\n{modified_str}"
-            context += f"\n\nStaged files:\n{staged_str}"
-            context += f"\n\nRecent commits:\n{commits_str}"
-            context += f"\n\nResume prior session with: claude --resume {session_id}"
+        state_text = _format_session_state(state=state)
+        if state_text:
+            parts.append(state_text)
 
     if has_plan:
         plan = _read_plan_summary(toplevel=toplevel)
-        plan_meta = plan.get("plan", {})
-        plan_status = plan_meta.get("status", "unknown")
-        plan_branch = plan_meta.get("branch", "unknown")
-        plan_synced = plan_meta.get("last_synced", "unknown")
-        tasks = plan.get("tasks", [])
-        task_count = len(tasks)
-        completed_count = sum(1 for t in tasks if t.get("status") == "completed")
-        pending_tasks = [
-            f"  - [{t.get('status')}] #{t.get('id')} {t.get('subject')}"
-            for t in tasks
-            if t.get("status") not in ("completed", "deleted")
-        ]
+        plan_text = _format_plan_summary(plan=plan)
+        if plan_text:
+            parts.append(plan_text)
 
-        if context:
-            context += "\n\n"
-
-        context += f"Persisted plan detected ({completed_count}/{task_count} tasks completed):"
-        context += f"\n- Plan branch: {plan_branch}"
-        context += f"\n- Plan status: {plan_status}"
-        context += f"\n- Last synced: {plan_synced}"
-
-        if pending_tasks:
-            context += "\n- Remaining tasks:\n" + "\n".join(pending_tasks)
-
-        plan_context = plan_meta.get("context", {})
-        work_type = plan_context.get("work_type")
-        if work_type:
-            context += f"\n- Work type: {work_type}"
-
-        tickets = plan_context.get("tickets", [])
-        if tickets:
-            context += (
-                f"\n- Tickets: {', '.join(tickets) if isinstance(tickets, list) else tickets}"
-            )
-
-        routing = plan_context.get("routing_table", {})
-        if routing and isinstance(routing, dict):
-            routing_lines = [f"  {k} → {v}" for k, v in routing.items()]
-            context += "\n- Skill routing:\n" + "\n".join(routing_lines)
-
-        if plan_status == "completed":
-            context += "\n- All tasks completed. Plan can be archived."
-
+    context = "\n\n".join(parts)
     if not context:
         sys.exit(0)
 
