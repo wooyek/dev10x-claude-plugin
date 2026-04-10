@@ -11,8 +11,9 @@ Modes:
   - --generalize: Replace session-specific args with wildcard patterns
 
 Config lookup order:
-  1. ~/.claude/skills/Dev10x:upgrade-cleanup/projects.yaml (userspace)
-  2. ${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/projects.yaml (plugin default)
+  1. ~/.claude/memory/Dev10x/projects.yaml (persistent user config)
+  2. ~/.claude/skills/Dev10x:upgrade-cleanup/projects.yaml (userspace)
+  3. ${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/projects.yaml (plugin default)
 """
 
 import argparse
@@ -23,6 +24,7 @@ from pathlib import Path
 
 import yaml
 
+MEMORY_CONFIG = Path.home() / ".claude" / "memory" / "Dev10x" / "projects.yaml"
 USERSPACE_CONFIG = Path.home() / ".claude" / "skills" / "Dev10x:upgrade-cleanup" / "projects.yaml"
 PLUGIN_CONFIG = (
     Path(__file__).resolve().parents[4] / "skills" / "upgrade-cleanup" / "projects.yaml"
@@ -42,12 +44,14 @@ def extract_cache_publisher(plugin_cache: str) -> str | None:
 
 
 def find_config() -> Path:
+    if MEMORY_CONFIG.is_file():
+        return MEMORY_CONFIG
     if USERSPACE_CONFIG.is_file():
         return USERSPACE_CONFIG
     if PLUGIN_CONFIG.is_file():
         return PLUGIN_CONFIG
     print(
-        f"ERROR: No config found. Create {USERSPACE_CONFIG}\nor ensure {PLUGIN_CONFIG} exists.",
+        f"ERROR: No config found. Create {MEMORY_CONFIG}\nor ensure {PLUGIN_CONFIG} exists.",
         file=sys.stderr,
     )
     sys.exit(1)
@@ -488,6 +492,9 @@ def _detect_plugin_cache() -> str:
 
 
 def _init_userspace_config() -> int:
+    if MEMORY_CONFIG.is_file():
+        print(f"Config already exists: {MEMORY_CONFIG}")
+        return 0
     if USERSPACE_CONFIG.is_file():
         print(f"Config already exists: {USERSPACE_CONFIG}")
         return 0
