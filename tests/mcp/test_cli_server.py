@@ -13,6 +13,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from dev10x.domain.repository_ref import RepositoryRef
+from dev10x.domain.result import ErrorResult, SuccessResult
 
 cli_server = pytest.importorskip("dev10x.mcp.server_cli", reason="mcp not installed")
 
@@ -169,10 +170,10 @@ class TestGhApi:
 class TestResolveRepo:
     @pytest.mark.asyncio
     async def test_returns_provided_repo(self) -> None:
-        result, error = await gh._resolve_repo(repo="owner/repo")
+        result = await gh._resolve_repo(repo="owner/repo")
 
-        assert result == RepositoryRef(owner="owner", name="repo")
-        assert error is None
+        assert isinstance(result, SuccessResult)
+        assert result.value == RepositoryRef(owner="owner", name="repo")
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.github._detect_repo", new_callable=AsyncMock, return_value="detected/repo")
@@ -180,10 +181,10 @@ class TestResolveRepo:
         self,
         _mock: AsyncMock,
     ) -> None:
-        result, error = await gh._resolve_repo(repo=None)
+        result = await gh._resolve_repo(repo=None)
 
-        assert result == RepositoryRef(owner="detected", name="repo")
-        assert error is None
+        assert isinstance(result, SuccessResult)
+        assert result.value == RepositoryRef(owner="detected", name="repo")
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.github._detect_repo", new_callable=AsyncMock, return_value=None)
@@ -191,11 +192,10 @@ class TestResolveRepo:
         self,
         _mock: AsyncMock,
     ) -> None:
-        result, error = await gh._resolve_repo(repo=None)
+        result = await gh._resolve_repo(repo=None)
 
-        assert result is None
-        assert error is not None
-        assert "error" in error
+        assert isinstance(result, ErrorResult)
+        assert "repository" in result.error.lower()
 
 
 class TestDetectTracker:
@@ -462,7 +462,7 @@ class TestPrePrChecks:
 
         result = await cli_server.pre_pr_checks(base_branch="develop")
 
-        assert result["success"] is False
+        assert "error" in result
         assert result["error"] == "Linting failed"
 
 

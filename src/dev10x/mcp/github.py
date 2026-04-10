@@ -1,7 +1,7 @@
 """GitHub MCP tool implementations.
 
 Extracted from cli_server.py — cohesive GitHub API and CLI operations.
-Each function takes explicit parameters and returns typed dicts.
+Each function takes explicit parameters and returns Result types.
 All public functions are async to avoid blocking the MCP event loop.
 """
 
@@ -10,17 +10,15 @@ from __future__ import annotations
 import json
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from dev10x.domain.repository_ref import RepositoryRef
+from dev10x.domain.result import ErrorResult, Result, err, ok
 from dev10x.mcp.subprocess_utils import (
     async_run,
     async_run_script,
     parse_key_value_output,
 )
-
-if TYPE_CHECKING:
-    pass
 
 
 async def _detect_repo() -> str | None:
@@ -61,41 +59,52 @@ async def _gh_api(
 
 async def _resolve_repo(
     repo: str | None,
-) -> tuple[RepositoryRef | None, dict[str, str] | None]:
+) -> Result[RepositoryRef]:
     resolved = repo or await _detect_repo()
     if not resolved:
-        return None, {"error": "Could not detect repository. Provide repo parameter."}
+        return err("Could not detect repository. Provide repo parameter.")
     try:
-        return RepositoryRef.parse(resolved), None
+        return ok(RepositoryRef.parse(resolved))
     except ValueError as exc:
-        return None, {"error": str(exc)}
+        return err(str(exc))
 
 
-async def detect_tracker(*, ticket_id: str) -> dict[str, Any]:
+def _parse_gh_api_result(
+    result: subprocess.CompletedProcess[str],
+) -> Result[dict[str, Any]]:
+    if result.returncode != 0:
+        return err(result.stderr.strip())
+    try:
+        return ok(json.loads(result.stdout))
+    except json.JSONDecodeError:
+        return ok({"raw_output": result.stdout})
+
+
+async def detect_tracker(*, ticket_id: str) -> Result[dict[str, Any]]:
     result = await async_run_script(
         "skills/gh-context/scripts/detect-tracker.sh",
         ticket_id,
     )
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-    return parse_key_value_output(result.stdout)
+        return err(result.stderr.strip())
+    return ok(parse_key_value_output(result.stdout))
 
 
-async def pr_detect(*, arg: str) -> dict[str, Any]:
+async def pr_detect(*, arg: str) -> Result[dict[str, Any]]:
     result = await async_run_script(
         "skills/gh-context/scripts/gh-pr-detect.sh",
         arg,
     )
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-    return parse_key_value_output(result.stdout)
+        return err(result.stderr.strip())
+    return ok(parse_key_value_output(result.stdout))
 
 
 async def issue_get(
     *,
     number: int,
     repo: str | None = None,
-) -> dict[str, Any]:
+) -> Result[dict[str, Any]]:
     args = [str(number)]
     if repo:
         args.append(repo)
@@ -104,18 +113,18 @@ async def issue_get(
         *args,
     )
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
+        return err(result.stderr.strip())
     try:
-        return json.loads(result.stdout)
+        return ok(json.loads(result.stdout))
     except json.JSONDecodeError:
-        return parse_key_value_output(result.stdout)
+        return ok(parse_key_value_output(result.stdout))
 
 
 async def issue_comments(
     *,
     number: int,
     repo: str | None = None,
-) -> dict[str, Any]:
+) -> Result[dict[str, Any]]:
     args = [str(number)]
     if repo:
         args.append(repo)
@@ -124,11 +133,11 @@ async def issue_comments(
         *args,
     )
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
+        return err(result.stderr.strip())
     try:
-        return json.loads(result.stdout)
+        return ok(json.loads(result.stdout))
     except json.JSONDecodeError:
-        return {"raw_output": result.stdout}
+        return ok({"raw_output": result.stdout})
 
 
 async def issue_create(
@@ -137,7 +146,7 @@ async def issue_create(
     body: str | None = None,
     labels: list[str] | None = None,
     repo: str | None = None,
-) -> dict[str, Any]:
+) -> Result[dict[str, Any]]:
     args = [title]
     if body:
         args.extend(["--body", body])
@@ -151,11 +160,11 @@ async def issue_create(
         *args,
     )
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
+        return err(result.stderr.strip())
     try:
-        return json.loads(result.stdout)
+        return ok(json.loads(result.stdout))
     except json.JSONDecodeError:
-        return parse_key_value_output(result.stdout)
+        return ok(parse_key_value_output(result.stdout))
 
 
 async def pr_comments(
@@ -166,26 +175,27 @@ async def pr_comments(
     comment_ids: list[str] | None = None,
     body: str | None = None,
     repo: str | None = None,
-) -> dict[str, Any]:
-    resolved_repo, err = await _resolve_repo(repo)
-    if err:
-        return err
+) -> Result[dict[str, Any]]:
+    repo_result = await _resolve_repo(repo)
+    if isinstance(repo_result, ErrorResult):
+        return repo_result
+    resolved_repo = repo_result.value
 
     if action == "get":
         if comment_id is None:
-            return {"error": "comment_id required for 'get' action"}
+            return err("comment_id required for 'get' action")
         result = await _gh_api(f"repos/{resolved_repo}/pulls/comments/{comment_id}")
 
     elif action == "list":
         if pr_number is None:
-            return {"error": "pr_number required for 'list' action"}
+            return err("pr_number required for 'list' action")
         result = await _gh_api(
             f"repos/{resolved_repo}/pulls/{pr_number}/comments?per_page=100",
         )
 
     elif action == "reply":
         if pr_number is None or comment_id is None or body is None:
-            return {"error": "pr_number, comment_id, and body required for 'reply'"}
+            return err("pr_number, comment_id, and body required for 'reply'")
         result = await _gh_api(
             f"repos/{resolved_repo}/pulls/{pr_number}/comments",
             method="POST",
@@ -199,7 +209,7 @@ async def pr_comments(
         elif comment_id is not None:
             ids_to_resolve = [str(comment_id)]
         else:
-            return {"error": "comment_id or comment_ids required for 'resolve' action"}
+            return err("comment_id or comment_ids required for 'resolve' action")
 
         node_fragments = " ".join(
             f"n{i}: node(id: {json.dumps(cid)}) "
@@ -212,7 +222,7 @@ async def pr_comments(
             fields={"query": f"{{ {node_fragments} }}"},
         )
         if query_result.returncode != 0:
-            return {"error": query_result.stderr.strip()}
+            return err(query_result.stderr.strip())
 
         query_data = json.loads(query_result.stdout)
         thread_ids: list[str] = []
@@ -230,7 +240,7 @@ async def pr_comments(
                 )
 
         if not thread_ids:
-            return {"error": "; ".join(errors)}
+            return err("; ".join(errors))
 
         resolve_fragments = " ".join(
             f"r{i}: resolveReviewThread(input: {{threadId: {json.dumps(tid)}}}) "
@@ -243,23 +253,17 @@ async def pr_comments(
         )
 
         if result.returncode != 0:
-            return {"error": result.stderr.strip()}
+            return err(result.stderr.strip())
 
         response: dict[str, Any] = json.loads(result.stdout)
         if errors:
             response["warnings"] = errors
-        return response
+        return ok(response)
 
     else:
-        return {"error": f"Unknown action: {action}. Supported: list, get, reply, resolve"}
+        return err(f"Unknown action: {action}. Supported: list, get, reply, resolve")
 
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return {"raw_output": result.stdout}
+    return _parse_gh_api_result(result)
 
 
 async def pr_comment_reply(
@@ -268,10 +272,11 @@ async def pr_comment_reply(
     comment_id: int,
     body: str,
     repo: str | None = None,
-) -> dict[str, Any]:
-    resolved_repo, err = await _resolve_repo(repo)
-    if err:
-        return err
+) -> Result[dict[str, Any]]:
+    repo_result = await _resolve_repo(repo)
+    if isinstance(repo_result, ErrorResult):
+        return repo_result
+    resolved_repo = repo_result.value
 
     result = await _gh_api(
         f"repos/{resolved_repo}/pulls/{pr_number}/comments",
@@ -279,13 +284,7 @@ async def pr_comment_reply(
         fields={"body": body, "in_reply_to": comment_id},
     )
 
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return {"raw_output": result.stdout}
+    return _parse_gh_api_result(result)
 
 
 async def request_review(
@@ -294,10 +293,11 @@ async def request_review(
     reviewers: list[str],
     team: bool | None = None,
     repo: str | None = None,
-) -> dict[str, Any]:
-    resolved_repo, err = await _resolve_repo(repo)
-    if err:
-        return err
+) -> Result[dict[str, Any]]:
+    repo_result = await _resolve_repo(repo)
+    if isinstance(repo_result, ErrorResult):
+        return repo_result
+    resolved_repo = repo_result.value
 
     fields: dict[str, str | list[str]] = {}
     if team:
@@ -311,20 +311,14 @@ async def request_review(
         fields=fields,
     )
 
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return {"raw_output": result.stdout}
+    return _parse_gh_api_result(result)
 
 
 async def detect_base_branch(
     *,
     base: str | None = None,
     force: bool = False,
-) -> dict[str, Any]:
+) -> Result[dict[str, Any]]:
     args: list[str] = []
     if base:
         args.extend(["--base", base])
@@ -337,16 +331,18 @@ async def detect_base_branch(
     )
 
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
+        return err(result.stderr.strip())
 
     parsed = parse_key_value_output(result.stdout)
-    return {
-        "base_branch": parsed.get("BASE_BRANCH", ""),
-        "has_develop": bool(parsed.get("DEV_BRANCH", "")),
-    }
+    return ok(
+        {
+            "base_branch": parsed.get("BASE_BRANCH", ""),
+            "has_develop": bool(parsed.get("DEV_BRANCH", "")),
+        }
+    )
 
 
-async def verify_pr_state(*, force: bool = False) -> dict[str, Any]:
+async def verify_pr_state(*, force: bool = False) -> Result[dict[str, Any]]:
     args: list[str] = []
     if force:
         args.append("--force")
@@ -357,12 +353,12 @@ async def verify_pr_state(*, force: bool = False) -> dict[str, Any]:
     )
 
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
+        return err(result.stderr.strip())
 
-    return parse_key_value_output(result.stdout)
+    return ok(parse_key_value_output(result.stdout))
 
 
-async def pre_pr_checks(*, base_branch: str | None = None) -> dict[str, Any]:
+async def pre_pr_checks(*, base_branch: str | None = None) -> Result[dict[str, Any]]:
     args: list[str] = []
     if base_branch:
         args.append(base_branch)
@@ -372,11 +368,10 @@ async def pre_pr_checks(*, base_branch: str | None = None) -> dict[str, Any]:
         *args,
     )
 
-    return {
-        "success": result.returncode == 0,
-        "output": result.stdout.strip(),
-        **({"error": result.stderr.strip()} if result.returncode != 0 else {}),
-    }
+    if result.returncode != 0:
+        return err(result.stderr.strip(), output=result.stdout.strip())
+
+    return ok({"success": True, "output": result.stdout.strip()})
 
 
 async def create_pr(
@@ -386,7 +381,7 @@ async def create_pr(
     issue_id: str,
     fixes_url: str | None = None,
     base_branch: str | None = None,
-) -> dict[str, Any]:
+) -> Result[dict[str, Any]]:
     args = [title, job_story, issue_id]
     args.append(fixes_url or "")
     args.append(base_branch or "")
@@ -397,19 +392,19 @@ async def create_pr(
     )
 
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
+        return err(result.stderr.strip())
 
     lines = result.stdout.strip().split("\n")
     pr_number = lines[-1]
     url = next((line for line in lines if line.startswith("http")), f"PR #{pr_number}")
-    return {"pr_number": int(pr_number), "url": url}
+    return ok({"pr_number": int(pr_number), "url": url})
 
 
 async def generate_commit_list(
     *,
     pr_number: int,
     base_branch: str | None = None,
-) -> dict[str, Any]:
+) -> Result[dict[str, Any]]:
     args = [str(pr_number)]
     if base_branch:
         args.append(base_branch)
@@ -420,16 +415,16 @@ async def generate_commit_list(
     )
 
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
+        return err(result.stderr.strip())
 
-    return {"commit_list": result.stdout.strip()}
+    return ok({"commit_list": result.stdout.strip()})
 
 
 async def post_summary_comment(
     *,
     issue_id: str,
     summary_text: str,
-) -> dict[str, Any]:
+) -> Result[dict[str, Any]]:
     result = await async_run_script(
         "skills/gh-pr-create/scripts/post-summary-comment.sh",
         issue_id,
@@ -437,9 +432,9 @@ async def post_summary_comment(
     )
 
     if result.returncode != 0:
-        return {"error": result.stderr.strip()}
+        return err(result.stderr.strip())
 
-    return {"success": True, "output": result.stdout.strip()}
+    return ok({"success": True, "output": result.stdout.strip()})
 
 
 async def pr_notify(
@@ -454,12 +449,12 @@ async def pr_notify(
     skip_slack: bool = False,
     skip_reviewers: bool = False,
     skip_checklist: bool = False,
-) -> dict[str, Any]:
+) -> Result[dict[str, Any]]:
     plugin_root = Path(__file__).parents[3]
     script_path = plugin_root / "skills" / "gh-pr-monitor" / "scripts" / "pr-notify.py"
 
     if not script_path.exists():
-        return {"error": f"Script not found: {script_path}"}
+        return err(f"Script not found: {script_path}")
 
     args = [
         "uv",
@@ -492,9 +487,9 @@ async def pr_notify(
     proc = await async_run(args=args, timeout=60)
 
     if proc.returncode != 0:
-        return {"error": proc.stderr.strip()}
+        return err(proc.stderr.strip())
 
     try:
-        return json.loads(proc.stdout)
+        return ok(json.loads(proc.stdout))
     except json.JSONDecodeError:
-        return {"success": True, "output": proc.stdout.strip()}
+        return ok({"success": True, "output": proc.stdout.strip()})

@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from dev10x.domain.repository_ref import RepositoryRef
+from dev10x.domain.result import ErrorResult, SuccessResult, ok
 
 gh = pytest.importorskip("dev10x.mcp.github", reason="dev10x not installed")
 
@@ -17,7 +18,7 @@ def mock_resolve_repo():
         gh,
         "_resolve_repo",
         new_callable=AsyncMock,
-        return_value=(RepositoryRef(owner="owner", name="repo"), None),
+        return_value=ok(RepositoryRef(owner="owner", name="repo")),
     ) as mock:
         yield mock
 
@@ -66,7 +67,7 @@ class TestPrCommentsResolveSingle:
             comment_id="PRRC_comment123",
         )
 
-        assert result["data"]["r0"]["thread"]["isResolved"] is True
+        assert result.value["data"]["r0"]["thread"]["isResolved"] is True
         assert mock_api.call_count == 2
 
     @pytest.mark.asyncio
@@ -96,8 +97,8 @@ class TestPrCommentsResolveSingle:
     ) -> None:
         result = await gh.pr_comments(action="resolve")
 
-        assert "error" in result
-        assert "comment_id or comment_ids required" in result["error"]
+        assert isinstance(result, ErrorResult)
+        assert "comment_id or comment_ids required" in result.error
 
 
 class TestPrCommentsResolveBatch:
@@ -150,10 +151,10 @@ class TestPrCommentsResolveBatch:
         )
 
         assert mock_api.call_count == 2
-        assert "data" in result
-        assert "r0" in result["data"]
-        assert "r1" in result["data"]
-        assert "r2" in result["data"]
+        assert isinstance(result, SuccessResult)
+        assert "r0" in result.value["data"]
+        assert "r1" in result.value["data"]
+        assert "r2" in result.value["data"]
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
@@ -225,7 +226,8 @@ class TestPrCommentsResolveErrors:
             comment_id="PRRC_abc",
         )
 
-        assert result["error"] == "GraphQL error"
+        assert isinstance(result, ErrorResult)
+        assert result.error == "GraphQL error"
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
@@ -243,8 +245,8 @@ class TestPrCommentsResolveErrors:
             comment_id="PRRC_bad",
         )
 
-        assert "error" in result
-        assert "Could not find thread" in result["error"]
+        assert isinstance(result, ErrorResult)
+        assert "Could not find thread" in result.error
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
@@ -264,8 +266,8 @@ class TestPrCommentsResolveErrors:
             comment_id="PRRC_bad",
         )
 
-        assert "error" in result
-        assert "Could not find thread" in result["error"]
+        assert isinstance(result, ErrorResult)
+        assert "Could not find thread" in result.error
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
@@ -297,9 +299,9 @@ class TestPrCommentsResolveErrors:
             comment_ids=["PRRC_good", "PRRC_bad"],
         )
 
-        assert result["data"]["r0"]["thread"]["isResolved"] is True
-        assert "warnings" in result
-        assert any("PRRC_bad" in w for w in result["warnings"])
+        assert result.value["data"]["r0"]["thread"]["isResolved"] is True
+        assert "warnings" in result.value
+        assert any("PRRC_bad" in w for w in result.value["warnings"])
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
@@ -320,39 +322,38 @@ class TestPrCommentsResolveErrors:
             comment_id="PRRC_abc",
         )
 
-        assert result["error"] == "Mutation failed"
+        assert isinstance(result, ErrorResult)
+        assert result.error == "Mutation failed"
 
 
 class TestResolveRepo:
     @pytest.mark.asyncio
     async def test_returns_repository_ref(self) -> None:
         with patch.object(gh, "_detect_repo", new_callable=AsyncMock, return_value="owner/repo"):
-            ref, err = await gh._resolve_repo(None)
+            result = await gh._resolve_repo(None)
 
-        assert err is None
-        assert isinstance(ref, RepositoryRef)
-        assert ref.owner == "owner"
-        assert ref.name == "repo"
+        assert isinstance(result, SuccessResult)
+        assert result.value.owner == "owner"
+        assert result.value.name == "repo"
 
     @pytest.mark.asyncio
     async def test_explicit_repo_param(self) -> None:
-        ref, err = await gh._resolve_repo("my-org/my-repo")
+        result = await gh._resolve_repo("my-org/my-repo")
 
-        assert err is None
-        assert ref == RepositoryRef(owner="my-org", name="my-repo")
+        assert isinstance(result, SuccessResult)
+        assert result.value == RepositoryRef(owner="my-org", name="my-repo")
 
     @pytest.mark.asyncio
     async def test_returns_error_when_no_repo(self) -> None:
         with patch.object(gh, "_detect_repo", new_callable=AsyncMock, return_value=None):
-            ref, err = await gh._resolve_repo(None)
+            result = await gh._resolve_repo(None)
 
-        assert ref is None
-        assert "error" in err
+        assert isinstance(result, ErrorResult)
+        assert "repository" in result.error.lower()
 
     @pytest.mark.asyncio
     async def test_returns_error_for_invalid_format(self) -> None:
-        ref, err = await gh._resolve_repo("invalid-repo-no-slash")
+        result = await gh._resolve_repo("invalid-repo-no-slash")
 
-        assert ref is None
-        assert "error" in err
-        assert "Invalid repository reference" in err["error"]
+        assert isinstance(result, ErrorResult)
+        assert "Invalid repository reference" in result.error
