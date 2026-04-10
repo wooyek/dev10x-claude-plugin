@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -14,6 +15,10 @@ class Compensation:
     guardrails: str = ""
     fallback: str = ""
     description: str = ""
+
+    @classmethod
+    def from_yaml_entry(cls, entry: dict[str, Any]) -> Compensation:
+        return cls(**{k: v for k, v in entry.items() if k in cls.__dataclass_fields__})
 
 
 @dataclass(frozen=True)
@@ -75,6 +80,28 @@ class Rule:
         if any(exc in command for exc in self.except_):
             return False
         return True
+
+    @classmethod
+    def from_yaml_entry(cls, entry: dict[str, Any]) -> Rule:
+        compensations = [
+            Compensation.from_yaml_entry(entry=c) for c in entry.get("compensations", [])
+        ]
+        return cls(
+            name=entry.get("name", ""),
+            patterns=entry.get("patterns", []),
+            matcher=entry.get("matcher", "Bash"),
+            except_=entry.get("except", []),
+            compensations=compensations,
+            hook_block=entry.get("hook_block", True),
+            reason=entry.get("reason", ""),
+            message=entry.get("message", ""),
+            related=entry.get("related", []),
+            file_pattern=entry.get("file_pattern", ""),
+            file_names=entry.get("file_names", []),
+            file_prefixes=entry.get("file_prefixes", []),
+            file_substrings=entry.get("file_substrings", []),
+            content_pattern=entry.get("content_pattern", ""),
+        )
 
 
 @dataclass(frozen=True)

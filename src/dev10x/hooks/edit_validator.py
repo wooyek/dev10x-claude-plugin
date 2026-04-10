@@ -9,44 +9,12 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import yaml
-
-from dev10x.domain.validation_rule import Compensation, Rule
+if TYPE_CHECKING:
+    from dev10x.domain.validation_rule import Rule
 
 _YAML_PATH = Path(__file__).parent.parent / "validators" / "command-skill-map.yaml"
-
-EditRule = Rule
-
-
-def load_rules(*, yaml_path: Path = _YAML_PATH) -> list[Rule]:
-    data: dict[str, Any] = yaml.safe_load(yaml_path.read_text())
-    rules: list[Rule] = []
-    for entry in data.get("rules", []):
-        if entry.get("matcher") != "Edit|Write":
-            continue
-        if not entry.get("hook_block", False):
-            continue
-        compensations = [
-            Compensation(**{k: v for k, v in c.items() if k in Compensation.__dataclass_fields__})
-            for c in entry.get("compensations", [])
-        ]
-        rules.append(
-            Rule(
-                name=entry.get("name", ""),
-                matcher="Edit|Write",
-                hook_block=True,
-                file_pattern=entry.get("file_pattern", ""),
-                file_names=entry.get("file_names", []),
-                file_prefixes=entry.get("file_prefixes", []),
-                file_substrings=entry.get("file_substrings", []),
-                content_pattern=entry.get("content_pattern", ""),
-                message=(entry.get("message") or entry.get("reason") or "BLOCKED").strip(),
-                compensations=compensations,
-            )
-        )
-    return rules
 
 
 def block(*, message: str) -> None:
@@ -58,7 +26,7 @@ def block(*, message: str) -> None:
     sys.exit(2)
 
 
-def _load_edit_rules(*, yaml_path: Path) -> list[EditRule]:
+def _load_edit_rules(*, yaml_path: Path) -> list[Rule]:
     from dev10x.config.loader import load_config
 
     config = load_config(yaml_path=yaml_path)
