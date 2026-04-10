@@ -27,7 +27,7 @@ async def detect_tracker(ticket_id: str) -> dict:
     """
     from dev10x.mcp import github as gh
 
-    return await gh.detect_tracker(ticket_id=ticket_id)
+    return (await gh.detect_tracker(ticket_id=ticket_id)).to_dict()
 
 
 @server.tool()
@@ -42,7 +42,7 @@ async def pr_detect(arg: str) -> dict:
     """
     from dev10x.mcp import github as gh
 
-    return await gh.pr_detect(arg=arg)
+    return (await gh.pr_detect(arg=arg)).to_dict()
 
 
 @server.tool()
@@ -58,7 +58,7 @@ async def issue_get(number: int, repo: str | None = None) -> dict:
     """
     from dev10x.mcp import github as gh
 
-    return await gh.issue_get(number=number, repo=repo)
+    return (await gh.issue_get(number=number, repo=repo)).to_dict()
 
 
 @server.tool()
@@ -74,7 +74,7 @@ async def issue_comments(number: int, repo: str | None = None) -> dict:
     """
     from dev10x.mcp import github as gh
 
-    return await gh.issue_comments(number=number, repo=repo)
+    return (await gh.issue_comments(number=number, repo=repo)).to_dict()
 
 
 @server.tool()
@@ -97,7 +97,7 @@ async def issue_create(
     """
     from dev10x.mcp import github as gh
 
-    return await gh.issue_create(title=title, body=body, labels=labels, repo=repo)
+    return (await gh.issue_create(title=title, body=body, labels=labels, repo=repo)).to_dict()
 
 
 @server.tool()
@@ -124,14 +124,16 @@ async def pr_comments(
     """
     from dev10x.mcp import github as gh
 
-    return await gh.pr_comments(
-        action=action,
-        pr_number=pr_number,
-        comment_id=comment_id,
-        comment_ids=comment_ids,
-        body=body,
-        repo=repo,
-    )
+    return (
+        await gh.pr_comments(
+            action=action,
+            pr_number=pr_number,
+            comment_id=comment_id,
+            comment_ids=comment_ids,
+            body=body,
+            repo=repo,
+        )
+    ).to_dict()
 
 
 @server.tool()
@@ -154,12 +156,14 @@ async def pr_comment_reply(
     """
     from dev10x.mcp import github as gh
 
-    return await gh.pr_comment_reply(
-        pr_number=pr_number,
-        comment_id=comment_id,
-        body=body,
-        repo=repo,
-    )
+    return (
+        await gh.pr_comment_reply(
+            pr_number=pr_number,
+            comment_id=comment_id,
+            body=body,
+            repo=repo,
+        )
+    ).to_dict()
 
 
 @server.tool()
@@ -182,12 +186,14 @@ async def request_review(
     """
     from dev10x.mcp import github as gh
 
-    return await gh.request_review(
-        pr_number=pr_number,
-        reviewers=reviewers,
-        team=team,
-        repo=repo,
-    )
+    return (
+        await gh.request_review(
+            pr_number=pr_number,
+            reviewers=reviewers,
+            team=team,
+            repo=repo,
+        )
+    ).to_dict()
 
 
 @server.tool()
@@ -205,7 +211,7 @@ async def detect_base_branch(base: str | None = None, force: bool = False) -> di
     """
     from dev10x.mcp import github as gh
 
-    return await gh.detect_base_branch(base=base, force=force)
+    return (await gh.detect_base_branch(base=base, force=force)).to_dict()
 
 
 @server.tool()
@@ -220,7 +226,7 @@ async def verify_pr_state(force: bool = False) -> dict:
     """
     from dev10x.mcp import github as gh
 
-    return await gh.verify_pr_state(force=force)
+    return (await gh.verify_pr_state(force=force)).to_dict()
 
 
 @server.tool()
@@ -235,7 +241,7 @@ async def pre_pr_checks(base_branch: str | None = None) -> dict:
     """
     from dev10x.mcp import github as gh
 
-    return await gh.pre_pr_checks(base_branch=base_branch)
+    return (await gh.pre_pr_checks(base_branch=base_branch)).to_dict()
 
 
 @server.tool()
@@ -260,13 +266,15 @@ async def create_pr(
     """
     from dev10x.mcp import github as gh
 
-    return await gh.create_pr(
-        title=title,
-        job_story=job_story,
-        issue_id=issue_id,
-        fixes_url=fixes_url,
-        base_branch=base_branch,
-    )
+    return (
+        await gh.create_pr(
+            title=title,
+            job_story=job_story,
+            issue_id=issue_id,
+            fixes_url=fixes_url,
+            base_branch=base_branch,
+        )
+    ).to_dict()
 
 
 @server.tool()
@@ -282,7 +290,7 @@ async def generate_commit_list(pr_number: int, base_branch: str | None = None) -
     """
     from dev10x.mcp import github as gh
 
-    return await gh.generate_commit_list(pr_number=pr_number, base_branch=base_branch)
+    return (await gh.generate_commit_list(pr_number=pr_number, base_branch=base_branch)).to_dict()
 
 
 @server.tool()
@@ -298,7 +306,7 @@ async def post_summary_comment(issue_id: str, summary_text: str) -> dict:
     """
     from dev10x.mcp import github as gh
 
-    return await gh.post_summary_comment(issue_id=issue_id, summary_text=summary_text)
+    return (await gh.post_summary_comment(issue_id=issue_id, summary_text=summary_text)).to_dict()
 
 
 @server.tool()
@@ -333,18 +341,20 @@ async def pr_notify(
     """
     from dev10x.mcp import github as gh
 
-    return await gh.pr_notify(
-        pr_number=pr_number,
-        repo=repo,
-        action=action,
-        channel=channel,
-        message=message,
-        message_file=message_file,
-        reviewer=reviewer,
-        skip_slack=skip_slack,
-        skip_reviewers=skip_reviewers,
-        skip_checklist=skip_checklist,
-    )
+    return (
+        await gh.pr_notify(
+            pr_number=pr_number,
+            repo=repo,
+            action=action,
+            channel=channel,
+            message=message,
+            message_file=message_file,
+            reviewer=reviewer,
+            skip_slack=skip_slack,
+            skip_reviewers=skip_reviewers,
+            skip_checklist=skip_checklist,
+        )
+    ).to_dict()
 
 
 # ── Git tools ───────────────────────────────────────────────────
@@ -363,7 +373,7 @@ async def push_safe(args: list[str], protected_branches: list[str] | None = None
     """
     from dev10x.mcp import git as git_tools
 
-    return await git_tools.push_safe(args=args, protected_branches=protected_branches)
+    return (await git_tools.push_safe(args=args, protected_branches=protected_branches)).to_dict()
 
 
 @server.tool()
@@ -379,7 +389,7 @@ async def rebase_groom(seq_path: str, base_ref: str) -> dict:
     """
     from dev10x.mcp import git as git_tools
 
-    return await git_tools.rebase_groom(seq_path=seq_path, base_ref=base_ref)
+    return (await git_tools.rebase_groom(seq_path=seq_path, base_ref=base_ref)).to_dict()
 
 
 @server.tool()
@@ -400,7 +410,7 @@ async def create_worktree(
     """
     from dev10x.mcp import git as git_tools
 
-    return await git_tools.create_worktree(branch=branch, base=base, path=path)
+    return (await git_tools.create_worktree(branch=branch, base=base, path=path)).to_dict()
 
 
 @server.tool()
@@ -415,7 +425,7 @@ async def mass_rewrite(config_path: str) -> dict:
     """
     from dev10x.mcp import git as git_tools
 
-    return await git_tools.mass_rewrite(config_path=config_path)
+    return (await git_tools.mass_rewrite(config_path=config_path)).to_dict()
 
 
 @server.tool()
@@ -431,7 +441,9 @@ async def start_split_rebase(commit_hash: str, base_branch: str = "develop") -> 
     """
     from dev10x.mcp import git as git_tools
 
-    return await git_tools.start_split_rebase(commit_hash=commit_hash, base_branch=base_branch)
+    return (
+        await git_tools.start_split_rebase(commit_hash=commit_hash, base_branch=base_branch)
+    ).to_dict()
 
 
 @server.tool()
@@ -446,7 +458,7 @@ async def next_worktree_name(base_dir: str | None = None) -> dict:
     """
     from dev10x.mcp import git as git_tools
 
-    return await git_tools.next_worktree_name(base_dir=base_dir)
+    return (await git_tools.next_worktree_name(base_dir=base_dir)).to_dict()
 
 
 @server.tool()
@@ -458,7 +470,7 @@ async def setup_aliases() -> dict:
     """
     from dev10x.mcp import git as git_tools
 
-    return await git_tools.setup_aliases()
+    return (await git_tools.setup_aliases()).to_dict()
 
 
 # ── Utility tools ───────────────────────────────────────────────

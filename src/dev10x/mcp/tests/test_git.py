@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from dev10x.domain.result import ErrorResult, SuccessResult
 from dev10x.mcp.git import mass_rewrite, rebase_groom
 
 
@@ -54,10 +55,10 @@ class TestRebaseGroomConflictDetection:
 
         result = await rebase_groom(seq_path="/tmp/seq.txt", base_ref="develop")
 
-        assert result["success"] is False
-        assert result["conflict"] is True
-        assert result["conflicted_files"] == ["src/service.py", "src/models.py"]
-        assert result["rebase_head"] == "abc1234"
+        assert isinstance(result, ErrorResult)
+        assert result.details["conflict"] is True
+        assert result.details["conflicted_files"] == ["src/service.py", "src/models.py"]
+        assert result.details["rebase_head"] == "abc1234"
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.git.async_run_script", new_callable=AsyncMock)
@@ -70,9 +71,9 @@ class TestRebaseGroomConflictDetection:
 
         result = await rebase_groom(seq_path="/tmp/seq.txt", base_ref="develop")
 
-        assert result["success"] is False
-        assert "conflict" not in result
-        assert result["error"] == "fatal: invalid upstream"
+        assert isinstance(result, ErrorResult)
+        assert "conflict" not in result.details
+        assert result.error == "fatal: invalid upstream"
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.git.async_run_script", new_callable=AsyncMock)
@@ -85,7 +86,8 @@ class TestRebaseGroomConflictDetection:
 
         result = await rebase_groom(seq_path="/tmp/seq.txt", base_ref="develop")
 
-        assert result["commits_rewritten"] == "3"
+        assert isinstance(result, SuccessResult)
+        assert result.value["commits_rewritten"] == "3"
 
 
 class TestMassRewriteConflictDetection:
@@ -126,10 +128,10 @@ class TestMassRewriteConflictDetection:
 
         result = await mass_rewrite(config_path="/tmp/config.json")
 
-        assert result["success"] is False
-        assert result["conflict"] is True
-        assert result["conflicted_files"] == ["src/handler.py"]
-        assert result["rebase_head"] == "def5678"
+        assert isinstance(result, ErrorResult)
+        assert result.details["conflict"] is True
+        assert result.details["conflicted_files"] == ["src/handler.py"]
+        assert result.details["rebase_head"] == "def5678"
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.git.async_run_script", new_callable=AsyncMock)
@@ -142,9 +144,9 @@ class TestMassRewriteConflictDetection:
 
         result = await mass_rewrite(config_path="/tmp/config.json")
 
-        assert result["success"] is False
-        assert "conflict" not in result
-        assert result["error"] == "Rebase failed."
+        assert isinstance(result, ErrorResult)
+        assert "conflict" not in result.details
+        assert result.error == "Rebase failed."
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.git.async_run_script", new_callable=AsyncMock)
@@ -157,5 +159,5 @@ class TestMassRewriteConflictDetection:
 
         result = await mass_rewrite(config_path="/tmp/config.json")
 
-        assert result["success"] is True
-        assert "Enable feature" in result["output"]
+        assert isinstance(result, SuccessResult)
+        assert "Enable feature" in result.value["output"]

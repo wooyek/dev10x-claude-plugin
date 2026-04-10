@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from dev10x.domain.result import ErrorResult, SuccessResult
 from dev10x.domain.sql import is_read_only_sql
 
 
@@ -123,9 +124,8 @@ class TestQueryFunctionValidation:
         from dev10x.mcp.db import query
 
         result = query(database="pp", sql="INSERT INTO users VALUES (1)")
-        assert isinstance(result, dict)
-        assert "error" in result
-        assert result.get("blocked") is True
+        assert isinstance(result, ErrorResult)
+        assert "blocked" in result.details
         mock_run_script.assert_not_called()
 
     @patch("dev10x.mcp.db.run_script")
@@ -133,9 +133,8 @@ class TestQueryFunctionValidation:
         from dev10x.mcp.db import query
 
         result = query(database="pp", sql="DELETE FROM users")
-        assert isinstance(result, dict)
-        assert "error" in result
-        assert result.get("blocked") is True
+        assert isinstance(result, ErrorResult)
+        assert "blocked" in result.details
         mock_run_script.assert_not_called()
 
     @patch("dev10x.mcp.db.run_script")
@@ -143,9 +142,8 @@ class TestQueryFunctionValidation:
         from dev10x.mcp.db import query
 
         result = query(database="pp", sql="UPDATE users SET id=1")
-        assert isinstance(result, dict)
-        assert "error" in result
-        assert result.get("blocked") is True
+        assert isinstance(result, ErrorResult)
+        assert "blocked" in result.details
         mock_run_script.assert_not_called()
 
     @patch("dev10x.mcp.db.run_script")
@@ -153,9 +151,8 @@ class TestQueryFunctionValidation:
         from dev10x.mcp.db import query
 
         result = query(database="pp", sql="DROP TABLE users")
-        assert isinstance(result, dict)
-        assert "error" in result
-        assert result.get("blocked") is True
+        assert isinstance(result, ErrorResult)
+        assert "blocked" in result.details
         mock_run_script.assert_not_called()
 
 
@@ -179,10 +176,9 @@ class TestQueryFunctionSuccess:
 
         result = query(database="pp", sql="SELECT * FROM users")
 
-        assert isinstance(result, dict)
-        assert "error" not in result
-        assert result.get("columns") == ["id", "name"]
-        assert result.get("row_count") == 2
+        assert isinstance(result, SuccessResult)
+        assert result.value.get("columns") == ["id", "name"]
+        assert result.value.get("row_count") == 2
         mock_run_script.assert_called_once()
 
     @patch("dev10x.mcp.db.run_script")
@@ -196,9 +192,8 @@ class TestQueryFunctionSuccess:
 
         result = query(database="pp", sql="SELECT * FROM users")
 
-        assert isinstance(result, dict)
-        assert "error" in result
-        assert "Database connection error" in result["error"]
+        assert isinstance(result, ErrorResult)
+        assert "Database connection error" in result.error
 
     @patch("dev10x.mcp.db.run_script")
     def test_handles_non_json_output(self, mock_run_script: MagicMock) -> None:
@@ -211,9 +206,8 @@ class TestQueryFunctionSuccess:
 
         result = query(database="pp", sql="SELECT * FROM users")
 
-        assert isinstance(result, dict)
-        assert "raw_output" in result
-        assert result["raw_output"] == "Plain text output"
+        assert isinstance(result, SuccessResult)
+        assert result.value["raw_output"] == "Plain text output"
 
     @patch("dev10x.mcp.db.run_script")
     def test_passes_correct_arguments_to_script(self, mock_run_script: MagicMock) -> None:
@@ -241,8 +235,8 @@ class TestQueryFunctionSuccess:
 
         result = query(database="pp", sql="SELECT * FROM users")
 
-        assert isinstance(result, dict)
-        assert result == {}
+        assert isinstance(result, SuccessResult)
+        assert result.value == {}
 
     @patch("dev10x.mcp.db.run_script")
     def test_handles_cte_query(self, mock_run_script: MagicMock) -> None:
@@ -255,8 +249,8 @@ class TestQueryFunctionSuccess:
 
         result = query(database="pp", sql="WITH cte AS (SELECT 1) SELECT * FROM cte")
 
-        assert "error" not in result
-        assert result.get("row_count") == 1
+        assert isinstance(result, SuccessResult)
+        assert result.value.get("row_count") == 1
 
     @patch("dev10x.mcp.db.run_script")
     def test_handles_explain_query(self, mock_run_script: MagicMock) -> None:
@@ -269,7 +263,8 @@ class TestQueryFunctionSuccess:
 
         result = query(database="pp", sql="EXPLAIN SELECT * FROM users")
 
-        assert "raw_output" in result
+        assert isinstance(result, SuccessResult)
+        assert "raw_output" in result.value
 
     @patch("dev10x.mcp.db.run_script")
     def test_different_database_aliases(self, mock_run_script: MagicMock) -> None:

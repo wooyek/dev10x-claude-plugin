@@ -28,7 +28,7 @@ async def query(
     """
     from dev10x.mcp import db as db_tools
 
-    return db_tools.query(database=database, sql=sql)
+    return db_tools.query(database=database, sql=sql).to_dict()
 
 
 def main() -> None:
