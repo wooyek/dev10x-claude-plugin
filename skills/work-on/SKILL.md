@@ -778,6 +778,16 @@ This applies to the shipping pipeline sequence:
 ... → Groom (force push) → RE-MONITOR CI → Update PR → ...
 ```
 
+### Apply Fixups Completion Guard (GH-851 F2)
+
+**Hard rule:** The "Apply fixups" task (4.10) CANNOT be marked
+complete until ALL PR checks — including automated review bots
+(claude-review, hygiene-review, openai-review) — have finished.
+A monitor returning "CI green" covers only core CI checks. Bot
+reviews are separate GitHub check runs that may still be PENDING
+when core CI passes. Verify via `gh pr checks` that zero checks
+remain in PENDING or IN_PROGRESS state before marking complete.
+
 ### Auto-Advance Rule
 
 See `references/task-orchestration.md` for the full pattern.
