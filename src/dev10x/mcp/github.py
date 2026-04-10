@@ -167,6 +167,123 @@ async def issue_create(
         return ok(parse_key_value_output(result.stdout))
 
 
+async def _pr_comment_get(
+    *,
+    resolved_repo: str,
+    comment_id: int | str | None = None,
+    **_: Any,
+) -> Result[dict[str, Any]]:
+    if comment_id is None:
+        return err("comment_id required for 'get' action")
+    result = await _gh_api(f"repos/{resolved_repo}/pulls/comments/{comment_id}")
+    return _parse_gh_api_result(result)
+
+
+async def _pr_comment_list(
+    *,
+    resolved_repo: str,
+    pr_number: int | None = None,
+    **_: Any,
+) -> Result[dict[str, Any]]:
+    if pr_number is None:
+        return err("pr_number required for 'list' action")
+    result = await _gh_api(
+        f"repos/{resolved_repo}/pulls/{pr_number}/comments?per_page=100",
+    )
+    return _parse_gh_api_result(result)
+
+
+async def _pr_comment_reply(
+    *,
+    resolved_repo: str,
+    pr_number: int | None = None,
+    comment_id: int | str | None = None,
+    body: str | None = None,
+    **_: Any,
+) -> Result[dict[str, Any]]:
+    if pr_number is None or comment_id is None or body is None:
+        return err("pr_number, comment_id, and body required for 'reply'")
+    result = await _gh_api(
+        f"repos/{resolved_repo}/pulls/{pr_number}/comments",
+        method="POST",
+        fields={"body": body, "in_reply_to": comment_id},
+    )
+    return _parse_gh_api_result(result)
+
+
+async def _pr_comment_resolve(
+    *,
+    resolved_repo: str,
+    comment_id: int | str | None = None,
+    comment_ids: list[str] | None = None,
+    **_: Any,
+) -> Result[dict[str, Any]]:
+    ids_to_resolve: list[str] = []
+    if comment_ids:
+        ids_to_resolve = comment_ids
+    elif comment_id is not None:
+        ids_to_resolve = [str(comment_id)]
+    else:
+        return err("comment_id or comment_ids required for 'resolve' action")
+
+    node_fragments = " ".join(
+        f"n{i}: node(id: {json.dumps(cid)}) "
+        f"{{ ... on PullRequestReviewComment "
+        f"{{ pullRequestReviewThread {{ id }} }} }}"
+        for i, cid in enumerate(ids_to_resolve)
+    )
+    query_result = await _gh_api(
+        "graphql",
+        fields={"query": f"{{ {node_fragments} }}"},
+    )
+    if query_result.returncode != 0:
+        return err(query_result.stderr.strip())
+
+    query_data = json.loads(query_result.stdout)
+    thread_ids: list[str] = []
+    errors: list[str] = []
+    for i, cid in enumerate(ids_to_resolve):
+        node = query_data.get("data", {}).get(f"n{i}")
+        thread = node.get("pullRequestReviewThread") if node else None
+        if thread and thread["id"].startswith("PRRT_"):
+            thread_ids.append(thread["id"])
+        else:
+            errors.append(
+                f"Could not find thread for comment {cid}. "
+                "The resolve action requires a GraphQL node_id, not a REST "
+                "integer ID. Use the node_id field from a comment response."
+            )
+
+    if not thread_ids:
+        return err("; ".join(errors))
+
+    resolve_fragments = " ".join(
+        f"r{i}: resolveReviewThread(input: {{threadId: {json.dumps(tid)}}}) "
+        f"{{ thread {{ id isResolved }} }}"
+        for i, tid in enumerate(thread_ids)
+    )
+    result = await _gh_api(
+        "graphql",
+        fields={"query": f"mutation {{ {resolve_fragments} }}"},
+    )
+
+    if result.returncode != 0:
+        return err(result.stderr.strip())
+
+    response: dict[str, Any] = json.loads(result.stdout)
+    if errors:
+        response["warnings"] = errors
+    return ok(response)
+
+
+_PR_COMMENT_ACTIONS: dict[str, Any] = {
+    "get": _pr_comment_get,
+    "list": _pr_comment_list,
+    "reply": _pr_comment_reply,
+    "resolve": _pr_comment_resolve,
+}
+
+
 async def pr_comments(
     *,
     action: str,
@@ -179,91 +296,19 @@ async def pr_comments(
     repo_result = await _resolve_repo(repo)
     if isinstance(repo_result, ErrorResult):
         return repo_result
-    resolved_repo = repo_result.value
 
-    if action == "get":
-        if comment_id is None:
-            return err("comment_id required for 'get' action")
-        result = await _gh_api(f"repos/{resolved_repo}/pulls/comments/{comment_id}")
+    handler = _PR_COMMENT_ACTIONS.get(action)
+    if handler is None:
+        supported = ", ".join(_PR_COMMENT_ACTIONS)
+        return err(f"Unknown action: {action}. Supported: {supported}")
 
-    elif action == "list":
-        if pr_number is None:
-            return err("pr_number required for 'list' action")
-        result = await _gh_api(
-            f"repos/{resolved_repo}/pulls/{pr_number}/comments?per_page=100",
-        )
-
-    elif action == "reply":
-        if pr_number is None or comment_id is None or body is None:
-            return err("pr_number, comment_id, and body required for 'reply'")
-        result = await _gh_api(
-            f"repos/{resolved_repo}/pulls/{pr_number}/comments",
-            method="POST",
-            fields={"body": body, "in_reply_to": comment_id},
-        )
-
-    elif action == "resolve":
-        ids_to_resolve: list[str] = []
-        if comment_ids:
-            ids_to_resolve = comment_ids
-        elif comment_id is not None:
-            ids_to_resolve = [str(comment_id)]
-        else:
-            return err("comment_id or comment_ids required for 'resolve' action")
-
-        node_fragments = " ".join(
-            f"n{i}: node(id: {json.dumps(cid)}) "
-            f"{{ ... on PullRequestReviewComment "
-            f"{{ pullRequestReviewThread {{ id }} }} }}"
-            for i, cid in enumerate(ids_to_resolve)
-        )
-        query_result = await _gh_api(
-            "graphql",
-            fields={"query": f"{{ {node_fragments} }}"},
-        )
-        if query_result.returncode != 0:
-            return err(query_result.stderr.strip())
-
-        query_data = json.loads(query_result.stdout)
-        thread_ids: list[str] = []
-        errors: list[str] = []
-        for i, cid in enumerate(ids_to_resolve):
-            node = query_data.get("data", {}).get(f"n{i}")
-            thread = node.get("pullRequestReviewThread") if node else None
-            if thread and thread["id"].startswith("PRRT_"):
-                thread_ids.append(thread["id"])
-            else:
-                errors.append(
-                    f"Could not find thread for comment {cid}. "
-                    "The resolve action requires a GraphQL node_id, not a REST "
-                    "integer ID. Use the node_id field from a comment response."
-                )
-
-        if not thread_ids:
-            return err("; ".join(errors))
-
-        resolve_fragments = " ".join(
-            f"r{i}: resolveReviewThread(input: {{threadId: {json.dumps(tid)}}}) "
-            f"{{ thread {{ id isResolved }} }}"
-            for i, tid in enumerate(thread_ids)
-        )
-        result = await _gh_api(
-            "graphql",
-            fields={"query": f"mutation {{ {resolve_fragments} }}"},
-        )
-
-        if result.returncode != 0:
-            return err(result.stderr.strip())
-
-        response: dict[str, Any] = json.loads(result.stdout)
-        if errors:
-            response["warnings"] = errors
-        return ok(response)
-
-    else:
-        return err(f"Unknown action: {action}. Supported: list, get, reply, resolve")
-
-    return _parse_gh_api_result(result)
+    return await handler(
+        resolved_repo=repo_result.value,
+        pr_number=pr_number,
+        comment_id=comment_id,
+        comment_ids=comment_ids,
+        body=body,
+    )
 
 
 async def pr_comment_reply(
