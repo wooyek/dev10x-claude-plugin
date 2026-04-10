@@ -81,6 +81,10 @@ def md_to_slack_bold(text: str) -> str:
     return re.sub(r"\*\*(.+?)\*\*", r"*\1*", text)
 
 
+def _repo_name(repo: str) -> str:
+    return repo.split("/")[-1]
+
+
 def format_review_message(
     pr_number: int,
     repo: str,
@@ -89,7 +93,7 @@ def format_review_message(
     jtbd: str | None,
     resolved_mentions: list[str],
 ) -> str:
-    repo_short = repo.split("/")[-1]
+    repo_short = _repo_name(repo)
     link = f"<{pr_url}|{repo_short}#{pr_number}>"
     mentions_prefix = f"{' '.join(resolved_mentions)} " if resolved_mentions else ""
     lines = [f"{mentions_prefix}Please review {link}", pr_title]
@@ -126,7 +130,7 @@ def gh_json(args: list[str]) -> Any:
 def cmd_prepare(args: argparse.Namespace) -> None:
     config = load_yaml(path=CONFIG_PATH)
     slack_config = load_yaml(path=SLACK_CONFIG_PATH)
-    repo_name = args.repo.split("/")[-1]
+    repo_name = _repo_name(args.repo)
 
     project = resolve_project_config(config=config, repo_name=repo_name)
 
