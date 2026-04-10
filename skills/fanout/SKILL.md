@@ -527,6 +527,23 @@ handed off for external review.
 
 After all items are processed and PRs merged:
 
+**REQUIRED: Wait for all background agents (GH-859).** Before
+ANY verification step, call `TaskList` and check for tasks with
+status `in_progress`. If any exist (e.g., Phase 4 monitor agents
+still running), do NOT proceed — wait for all agents to complete.
+The completion gate must not fire while monitors are still
+tracking CI or merges.
+
+**Enforcement loop:**
+1. Call `TaskList`
+2. If any task has status `in_progress` → wait and re-check
+3. Only proceed when ALL tasks are either `completed` or
+   `pending` (no `in_progress` tasks remain)
+
+This prevents the failure mode where the completion gate fires
+as soon as Phase 3 marks items as dispatched, before Phase 4
+monitors confirm CI green or merges complete.
+
 1. Call `TaskList` to show the full task list
 2. **REQUIRED: Enforce PR comment resolution for every PR
    (GH-829).** For each PR processed in this session:
