@@ -7,11 +7,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from dev10x.domain.rule_engine import RuleEngine
 from dev10x.domain.validation_rule import Rule
-from dev10x.hooks.edit_validator import (
-    EditRule,
-    load_rules,
-)
 
 
 @pytest.fixture()
@@ -167,10 +164,10 @@ class TestLoadRules:
         yaml_path = tmp_path / "rules.yaml"
         yaml_path.write_text(yaml.dump(yaml_content))
 
-        rules = load_rules(yaml_path=yaml_path)
+        engine = RuleEngine.from_yaml(path=yaml_path)
 
-        assert len(rules) == 1
-        assert rules[0].name == "block-env"
+        assert len(engine.edit_rules) == 1
+        assert engine.edit_rules[0].name == "block-env"
 
     def test_skips_non_blocking_rules(self, tmp_path: Path) -> None:
         yaml_content = {
@@ -186,11 +183,6 @@ class TestLoadRules:
         yaml_path = tmp_path / "rules.yaml"
         yaml_path.write_text(yaml.dump(yaml_content))
 
-        rules = load_rules(yaml_path=yaml_path)
+        engine = RuleEngine.from_yaml(path=yaml_path)
 
-        assert len(rules) == 0
-
-
-class TestEditRuleAlias:
-    def test_editrule_is_rule(self) -> None:
-        assert EditRule is Rule
+        assert len(engine.edit_rules) == 0

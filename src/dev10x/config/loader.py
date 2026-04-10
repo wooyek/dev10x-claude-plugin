@@ -75,38 +75,7 @@ def _parse_yaml(*, yaml_path: Path) -> Config:
     data: dict[str, Any] = yaml.safe_load(yaml_path.read_text()) or {}
     cfg_data = data.get("config", {})
 
-    rules: list[Rule] = []
-    for entry in data.get("rules", []):
-        compensations = [
-            Compensation(
-                type=c.get("type", ""),
-                skill=c.get("skill", ""),
-                tool=c.get("tool", ""),
-                alias=c.get("alias", ""),
-                guardrails=c.get("guardrails", ""),
-                fallback=c.get("fallback", ""),
-                description=c.get("description", ""),
-            )
-            for c in entry.get("compensations", [])
-        ]
-        rules.append(
-            Rule(
-                name=entry.get("name", ""),
-                patterns=entry.get("patterns", []),
-                matcher=entry.get("matcher", "Bash"),
-                except_=entry.get("except", []),
-                compensations=compensations,
-                hook_block=entry.get("hook_block", True),
-                reason=entry.get("reason", ""),
-                message=entry.get("message", ""),
-                related=entry.get("related", []),
-                file_pattern=entry.get("file_pattern", ""),
-                file_names=entry.get("file_names", []),
-                file_prefixes=entry.get("file_prefixes", []),
-                file_substrings=entry.get("file_substrings", []),
-                content_pattern=entry.get("content_pattern", ""),
-            )
-        )
+    rules = [Rule.from_yaml_entry(entry=entry) for entry in data.get("rules", [])]
 
     return Config(
         friction_level=cfg_data.get("friction_level", "strict"),

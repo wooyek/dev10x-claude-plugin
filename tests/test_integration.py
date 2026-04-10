@@ -16,7 +16,8 @@ from click.testing import CliRunner
 
 from dev10x.cli import cli
 from dev10x.config.loader import load_config
-from dev10x.hooks.edit_validator import load_rules, validate_edit_write
+from dev10x.domain.rule_engine import RuleEngine
+from dev10x.hooks.edit_validator import validate_edit_write
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -116,10 +117,10 @@ class TestEditValidatorRules:
         if not yaml_path.exists():
             pytest.skip("command-skill-map.yaml not found")
 
-        rules = load_rules(yaml_path=yaml_path)
+        engine = RuleEngine.from_yaml(path=yaml_path)
 
-        assert len(rules) > 0
-        assert all(r.name for r in rules)
+        assert len(engine.edit_rules) > 0
+        assert all(r.name for r in engine.edit_rules)
 
 
 def _script_imports_dev10x(script: Path) -> bool:
