@@ -320,6 +320,7 @@ Repeat until all CI checks pass:
 | pytest failures | Read test, fix code or update expectations |
 | Import errors | Update import paths |
 | Coverage < 100% | Add tests for uncovered lines |
+| git-history-linting (fixup! commits) | Auto-groom: `git autosquash-{base}` then `git push --force-with-lease`. Wait 60s, resume Phase 1 loop. See `ci-failure-patterns.md` for detection and full procedure. |
 
 For each CI fix:
 - Implement the fix
