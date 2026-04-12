@@ -59,7 +59,8 @@ After reading findings, create one subtask per finding.
 
 Read the JSON findings file from the path argument. Parse the
 findings array. Filter to only `ERROR` and `WARNING` severity
-(skip `INFO`).
+(skip `INFO`). When a `confidence` field is present, also skip
+findings below the configured threshold (default: 70).
 
 Sort findings by file path to minimize context switches.
 
@@ -122,6 +123,7 @@ Reads the same JSON format produced by `Dev10x:review`:
 [
   {
     "severity": "WARNING",
+    "confidence": 85,
     "source": "manual",
     "file": "src/auth/middleware.py",
     "line": 42,
@@ -133,7 +135,8 @@ Reads the same JSON format produced by `Dev10x:review`:
 ```
 
 Required fields: `file`, `line`, `description`
-Optional fields: `severity`, `source`, `suggested_fix`, `category`
+Optional fields: `severity`, `confidence`, `source`,
+`suggested_fix`, `category`
 
 ## Integration
 

@@ -69,5 +69,6 @@ For `servers/*.py` files:
 For each issue:
 - **File**: path
 - **Severity**: CRITICAL / WARNING / INFO
+- **Confidence**: 0-100 (see `Dev10x:review` SKILL.md for scale)
 - **Issue**: what's wrong
 - **Pattern**: reference implementation if applicable
