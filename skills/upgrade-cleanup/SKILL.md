@@ -39,9 +39,10 @@ Run dry-run first, then apply — no pause between steps.
 2. `TaskCreate(subject="Migrate config files", activeForm="Migrating configs")`
 3. `TaskCreate(subject="Ensure base permissions", activeForm="Ensuring base perms")`
 4. `TaskCreate(subject="Generalize session-specific permissions", activeForm="Generalizing perms")`
-5. `TaskCreate(subject="Merge worktree permissions", activeForm="Merging worktree perms")`
-6. `TaskCreate(subject="Audit permissions for friction", activeForm="Auditing permissions")`
-7. `TaskCreate(subject="Clean project files", activeForm="Cleaning project files")`
+5. `TaskCreate(subject="Ensure script coverage", activeForm="Verifying script rules")`
+6. `TaskCreate(subject="Merge worktree permissions", activeForm="Merging worktree perms")`
+7. `TaskCreate(subject="Audit permissions for friction", activeForm="Auditing permissions")`
+8. `TaskCreate(subject="Clean project files", activeForm="Cleaning project files")`
 
 Set sequential dependencies. Mark each step `in_progress` when
 starting and `completed` when done. Steps that produce no
@@ -152,7 +153,30 @@ ${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/scripts/update-paths.py --generaliz
 - `generate-commit-list.sh 42` → `generate-commit-list.sh *` (PR args)
 - `/tmp/claude/git/msg.AbCdEf.txt` → `/tmp/claude/git/**` (temp hashes)
 
-### 5. Merge worktree permissions
+### 5. Ensure script coverage
+
+Verify that all callable scripts in the current plugin version have
+individual allow rules in each settings file. New plugin versions may
+add scripts that are not yet enumerated.
+
+1. Dry run to preview missing rules:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/scripts/update-paths.py --ensure-scripts --dry-run
+```
+
+2. Add missing script rules:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/scripts/update-paths.py --ensure-scripts
+```
+
+**What gets scanned:**
+- `bin/*.sh` — helper scripts
+- `hooks/scripts/*.py`, `hooks/scripts/*.sh` — hook implementations
+- `skills/*/scripts/*.py`, `skills/*/scripts/*.sh` — skill scripts
+
+### 6. Merge worktree permissions
 
 Worktrees accumulate allow rules during sessions that the main project
 never sees. This script collects stable permissions from all worktrees
@@ -174,7 +198,7 @@ Session-specific noise (temp file hashes, inline conditionals, ticket-
 specific script args) is filtered out automatically. Only stable,
 reusable permissions are merged.
 
-### 6. Audit permissions for friction
+### 7. Audit permissions for friction
 
 Dispatch the `permission-auditor` agent to perform a comprehensive
 7-phase security and friction audit. The agent analyzes:
@@ -200,7 +224,7 @@ Agent(subagent_type="Dev10x:permission-auditor",
 The agent produces a severity-categorized report with specific fix
 proposals. Review and apply selectively.
 
-### 7. Clean project files
+### 8. Clean project files
 
 Strip redundant rules from project `settings.local.json` files that are
 now covered by global `~/.claude/settings.json`. Also flags rules
@@ -250,6 +274,7 @@ The plugin default ships with empty roots as a template.
 | `--init` | Copy plugin default config to userspace for customization |
 | `--ensure-base` | Add missing base permissions from projects.yaml |
 | `--generalize` | Replace session-specific args with wildcard patterns |
+| `--ensure-scripts` | Verify all plugin scripts have allow rules; add missing |
 
 ### merge-worktree-permissions.py
 
