@@ -201,6 +201,86 @@ def ensure_base_permissions(
     return len(missing), messages
 
 
+SCRIPT_SCAN_GLOBS: list[str] = [
+    "bin/*.sh",
+    "hooks/scripts/*.py",
+    "hooks/scripts/*.sh",
+    "skills/*/scripts/*.py",
+    "skills/*/scripts/*.sh",
+]
+
+
+def scan_plugin_scripts(plugin_root: Path) -> list[Path]:
+    scripts: list[Path] = []
+    for glob_pattern in SCRIPT_SCAN_GLOBS:
+        scripts.extend(plugin_root.glob(glob_pattern))
+    return sorted(set(scripts))
+
+
+def build_script_allow_rules(
+    scripts: list[Path],
+    *,
+    plugin_root: Path,
+) -> list[str]:
+    rules: list[str] = []
+    for script in scripts:
+        relative = script.relative_to(plugin_root)
+        rule = f"Bash({plugin_root}/{relative}:*)"
+        rules.append(rule)
+    return rules
+
+
+def verify_script_coverage(
+    settings_path: Path,
+    expected_rules: list[str],
+) -> tuple[list[str], list[str]]:
+    content = settings_path.read_text()
+    try:
+        data = json.loads(content)
+    except json.JSONDecodeError:
+        return [], expected_rules
+
+    allow_list: list[str] = data.get("permissions", {}).get("allow", [])
+
+    covered: list[str] = []
+    missing: list[str] = []
+    for rule in expected_rules:
+        match = re.search(r"Bash\((.+?):\*\)", rule)
+        if not match:
+            missing.append(rule)
+            continue
+        script_name = Path(match.group(1)).name
+        pattern = re.compile(rf"Bash\(.*/{re.escape(script_name)}:\*\)")
+        if rule in allow_list or any(pattern.search(entry) for entry in allow_list):
+            covered.append(rule)
+        else:
+            missing.append(rule)
+    return covered, missing
+
+
+def ensure_script_rules(
+    settings_path: Path,
+    missing_rules: list[str],
+    *,
+    dry_run: bool = False,
+) -> tuple[int, list[str]]:
+    if not missing_rules:
+        return 0, []
+
+    if not dry_run:
+        from dev10x.skills.permission.file_lock import locked_json_update
+
+        with locked_json_update(path=settings_path) as data:
+            if "permissions" not in data:
+                data["permissions"] = {}
+            if "allow" not in data["permissions"]:
+                data["permissions"]["allow"] = []
+            data["permissions"]["allow"].extend(missing_rules)
+
+    messages = [f"  + {rule}" for rule in missing_rules]
+    return len(missing_rules), messages
+
+
 GENERALIZE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"(detect-tracker\.sh)\s+[^)]+"), r"\1:*"),
     (re.compile(r"(gh-issue-get\.sh)\s+[^)]+"), r"\1:*"),
@@ -289,6 +369,11 @@ def main() -> int:
         help="Replace session-specific permission args with wildcard patterns",
     )
     parser.add_argument(
+        "--ensure-scripts",
+        action="store_true",
+        help="Verify all plugin scripts have allow rules; add missing ones",
+    )
+    parser.add_argument(
         "--quiet",
         action="store_true",
         help="Suppress per-file details, emit only the summary line",
@@ -322,6 +407,14 @@ def main() -> int:
 
     if args.generalize:
         return _generalize(
+            settings_files=settings_files,
+            dry_run=args.dry_run,
+            quiet=args.quiet,
+        )
+
+    if args.ensure_scripts:
+        return _ensure_scripts(
+            config=config,
             settings_files=settings_files,
             dry_run=args.dry_run,
             quiet=args.quiet,
@@ -461,6 +554,69 @@ def _generalize(
     else:
         verb = "Would generalize" if dry_run else "Generalized"
         print(f"{verb} {total_generalized} permissions in {files_changed} files.")
+
+    return 0
+
+
+def _ensure_scripts(
+    *,
+    config: dict,
+    settings_files: list[Path],
+    dry_run: bool,
+    quiet: bool = False,
+) -> int:
+    cache_dir = Path(config["plugin_cache"]).expanduser()
+    target_version = detect_latest_version(cache_dir)
+    if not target_version:
+        print(f"ERROR: No versions found in {cache_dir}", file=sys.stderr)
+        return 1
+
+    plugin_root = cache_dir / target_version
+    scripts = scan_plugin_scripts(plugin_root)
+    if not scripts:
+        print(f"No callable scripts found in {plugin_root}")
+        return 0
+
+    expected_rules = build_script_allow_rules(
+        scripts,
+        plugin_root=plugin_root,
+    )
+
+    if not quiet:
+        print(f"Plugin root: {plugin_root}")
+        print(f"Scripts found: {len(scripts)}")
+        if dry_run:
+            print("(dry run — no files will be modified)\n")
+
+    total_added = 0
+    files_changed = 0
+
+    for path in sorted(settings_files):
+        _covered, missing = verify_script_coverage(
+            settings_path=path,
+            expected_rules=expected_rules,
+        )
+        if not missing:
+            continue
+
+        count, messages = ensure_script_rules(
+            settings_path=path,
+            missing_rules=missing,
+            dry_run=dry_run,
+        )
+        if count > 0:
+            if not quiet:
+                print(f"\n{path}")
+                for msg in messages:
+                    print(msg)
+            total_added += count
+            files_changed += 1
+
+    if total_added == 0:
+        print("All settings files have complete script coverage.")
+    else:
+        verb = "Would add" if dry_run else "Added"
+        print(f"{verb} {total_added} script rules across {files_changed} files.")
 
     return 0
 
