@@ -127,12 +127,36 @@ Each finding is a structured object:
 ```
 Finding:
   severity: ERROR | WARNING | INFO
+  confidence: <0-100>
   source: automated | manual
   file: <path>
   line: <number>
   description: <what's wrong>
   suggested_fix: <code or guidance>
   category: <bug | security | architecture | style | test>
+```
+
+**Confidence scoring (GH-872):** Each finding includes a
+`confidence` score (0-100) indicating how certain the reviewer
+is that this is a genuine issue:
+
+| Range | Meaning | Example |
+|-------|---------|---------|
+| 90-100 | Certain defect | Missing null check on user input |
+| 70-89 | Likely issue | Broad exception catch in prod path |
+| 50-69 | Possible issue | Style preference, debatable pattern |
+| 0-49 | Low confidence | Nitpick, subjective suggestion |
+
+**Threshold filtering:** In unattended mode, only findings with
+`confidence >= 70` are passed to `Dev10x:review-fix`. Below-
+threshold findings are reported as INFO in the summary but not
+auto-fixed. In attended mode, all findings are presented
+regardless of confidence.
+
+The threshold is configurable via session config:
+```yaml
+# .claude/Dev10x/session.yaml
+review_confidence_threshold: 70  # default
 ```
 
 Write findings to a temp file for handoff:
@@ -147,7 +171,10 @@ Write the findings array as JSON to the temp file path.
 
 **Unattended mode** (`--unattended`):
 - Skip presentation
-- Pass all `ERROR` and `WARNING` findings to `Dev10x:review-fix`
+- Filter findings by confidence threshold (default: 70).
+  Only pass findings with `confidence >= threshold` AND
+  severity `ERROR` or `WARNING` to `Dev10x:review-fix`
+- Below-threshold findings are logged as INFO in summary
 - Invoke: `Skill(skill="Dev10x:review-fix", args="<findings-file-path>")`
 - Auto-advance after fixer completes
 
@@ -203,6 +230,7 @@ and `Dev10x:review-fix`:
 [
   {
     "severity": "WARNING",
+    "confidence": 85,
     "source": "manual",
     "file": "src/auth/middleware.py",
     "line": 42,
