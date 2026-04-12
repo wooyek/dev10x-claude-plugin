@@ -69,6 +69,17 @@ fragments:
         supervised:
           prompt: >
             Present findings for approval before auto-fixing.
+    - subject: Simplify post-review changes
+      type: detailed
+      condition: review-fix-produced-changes
+      optional: true
+      prompt: >
+        Run the simplify skill on files changed by review-fix
+        to catch unnecessary complexity introduced during the
+        fix phase. Clarity improvements only — do not change
+        functionality. Skip if review-fix made no changes or
+        if the simplify skill is not available.
+      skills: [simplify]  # external user-level skill (like test)
     - subject: Commit outstanding changes
       type: detailed
       prompt: >
