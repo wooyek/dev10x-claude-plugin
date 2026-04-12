@@ -119,6 +119,45 @@ or `gh pr view` reports `mergeable: CONFLICTING`.
 - Resolve conflicts manually if auto-rebase fails
 - Force-push: `git push --force-with-lease origin {branch}`
 
+## Git History Linting Failures
+
+### Fixup Commits Blocking Merge
+
+**Pattern:**
+```
+git-history-linting / Block fixup commit merge ............ Failed
+```
+
+The `git-history-linting` CI check blocks merging when the branch
+contains `fixup!` commits. These commits are created during review
+comment fixes and must be squashed into their target commits before
+merge.
+
+**Detection:**
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/detect-fixup-commits.sh \
+  --pr {pr_number} --repo {repo}
+```
+
+**Fix:**
+1. Get the base branch from the PR
+2. Run autosquash rebase to squash fixups into targets:
+   ```bash
+   git autosquash-{base}
+   ```
+3. Force-push the cleaned history:
+   ```bash
+   git push --force-with-lease origin {branch}
+   ```
+4. Wait 60 seconds for GitHub to register new check suites
+5. Resume the Phase 1 CI monitoring loop
+
+**Note:** The `git autosquash-{base}` alias runs a non-interactive
+rebase with `--autosquash` that matches `fixup!` commit prefixes
+to their target commits and squashes them automatically. After the
+force-push, all previous CI results are invalidated — the agent
+must re-monitor from scratch.
+
 ## Coverage Failures
 
 **Pattern:**
