@@ -111,7 +111,10 @@ is checked against the output of `git remote get-url origin`.
 3. Walk `projects` list — first `match` that fits selects the
    strategy
 4. If no match and `default-strategy` is set, use that
-5. If still no match, load `references/gitmoji-defaults.yaml`
+5. If still no match, check for a semantic-release config in the
+   project root and auto-derive release tags (see
+   `semantic-release.md`)
+6. If no config found, load `references/gitmoji-defaults.yaml`
 
 If the YAML file is invalid or unreadable, the skill logs a
 warning and falls back to the defaults file — the commit is
