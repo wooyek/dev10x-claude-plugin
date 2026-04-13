@@ -1037,31 +1037,55 @@ When reaching an epic task:
    Auto-advance between sub-tasks (same rule as top-level).
 8. **Mark the epic completed** when all sub-tasks are done
 
-### Fanout Execution (Multiple Issues)
+### Multi-Issue Execution
 
-When executing a plan with multiple issues (fanout), each
-issue MUST execute the **full playbook play** — not a
+When multiple issues are provided, two strategies exist:
+
+**Strategy A: Separate PRs (fanout — default)**
+
+Each issue gets its own branch, PR, and full playbook play.
+Use `Dev10x:fanout` for parallel execution or sequential
+execution within `work-on`.
+
+Each issue MUST execute the **full playbook play** — not a
 collapsed subset. Fanout does NOT exempt individual issues
 from the shipping pipeline.
 
-**Anti-pattern (PROHIBITED):**
+**Strategy B: Bundled PR (atomic commits)**
+
+All issues share one branch and one PR. Each issue becomes
+one atomic commit. The shipping pipeline runs once for the
+bundle, not per issue. Use this when issues are small,
+related, and benefit from a single review cycle.
+
+**Bundled execution pattern:**
+```
+1. Set up workspace (one branch for all issues)
+2. For each issue (sequentially):
+   a. Design approach for this issue
+   b. Implement changes
+   c. Create atomic commit (one per issue, ticket ID in msg)
+3. Verify (run tests once for all changes)
+4. Shipping pipeline (review → PR → CI → groom → merge)
+```
+
+The "Implement changes" epic expands to one sub-task per
+issue. Each sub-task produces exactly one commit with the
+issue's ticket ID in the message. The shipping pipeline
+runs once — the PR references all bundled issues via
+multiple `Fixes:` lines.
+
+**Strategy selection:** When the user explicitly requests
+bundling (e.g., "one PR", "atomic commits", "bundle these"),
+use Strategy B. When the user provides multiple independent
+issues without bundling intent, use Strategy A (fanout).
+When ambiguous, ask via `AskUserQuestion`.
+
+**Anti-pattern (PROHIBITED for both strategies):**
 ```
 for each issue:
   branch → edit → commit → push → PR   # 5 steps
 ```
-
-**Required pattern:**
-```
-for each issue:
-  full play (branch → design → implement → verify →
-  review → commit → PR → CI → groom → update → ready →
-  verify-acc)                           # 12+ steps
-```
-
-Each issue gets its own task subtree under Phase 4. When
-worktree agents fail or fall back to sequential execution,
-the playbook steps remain mandatory — fallback changes the
-*executor*, not the *steps*.
 
 ### Parallelism Policy
 

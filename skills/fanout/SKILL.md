@@ -39,9 +39,11 @@ conflict risk. It is the multi-item counterpart to
 `Dev10x:work-on` (which handles a single work item).
 
 **When to use fanout vs work-on:**
-- **work-on**: Single ticket, PR, or investigation
+- **work-on**: Single ticket, PR, or investigation. Also
+  handles multiple issues bundled into one PR with atomic
+  commits (user requests "one PR" or "bundle these").
 - **fanout**: Multiple PRs to merge, multiple issues to
-  implement, or a mix of both
+  implement as separate PRs, or a mix of both
 
 **Default mode:** Fully autonomous with auto-advancement.
 No confirmation gates between items unless a genuine
