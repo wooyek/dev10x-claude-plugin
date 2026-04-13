@@ -326,6 +326,61 @@ class TestPrCommentsResolveErrors:
         assert result.error == "Mutation failed"
 
 
+class TestResolveReviewThreadDirect:
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_resolves_by_thread_ids(
+        self,
+        mock_api: AsyncMock,
+    ) -> None:
+        mock_api.return_value = _completed(
+            stdout=json.dumps({"data": {"r0": {"thread": {"id": "PRRT_t1", "isResolved": True}}}}),
+        )
+
+        result = await gh.resolve_review_thread(thread_ids=["PRRT_t1"])
+
+        assert isinstance(result, SuccessResult)
+        assert result.value["data"]["r0"]["thread"]["isResolved"] is True
+        assert mock_api.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_rejects_invalid_thread_ids(self) -> None:
+        result = await gh.resolve_review_thread(thread_ids=["INVALID_123"])
+
+        assert isinstance(result, ErrorResult)
+        assert "must start with PRRT_" in result.error
+
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github._gh_api", new_callable=AsyncMock)
+    async def test_resolves_by_comment_ids(
+        self,
+        mock_api: AsyncMock,
+        mock_resolve_repo: AsyncMock,
+    ) -> None:
+        mock_api.side_effect = [
+            _completed(
+                stdout=json.dumps({"data": {"n0": {"pullRequestReviewThread": {"id": "PRRT_t1"}}}})
+            ),
+            _completed(
+                stdout=json.dumps(
+                    {"data": {"r0": {"thread": {"id": "PRRT_t1", "isResolved": True}}}}
+                )
+            ),
+        ]
+
+        result = await gh.resolve_review_thread(comment_ids=["PRRC_abc"])
+
+        assert isinstance(result, SuccessResult)
+        assert mock_api.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_returns_error_when_no_ids(self) -> None:
+        result = await gh.resolve_review_thread()
+
+        assert isinstance(result, ErrorResult)
+        assert "thread_ids" in result.error
+
+
 class TestResolveRepo:
     @pytest.mark.asyncio
     async def test_returns_repository_ref(self) -> None:
