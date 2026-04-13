@@ -4,6 +4,26 @@
 **Scope:** Full audit (Phases A-I) of `src/dev10x/` (~8,277 LOC, 903 tests)
 **Coverage:** 15.66% (threshold: 38%)
 
+## Status Update (2026-04-13)
+
+### M3 Architecture Alignment — Largely Resolved
+
+| # | Finding | Status | Evidence |
+|---|---------|--------|----------|
+| 5 | RuleEngine never used | RESOLVED | edit_validator.py and skill_redirect.py both delegate to RuleEngine |
+| 6 | Duplicate YAML parsing | RESOLVED | config/loader.py is single parsing path with msgpack cache |
+| 20 | Pipeline validators hardcode filter | OPEN | Per-validator filtering is by design — each handles different concerns |
+| 21 | Plugin registration hardcoded | OPEN | Validators still imported directly |
+| 22 | Config loading — 3 paths | RESOLVED | loader.py with TTL-based cache invalidation |
+| 23 | Edit/Write rule classes | PARTIAL | RuleEngine splits by matcher but rule classes are unified |
+| 30 | Leaked validation logic | OPEN | Architectural concern remains |
+| 40 | Global mutable config cache | RESOLVED | loader.py uses TTL invalidation |
+
+RuleEngine has 234 lines of tests. ConfigLoader has 228 lines.
+The core architecture (RuleEngine + ConfigLoader + Config) is
+tested and wired up. Remaining items (20, 21, 30) are pattern
+improvements, not architectural gaps.
+
 ---
 
 ## Executive Summary
