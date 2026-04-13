@@ -46,6 +46,18 @@ Remaining 0% modules (not blocking threshold):
 - `skills/release/collect_prs.py` (213 lines) — release tool
 - `mcp/tests/test_git.py` (77 lines) — test file in src/
 
+### M6 Cross-Cutting Consistency — Partially Resolved
+
+| # | Finding | Status | Evidence |
+|---|---------|--------|----------|
+| 9 | MCP return type inconsistency | RESOLVED | `Result[T]` type in domain/result.py; all github.py tools use ok()/err() |
+| 10 | Error handling pattern mixing | PARTIAL | HookResult/HookAllow/HookRetry defined; not all hooks migrated |
+| 22 | Config access — 3 patterns | RESOLVED | See M3 |
+
+The `Result[T]` algebraic type and `HookResult.emit()` protocol
+are in place. Adoption across all hooks is incremental — see
+GH-826 for the migration plan.
+
 ---
 
 ## Executive Summary
