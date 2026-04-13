@@ -3,6 +3,82 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.59.0 — Permission Automation & Review Intelligence
+
+Released 2026-04-13
+
+### Features
+
+- **Auto-detect semantic-release config** — release-notes skill
+  now discovers project-specific ticket patterns and output
+  targets without manual configuration ([GH-585])
+- **Auto-groom fixup commits in CI** — PR monitor detects
+  fixup! commits and triggers automatic interactive rebase
+  before merge readiness ([GH-869])
+- **Pre-approve temp file and MCP permissions** — new permission
+  namespaces eliminate approval prompts for temp files, plugin
+  scripts, MCP tools, and git aliases ([GH-878])
+- **Simplify code after review** — post-review pipeline step
+  scans changed files for reuse and quality improvements
+  ([GH-874])
+- **Filter review findings by confidence** — review skill drops
+  low-confidence findings to reduce noise in PR comments
+  ([GH-872])
+- **Detect silent failures in reviews** — new reviewer agent
+  catches swallowed exceptions and missing error logging
+  ([GH-873])
+- **Verify plugin script coverage** — pre-PR check ensures all
+  plugin scripts referenced in skills have test coverage
+  ([GH-876])
+- **Invoke scripts via MCP instead of paths** — MCP server
+  wraps plugin scripts so skills avoid path-dependent Bash
+  allow rules ([GH-807])
+- **Persist upgrade-cleanup config** — cleanup preferences
+  survive across sessions via YAML settings file ([GH-862])
+
+### Improvements
+
+- **Extensible PR comment action dispatch** — comment handler
+  uses registry pattern for adding new reply actions ([GH-827])
+- **Self-formatting session state objects** — state dataclasses
+  render their own display strings, removing format duplication
+  ([GH-820], [GH-823])
+- **Canonical rule evaluation via RuleEngine** — single
+  evaluation path replaces scattered rule-checking code
+  ([GH-818])
+- **Single-source YAML rule parsing** — rule definitions load
+  from YAML instead of duplicated Python dicts ([GH-822])
+- **Path-independent plan context updates** — plan sync works
+  from any working directory without hardcoded paths ([GH-802])
+- **Type-safe MCP tool returns** — MCP tools return typed dicts
+  instead of raw strings, catching schema mismatches early
+  ([GH-819])
+- **Validated repository references** — repo URL construction
+  uses validated objects instead of string concatenation
+  ([GH-821])
+
+### Fixes
+
+- **Prevent shipping pipeline skill regressions** — pin
+  eval assertions that caught behavioral drift in PR create,
+  groom, and merge skills ([GH-851])
+- **Block fanout completion before monitors finish** — gate
+  now waits for all background PR monitors before advancing
+  ([GH-859])
+- **Fix plugin cache lookup after repo rename** — cache key
+  derivation uses canonical repo name, not stale path
+  ([GH-861])
+- **Detect stale plugin paths with different casing** — path
+  comparison is now case-insensitive on case-folding
+  filesystems ([GH-864])
+
+### Tests
+
+- **MCP GitHub tool coverage** — add unit tests for PR detect,
+  issue get, and comment reply MCP tools ([GH-825])
+- **Domain module regression safety** — add integration tests
+  for core domain module imports and wiring ([GH-824])
+
 ## 0.58.0 — Session Safety & Config Hygiene
 
 Released 2026-04-09
