@@ -58,6 +58,19 @@ The `Result[T]` algebraic type and `HookResult.emit()` protocol
 are in place. Adoption across all hooks is incremental — see
 GH-826 for the migration plan.
 
+### GH-826 Hook Error Handling — Convention Established
+
+The `HookResult.emit()` / `HookAllow.emit()` / `HookRetry.emit()`
+protocol in `domain/hook_input.py` is the canonical pattern:
+- **Deny**: `HookResult(message=...).emit()` → JSON stderr + exit 2
+- **Allow**: `HookAllow(message=...).emit()` → JSON stderr + exit 0
+- **Pass-through**: `sys.exit(0)` → no output, exit 0
+
+All denial paths in validators (edit_validator, skill_redirect,
+prefix_friction, etc.) use `HookResult.emit()`. The `sys.exit(0)`
+calls in session.py, skill.py, and task_plan_sync.py are correct
+pass-through returns, not error handling inconsistencies.
+
 ---
 
 ## Executive Summary
