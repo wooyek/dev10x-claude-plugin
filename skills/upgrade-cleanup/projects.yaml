@@ -145,10 +145,36 @@ base_permissions:
   # --- Dev10x MCP tools: db server (GH-878) ---
   - "mcp__plugin_Dev10x_db__query"
 
-  # --- Git temp files (GH-120) ---
+  # --- Temp file namespaces (GH-878) ---
+  # Each /tmp/claude/<namespace>/ is created by mktmp and used by
+  # skills for intermediate files. Enumerate all namespaces here.
   - "Read(/tmp/claude/git/**)"
   - "Write(/tmp/claude/git/**)"
   - "Edit(/tmp/claude/git/**)"
+  - "Read(/tmp/claude/review/**)"
+  - "Write(/tmp/claude/review/**)"
+  - "Edit(/tmp/claude/review/**)"
+  - "Read(/tmp/claude/skill-audit/**)"
+  - "Write(/tmp/claude/skill-audit/**)"
+  - "Edit(/tmp/claude/skill-audit/**)"
+  - "Read(/tmp/claude/playwright/**)"
+  - "Write(/tmp/claude/playwright/**)"
+  - "Edit(/tmp/claude/playwright/**)"
+  - "Read(/tmp/claude/self-qa/**)"
+  - "Write(/tmp/claude/self-qa/**)"
+  - "Edit(/tmp/claude/self-qa/**)"
+  - "Read(/tmp/claude/ticket-scope/**)"
+  - "Write(/tmp/claude/ticket-scope/**)"
+  - "Edit(/tmp/claude/ticket-scope/**)"
+  - "Read(/tmp/claude/slack/**)"
+  - "Write(/tmp/claude/slack/**)"
+  - "Edit(/tmp/claude/slack/**)"
+  - "Read(/tmp/claude/pr-monitor/**)"
+  - "Write(/tmp/claude/pr-monitor/**)"
+  - "Edit(/tmp/claude/pr-monitor/**)"
+  - "Read(/tmp/claude/gh/**)"
+  - "Write(/tmp/claude/gh/**)"
+  - "Edit(/tmp/claude/gh/**)"
 
   # --- gh CLI patterns (GH-98) ---
   - "Bash(gh pr view:*)"
