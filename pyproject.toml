@@ -1,6 +1,6 @@
 [project]
 name = "Dev10x"
-version = "0.60.0"
+version = "0.61.0.dev0"
 description = "Claude Code plugin providing reusable skills, hooks, and commands"
 requires-python = ">=3.12"
 dependencies = [
