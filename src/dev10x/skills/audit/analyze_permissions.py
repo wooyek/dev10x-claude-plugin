@@ -215,6 +215,20 @@ def classify_toxicity(command: str) -> str | None:
     return None
 
 
+MULTI_WORD_COMMANDS = {"gh", "git", "uv", "docker", "kubectl", "aws"}
+
+
+def _extract_command_prefix(command: str) -> str:
+    parts = command.split()
+    if not parts:
+        return command
+    if parts[0] in MULTI_WORD_COMMANDS and len(parts) >= 2:
+        subcommand = parts[1]
+        if not subcommand.startswith("-"):
+            return f"{parts[0]} {subcommand}"
+    return parts[0]
+
+
 def classify_unmatched(
     tc: ToolCall,
     rules: list[AllowRule],
@@ -235,7 +249,8 @@ def classify_unmatched(
         if has_similar:
             return "PATTERN_TOO_NARROW", "Widen existing allow rule pattern"
 
-        return "MISSING_RULE", f"Add: Bash({tc.command.split()[0]}:*)"
+        prefix = _extract_command_prefix(command=tc.command)
+        return "MISSING_RULE", f"Add: Bash({prefix}:*)"
 
     target = tc.file_path or tc.command
     has_similar = any(r.tool == tc.tool and target[:10].startswith(r.pattern[:10]) for r in rules)
