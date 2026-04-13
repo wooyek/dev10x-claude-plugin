@@ -246,9 +246,14 @@ echo "Created fixup commit: ${COMMIT_HASH}"
 echo "URL: ${COMMIT_URL}"
 ```
 
-**Return to caller (Dev10x:gh-pr-fixup):**
-- `commit_hash` - Short hash for reply
-- `commit_url` - Full URL for linking (PR-based when PR number available)
+**Completion:** Signal completion silently via `TaskUpdate`
+(status="completed"). Do not output "Returning to caller"
+messages — they mislead users in nested skill execution into
+thinking the workflow is done when the parent still has steps.
+
+The caller reads these values from git state:
+- `commit_hash` — `git rev-parse --short HEAD`
+- `commit_url` — constructed from repo + PR number + full hash
 
 ## Pre-commit Hook Integration
 
