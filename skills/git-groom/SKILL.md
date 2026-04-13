@@ -321,17 +321,26 @@ the new HEAD. All previous CI results become invalid. The calling
 skill (e.g., `Dev10x:work-on`) MUST re-monitor CI after grooming
 completes — do not declare CI green based on pre-groom results.
 
-### Phase 4: Update PR References
+### Phase 4: Update PR References (MANDATORY)
 
-After force-pushing groomed history, PR body and summary comment may
-contain stale commit hashes.
+**Hard rule:** After force-pushing groomed history, this phase
+MUST execute when an open PR exists for the branch. PR body and
+summary comment contain stale commit hashes that confuse
+reviewers and break permalink traceability. Skipping this phase
+leaves stale SHAs in the PR body — detected as PARTIALLY_COMPLIANT
+in session 0aa83b83.
 
-1. Get the new commit hash(es): `git log --oneline develop..HEAD`
-2. Update the PR body commit links with new hashes
-3. Update the summary comment (first comment by the author) with new hashes
-4. If the PR body has a Job Story, preserve it unchanged
+**Anti-pattern:** Marking Phase 4 as "optional" or skipping it
+because "the PR will be updated later" — the groom skill owns
+the full rewrite lifecycle including reference updates.
 
-This step is only needed when an open PR exists for the branch.
+1. Detect open PR: `gh pr view --json number,state`
+   - If no PR or PR is closed/merged → skip Phase 4, mark done
+   - If PR is open → proceed with updates
+2. Get the new commit hash(es): `git log --oneline develop..HEAD`
+3. Update the PR body commit links with new hashes
+4. Update the summary comment (first comment by the author) with new hashes
+5. If the PR body has a Job Story, preserve it unchanged
 
 After completing, mark all tasks done: `TaskUpdate(taskId=push_task, status="completed")`
 
