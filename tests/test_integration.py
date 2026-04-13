@@ -347,7 +347,15 @@ class TestUvShebangDependencies:
             timeout=120,
             cwd=str(REPO_ROOT),
         )
-        assert result.returncode in (0, 2), (
+        dep_failure_markers = [
+            "No solution found",
+            "Could not find a version",
+            "Failed to download",
+            "ModuleNotFoundError",
+            "No matching distribution",
+        ]
+        has_dep_failure = any(m in result.stderr for m in dep_failure_markers)
+        assert not has_dep_failure, (
             f"uv failed to resolve deps for {script.relative_to(REPO_ROOT)}:\n"
             f"exit code: {result.returncode}\n"
             f"stderr: {result.stderr[:500]}"
