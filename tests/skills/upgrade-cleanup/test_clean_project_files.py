@@ -584,3 +584,134 @@ class TestBasePermissionsPreserved:
 
         assert result.kept == rules
         assert result.total_removed == 0
+
+
+class TestWildcardBypassDetection:
+    def test_detects_bash_wildcard_bypass(self) -> None:
+        rules = ["Bash(*)", "Bash(git log)"]
+
+        result = clean_mod.classify_rules(
+            rules,
+            global_rules=set(),
+            current_version=None,
+        )
+
+        assert result.wildcard_bypasses == ["Bash(*)"]
+
+    def test_detects_read_write_wildcard_bypass(self) -> None:
+        rules = ["Read(*)", "Write(*)", "Edit(*)"]
+
+        result = clean_mod.classify_rules(
+            rules,
+            global_rules=set(),
+            current_version=None,
+        )
+
+        assert len(result.wildcard_bypasses) == 3
+
+
+class TestAllowDenyContradictions:
+    def test_detects_exact_contradiction(self) -> None:
+        allow = ["Bash(rm -rf)", "Bash(git log)"]
+        deny = ["Bash(rm -rf)"]
+
+        result = clean_mod.classify_rules(
+            allow,
+            global_rules=set(),
+            current_version=None,
+            deny_rules=deny,
+        )
+
+        assert len(result.allow_deny_contradictions) == 1
+        assert result.allow_deny_contradictions[0] == (
+            "Bash(rm -rf)",
+            "Bash(rm -rf)",
+        )
+
+    def test_no_contradiction_when_different(self) -> None:
+        allow = ["Bash(git log)"]
+        deny = ["Bash(rm -rf)"]
+
+        result = clean_mod.classify_rules(
+            allow,
+            global_rules=set(),
+            current_version=None,
+            deny_rules=deny,
+        )
+
+        assert result.allow_deny_contradictions == []
+
+
+class TestAskShadowedByAllow:
+    def test_detects_exact_shadow(self) -> None:
+        allow = ["Bash(git push:*)"]
+        ask = ["Bash(git push:*)"]
+
+        result = clean_mod.classify_rules(
+            allow,
+            global_rules=set(),
+            current_version=None,
+            ask_rules=ask,
+        )
+
+        assert len(result.ask_shadowed_by_allow) == 1
+
+    def test_detects_wildcard_shadow(self) -> None:
+        allow = ["mcp__plugin_Dev10x_cli__*"]
+        ask = ["mcp__plugin_Dev10x_cli__push_safe"]
+
+        result = clean_mod.classify_rules(
+            allow,
+            global_rules=set(),
+            current_version=None,
+            ask_rules=ask,
+        )
+
+        assert len(result.ask_shadowed_by_allow) == 1
+
+    def test_no_shadow_when_unrelated(self) -> None:
+        allow = ["Bash(docker:*)"]
+        ask = ["Bash(git push)"]
+
+        result = clean_mod.classify_rules(
+            allow,
+            global_rules=set(),
+            current_version=None,
+            ask_rules=ask,
+        )
+
+        assert result.ask_shadowed_by_allow == []
+
+
+class TestVerboseFormatting:
+    @pytest.fixture
+    def format_messages(self):
+        from dev10x.skills.permission.clean_project_files import _format_messages
+
+        return _format_messages
+
+    def test_verbose_includes_rule_details(self, format_messages) -> None:
+        result = clean_mod.RemovalResult(
+            exact_duplicates=["Bash(git log:*)"],
+            wildcard_covered=[("mcp__foo__bar", "mcp__foo__*")],
+            kept=["Bash(docker up)"],
+        )
+
+        messages = format_messages(result, verbose=True)
+
+        verbose_output = "\n".join(messages)
+        assert "Bash(git log:*)" in verbose_output
+        assert "mcp__foo__bar" in verbose_output
+        assert "covered by: mcp__foo__*" in verbose_output
+
+    def test_non_verbose_omits_rule_details(self, format_messages) -> None:
+        result = clean_mod.RemovalResult(
+            exact_duplicates=["Bash(git log:*)"],
+            kept=["Bash(docker up)"],
+        )
+
+        messages = format_messages(result, verbose=False)
+
+        output = "\n".join(messages)
+        assert "1 exact duplicates" in output
+        assert "Bash(git log:*)" not in output
