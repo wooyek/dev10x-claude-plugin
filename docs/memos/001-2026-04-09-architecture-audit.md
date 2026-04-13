@@ -36,6 +36,16 @@ The pr_comments strategy dispatch was refactored to a dict-based
 pattern. Template Method and Factory patterns remain open but are
 lower priority without concrete regression risk.
 
+### M5 Test Coverage — Threshold Met
+
+Current coverage: **54.14%** (threshold: 38%).
+The threshold has been exceeded by 16 percentage points.
+
+Remaining 0% modules (not blocking threshold):
+- `skills/audit/` (629 lines) — CLI audit scripts
+- `skills/release/collect_prs.py` (213 lines) — release tool
+- `mcp/tests/test_git.py` (77 lines) — test file in src/
+
 ---
 
 ## Executive Summary
