@@ -952,42 +952,64 @@ Review user corrections and `[CORRECTION]` markers:
 
 ---
 
-#### Phase 6: Propose Changes (REQUIRES USER CONFIRMATION)
+#### Phase 6: Report Findings (REQUIRES USER CONFIRMATION)
 
 **Runs in main agent after Step 8 (collect and synthesize).**
 
 Read all five phase output files to gather the complete findings.
-Merge them into a unified view before presenting proposals.
+Merge them into a unified view before presenting the report.
 
-**CRITICAL: Do NOT modify any files without user confirmation.**
+**CRITICAL: Audit reports findings — it does NOT design solutions.**
+The audit's job is to identify *what failed and why*. Proposing
+SKILL.md edits, new MCP tools, or allow-rule strategies requires
+project context that the auditor lacks. The implementor who picks
+up the filed ticket designs the fix.
 
-1. Present each proposed change clearly:
-   - Which file to modify
-   - What to add/change/remove
-   - Why (reference the specific transcript turn)
+**Anti-pattern:** "Phase 6 recommends adding `Bash(gh:*)` to
+allowed-tools" — this is a design decision, not a finding.
+Instead report: "Skill X invoked `gh pr view` directly 3 times
+(turns 12, 18, 24) because no MCP tool or allow-rule covered it."
 
-2. Use AskUserQuestion to confirm each change (or batch related changes).
+**DO NOT:**
+- Propose specific SKILL.md edits or diffs
+- Recommend new MCP tools or allow-rule patterns
+- Suggest architectural changes (e.g., "extract to a new skill")
+- Modify any files (the audit is read-only)
 
-3. If approved, edit the files. For new skills, suggest using `/Dev10x:skill-create`.
+**DO:**
+- Report what happened (which skill, which step, which turn)
+- Report what was expected (per SKILL.md orchestration)
+- Report the gap (skipped, deviated, bypassed, missing)
+- Include transcript evidence (turn numbers, tool calls)
 
-4. **REQUIRED: File a GitHub issue for every actionable finding.**
+1. Present each finding clearly:
+   - Which skill and step failed or deviated
+   - What happened vs what was expected
+   - Evidence (transcript turn numbers, tool calls)
+   - Classification (SKILL_UPDATE, GAP, SKIPPED_STEP, etc.)
+
+2. Use AskUserQuestion to confirm filing issues (batch).
+
+3. **REQUIRED: File a GitHub issue for every actionable finding.**
    After presenting the summary, iterate over all findings
    classified as SKILL_UPDATE, GAP, or SKIPPED_STEP. For each:
    - Invoke `Skill(Dev10x:ticket-create)` with:
      - Title: `[<classification>] <affected skill>: <short description>`
      - Body: finding classification, affected skill, description
-       of the gap/deviation, recommended fix, and session evidence
+       of the gap/deviation, and session evidence (turn numbers)
+     - Do NOT include recommended fixes in the ticket body —
+       the implementor designs the solution
    - Do NOT gate behind `AskUserQuestion` — filing is mandatory
    - Report all created issue URLs in the final summary
 
-5. Generate a summary report:
+4. Generate a summary report:
    - Total actions reviewed
    - Skills invoked vs missed vs gaps
    - Compliance score (% of steps followed correctly)
-   - Permission prompts: total, avoidable, proposed rules
-   - Changes applied (skill updates + permission rules)
+   - Permission prompts: total, avoidable (count only, no rules)
    - Issues filed (with URLs)
-   - Recommendations for future sessions
+   - Recommendations for future sessions (behavioral, not
+     architectural — e.g., "invoke skill X before step Y")
 
 ---
 
