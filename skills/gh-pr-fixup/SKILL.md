@@ -29,9 +29,17 @@ already been validated as needing a code change. It:
 
 **Critical rule: ONE fixup commit per PR comment.**
 
+**Entry point rule:** `Dev10x:gh-pr-respond` is the recommended
+entry point for all PR review comments. It orchestrates triage,
+fixup, reply, and thread resolution as a pipeline. Calling
+`Dev10x:gh-pr-fixup` directly skips triage, reply formatting,
+and thread resolution — use it only when you have already
+validated the comment and will handle reply/resolution yourself.
+
 **When to use this skill:**
 - Called by `Dev10x:gh-pr-respond` after `Dev10x:gh-pr-triage` returns `VALID`
-- Standalone when you already know a comment needs a fix
+- Standalone only when the comment is already validated and you
+  will handle reply and thread resolution separately
 
 ## Orchestration
 

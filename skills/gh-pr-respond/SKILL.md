@@ -23,6 +23,12 @@ allowed-tools:
 
 # Respond to PR Review Comments
 
+**This skill is the recommended entry point for all PR review
+comments.** It orchestrates the full pipeline: collect comments,
+triage each one, implement fixes, reply, and resolve threads.
+Do not call `Dev10x:gh-pr-fixup` or `Dev10x:gh-pr-triage`
+directly unless you are handling the full pipeline yourself.
+
 ## Orchestration
 
 This skill follows `references/task-orchestration.md` patterns.
