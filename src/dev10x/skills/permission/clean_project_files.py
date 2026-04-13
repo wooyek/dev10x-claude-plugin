@@ -81,6 +81,15 @@ SECRET_INDICATORS = [
 ]
 
 
+WILDCARD_BYPASS_PATTERNS = [
+    re.compile(r"^Bash\(\*\)$"),
+    re.compile(r"^Bash\(\.\*\)$"),
+    re.compile(r"^Read\(\*\)$"),
+    re.compile(r"^Write\(\*\)$"),
+    re.compile(r"^Edit\(\*\)$"),
+]
+
+
 @dataclass
 class RemovalResult:
     exact_duplicates: list[str] = field(default_factory=list)
@@ -92,6 +101,9 @@ class RemovalResult:
     double_slash: list[str] = field(default_factory=list)
     leaked_secrets: list[str] = field(default_factory=list)
     hook_enabled: list[str] = field(default_factory=list)
+    wildcard_bypasses: list[str] = field(default_factory=list)
+    allow_deny_contradictions: list[tuple[str, str]] = field(default_factory=list)
+    ask_shadowed_by_allow: list[tuple[str, str]] = field(default_factory=list)
     kept: list[str] = field(default_factory=list)
 
     @property
@@ -209,6 +221,40 @@ def has_leaked_secret(rule: str) -> bool:
     return any(p.search(rule) for p in SECRET_INDICATORS)
 
 
+def is_wildcard_bypass(rule: str) -> bool:
+    return any(p.match(rule) for p in WILDCARD_BYPASS_PATTERNS)
+
+
+def find_allow_deny_contradictions(
+    allow_rules: list[str],
+    deny_rules: list[str],
+) -> list[tuple[str, str]]:
+    contradictions: list[tuple[str, str]] = []
+    for allow in allow_rules:
+        for deny in deny_rules:
+            if allow == deny:
+                contradictions.append((allow, deny))
+    return contradictions
+
+
+def find_ask_shadowed_by_allow(
+    allow_rules: list[str],
+    ask_rules: list[str],
+) -> list[tuple[str, str]]:
+    shadowed: list[tuple[str, str]] = []
+    for ask in ask_rules:
+        for allow in allow_rules:
+            if allow == ask:
+                shadowed.append((ask, allow))
+                break
+            if "*" in allow:
+                pattern = re.escape(allow).replace(r"\*", ".*")
+                if re.fullmatch(pattern, ask):
+                    shadowed.append((ask, allow))
+                    break
+    return shadowed
+
+
 def classify_rules(
     project_rules: list[str],
     *,
@@ -216,13 +262,30 @@ def classify_rules(
     current_version: str | None,
     base_permissions: set[str] | None = None,
     cache_root: Path | None = None,
+    deny_rules: list[str] | None = None,
+    ask_rules: list[str] | None = None,
 ) -> RemovalResult:
     result = RemovalResult()
     _base = base_permissions or set()
 
+    if deny_rules:
+        result.allow_deny_contradictions = find_allow_deny_contradictions(
+            allow_rules=project_rules,
+            deny_rules=deny_rules,
+        )
+
+    if ask_rules:
+        result.ask_shadowed_by_allow = find_ask_shadowed_by_allow(
+            allow_rules=project_rules,
+            ask_rules=ask_rules,
+        )
+
     for rule in project_rules:
         if has_leaked_secret(rule):
             result.leaked_secrets.append(rule)
+
+        if is_wildcard_bypass(rule):
+            result.wildcard_bypasses.append(rule)
 
         if rule in _base:
             result.kept.append(rule)
@@ -275,6 +338,7 @@ def clean_file(
     base_permissions: set[str] | None = None,
     cache_root: Path | None = None,
     dry_run: bool = False,
+    verbose: bool = False,
 ) -> tuple[RemovalResult | None, list[str]]:
     content = path.read_text()
     try:
@@ -282,7 +346,11 @@ def clean_file(
     except json.JSONDecodeError as e:
         return None, [f"  SKIP (invalid JSON): {e}"]
 
-    allow_list: list[str] = data.get("permissions", {}).get("allow", [])
+    perms = data.get("permissions", {})
+    allow_list: list[str] = perms.get("allow", [])
+    deny_list: list[str] = perms.get("deny", [])
+    ask_list: list[str] = perms.get("ask", [])
+
     if not allow_list:
         return RemovalResult(), []
 
@@ -292,22 +360,34 @@ def clean_file(
         current_version=current_version,
         base_permissions=base_permissions,
         cache_root=cache_root,
+        deny_rules=deny_list if deny_list else None,
+        ask_rules=ask_list if ask_list else None,
     )
 
-    if result.total_removed == 0:
+    has_findings = (
+        result.total_removed > 0
+        or result.wildcard_bypasses
+        or result.allow_deny_contradictions
+        or result.ask_shadowed_by_allow
+    )
+    if not has_findings:
         return result, []
 
-    if not dry_run:
+    if not dry_run and result.total_removed > 0:
         from dev10x.skills.permission.file_lock import locked_json_update
 
         with locked_json_update(path=path) as live_data:
             live_data["permissions"]["allow"] = result.kept
 
-    messages = _format_messages(result)
+    messages = _format_messages(result, verbose=verbose)
     return result, messages
 
 
-def _format_messages(result: RemovalResult) -> list[str]:
+def _format_messages(
+    result: RemovalResult,
+    *,
+    verbose: bool = False,
+) -> list[str]:
     messages: list[str] = []
 
     if result.leaked_secrets:
@@ -315,29 +395,73 @@ def _format_messages(result: RemovalResult) -> list[str]:
         for rule in result.leaked_secrets:
             messages.append(f"    ⚠ {rule}")
 
+    if result.wildcard_bypasses:
+        messages.append(f"  ⚠ WILDCARD BYPASSES ({len(result.wildcard_bypasses)}):")
+        for rule in result.wildcard_bypasses:
+            messages.append(f"    ⚠ {rule}")
+
+    if result.allow_deny_contradictions:
+        messages.append(
+            f"  ⚠ ALLOW/DENY CONTRADICTIONS ({len(result.allow_deny_contradictions)}):"
+        )
+        for allow, deny in result.allow_deny_contradictions:
+            messages.append(f"    allow: {allow}")
+            messages.append(f"    deny:  {deny}")
+
+    if result.ask_shadowed_by_allow:
+        messages.append(f"  ⚠ ASK SHADOWED BY ALLOW ({len(result.ask_shadowed_by_allow)}):")
+        for ask, allow in result.ask_shadowed_by_allow:
+            messages.append(f"    ask:   {ask}")
+            messages.append(f"    allow: {allow}")
+
     if result.exact_duplicates:
         messages.append(f"  - {len(result.exact_duplicates)} exact duplicates of global rules")
+        if verbose:
+            for rule in result.exact_duplicates:
+                messages.append(f"    {rule}")
 
     if result.wildcard_covered:
         messages.append(f"  - {len(result.wildcard_covered)} covered by global wildcards")
+        if verbose:
+            for rule, covering in result.wildcard_covered:
+                messages.append(f"    {rule}")
+                messages.append(f"      covered by: {covering}")
 
     if result.old_versions:
         messages.append(f"  - {len(result.old_versions)} old plugin versions")
+        if verbose:
+            for rule in result.old_versions:
+                messages.append(f"    {rule}")
 
     if result.stale_publisher:
         messages.append(f"  - {len(result.stale_publisher)} stale publisher paths")
+        if verbose:
+            for rule in result.stale_publisher:
+                messages.append(f"    {rule}")
 
     if result.env_noise:
         messages.append(f"  - {len(result.env_noise)} env-prefixed session noise")
+        if verbose:
+            for rule in result.env_noise:
+                messages.append(f"    {rule}")
 
     if result.shell_fragments:
         messages.append(f"  - {len(result.shell_fragments)} shell control flow fragments")
+        if verbose:
+            for rule in result.shell_fragments:
+                messages.append(f"    {rule}")
 
     if result.double_slash:
         messages.append(f"  - {len(result.double_slash)} double-slash paths")
+        if verbose:
+            for rule in result.double_slash:
+                messages.append(f"    {rule}")
 
     if result.hook_enabled:
         messages.append(f"  - {len(result.hook_enabled)} hook-enabled rules (kept)")
+        if verbose:
+            for rule in result.hook_enabled:
+                messages.append(f"    {rule}")
 
     messages.append(f"  Removed: {result.total_removed} | Kept: {len(result.kept)}")
     return messages
@@ -376,6 +500,12 @@ def main() -> int:
         "--dry-run",
         action="store_true",
         help="Show what would be cleaned without modifying files",
+    )
+    parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Print each affected rule instead of just counts",
     )
     args = parser.parse_args()
 
@@ -420,6 +550,7 @@ def main() -> int:
             base_permissions=base_permissions,
             cache_root=cache_root,
             dry_run=args.dry_run,
+            verbose=args.verbose,
         )
         if result is None:
             print(f"\n{path}")
@@ -427,7 +558,14 @@ def main() -> int:
                 print(msg)
             continue
 
-        if result.total_removed > 0 or result.leaked_secrets:
+        has_findings = (
+            result.total_removed > 0
+            or result.leaked_secrets
+            or result.wildcard_bypasses
+            or result.allow_deny_contradictions
+            or result.ask_shadowed_by_allow
+        )
+        if has_findings:
             print(f"\n{path}")
             for msg in messages:
                 print(msg)

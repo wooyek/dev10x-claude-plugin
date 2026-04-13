@@ -144,11 +144,14 @@ def merge_permissions(
     main_allow = extract_allow_set(main_data)
 
     new_entries: set[str] = set()
+    source_map: dict[str, list[Path]] = {}
     for wt_dir in worktree_dirs:
         wt_settings = wt_dir / ".claude" / "settings.local.json"
         wt_data = load_permissions(wt_settings)
         wt_allow = extract_allow_set(wt_data)
-        new_entries |= wt_allow - main_allow
+        for entry in wt_allow - main_allow:
+            new_entries.add(entry)
+            source_map.setdefault(entry, []).append(wt_settings)
 
     generalized = {generalize_permission(e) for e in new_entries}
     generalized -= main_allow
@@ -157,9 +160,18 @@ def merge_permissions(
     if not stable_entries:
         return 0, []
 
-    messages = [f"  +{len(stable_entries)} permissions from {len(worktree_dirs)} worktrees"]
+    messages = [
+        f"  target: {main_settings}",
+        f"  +{len(stable_entries)} permissions from {len(worktree_dirs)} worktrees",
+    ]
     for entry in stable_entries:
-        messages.append(f"    + {entry}")
+        sources = source_map.get(entry, [])
+        if sources:
+            source_paths = ", ".join(str(s) for s in sources)
+            messages.append(f"    + {entry}")
+            messages.append(f"      from: {source_paths}")
+        else:
+            messages.append(f"    + {entry}")
 
     if not dry_run:
         from dev10x.skills.permission.file_lock import locked_json_update
