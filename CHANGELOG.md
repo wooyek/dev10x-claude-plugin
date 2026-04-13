@@ -3,6 +3,40 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.60.0 — Multi-Issue Bundling & Audit Clarity
+
+Released 2026-04-13
+
+### Features
+
+- **Bundle multiple issues in work-on** — work-on skill accepts
+  multiple ticket URLs or IDs in a single invocation, gathering
+  context in parallel and building a unified task list ([GH-868])
+- **Separate audit detection from solution design** — permission
+  auditor splits finding identification from fix proposals so
+  users review problems before seeing solutions ([GH-904])
+
+### Fixes
+
+- **Restore MCP server dependencies** — re-add yaml and msgpack
+  dependencies removed during consolidation so MCP servers start
+  without import errors ([GH-911])
+- **Enforce PR reference update after groom force-push** — groom
+  skill now updates the PR head ref after force-pushing rebased
+  commits, preventing stale SHA references ([GH-900])
+- **Prevent misleading completion messages in fixup** — fixup
+  skill no longer reports success when the underlying commit
+  was not created ([GH-899])
+- **Prevent wildcard allow-rule proposals in audit** — permission
+  auditor blocks overly broad glob patterns that would bypass
+  security boundaries ([GH-903])
+
+### Docs
+
+- **Clarify gh-pr-respond as PR comment entry point** — update
+  skill description to direct users to gh-pr-respond instead
+  of gh-pr-fixup for handling review comments ([GH-898])
+
 ## 0.59.0 — Permission Automation & Review Intelligence
 
 Released 2026-04-13
