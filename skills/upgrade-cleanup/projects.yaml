@@ -26,7 +26,74 @@ include_user_settings: true
 base_permissions:
   # --- Plugin infrastructure (GH-274, GH-101, GH-426) ---
   - "Bash(/tmp/claude/bin/mktmp.sh:*)"
-  - "Bash(~/.claude/plugins/cache/**:*)"
+
+  # --- Plugin scripts: bin/ ---
+  - "Bash(~/.claude/plugins/cache/**/bin/release.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/bin/require-tool.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/bin/statusline.sh:*)"
+
+  # --- Plugin scripts: hooks/ ---
+  - "Bash(~/.claude/plugins/cache/**/hooks/scripts/permission-denied.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/hooks/scripts/precompact-context.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/hooks/scripts/session-start-reload.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/hooks/scripts/task-plan-sync.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/hooks/scripts/validate-bash-command.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/hooks/scripts/validate-edit-write.py:*)"
+
+  # --- Plugin scripts: skills/ ---
+  - "Bash(~/.claude/plugins/cache/**/skills/db-psql/scripts/db.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/db-psql/scripts/dsn-resolve.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/db-psql/scripts/parse-databases.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-context/scripts/detect-tracker.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-context/scripts/gh-issue-comments.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-context/scripts/gh-issue-create.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-context/scripts/gh-issue-get.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-context/scripts/gh-pr-detect.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-create/scripts/create-pr.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-create/scripts/detect-base-branch.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-create/scripts/generate-commit-list.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-create/scripts/post-summary-comment.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-create/scripts/pre-pr-checks.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-create/scripts/verify-state.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-doctor/scripts/gh-audit-check.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-doctor/scripts/gh-audit-comment.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-doctor/scripts/gh-unresolved-threads.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-merge/scripts/check-top-level-comments.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-monitor/scripts/ci-check-status.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/gh-pr-monitor/scripts/pr-notify.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git-alias-setup/scripts/git-alias-setup.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git-commit-split/scripts/start-split-rebase.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git-groom/scripts/mass-rewrite.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git/scripts/git-push-safe.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git/scripts/git-rebase-groom.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git/scripts/git-seq-editor.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git/scripts/protected-branches.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git-worktree/scripts/create-worktree.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git-worktree/scripts/next-worktree-name.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git-worktree/scripts/session-end-cleanup.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/git-worktree/scripts/setup-session-end-hook.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/investigate/scripts/parse-slack-url.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/investigate/scripts/reply.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/playwright/scripts/run-playwright.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/py-uv/scripts/check-uv.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/qa-self/scripts/convert-evidence.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/qa-self/scripts/upload-screenshots.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/release-notes/scripts/collect-prs.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-audit/scripts/analyze-actions.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-audit/scripts/analyze-actions.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-audit/scripts/analyze-permissions.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-audit/scripts/analyze-permissions.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-audit/scripts/extract-session.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-audit/scripts/extract-session.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-create/scripts/scaffold.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-index/scripts/generate-all.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-index/scripts/generate-motd.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/skill-index/scripts/generate-skills-menu.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/slack-review-request/scripts/slack-review-request.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/ticket-create/scripts/create-github-issue.sh:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/upgrade-cleanup/scripts/clean-project-files.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/upgrade-cleanup/scripts/merge-worktree-permissions.py:*)"
+  - "Bash(~/.claude/plugins/cache/**/skills/upgrade-cleanup/scripts/update-paths.py:*)"
 
   # --- Dev10x config file access (GH-878) ---
   # Skills read/write playbook overrides, session config, slack config,
@@ -79,8 +146,9 @@ base_permissions:
   - "mcp__plugin_Dev10x_db__query"
 
   # --- Git temp files (GH-120) ---
-  - "Write(/tmp/claude/git/**)"
   - "Read(/tmp/claude/git/**)"
+  - "Write(/tmp/claude/git/**)"
+  - "Edit(/tmp/claude/git/**)"
 
   # --- gh CLI patterns (GH-98) ---
   - "Bash(gh pr view:*)"
@@ -118,13 +186,29 @@ base_permissions:
   - "Bash(git rebase:*)"
 
   # --- Git aliases (GH-852, GH-853) ---
-  # These are subsumed by global wildcards like Bash(git develop-:*)
-  # but must be preserved at project level as safety anchors — they
-  # enable hook feedback and branch-specific allow rules.
+  # All base branch aliases from Dev10x:git-alias-setup.
+  # Preserved at project level as safety anchors — they enable
+  # hook feedback and branch-specific allow rules.
   - "Bash(git develop-log:*)"
   - "Bash(git develop-diff:*)"
   - "Bash(git develop-rebase:*)"
   - "Bash(git autosquash-develop:*)"
+  - "Bash(git development-log:*)"
+  - "Bash(git development-diff:*)"
+  - "Bash(git development-rebase:*)"
+  - "Bash(git autosquash-development:*)"
+  - "Bash(git trunk-log:*)"
+  - "Bash(git trunk-diff:*)"
+  - "Bash(git trunk-rebase:*)"
+  - "Bash(git autosquash-trunk:*)"
+  - "Bash(git main-log:*)"
+  - "Bash(git main-diff:*)"
+  - "Bash(git main-rebase:*)"
+  - "Bash(git autosquash-main:*)"
+  - "Bash(git master-log:*)"
+  - "Bash(git master-diff:*)"
+  - "Bash(git master-rebase:*)"
+  - "Bash(git autosquash-master:*)"
 
   # --- Dev10x skills ---
   - "Skill(Dev10x:*)"
