@@ -7,6 +7,7 @@ together after the src/dev10x migration.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -20,6 +21,11 @@ from dev10x.domain.rule_engine import RuleEngine
 from dev10x.hooks.edit_validator import validate_edit_write
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+_PEP723_DEPS_RE = re.compile(
+    r"# /// script\s*\n(.*?)# ///",
+    re.DOTALL,
+)
 
 
 class TestCliIntegration:
@@ -300,6 +306,65 @@ class TestPythonEntryPointLoadability:
             env={**__import__("os").environ, "PYTHONPATH": str(REPO_ROOT / "src")},
         )
         assert result.returncode == 0, f"Import failed for {module}: {result.stderr}"
+
+
+def _collect_uv_shebang_scripts() -> list[Path]:
+    scripts: list[Path] = []
+    for pattern in ["skills/**/scripts/*.py", "hooks/scripts/*.py", "servers/*.py"]:
+        for p in sorted(REPO_ROOT.glob(pattern)):
+            if p.name == "__init__.py":
+                continue
+            first_line = p.read_text().split("\n", 1)[0]
+            if "uv run" in first_line:
+                scripts.append(p)
+    standalone = REPO_ROOT / "skills" / "slack" / "slack-notify.py"
+    if standalone.exists() and "uv run" in standalone.read_text().split("\n", 1)[0]:
+        scripts.append(standalone)
+    return scripts
+
+
+UV_SHEBANG_SCRIPTS = _collect_uv_shebang_scripts()
+
+
+class TestUvShebangDependencies:
+    """GH-913: Verify uv shebang scripts have satisfiable PEP 723 deps.
+
+    Runs each script with `uv run --script <file> --help` to confirm
+    uv can resolve inline dependencies. Exit code 0 or 2 (argparse
+    unrecognized args) both indicate deps resolved successfully.
+    """
+
+    @pytest.mark.parametrize(
+        "script",
+        UV_SHEBANG_SCRIPTS,
+        ids=lambda p: str(p.relative_to(REPO_ROOT)),
+    )
+    def test_uv_resolves_inline_deps(self, script: Path) -> None:
+        result = subprocess.run(
+            ["uv", "run", "--script", str(script), "--help"],
+            capture_output=True,
+            text=True,
+            timeout=120,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode in (0, 2), (
+            f"uv failed to resolve deps for {script.relative_to(REPO_ROOT)}:\n"
+            f"exit code: {result.returncode}\n"
+            f"stderr: {result.stderr[:500]}"
+        )
+
+    @pytest.mark.parametrize(
+        "script",
+        UV_SHEBANG_SCRIPTS,
+        ids=lambda p: str(p.relative_to(REPO_ROOT)),
+    )
+    def test_pep723_metadata_is_valid(self, script: Path) -> None:
+        content = script.read_text()
+        match = _PEP723_DEPS_RE.search(content)
+        assert match is not None, (
+            f"{script.relative_to(REPO_ROOT)} has uv shebang but no "
+            f"PEP 723 inline metadata block (# /// script ... # ///)"
+        )
 
 
 class TestStartupTime:
