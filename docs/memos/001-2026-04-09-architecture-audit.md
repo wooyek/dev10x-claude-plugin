@@ -24,6 +24,18 @@ The core architecture (RuleEngine + ConfigLoader + Config) is
 tested and wired up. Remaining items (20, 21, 30) are pattern
 improvements, not architectural gaps.
 
+### M4 Pattern Adoption — Largely Resolved
+
+| # | Finding | Status | Evidence |
+|---|---------|--------|----------|
+| 12 | Strategy pattern missing for pr_comments | RESOLVED | `_PR_COMMENT_ACTIONS` dict in github.py dispatches by action string |
+| 20 | Pipeline validators hardcode filter | OPEN | Same as M3 — per-validator design |
+| 23 | Edit/Write rules incompatible | PARTIAL | RuleEngine.evaluate() handles both via matcher field |
+
+The pr_comments strategy dispatch was refactored to a dict-based
+pattern. Template Method and Factory patterns remain open but are
+lower priority without concrete regression risk.
+
 ---
 
 ## Executive Summary
