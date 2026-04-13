@@ -27,7 +27,56 @@ base_permissions:
   # --- Plugin infrastructure (GH-274, GH-101, GH-426) ---
   - "Bash(/tmp/claude/bin/mktmp.sh:*)"
   - "Bash(~/.claude/plugins/cache/**:*)"
-  - "mcp__plugin_Dev10x_*"
+
+  # --- Dev10x config file access (GH-878) ---
+  # Skills read/write playbook overrides, session config, slack config,
+  # reviewer config, database config under these directories.
+  - "Read(~/.claude/memory/Dev10x/**)"
+  - "Write(~/.claude/memory/Dev10x/**)"
+  - "Edit(~/.claude/memory/Dev10x/**)"
+  - "Read(.claude/Dev10x/**)"
+  - "Write(.claude/Dev10x/**)"
+  - "Edit(.claude/Dev10x/**)"
+
+  # --- Dev10x MCP tools: cli server (GH-878) ---
+  - "mcp__plugin_Dev10x_cli__detect_tracker"
+  - "mcp__plugin_Dev10x_cli__pr_detect"
+  - "mcp__plugin_Dev10x_cli__issue_get"
+  - "mcp__plugin_Dev10x_cli__issue_comments"
+  - "mcp__plugin_Dev10x_cli__issue_create"
+  - "mcp__plugin_Dev10x_cli__pr_comments"
+  - "mcp__plugin_Dev10x_cli__pr_comment_reply"
+  - "mcp__plugin_Dev10x_cli__request_review"
+  - "mcp__plugin_Dev10x_cli__detect_base_branch"
+  - "mcp__plugin_Dev10x_cli__verify_pr_state"
+  - "mcp__plugin_Dev10x_cli__pre_pr_checks"
+  - "mcp__plugin_Dev10x_cli__create_pr"
+  - "mcp__plugin_Dev10x_cli__generate_commit_list"
+  - "mcp__plugin_Dev10x_cli__post_summary_comment"
+  - "mcp__plugin_Dev10x_cli__pr_notify"
+  - "mcp__plugin_Dev10x_cli__push_safe"
+  - "mcp__plugin_Dev10x_cli__rebase_groom"
+  - "mcp__plugin_Dev10x_cli__create_worktree"
+  - "mcp__plugin_Dev10x_cli__mass_rewrite"
+  - "mcp__plugin_Dev10x_cli__start_split_rebase"
+  - "mcp__plugin_Dev10x_cli__next_worktree_name"
+  - "mcp__plugin_Dev10x_cli__setup_aliases"
+  - "mcp__plugin_Dev10x_cli__mktmp"
+  - "mcp__plugin_Dev10x_cli__plan_sync_set_context"
+  - "mcp__plugin_Dev10x_cli__plan_sync_json_summary"
+  - "mcp__plugin_Dev10x_cli__plan_sync_archive"
+  - "mcp__plugin_Dev10x_cli__check_top_level_comments"
+  - "mcp__plugin_Dev10x_cli__unresolved_threads"
+  - "mcp__plugin_Dev10x_cli__ci_check_status"
+  - "mcp__plugin_Dev10x_cli__update_paths"
+  - "mcp__plugin_Dev10x_cli__collect_prs"
+  - "mcp__plugin_Dev10x_cli__generate_skill_index"
+  - "mcp__plugin_Dev10x_cli__audit_extract_session"
+  - "mcp__plugin_Dev10x_cli__audit_analyze_actions"
+  - "mcp__plugin_Dev10x_cli__audit_analyze_permissions"
+
+  # --- Dev10x MCP tools: db server (GH-878) ---
+  - "mcp__plugin_Dev10x_db__query"
 
   # --- Git temp files (GH-120) ---
   - "Write(/tmp/claude/git/**)"

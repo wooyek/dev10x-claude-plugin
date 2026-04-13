@@ -113,8 +113,8 @@ that feature). Warn if a file exists at both old and new paths.
 ### 3. Ensure base permissions
 
 Add missing base permissions (gh CLI, /tmp/claude paths, git ops, MCP
-tools) to all settings files. The base set is defined in `projects.yaml`
-under `base_permissions:`.
+tools, Dev10x config file RWE access) to all settings files. The base
+set is defined in `projects.yaml` under `base_permissions:`.
 
 1. Dry run:
 
