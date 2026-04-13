@@ -548,6 +548,36 @@ async def plan_sync_archive() -> dict:
 
 
 @server.tool()
+async def resolve_review_thread(
+    thread_ids: list[str] | None = None,
+    comment_ids: list[str] | None = None,
+    repo: str | None = None,
+) -> dict:
+    """Resolve GitHub PR review threads by thread ID or comment node ID.
+
+    Accepts either direct thread IDs (PRRT_...) for immediate resolution,
+    or comment node IDs that are looked up to find their parent thread first.
+
+    Args:
+        thread_ids: List of PRRT_ thread IDs to resolve directly
+        comment_ids: List of GraphQL comment node IDs (thread lookup needed)
+        repo: Repository (owner/repo). Required when using comment_ids.
+
+    Returns:
+        Dictionary with GraphQL mutation results per resolved thread
+    """
+    from dev10x.mcp import github as gh
+
+    return (
+        await gh.resolve_review_thread(
+            thread_ids=thread_ids,
+            comment_ids=comment_ids,
+            repo=repo,
+        )
+    ).to_dict()
+
+
+@server.tool()
 async def check_top_level_comments(
     pr_number: int,
     repo: str,

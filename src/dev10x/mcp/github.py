@@ -284,6 +284,44 @@ _PR_COMMENT_ACTIONS: dict[str, Any] = {
 }
 
 
+async def resolve_review_thread(
+    *,
+    thread_ids: list[str] | None = None,
+    comment_ids: list[str] | None = None,
+    repo: str | None = None,
+) -> Result[dict[str, Any]]:
+    if thread_ids:
+        invalid = [tid for tid in thread_ids if not tid.startswith("PRRT_")]
+        if invalid:
+            return err(
+                f"Invalid thread IDs (must start with PRRT_): {invalid}. "
+                "Use comment_ids for GraphQL node IDs that need thread lookup."
+            )
+        resolve_fragments = " ".join(
+            f"r{i}: resolveReviewThread(input: {{threadId: {json.dumps(tid)}}}) "
+            f"{{ thread {{ id isResolved }} }}"
+            for i, tid in enumerate(thread_ids)
+        )
+        result = await _gh_api(
+            "graphql",
+            fields={"query": f"mutation {{ {resolve_fragments} }}"},
+        )
+        if result.returncode != 0:
+            return err(result.stderr.strip())
+        return ok(json.loads(result.stdout))
+
+    if comment_ids:
+        repo_result = await _resolve_repo(repo)
+        if isinstance(repo_result, ErrorResult):
+            return repo_result
+        return await _pr_comment_resolve(
+            resolved_repo=repo_result.value,
+            comment_ids=comment_ids,
+        )
+
+    return err("Provide either thread_ids (PRRT_...) or comment_ids (GraphQL node IDs).")
+
+
 async def pr_comments(
     *,
     action: str,
