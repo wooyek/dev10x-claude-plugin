@@ -116,6 +116,16 @@ Add missing base permissions (gh CLI, /tmp/claude paths, git ops, MCP
 tools, Dev10x config file RWE access) to all settings files. The base
 set is defined in `projects.yaml` under `base_permissions:`.
 
+**Enumeration requirement:** All script paths and MCP tool names
+MUST be listed individually in `base_permissions`. Glob wildcards
+(e.g., `Bash(~/.claude/plugins/cache/**:*)` or
+`mcp__plugin_Dev10x_*`) cause permission friction — Claude Code
+cannot pre-approve glob patterns for Bash or MCP tools, so each
+invocation triggers a manual approval prompt. When adding new
+scripts or MCP tools to the plugin, enumerate them explicitly in
+`projects.yaml` following the existing per-script and per-tool
+entries.
+
 1. Dry run:
 
 ```bash
