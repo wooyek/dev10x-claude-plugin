@@ -258,17 +258,28 @@ check for a strategy override:
 3. Walk the `projects` list — first `match` glob that fits
    the origin URL selects the named `strategy`
 4. If no match, check `default-strategy`
-5. If still no match, load `references/gitmoji-defaults.yaml`
+5. If still no match, check for a semantic-release config in
+   the project root (see `references/semantic-release.md`).
+   Search for `release.config.mjs`, `.releaserc.json`,
+   `.releaserc.yaml`, or `package.json` with a `"release"` key.
+   If found, extract `releaseRules` from the
+   `@semantic-release/commit-analyzer` plugin config and enrich
+   the defaults with `release` tags. This adds release impact
+   metadata without replacing the type menu.
+6. If no config found, load `references/gitmoji-defaults.yaml`
 
-If the user config is invalid or unreadable, log a warning
-and fall back to the defaults file — never block the commit.
+If the user config or semantic-release config is invalid or
+unreadable, log a warning and fall back to the defaults file —
+never block the commit.
 
-When a strategy is resolved, use its `gitmoji-mapping` list.
+When a strategy is resolved (from manual override, semantic-release
+auto-detection, or defaults), use its `gitmoji-mapping` list.
 Each entry has `emoji`, `label`, `description`, and optional
 `release` (patch/minor/major/none). When `release` is present,
 append it as a badge: `"Bug fixes [patch]"`.
 
-See `references/project-override.md` for full schema.
+See `references/project-override.md` for manual override schema.
+See `references/semantic-release.md` for auto-detection details.
 
 **Unattended mode:** Auto-select the commit type from context
 (e.g., changed file types, session history, orchestrator hints).
@@ -800,6 +811,11 @@ Default gitmoji-to-type mapping shipped with the plugin.
 
 Project-level gitmoji strategy overrides — schema, resolution
 order, and examples for `~/.claude/memory/Dev10x/gitmoji.yaml`.
+
+### references/semantic-release.md
+
+Auto-detection of gitmoji-to-release mappings from a project's
+semantic-release config (`release.config.mjs`, `.releaserc`, etc.).
 
 ## Success Criteria
 
