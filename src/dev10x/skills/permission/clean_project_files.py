@@ -93,7 +93,6 @@ WILDCARD_BYPASS_PATTERNS = [
 @dataclass
 class RemovalResult:
     exact_duplicates: list[str] = field(default_factory=list)
-    wildcard_covered: list[tuple[str, str]] = field(default_factory=list)
     old_versions: list[str] = field(default_factory=list)
     stale_publisher: list[str] = field(default_factory=list)
     env_noise: list[str] = field(default_factory=list)
@@ -110,7 +109,6 @@ class RemovalResult:
     def total_removed(self) -> int:
         return (
             len(self.exact_duplicates)
-            + len(self.wildcard_covered)
             + len(self.old_versions)
             + len(self.stale_publisher)
             + len(self.env_noise)
@@ -162,21 +160,6 @@ def _version_tuple(version: str) -> tuple[int, ...]:
         return tuple(int(x) for x in version.split("."))
     except ValueError:
         return (0,)
-
-
-def is_covered_by_wildcard(
-    rule: str,
-    global_rules: set[str],
-) -> str | None:
-    for global_rule in global_rules:
-        if "*" not in global_rule:
-            continue
-        if rule == global_rule:
-            continue
-        pattern = re.escape(global_rule).replace(r"\*", ".*")
-        if re.fullmatch(pattern, rule):
-            return global_rule
-    return None
 
 
 def is_shell_fragment(rule: str) -> bool:
@@ -300,11 +283,6 @@ def classify_rules(
             result.exact_duplicates.append(rule)
             continue
 
-        covering = is_covered_by_wildcard(rule, global_rules)
-        if covering is not None:
-            result.wildcard_covered.append((rule, covering))
-            continue
-
         if is_stale_publisher(rule, cache_root=cache_root):
             result.stale_publisher.append(rule)
             continue
@@ -421,13 +399,6 @@ def _format_messages(
         if verbose:
             for rule in result.exact_duplicates:
                 messages.append(f"    {rule}")
-
-    if result.wildcard_covered:
-        messages.append(f"  - {len(result.wildcard_covered)} covered by global wildcards")
-        if verbose:
-            for rule, covering in result.wildcard_covered:
-                messages.append(f"    {rule}")
-                messages.append(f"      covered by: {covering}")
 
     if result.old_versions:
         messages.append(f"  - {len(result.old_versions)} old plugin versions")

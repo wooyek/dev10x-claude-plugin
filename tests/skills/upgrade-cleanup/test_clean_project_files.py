@@ -13,55 +13,6 @@ clean_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(clean_mod)
 
 
-class TestIsCoveredByWildcard:
-    @pytest.mark.parametrize(
-        "rule,global_rules,expected_cover",
-        [
-            (
-                "mcp__claude_ai_Linear__get_issue",
-                {"mcp__claude_ai_Linear__*"},
-                "mcp__claude_ai_Linear__*",
-            ),
-            (
-                "Bash(/home/user/.claude/plugins/cache/Dev10x-Guru/dev10x-claude/0.30.0/scripts/foo.sh:*)",
-                {"Bash(/home/user/.claude/plugins/cache/Dev10x-Guru/dev10x-claude/*:*)"},
-                "Bash(/home/user/.claude/plugins/cache/Dev10x-Guru/dev10x-claude/*:*)",
-            ),
-            (
-                "mcp__plugin_Dev10x_cli__detect_tracker",
-                {"mcp__plugin_Dev10x_*"},
-                "mcp__plugin_Dev10x_*",
-            ),
-        ],
-    )
-    def test_detects_wildcard_coverage(
-        self,
-        rule: str,
-        global_rules: set[str],
-        expected_cover: str,
-    ) -> None:
-        result = clean_mod.is_covered_by_wildcard(rule, global_rules)
-
-        assert result == expected_cover
-
-    @pytest.mark.parametrize(
-        "rule,global_rules",
-        [
-            ("Bash(git log:*)", {"Bash(gh pr view:*)"}),
-            ("mcp__claude_ai_Slack__send", {"mcp__claude_ai_Linear__*"}),
-            ("Bash(git log:*)", {"Bash(git log:*)"}),
-        ],
-    )
-    def test_returns_none_when_not_covered(
-        self,
-        rule: str,
-        global_rules: set[str],
-    ) -> None:
-        result = clean_mod.is_covered_by_wildcard(rule, global_rules)
-
-        assert result is None
-
-
 class TestIsShellFragment:
     @pytest.mark.parametrize(
         "rule",
@@ -201,7 +152,7 @@ class TestClassifyRules:
         assert result.exact_duplicates == rules
         assert result.kept == []
 
-    def test_classifies_wildcard_covered(self) -> None:
+    def test_mcp_wildcards_no_longer_remove_individual_tools(self) -> None:
         rules = ["mcp__claude_ai_Linear__get_issue", "mcp__plugin_Dev10x_cli__push"]
 
         result = clean_mod.classify_rules(
@@ -210,8 +161,7 @@ class TestClassifyRules:
             current_version="0.33.0",
         )
 
-        assert len(result.wildcard_covered) == 2
-        assert result.kept == []
+        assert result.kept == rules
 
     def test_classifies_old_versions(self) -> None:
         rules = [
@@ -320,7 +270,6 @@ class TestClassifyRules:
     def test_total_removed_counts_all_categories(self) -> None:
         rules = [
             "Bash(git log:*)",
-            "mcp__claude_ai_Linear__get_issue",
             "Bash(/home/u/.claude/plugins/cache/Dev10x-Guru/dev10x-claude/0.4.0/x.sh:*)",
             "Bash(GIT_SEQUENCE_EDITOR=: git rebase)",
             "Bash(fi)",
@@ -333,7 +282,7 @@ class TestClassifyRules:
             current_version="0.33.0",
         )
 
-        assert result.total_removed == 6
+        assert result.total_removed == 5
 
 
 class TestCleanFile:
@@ -365,9 +314,11 @@ class TestCleanFile:
             current_version="0.33.0",
         )
 
-        assert result.total_removed == 2
+        assert result.total_removed == 1
         data = json.loads(settings_file.read_text())
-        assert data["permissions"]["allow"] == ["Bash(docker compose up)"]
+        assert "Bash(git log:*)" not in data["permissions"]["allow"]
+        assert "mcp__claude_ai_Linear__get_issue" in data["permissions"]["allow"]
+        assert "Bash(docker compose up)" in data["permissions"]["allow"]
 
     def test_dry_run_does_not_write(self, settings_file: Path) -> None:
         settings_file.write_text(
@@ -693,7 +644,6 @@ class TestVerboseFormatting:
     def test_verbose_includes_rule_details(self, format_messages) -> None:
         result = clean_mod.RemovalResult(
             exact_duplicates=["Bash(git log:*)"],
-            wildcard_covered=[("mcp__foo__bar", "mcp__foo__*")],
             kept=["Bash(docker up)"],
         )
 
@@ -701,8 +651,6 @@ class TestVerboseFormatting:
 
         verbose_output = "\n".join(messages)
         assert "Bash(git log:*)" in verbose_output
-        assert "mcp__foo__bar" in verbose_output
-        assert "covered by: mcp__foo__*" in verbose_output
 
     def test_non_verbose_omits_rule_details(self, format_messages) -> None:
         result = clean_mod.RemovalResult(
