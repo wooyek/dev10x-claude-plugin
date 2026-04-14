@@ -135,6 +135,19 @@ fragments:
           prompt: >
             Auto-assign reviewers from CODEOWNERS. No
             AskUserQuestion for reviewer selection.
+    - subject: Merge PR
+      type: detailed
+      prompt: >
+        Merge the PR after all checks pass. Use the merge
+        strategy from project settings (rebase preferred to
+        preserve groomed commit history).
+      skills: [Dev10x:gh-pr-merge]
+      modes:
+        solo-maintainer:
+          prompt: >
+            Solo maintainer — no reviewers to wait for. Merge
+            immediately after marking ready and CI passes.
+      condition: solo-maintainer
     - subject: Verify acceptance criteria
       type: detailed
       prompt: >
@@ -189,6 +202,19 @@ fragments:
           prompt: >
             Run `gh pr ready` if still draft. No reviewer
             assignment, no Slack.
+    - subject: Merge PR
+      type: detailed
+      prompt: >
+        Merge the PR after all checks pass. Use the merge
+        strategy from project settings (rebase preferred to
+        preserve groomed commit history).
+      skills: [Dev10x:gh-pr-merge]
+      modes:
+        solo-maintainer:
+          prompt: >
+            Solo maintainer — no reviewers to wait for. Merge
+            immediately after marking ready and CI passes.
+      condition: solo-maintainer
     - subject: Verify acceptance criteria
       type: detailed
       prompt: >
