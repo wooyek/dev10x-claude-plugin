@@ -339,15 +339,22 @@ reference those fragments (or default fragments) in their plays.
 1. Load the `fragments` map from the user override file (if present)
 2. Merge with fragments from the default playbook YAML; user
    fragments shadow defaults with the same name
-3. Walk the step list; when `fragment: <name>` is found,
+3. **Field inheritance on shadowing (GH-938):** When a user
+   fragment shadows a default, match steps by `subject`. For
+   each matched step, inherit `skills`, `agent`, `model`, and
+   `modes` from the default if the user step omits them. To
+   explicitly remove a field, set it to `[]` or `{}`. This
+   makes `skills:` "sticky" — preventing silent delegation
+   bypass when users customize only the `prompt:`.
+4. Walk the step list; when `fragment: <name>` is found,
    look up the name in the merged fragments map
-4. Copy fragment steps inline, applying `condition` from the
+5. Copy fragment steps inline, applying `condition` from the
    reference to each expanded step
-5. `subject`, `type`, `skills`, `agent` from fragment steps
-   are immutable — only `condition` and `prompt` can be
-   overridden at the reference site
-6. Detect circular references (max depth 3)
-7. Missing fragment → clear error, do not silently skip
+6. `subject` and `type` from fragment steps are immutable —
+   only `condition` and `prompt` can be overridden at the
+   reference site
+7. Detect circular references (max depth 3)
+8. Missing fragment → clear error, do not silently skip
 
 See `references/playbook.yaml` for the full work-on playbook
 with all 5 plays as a reference implementation.

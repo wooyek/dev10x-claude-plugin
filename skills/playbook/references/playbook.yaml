@@ -14,6 +14,8 @@
 #   1. fragments from the user override file (if present)
 #   2. fragments from this default playbook file
 #   User-defined fragments with the same name shadow defaults.
+#   When shadowing, steps matched by subject inherit skills, agent,
+#   model, and modes from the default if omitted (GH-938).
 #
 # Play-level fields:
 #   prompt — heuristic guidance for when this play type applies
