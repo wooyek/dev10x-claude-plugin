@@ -158,6 +158,9 @@ def update_file(
         except json.JSONDecodeError as e:
             return 0, [f"  SKIP (invalid JSON after replacement): {e}"]
 
+        from dev10x.skills.permission.backup import create_backup
+
+        create_backup(path)
         path.write_text(new_content)
 
     messages = []
@@ -188,8 +191,10 @@ def ensure_base_permissions(
         return 0, []
 
     if not dry_run:
+        from dev10x.skills.permission.backup import create_backup
         from dev10x.skills.permission.file_lock import locked_json_update
 
+        create_backup(path)
         with locked_json_update(path=path) as live_data:
             if "permissions" not in live_data:
                 live_data["permissions"] = {}
@@ -268,8 +273,10 @@ def ensure_script_rules(
         return 0, []
 
     if not dry_run:
+        from dev10x.skills.permission.backup import create_backup
         from dev10x.skills.permission.file_lock import locked_json_update
 
+        create_backup(settings_path)
         with locked_json_update(path=settings_path) as data:
             if "permissions" not in data:
                 data["permissions"] = {}
@@ -329,6 +336,9 @@ def generalize_permissions(
         return 0, []
 
     if not dry_run:
+        from dev10x.skills.permission.backup import create_backup
+
+        create_backup(path)
         new_allow = list(allow_list)
         for old, new in replacements:
             idx = new_allow.index(old)
@@ -338,6 +348,24 @@ def generalize_permissions(
 
     messages = [f"  {old} → {new}" for old, new in replacements]
     return len(replacements), messages
+
+
+def _restore(*, config_path: Path) -> int:
+    from dev10x.skills.permission.backup import restore_all
+
+    config = load_config(config_path)
+    settings_files = find_settings_files(
+        roots=config.get("roots", []),
+        include_user=config.get("include_user_settings", True),
+    )
+    restored = restore_all(paths=settings_files)
+    if not restored:
+        print("No backups found to restore.")
+        return 0
+    for original, backup in restored:
+        print(f"  Restored {original} from {backup.name}")
+    print(f"\nRestored {len(restored)} files.")
+    return 0
 
 
 def main() -> int:
@@ -378,7 +406,15 @@ def main() -> int:
         action="store_true",
         help="Suppress per-file details, emit only the summary line",
     )
+    parser.add_argument(
+        "--restore",
+        action="store_true",
+        help="Restore all settings files from their most recent backups",
+    )
     args = parser.parse_args()
+
+    if args.restore:
+        return _restore(config_path=find_config())
 
     if args.init:
         return _init_userspace_config()
