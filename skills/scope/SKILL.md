@@ -228,6 +228,34 @@ Agent(subagent_type="Explore", model="opus",
 - Implementation path is already clearly defined from Phase 1
 - User passes `--quick` argument to the skill
 
+#### 2.1c Design Discussion Artifact (GH-883)
+
+Before proceeding to design principles, produce an explicit
+**Design Discussion** document capturing the agent's analysis.
+This is the highest-leverage review gate — corrections here
+are 10x cheaper than fixing a 2,000-line implementation.
+
+**Required sections:**
+
+1. **Current State** — what exists today in the relevant
+   codebase area (patterns, components, data flow)
+2. **Desired State** — what the end result should look like
+   after implementation
+3. **Patterns Found** — existing conventions and abstractions
+   discovered during Phase 1 exploration
+4. **Key Decisions** — explicit choices the design makes
+   (and alternatives considered)
+5. **Open Questions** — uncertainties that need supervisor
+   input before implementation begins
+
+**Present this artifact as a review gate** — queue the
+decision per the Orchestration section's Phase 2 approval
+gate. The supervisor reviews the discussion before the agent
+proceeds to implementation planning.
+
+**Skip when:** Bug fix with obvious root cause, config-only
+change, or `--quick` flag passed.
+
 #### 2.2 Apply Design Principles
 
 **YAGNI (You Aren't Gonna Need It):**
