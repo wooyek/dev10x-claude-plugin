@@ -1,22 +1,18 @@
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.12"
-# dependencies = ["pyyaml"]
-# ///
 """Maintain Dev10x plugin permission settings across all projects.
 
 Modes:
   - (default) Update versioned plugin cache paths to the latest version
-  - --ensure-base: Add missing base permissions from projects.yaml
-  - --generalize: Replace session-specific args with wildcard patterns
+  - ensure-base: Add missing base permissions from projects.yaml
+  - generalize: Replace session-specific args with wildcard patterns
 
 Config lookup order:
   1. ~/.claude/memory/Dev10x/projects.yaml (persistent user config)
   2. ~/.claude/skills/Dev10x:upgrade-cleanup/projects.yaml (userspace)
   3. ${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/projects.yaml (plugin default)
+
+CLI entry point: ``dev10x permission update-paths`` (and siblings).
 """
 
-import argparse
 import json
 import re
 import sys
@@ -368,136 +364,6 @@ def _restore(*, config_path: Path) -> int:
     return 0
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Maintain Dev10x plugin permission settings",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be changed without modifying files",
-    )
-    parser.add_argument(
-        "--version",
-        help="Target version (default: auto-detect latest installed)",
-    )
-    parser.add_argument(
-        "--init",
-        action="store_true",
-        help="Create userspace config from plugin default",
-    )
-    parser.add_argument(
-        "--ensure-base",
-        action="store_true",
-        help="Add missing base permissions from projects.yaml to all settings files",
-    )
-    parser.add_argument(
-        "--generalize",
-        action="store_true",
-        help="Replace session-specific permission args with wildcard patterns",
-    )
-    parser.add_argument(
-        "--ensure-scripts",
-        action="store_true",
-        help="Verify all plugin scripts have allow rules; add missing ones",
-    )
-    parser.add_argument(
-        "--quiet",
-        action="store_true",
-        help="Suppress per-file details, emit only the summary line",
-    )
-    parser.add_argument(
-        "--restore",
-        action="store_true",
-        help="Restore all settings files from their most recent backups",
-    )
-    args = parser.parse_args()
-
-    if args.restore:
-        return _restore(config_path=find_config())
-
-    if args.init:
-        return _init_userspace_config()
-
-    config_path = find_config()
-    if not args.quiet:
-        print(f"Config: {config_path}")
-    config = load_config(config_path)
-
-    settings_files = find_settings_files(
-        roots=config.get("roots", []),
-        include_user=config.get("include_user_settings", True),
-    )
-
-    if not settings_files:
-        print("No settings files found.")
-        return 0
-
-    if args.ensure_base:
-        return _ensure_base(
-            config=config,
-            settings_files=settings_files,
-            dry_run=args.dry_run,
-            quiet=args.quiet,
-        )
-
-    if args.generalize:
-        return _generalize(
-            settings_files=settings_files,
-            dry_run=args.dry_run,
-            quiet=args.quiet,
-        )
-
-    if args.ensure_scripts:
-        return _ensure_scripts(
-            config=config,
-            settings_files=settings_files,
-            dry_run=args.dry_run,
-            quiet=args.quiet,
-        )
-
-    cache_dir = Path(config["plugin_cache"]).expanduser()
-    target = args.version or detect_latest_version(cache_dir)
-
-    if not target:
-        print(f"ERROR: No versions found in {cache_dir}", file=sys.stderr)
-        return 1
-
-    publisher = extract_cache_publisher(config["plugin_cache"])
-    if not args.quiet:
-        print(f"Target version: {target}")
-        if publisher:
-            print(f"Target publisher: {publisher}")
-    if args.dry_run and not args.quiet:
-        print("(dry run — no files will be modified)\n")
-
-    total_changes = 0
-    files_changed = 0
-
-    for path in sorted(settings_files):
-        count, messages = update_file(
-            path,
-            target,
-            target_publisher=publisher,
-            dry_run=args.dry_run,
-        )
-        if count > 0:
-            if not args.quiet:
-                print(f"\n{path}")
-                for msg in messages:
-                    print(msg)
-            total_changes += count
-            files_changed += 1
-
-    if total_changes == 0:
-        print("All files already up to date.")
-    else:
-        verb = "Would update" if args.dry_run else "Updated"
-        print(f"{verb} {total_changes} paths in {files_changed} files.")
-
-    return 0
-
-
 def _load_global_allow_rules() -> set[str]:
     global_settings = Path.home() / ".claude" / "settings.json"
     if not global_settings.is_file():
@@ -705,7 +571,3 @@ def _init_userspace_config() -> int:
     print(f"Plugin cache: {detected_cache}")
     print("Edit this file to add your project roots.")
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

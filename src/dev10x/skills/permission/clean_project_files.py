@@ -1,8 +1,3 @@
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.12"
-# dependencies = ["pyyaml"]
-# ///
 """Clean redundant permission rules from project settings.local.json files.
 
 Compares project-level allow rules against global ~/.claude/settings.json
@@ -16,12 +11,9 @@ and strips rules that are:
 
 Also flags rules containing leaked secrets (env vars with plaintext values).
 
-Config lookup order:
-  1. ~/.claude/skills/Dev10x:upgrade-cleanup/projects.yaml (userspace)
-  2. ${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/projects.yaml (plugin default)
+CLI entry point: ``dev10x permission clean``.
 """
 
-import argparse
 import json
 import re
 import sys
@@ -478,117 +470,3 @@ def _restore(*, config_path: Path) -> int:
         print(f"  Restored {original} from {backup.name}")
     print(f"\nRestored {len(restored)} files.")
     return 0
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Clean redundant permissions from project settings files",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be cleaned without modifying files",
-    )
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="Print each affected rule instead of just counts",
-    )
-    parser.add_argument(
-        "--restore",
-        action="store_true",
-        help="Restore all settings files from their most recent backups",
-    )
-    args = parser.parse_args()
-
-    if args.restore:
-        return _restore(config_path=find_config())
-
-    config_path = find_config()
-    print(f"Config: {config_path}")
-    config = load_config(config_path)
-
-    global_data = load_global_settings(GLOBAL_SETTINGS)
-    global_rules = extract_allow_rules(global_data)
-    print(f"Global rules: {len(global_rules)}")
-
-    cache_dir = Path(config.get("plugin_cache", "")).expanduser()
-    cache_root = cache_dir.parent.parent if cache_dir.parts else None
-    current_version = detect_current_version(cache_dir)
-    if current_version:
-        print(f"Current plugin version: {current_version}")
-
-    base_permissions = set(config.get("base_permissions", []))
-
-    settings_files = find_settings_files(roots=config.get("roots", []))
-
-    if not settings_files:
-        print("No project settings files found.")
-        return 0
-
-    print(f"Scanning {len(settings_files)} files")
-    if args.dry_run:
-        print("(dry run — no files will be modified)\n")
-    else:
-        print()
-
-    total_removed = 0
-    total_kept = 0
-    files_changed = 0
-    total_secrets = 0
-
-    for path in sorted(settings_files):
-        result, messages = clean_file(
-            path,
-            global_rules=global_rules,
-            current_version=current_version,
-            base_permissions=base_permissions,
-            cache_root=cache_root,
-            dry_run=args.dry_run,
-            verbose=args.verbose,
-        )
-        if result is None:
-            print(f"\n{path}")
-            for msg in messages:
-                print(msg)
-            continue
-
-        has_findings = (
-            result.total_removed > 0
-            or result.leaked_secrets
-            or result.wildcard_bypasses
-            or result.allow_deny_contradictions
-            or result.ask_shadowed_by_allow
-        )
-        if has_findings:
-            print(f"\n{path}")
-            for msg in messages:
-                print(msg)
-            total_removed += result.total_removed
-            total_kept += len(result.kept)
-            total_secrets += len(result.leaked_secrets)
-            if result.total_removed > 0:
-                files_changed += 1
-        else:
-            total_kept += len(result.kept)
-
-    print()
-    if total_removed == 0:
-        print("All project files are clean.")
-    else:
-        verb = "Would remove" if args.dry_run else "Removed"
-        print(f"{verb} {total_removed} rules across {files_changed} files.")
-        print(f"Kept {total_kept} rules total.")
-
-    if total_secrets > 0:
-        print(
-            f"\n⚠ Found {total_secrets} rules containing leaked secrets."
-            " Review and rotate affected credentials."
-        )
-
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

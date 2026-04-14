@@ -1,16 +1,11 @@
-"""Tests for the --ensure-scripts feature of update-paths.py."""
+"""Tests for the ensure-scripts feature of update_paths module."""
 
-import importlib.util
 import json
 from pathlib import Path
 
 import pytest
 
-_repo_root = Path(__file__).resolve().parent.parent.parent.parent
-SCRIPT_PATH = _repo_root / "skills" / "upgrade-cleanup" / "scripts" / "update-paths.py"
-spec = importlib.util.spec_from_file_location("update_paths", SCRIPT_PATH)
-update_paths = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(update_paths)
+from dev10x.skills.permission import update_paths
 
 
 class TestScanPluginScripts:

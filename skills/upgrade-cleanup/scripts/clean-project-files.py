@@ -1,17 +1,16 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["pyyaml"]
+# dependencies = ["pyyaml", "click"]
 # ///
-"""Thin shim — delegates to dev10x.skills.permission.clean_project_files."""
+"""Thin shim — delegates to dev10x permission clean."""
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
 
-from dev10x.skills.permission.clean_project_files import *  # noqa: F401, F403
-from dev10x.skills.permission.clean_project_files import main
+from dev10x.commands.permission import clean
 
 if __name__ == "__main__":
-    sys.exit(main())
+    clean(standalone_mode=True)

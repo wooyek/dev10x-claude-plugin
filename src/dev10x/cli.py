@@ -41,6 +41,7 @@ class LazyGroup(click.Group):
     cls=LazyGroup,
     lazy_subcommands={
         "hook": "dev10x.commands.hook.hook",
+        "permission": "dev10x.commands.permission.permission",
         "validate": "dev10x.commands.validate.validate",
         "skill": "dev10x.commands.skill.skill",
     },

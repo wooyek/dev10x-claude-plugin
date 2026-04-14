@@ -1,17 +1,11 @@
-"""Tests for the merge-worktree-permissions.py script."""
-
-import importlib.util
-from pathlib import Path
+"""Tests for merge_worktree_permissions module."""
 
 import pytest
 
-_repo_root = Path(__file__).resolve().parent.parent.parent.parent
-SCRIPT_PATH = (
-    _repo_root / "skills" / "upgrade-cleanup" / "scripts" / "merge-worktree-permissions.py"
+from dev10x.skills.permission.merge_worktree_permissions import (
+    generalize_permission,
+    is_noise,
 )
-spec = importlib.util.spec_from_file_location("merge_worktree_permissions", SCRIPT_PATH)
-merge_mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(merge_mod)
 
 
 class TestIsNoise:
@@ -32,7 +26,7 @@ class TestIsNoise:
         ],
     )
     def test_detects_noise(self, entry: str) -> None:
-        assert merge_mod.is_noise(entry) is True
+        assert is_noise(entry) is True
 
     @pytest.mark.parametrize(
         "entry",
@@ -44,7 +38,7 @@ class TestIsNoise:
         ],
     )
     def test_allows_stable_entries(self, entry: str) -> None:
-        assert merge_mod.is_noise(entry) is False
+        assert is_noise(entry) is False
 
 
 class TestGeneralizePermission:
@@ -58,7 +52,7 @@ class TestGeneralizePermission:
         ],
     )
     def test_generalizes_known_patterns(self, entry: str, expected: str) -> None:
-        assert merge_mod.generalize_permission(entry) == expected
+        assert generalize_permission(entry) == expected
 
     def test_leaves_stable_entry_unchanged(self) -> None:
-        assert merge_mod.generalize_permission("Bash(git log:*)") == "Bash(git log:*)"
+        assert generalize_permission("Bash(git log:*)") == "Bash(git log:*)"
