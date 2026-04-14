@@ -151,6 +151,45 @@ The `🔖 **Session bookmark**` prefix on the first line is required —
 `Dev10x:park-discover` scans for this exact pattern when checking open
 PRs for deferred work.
 
+## Phase 3b: Session State Persistence (GH-917)
+
+**After triage, before summary**, persist session state to
+`.claude/Dev10x/session.yaml` so a future session can resume
+where this one left off.
+
+**What to persist:**
+
+1. **Uncompleted tasks** — serialize the pending/in-progress
+   task list from `TaskList` as a `tasks:` array:
+   ```yaml
+   tasks:
+     - subject: "Implement fix"
+       status: pending
+       metadata: {type: epic}
+     - subject: "Monitor CI"
+       status: in_progress
+       metadata: {skills: [dev10x:gh-pr-monitor]}
+   ```
+
+2. **Continuation prompt** — generate a one-paragraph summary
+   of what was in progress and what to do next. Store as
+   `continuation_prompt:` in session.yaml. This bootstraps
+   context after `/clear` or a new session.
+
+3. **Collected insights** — any lessons learned, patterns
+   discovered, or decisions made during the session that
+   are not captured in code or commits. Store as
+   `insights:` list.
+
+**Read-before-write:** Preserve existing `friction_level`
+and `active_modes` when updating session.yaml — only add
+the new fields, never overwrite existing config.
+
+**Integration with `/clear`:** After writing session.yaml,
+inform the user: "Session state saved. To resume after
+`/clear`, invoke `Dev10x:work-on` — it will detect the
+saved state and offer to continue."
+
 ## Phase 4: Summary
 
 After all items are triaged, present a brief summary:
