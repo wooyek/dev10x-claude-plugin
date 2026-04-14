@@ -325,6 +325,27 @@ class TestIssueCreate:
 
         assert result["NUMBER"] == "789"
 
+    @pytest.mark.asyncio
+    @patch("dev10x.mcp.github.async_run_script", new_callable=AsyncMock)
+    async def test_creates_issue_with_milestone(
+        self,
+        mock_run: AsyncMock,
+    ) -> None:
+        mock_run.return_value = _completed(
+            stdout='{"number":789,"title":"Track progress","url":"https://github.com/org/repo/issues/789"}',
+        )
+
+        result = await cli_server.issue_create(
+            title="Track progress",
+            milestone="v1.0",
+        )
+
+        assert result["number"] == 789
+        call_args = list(mock_run.call_args[0])
+        assert "--milestone" in call_args
+        milestone_idx = call_args.index("--milestone")
+        assert call_args[milestone_idx + 1] == "v1.0"
+
 
 class TestPrDetect:
     @pytest.mark.asyncio

@@ -82,6 +82,7 @@ async def issue_create(
     title: str,
     body: str | None = None,
     labels: list[str] | None = None,
+    milestone: str | None = None,
     repo: str | None = None,
 ) -> dict:
     """Create a GitHub issue.
@@ -90,6 +91,7 @@ async def issue_create(
         title: Issue title
         body: Issue body text (optional)
         labels: List of label names to apply (optional)
+        milestone: Milestone title to assign (optional)
         repo: Repository (owner/repo). If omitted, uses current repo
 
     Returns:
@@ -97,7 +99,15 @@ async def issue_create(
     """
     from dev10x.mcp import github as gh
 
-    return (await gh.issue_create(title=title, body=body, labels=labels, repo=repo)).to_dict()
+    return (
+        await gh.issue_create(
+            title=title,
+            body=body,
+            labels=labels,
+            milestone=milestone,
+            repo=repo,
+        )
+    ).to_dict()
 
 
 @server.tool()
