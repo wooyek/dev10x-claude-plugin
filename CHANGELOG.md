@@ -3,6 +3,61 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.61.0 — Permission Diagnostics & Skill Refinements
+
+Released 2026-04-14
+
+### Features
+
+- **Surface permission-denied diagnostics** — hooks detect blocked
+  tool calls and provide actionable guidance on missing allow rules
+  or hook configuration ([GH-918])
+- **Improve upgrade-cleanup audit reporting** — upgrade-cleanup
+  produces structured, severity-categorized findings instead of
+  flat text output ([GH-914])
+- **Enable direct review thread resolution** — gh-pr-respond can
+  resolve review threads directly after posting fixup commits,
+  reducing round-trips ([GH-902])
+
+### Fixes
+
+- **Stabilize uv dep resolution test assertion** — fix flaky test
+  that depended on exact pip resolver output ordering ([GH-913])
+
+### Tests
+
+- **Validate uv shebang script dependencies** — new test ensures
+  all PEP 723 inline-metadata scripts declare valid, resolvable
+  dependencies ([GH-913])
+
+### Docs & Skills
+
+- **Persist session state across context resets** — session-stop
+  hook preserves branch, plan, and task state so resumed sessions
+  recover context automatically ([GH-917])
+- **Detect architecture violations in PR review** — review skill
+  checks for Clean Architecture boundary crossings ([GH-916])
+- **Ensure monitor fallback on permission failure** — PR monitor
+  retries with reduced permissions instead of failing silently
+  ([GH-901])
+- **Support natural-language input in work-on** — work-on accepts
+  free-text task descriptions alongside ticket URLs ([GH-886])
+- **Prefer vertical slice decomposition in scope** — scope skill
+  favors feature slices over horizontal layer splits ([GH-885])
+- **Monitor context fill at phase boundaries** — work-on tracks
+  context window usage and warns before overflow ([GH-884])
+- **Surface design analysis as a review gate** — scope skill
+  requires design review before implementation begins ([GH-883])
+- **Prevent confirmation bias with blind research** — brainstorming
+  skill gathers evidence before presenting options ([GH-881])
+- **Enable skill instruction count tracking** — skill-index reports
+  instruction line counts for budget monitoring ([GH-877])
+- **Resolve hook error handling standardization** — align hook exit
+  codes and error messages across Python and shell ([GH-826])
+- **Resolve milestone findings** — address M3–M6 architecture,
+  pattern adoption, test coverage, and cross-cutting consistency
+  findings ([GH-811], [GH-812], [GH-813], [GH-814])
+
 ## 0.60.0 — Multi-Issue Bundling & Audit Clarity
 
 Released 2026-04-13
