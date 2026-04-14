@@ -1,17 +1,14 @@
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.12"
-# dependencies = ["pyyaml"]
-# ///
 """Merge permissions from worktree settings back into the main project.
 
 Worktrees accumulate session-specific allow rules that the main project
-never sees. This script collects stable, reusable permissions from all
+never sees. This module collects stable, reusable permissions from all
 worktrees of a project and merges them into the main project's
 settings.local.json.
 
 Session-specific entries (temp file hashes, specific ticket numbers,
 one-off inline commands) are filtered out automatically.
+
+CLI entry point: ``dev10x permission merge-worktree``.
 """
 
 import json
@@ -206,72 +203,3 @@ def _restore(*, config_path: Path) -> int:
         print(f"  Restored {original} from {backup.name}")
     print(f"\nRestored {len(restored)} files.")
     return 0
-
-
-def main() -> int:
-    import argparse
-
-    parser = argparse.ArgumentParser(
-        description="Merge worktree permissions back into main project settings",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be merged without modifying files",
-    )
-    parser.add_argument(
-        "--restore",
-        action="store_true",
-        help="Restore all main project settings from their most recent backups",
-    )
-    args = parser.parse_args()
-
-    config_path = find_config()
-
-    if args.restore:
-        return _restore(config_path=config_path)
-    print(f"Config: {config_path}")
-    config = load_config(config_path)
-
-    roots = config.get("roots", [])
-    if not roots:
-        print("No roots configured. Run update-paths.py --init first.")
-        return 0
-
-    groups = find_worktree_groups(roots)
-    if not groups:
-        print("No worktree groups found.")
-        return 0
-
-    if args.dry_run:
-        print("(dry run — no files will be modified)\n")
-
-    total_merged = 0
-    projects_changed = 0
-
-    for main_project, worktree_dirs in sorted(groups.items()):
-        count, messages = merge_permissions(
-            main_project=main_project,
-            worktree_dirs=worktree_dirs,
-            dry_run=args.dry_run,
-        )
-        if count > 0:
-            print(f"\n{main_project}")
-            for msg in messages:
-                print(msg)
-            total_merged += count
-            projects_changed += 1
-        else:
-            print(f"\n{main_project} — up to date ({len(worktree_dirs)} worktrees)")
-
-    if total_merged == 0:
-        print("\nAll projects up to date.")
-    else:
-        verb = "Would merge" if args.dry_run else "Merged"
-        print(f"\n{verb} {total_merged} permissions into {projects_changed} projects.")
-
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
