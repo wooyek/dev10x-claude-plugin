@@ -47,9 +47,11 @@ The code review system uses a **multi-agent architecture**:
 | `.claude/rules/skill-naming.md` | When editing `skills/**` | Skill naming conventions |
 | `.claude/rules/agents.md` | When editing `agents/**` | Plugin-distributed agent specs |
 | `.claude/rules/model-selection.md` | When editing `agents/**` or `skills/**` | Model & effort selection for agent dispatch |
+| `.claude/rules/playbook-pattern.md` | When editing `skills/**` with playbooks | Playbook patterns, user customization, reviewer expectations |
 | `.claude/rules/github-workflows.md` | When editing `.github/workflows/**` | GitHub Actions patterns |
 | `.claude/rules/hook-state-schema.md` | When editing `hooks/**` state writers | Hook JSON state documentation |
 | `.claude/rules/hook-patterns.md` | When editing `hooks/**` with dual implementations | Python-shell hook equivalence |
+| `.claude/rules/performance.md` | Reference: post-dependency change monitoring | CLI startup baseline, profiling instructions |
 | `references/*.md` | On-demand by skills/CI | Detailed git, review, JTBD guides |
 
 ## Loading Order

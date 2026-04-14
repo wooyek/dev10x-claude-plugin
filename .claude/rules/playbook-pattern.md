@@ -66,6 +66,10 @@ Tier 2 (global) is preferred — one file serves multiple repos via
 `projects[].match` globs. The skill loads this file at invocation,
 allowing users to customize behavior without editing the plugin.
 
+> **Note (GH-941):** The old `~/.claude/projects/<key>/memory/`
+> path is removed. All tier 2 config lives under
+> `~/.claude/memory/Dev10x/`.
+
 ## Reviewer Expectations
 
 When reviewing a skill with playbook.yaml:

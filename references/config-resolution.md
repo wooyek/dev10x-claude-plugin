@@ -23,6 +23,10 @@ Single file serves multiple projects via `projects[].match` globs.
 Preferred for overrides that apply to several repos (e.g., all
 TireTutor repos share the same shipping pipeline).
 
+> **Note (GH-941):** The old `~/.claude/projects/<key>/memory/`
+> path is removed. All tier 2 config lives under
+> `~/.claude/memory/Dev10x/`.
+
 **Tier 3 — Plugin defaults** (`${CLAUDE_PLUGIN_ROOT}/skills/*/references/`):
 Shipped with the plugin. Used when no user override exists.
 
@@ -176,9 +180,9 @@ projects:
 |-------|------------|------------|
 | `Dev10x:work-on` | playbook, session | 1, 2, 3 |
 | `Dev10x:playbook` | playbook | 1, 2, 3 |
-| `Dev10x:gh-pr-respond` | playbook | 2, 3 |
-| `Dev10x:release-notes` | playbook | 2, 3 |
-| `Dev10x:investigate` | playbook | 2, 3 |
+| `Dev10x:gh-pr-respond` | playbook | 1, 2, 3 |
+| `Dev10x:release-notes` | playbook | 1, 2, 3 |
+| `Dev10x:investigate` | playbook | 1, 2, 3 |
 | `Dev10x:gh-pr-merge` | settings | 2 |
 | `Dev10x:verify-acc-dod` | acceptance criteria | 2, 3 |
 | `Dev10x:git-commit` | gitmoji | 2, 3 |
