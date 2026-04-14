@@ -671,6 +671,31 @@ final status report. The parent orchestrator MUST re-invoke
 sees this status. Do NOT mark the parent's acceptance task
 as `completed` when the agent reports incomplete.
 
+### Main-Session Fallback (GH-901)
+
+**Hard rule:** When a background agent launched with
+`mode: dontAsk` still lacks Bash permissions or fails to
+complete any phase due to permission friction, the parent
+orchestrator MUST immediately re-run the failed phase in
+the main session. Do NOT treat a permission-failed background
+agent as a successful completion.
+
+**Detection:** The background agent's completion notification
+includes its final status. Check for:
+- Explicit "permission failure" or "INCOMPLETE" in the result
+- Agent completing in under 60 seconds (suspect — likely
+  skipped phases due to permission denials)
+- Missing phase completion markers in the result summary
+
+**Fallback protocol:**
+1. Log: "Background agent failed — re-running in main session"
+2. Re-invoke the monitoring skill directly (not as a background
+   agent) so it inherits the main session's permissions
+3. Mark the background agent's tracking task as `completed`
+   with description "Failed — re-ran in main session"
+4. The main-session re-run replaces the background agent's
+   results entirely
+
 ````
 
 ---
