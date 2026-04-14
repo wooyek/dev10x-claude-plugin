@@ -267,6 +267,36 @@ Mark phase transition: `TaskUpdate(taskId=design_task, status="completed")` then
 
 **Goal:** Create actionable implementation steps.
 
+#### 3.0 Decomposition Strategy (GH-885)
+
+Before ordering steps, decide the decomposition strategy:
+
+**Vertical slices (Recommended for multi-layer features):**
+Each slice delivers a thin, testable increment across all
+layers (DTO → repository → service → endpoint → test).
+Slices create natural verification points and enable fresh
+context windows per slice.
+
+**Horizontal layers (Acceptable for single-layer changes):**
+Group changes by architectural layer (all DTOs, then all
+services, etc.). Appropriate when changes affect only one
+layer or are mechanical transforms.
+
+**Decision heuristic:**
+- Feature touches 2+ layers → vertical slices
+- Single-layer refactoring → horizontal layers
+- Each slice must be independently testable and reviewable
+
+**Example vertical slice:**
+```
+Slice 1: "Create customer" endpoint
+  - CustomerCreateDTO
+  - CustomerRepository.create()
+  - CustomerService.create()
+  - POST /customers endpoint
+  - test_create_customer.py
+```
+
 #### 3.1 Order Steps Logically
 
 Consider dependencies between steps:
