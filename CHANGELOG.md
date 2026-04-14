@@ -3,6 +3,37 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.62.0 — Issue Milestones & Permission Safety
+
+Released 2026-04-14
+
+### Features
+
+- **Enable milestone assignment on issue creation** — ticket-create
+  skill assigns milestones when specified, keeping project tracking
+  aligned from the start ([GH-926])
+- **Enable rollback for upgrade-cleanup bulk edits** — bulk settings
+  modifications create timestamped backups so changes can be reverted
+  if something goes wrong ([GH-921])
+- **Enable CLI access to permission scripts** — permission audit and
+  cleanup scripts are accessible from the dev10x CLI entry point
+  ([GH-924])
+
+### Fixes
+
+- **Prevent wildcard rules from stripping permissions** — upgrade
+  cleanup no longer removes valid allow rules when wildcard patterns
+  overlap with specific entries ([GH-922])
+- **Strengthen recurring audit finding guards** — audit-report skill
+  checks for duplicate findings before filing, preventing redundant
+  GitHub issues ([GH-928])
+
+### Docs
+
+- **Improve README with cover image and badges** — README now leads
+  with marketplace badge, version badge, and a cover image for better
+  first impressions
+
 ## 0.61.0 — Permission Diagnostics & Skill Refinements
 
 Released 2026-04-14
