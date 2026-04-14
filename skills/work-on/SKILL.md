@@ -725,6 +725,38 @@ summary via `TaskUpdate` metadata. This frees context window for
 remaining work. See `references/task-orchestration.md` Pattern 8
 for the full compaction protocol.
 
+### Context Fill Monitoring (GH-884)
+
+**Advisory check at phase boundaries.** Quality degrades when
+context utilization exceeds ~40%. Check context fill at these
+transition points:
+
+| Transition | When |
+|-----------|------|
+| Phase 2 → Phase 3 | After all gather subagents return |
+| Phase 3 → Phase 4 | After plan approval |
+| Mid-Phase 4 | After completing implementation epic |
+
+**Check method:** Approximate context fill from conversation
+length. If the Claude Code harness exposes token count or
+context utilization, use it directly. Otherwise estimate from
+message count and tool result sizes.
+
+**When context exceeds 40%:**
+1. Log: "Context fill ~{N}% — consider mitigation"
+2. **Recommended mitigations:**
+   - Delegate remaining implementation to subagents (use
+     haiku for data collection, sonnet for analysis)
+   - Compact completed task metadata (Pattern 8)
+   - For large remaining work: spawn a fresh session with
+     `Dev10x:session-wrap-up` + resume instructions
+3. Do NOT block execution — this is advisory. Some tasks
+   legitimately need deep context (e.g., cross-cutting
+   refactors spanning many files).
+
+**Skip when:** Session has fewer than 10 tool calls (too
+early to measure meaningfully).
+
 ### Skill Routing Enforcement
 
 **Hard rule — applies to ALL plans and ALL work types
