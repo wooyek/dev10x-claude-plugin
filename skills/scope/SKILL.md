@@ -121,6 +121,38 @@ Agent(subagent_type="Explore",
 
 Collect results, then proceed through sub-steps:
 
+#### 1.0 Blind Research (GH-881)
+
+**Before revealing ticket context**, dispatch an Explore agent
+to map the relevant domain area without knowing the feature
+requirements. This prevents confirmation bias — the agent
+discovers legacy patterns and constraints instead of confirming
+assumptions.
+
+```
+Agent(subagent_type="Explore",
+    model="haiku",
+    description="Blind domain exploration",
+    prompt="""Map the [domain area] in this codebase.
+    You do NOT know what feature is being built — just
+    explore and report:
+    - Existing components and their responsibilities
+    - Data flow between components
+    - Test coverage and patterns
+    - Legacy constraints or technical debt
+    - Extension points and abstractions
+    Keep response concise — 10-15 key findings.""",
+    run_in_background=true)
+```
+
+**When the blind agent returns**, compare its findings with
+the ticket requirements. Mismatches between "what the agent
+discovered" and "what the ticket assumes" reveal hidden
+constraints that ticket-aware research would miss.
+
+**Skip when:** Domain area is already well-understood from
+prior session work, or the change is config-only.
+
 #### 1.1 Identify Starting Point
 
 Determine what you're scoping:
