@@ -180,7 +180,7 @@ def ensure_base_permissions(
         return 0, [f"  SKIP (invalid JSON): {e}"]
 
     allow_list: list[str] = data.get("permissions", {}).get("allow", [])
-    existing = set(allow_list)
+    existing = {r for r in allow_list if not _is_nonfunctional_mcp_wildcard(r)}
     missing = [p for p in base_permissions if p not in existing]
 
     if not missing:
@@ -364,15 +364,25 @@ def _restore(*, config_path: Path) -> int:
     return 0
 
 
-def _load_global_allow_rules() -> set[str]:
+MCP_WILDCARD_PATTERN = re.compile(r"^mcp__plugin_[A-Za-z0-9]+_\*$")
+
+
+def _is_nonfunctional_mcp_wildcard(rule: str) -> bool:
+    return bool(MCP_WILDCARD_PATTERN.match(rule))
+
+
+def _load_global_allow_rules() -> tuple[set[str], list[str]]:
     global_settings = Path.home() / ".claude" / "settings.json"
     if not global_settings.is_file():
-        return set()
+        return set(), []
     try:
         data = json.loads(global_settings.read_text())
-        return set(data.get("permissions", {}).get("allow", []))
+        all_rules = data.get("permissions", {}).get("allow", [])
+        wildcards = [r for r in all_rules if _is_nonfunctional_mcp_wildcard(r)]
+        effective = {r for r in all_rules if not _is_nonfunctional_mcp_wildcard(r)}
+        return effective, wildcards
     except (json.JSONDecodeError, OSError):
-        return set()
+        return set(), []
 
 
 def _ensure_base(
@@ -387,12 +397,19 @@ def _ensure_base(
         print("No base_permissions defined in config.")
         return 0
 
-    global_rules = _load_global_allow_rules()
+    global_rules, stale_wildcards = _load_global_allow_rules()
     filtered = [p for p in base_permissions if p not in global_rules]
     skipped = len(base_permissions) - len(filtered)
 
     if not quiet:
         print(f"Base permissions: {len(base_permissions)} rules")
+        if stale_wildcards:
+            print(
+                f"  WARNING: {len(stale_wildcards)} non-functional MCP wildcard(s)"
+                " in global settings.json:"
+            )
+            for wc in stale_wildcards:
+                print(f"    - {wc}  (Claude Code ignores MCP wildcards)")
         if skipped > 0:
             print(f"  Skipping {skipped} already in global settings.json")
         if dry_run:

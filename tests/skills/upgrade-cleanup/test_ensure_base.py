@@ -6,6 +6,127 @@ from pathlib import Path
 import pytest
 
 from dev10x.skills.permission import update_paths
+from dev10x.skills.permission.update_paths import (
+    _is_nonfunctional_mcp_wildcard,
+    _load_global_allow_rules,
+)
+
+
+class TestIsNonfunctionalMcpWildcard:
+    @pytest.mark.parametrize(
+        "rule",
+        [
+            "mcp__plugin_Dev10x_*",
+            "mcp__plugin_SomePlugin_*",
+        ],
+    )
+    def test_detects_wildcard_patterns(self, rule: str) -> None:
+        assert _is_nonfunctional_mcp_wildcard(rule) is True
+
+    @pytest.mark.parametrize(
+        "rule",
+        [
+            "mcp__plugin_Dev10x_cli__mktmp",
+            "mcp__plugin_Dev10x_cli__detect_tracker",
+            "Bash(gh pr view:*)",
+            "Skill(Dev10x:*)",
+            "mcp__plugin_Dev10x_cli__*",
+        ],
+    )
+    def test_ignores_non_wildcard_patterns(self, rule: str) -> None:
+        assert _is_nonfunctional_mcp_wildcard(rule) is False
+
+
+class TestLoadGlobalAllowRules:
+    @pytest.fixture()
+    def global_settings(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+        settings = tmp_path / ".claude" / "settings.json"
+        settings.parent.mkdir(parents=True)
+        monkeypatch.setattr(
+            "dev10x.skills.permission.update_paths.Path.home",
+            lambda: tmp_path,
+        )
+        return settings
+
+    def test_filters_out_mcp_wildcards(self, global_settings: Path) -> None:
+        global_settings.write_text(
+            json.dumps(
+                {
+                    "permissions": {
+                        "allow": [
+                            "mcp__plugin_Dev10x_*",
+                            "mcp__plugin_Dev10x_cli__mktmp",
+                            "Bash(gh pr view:*)",
+                        ]
+                    }
+                }
+            )
+        )
+
+        effective, wildcards = _load_global_allow_rules()
+
+        assert "mcp__plugin_Dev10x_*" not in effective
+        assert "mcp__plugin_Dev10x_cli__mktmp" in effective
+        assert "Bash(gh pr view:*)" in effective
+        assert wildcards == ["mcp__plugin_Dev10x_*"]
+
+    def test_returns_empty_when_no_wildcards(self, global_settings: Path) -> None:
+        global_settings.write_text(
+            json.dumps({"permissions": {"allow": ["mcp__plugin_Dev10x_cli__mktmp"]}})
+        )
+
+        effective, wildcards = _load_global_allow_rules()
+
+        assert "mcp__plugin_Dev10x_cli__mktmp" in effective
+        assert wildcards == []
+
+    def test_returns_empty_sets_when_file_missing(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(
+            "dev10x.skills.permission.update_paths.Path.home",
+            lambda: tmp_path,
+        )
+
+        effective, wildcards = _load_global_allow_rules()
+
+        assert effective == set()
+        assert wildcards == []
+
+
+class TestEnsureBasePermissionsWithWildcard:
+    @pytest.fixture()
+    def settings_file(self, tmp_path: Path) -> Path:
+        return tmp_path / "settings.local.json"
+
+    def test_wildcard_does_not_mask_individual_entries(
+        self,
+        settings_file: Path,
+    ) -> None:
+        settings_file.write_text(
+            json.dumps(
+                {
+                    "permissions": {
+                        "allow": [
+                            "mcp__plugin_Dev10x_*",
+                        ]
+                    }
+                }
+            )
+        )
+
+        count, _ = update_paths.ensure_base_permissions(
+            settings_file,
+            ["mcp__plugin_Dev10x_cli__mktmp", "mcp__plugin_Dev10x_cli__push_safe"],
+        )
+
+        assert count == 2
+        data = json.loads(settings_file.read_text())
+        allow = data["permissions"]["allow"]
+        assert "mcp__plugin_Dev10x_cli__mktmp" in allow
+        assert "mcp__plugin_Dev10x_cli__push_safe" in allow
 
 
 class TestEnsureBasePermissions:
