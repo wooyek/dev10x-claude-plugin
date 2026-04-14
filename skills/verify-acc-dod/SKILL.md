@@ -133,6 +133,13 @@ plugin defaults:
 Apply in order: remove first, then replace, then add. This
 prevents removing a just-added check or replacing a removed one.
 
+### Step 4: Filter by active modes
+
+Read `active_modes` from `.claude/Dev10x/session.yaml`. For each
+check with a `modes:` field, check if any active mode has
+`skip: true`. If so, remove the check from the list and report
+it as "skipped (mode: <mode-name>)".
+
 ### Resolution order (summary)
 
 1. Load plugin defaults for `work_type`
@@ -141,6 +148,7 @@ prevents removing a just-added check or replacing a removed one.
 3. If global file is absent: use plugin defaults as-is
 4. If `work_type` has no entry in defaults: use empty checks list
    and warn
+5. Filter by active modes (skip checks marked for active modes)
 
 ## Executing Checks
 

@@ -14,6 +14,9 @@
 #   expect_gt:        Output (parsed as number) must be greater than this value
 #   prompt:           For "manual": question shown to user
 #                     For "prompt": instruction Claude evaluates contextually
+#   modes:            Per-mode overrides (optional). Map of mode name
+#                     to {skip: true} to skip when that mode is active.
+#                     Read active_modes from .claude/Dev10x/session.yaml.
 #
 # Only one expect_* field per check. First match wins.
 
@@ -52,6 +55,9 @@ defaults:
           gh pr view {pr_number} --repo {repo}
           --json reviewRequests -q '.reviewRequests | length'
         expect_gt: 0
+        modes:
+          solo-maintainer:
+            skip: true
 
   bugfix:
     checks:
@@ -87,6 +93,9 @@ defaults:
           gh pr view {pr_number} --repo {repo}
           --json reviewRequests -q '.reviewRequests | length'
         expect_gt: 0
+        modes:
+          solo-maintainer:
+            skip: true
 
   pr-continuation:
     checks:
@@ -118,6 +127,9 @@ defaults:
           gh pr view {pr_number} --repo {repo}
           --json reviewRequests -q '.reviewRequests | length'
         expect_gt: 0
+        modes:
+          solo-maintainer:
+            skip: true
 
   local-only:
     checks:
