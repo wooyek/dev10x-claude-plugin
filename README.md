@@ -1,10 +1,4 @@
 <p align="center">
-  <a href="https://dev10x.guru">
-    <img src="https://dev10x.guru/og-image.png" alt="Dev10x — Stop babysitting your AI. Start supervising." width="800">
-  </a>
-</p>
-
-<p align="center">
   <a href="https://github.com/Dev10x-Guru/dev10x-claude/releases"><img src="https://img.shields.io/github/v/release/Dev10x-Guru/dev10x-claude?style=for-the-badge&color=blue" alt="GitHub Release"></a>
   <img src="https://img.shields.io/badge/skills-69-green?style=for-the-badge" alt="69 Skills">
   <img src="https://img.shields.io/badge/agents-21-purple?style=for-the-badge" alt="21 Agents">
@@ -14,10 +8,15 @@
 
 <p align="center">
   <a href="https://github.com/Dev10x-Guru/dev10x-claude/stargazers"><img src="https://img.shields.io/github/stars/Dev10x-Guru/dev10x-claude?style=flat-square&logo=github" alt="GitHub stars"></a>
-  <a href="https://github.com/Dev10x-Guru/dev10x-claude/releases"><img src="https://img.shields.io/github/downloads/Dev10x-Guru/dev10x-claude/total?style=flat-square&label=downloads" alt="GitHub downloads"></a>
   <img src="https://img.shields.io/badge/clones-20k+-blue?style=flat-square" alt="GitHub clones">
   <a href="https://github.com/Dev10x-Guru/dev10x-claude/issues"><img src="https://img.shields.io/github/issues/Dev10x-Guru/dev10x-claude?style=flat-square" alt="GitHub issues"></a>
   <img src="https://img.shields.io/badge/python-3.11+-yellow?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+">
+</p>
+
+<p align="center">
+  <a href="https://dev10x.guru">
+    <img src="https://dev10x.guru/og-image.png" alt="Dev10x — Stop babysitting your AI. Start supervising." width="800">
+  </a>
 </p>
 
 <p align="center">
