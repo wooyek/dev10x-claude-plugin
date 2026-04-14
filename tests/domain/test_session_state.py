@@ -159,6 +159,137 @@ class TestPlanSummaryFormatForDisplay:
         assert "can be archived" in summary.format_for_display()
 
 
+class TestPlanSummaryPendingDecisions:
+    def test_returns_tasks_with_decision_needed(self) -> None:
+        summary = PlanSummary(
+            tasks=[
+                {
+                    "id": "1",
+                    "subject": "Choose approach",
+                    "status": "pending",
+                    "metadata": {
+                        "decision_needed": "Fix strategy",
+                        "options": ["retry", "timeout"],
+                    },
+                },
+                {"id": "2", "subject": "Implement", "status": "pending"},
+            ],
+        )
+
+        result = summary.pending_decisions
+
+        assert len(result) == 1
+        assert result[0]["id"] == "1"
+
+    def test_excludes_completed_tasks(self) -> None:
+        summary = PlanSummary(
+            tasks=[
+                {
+                    "id": "1",
+                    "subject": "Done decision",
+                    "status": "completed",
+                    "metadata": {"decision_needed": "Already answered"},
+                },
+            ],
+        )
+
+        assert summary.pending_decisions == []
+
+    def test_excludes_deleted_tasks(self) -> None:
+        summary = PlanSummary(
+            tasks=[
+                {
+                    "id": "1",
+                    "subject": "Deleted",
+                    "status": "deleted",
+                    "metadata": {"decision_needed": "Removed"},
+                },
+            ],
+        )
+
+        assert summary.pending_decisions == []
+
+    def test_returns_empty_when_no_decisions(self) -> None:
+        summary = PlanSummary(
+            tasks=[
+                {"id": "1", "subject": "Regular task", "status": "pending"},
+            ],
+        )
+
+        assert summary.pending_decisions == []
+
+
+class TestPlanSummaryDisplayWithDecisions:
+    def test_includes_pending_decisions_section(self) -> None:
+        summary = PlanSummary(
+            status="in_progress",
+            tasks=[
+                {
+                    "id": "1",
+                    "subject": "Choose approach",
+                    "status": "pending",
+                    "metadata": {
+                        "decision_needed": "Fix strategy",
+                        "options": ["retry", "timeout"],
+                    },
+                },
+            ],
+        )
+
+        result = summary.format_for_display()
+
+        assert "Pending decisions" in result
+        assert "Fix strategy" in result
+        assert "retry" in result
+
+    def test_omits_decisions_section_when_none(self) -> None:
+        summary = PlanSummary(
+            tasks=[{"id": "1", "subject": "Task", "status": "pending"}],
+        )
+
+        result = summary.format_for_display()
+
+        assert "Pending decisions" not in result
+
+
+class TestPlanSummaryCompactionWithDecisions:
+    def test_marks_decision_needed_inline(self) -> None:
+        summary = PlanSummary(
+            tasks=[
+                {
+                    "id": "1",
+                    "subject": "Choose",
+                    "status": "pending",
+                    "metadata": {"decision_needed": "Strategy choice"},
+                },
+            ],
+        )
+
+        result = summary.format_for_compaction()
+
+        assert "DECISION NEEDED" in result
+        assert "Strategy choice" in result
+
+    def test_includes_pending_decisions_section(self) -> None:
+        summary = PlanSummary(
+            tasks=[
+                {
+                    "id": "1",
+                    "subject": "Choose",
+                    "status": "pending",
+                    "metadata": {
+                        "decision_needed": "Strategy",
+                        "options": ["A", "B"],
+                    },
+                },
+            ],
+        )
+
+        result = summary.format_for_compaction()
+
+        assert "Pending Decisions" in result
+
+
 class TestPlanSummaryFormatForCompaction:
     def test_includes_task_metadata(self) -> None:
         summary = PlanSummary(

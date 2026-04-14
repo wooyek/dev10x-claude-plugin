@@ -1,8 +1,14 @@
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 import pytest
 
-from dev10x.hooks.session import _format_plan_summary, _format_session_state
+from dev10x.hooks.session import (
+    _format_decision_guidance,
+    _format_plan_summary,
+    _format_session_state,
+    _read_friction_level,
+)
 
 
 class TestFormatSessionState:
@@ -116,3 +122,158 @@ class TestFormatPlanSummary:
     def test_handles_empty_plan(self) -> None:
         result = _format_plan_summary(plan={})
         assert "0/0 tasks completed" in result
+
+    def test_includes_pending_decisions(self) -> None:
+        plan = {
+            "plan": {"status": "in_progress", "branch": "b", "last_synced": "t"},
+            "tasks": [
+                {
+                    "id": "1",
+                    "subject": "Choose approach",
+                    "status": "pending",
+                    "metadata": {
+                        "decision_needed": "Fix strategy",
+                        "options": ["retry", "timeout"],
+                    },
+                },
+            ],
+        }
+
+        result = _format_plan_summary(plan=plan)
+
+        assert "Pending decisions" in result
+        assert "Fix strategy" in result
+
+
+class TestReadFrictionLevel:
+    def test_reads_friction_level_from_yaml(self, tmp_path: Path) -> None:
+        session_dir = tmp_path / ".claude" / "Dev10x"
+        session_dir.mkdir(parents=True)
+        (session_dir / "session.yaml").write_text("friction_level: adaptive\n")
+
+        result = _read_friction_level(toplevel=str(tmp_path))
+
+        assert result == "adaptive"
+
+    def test_returns_empty_when_file_missing(self, tmp_path: Path) -> None:
+        result = _read_friction_level(toplevel=str(tmp_path))
+
+        assert result == ""
+
+    def test_returns_empty_for_invalid_yaml(self, tmp_path: Path) -> None:
+        session_dir = tmp_path / ".claude" / "Dev10x"
+        session_dir.mkdir(parents=True)
+        (session_dir / "session.yaml").write_text(": invalid: yaml: [")
+
+        result = _read_friction_level(toplevel=str(tmp_path))
+
+        assert result == ""
+
+    def test_returns_empty_when_key_missing(self, tmp_path: Path) -> None:
+        session_dir = tmp_path / ".claude" / "Dev10x"
+        session_dir.mkdir(parents=True)
+        (session_dir / "session.yaml").write_text("active_modes: []\n")
+
+        result = _read_friction_level(toplevel=str(tmp_path))
+
+        assert result == ""
+
+
+class TestFormatDecisionGuidance:
+    @pytest.fixture()
+    def plan_with_decision(self) -> dict:
+        return {
+            "plan": {"status": "in_progress"},
+            "tasks": [
+                {
+                    "id": "1",
+                    "subject": "Choose approach",
+                    "status": "pending",
+                    "metadata": {
+                        "decision_needed": "Fix strategy",
+                        "options": ["retry", "timeout"],
+                    },
+                },
+                {"id": "2", "subject": "Implement", "status": "pending"},
+            ],
+        }
+
+    @pytest.fixture()
+    def plan_without_decision(self) -> dict:
+        return {
+            "plan": {"status": "in_progress"},
+            "tasks": [
+                {"id": "1", "subject": "Implement", "status": "pending"},
+            ],
+        }
+
+    def test_adaptive_auto_selects_decisions(
+        self,
+        plan_with_decision: dict,
+    ) -> None:
+        result = _format_decision_guidance(
+            plan=plan_with_decision,
+            friction_level="adaptive",
+        )
+
+        assert "auto-select" in result
+        assert "without calling AskUserQuestion" in result
+
+    def test_guided_re_asks_decisions(
+        self,
+        plan_with_decision: dict,
+    ) -> None:
+        result = _format_decision_guidance(
+            plan=plan_with_decision,
+            friction_level="guided",
+        )
+
+        assert "AskUserQuestion" in result
+
+    def test_strict_re_asks_decisions(
+        self,
+        plan_with_decision: dict,
+    ) -> None:
+        result = _format_decision_guidance(
+            plan=plan_with_decision,
+            friction_level="strict",
+        )
+
+        assert "AskUserQuestion" in result
+
+    def test_no_decisions_with_remaining_tasks(
+        self,
+        plan_without_decision: dict,
+    ) -> None:
+        result = _format_decision_guidance(
+            plan=plan_without_decision,
+            friction_level="guided",
+        )
+
+        assert "Auto-advance" in result
+
+    def test_no_decisions_all_completed(self) -> None:
+        plan: dict = {
+            "plan": {"status": "completed"},
+            "tasks": [
+                {"id": "1", "subject": "Done", "status": "completed"},
+            ],
+        }
+
+        result = _format_decision_guidance(
+            plan=plan,
+            friction_level="guided",
+        )
+
+        assert result == ""
+
+    def test_empty_friction_level_re_asks(
+        self,
+        plan_with_decision: dict,
+    ) -> None:
+        result = _format_decision_guidance(
+            plan=plan_with_decision,
+            friction_level="",
+        )
+
+        assert "AskUserQuestion" in result

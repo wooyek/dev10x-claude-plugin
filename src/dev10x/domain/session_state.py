@@ -99,6 +99,15 @@ class PlanSummary:
             tasks=data.get("tasks", []),
         )
 
+    @property
+    def pending_decisions(self) -> list[dict[str, Any]]:
+        return [
+            t
+            for t in self.tasks
+            if t.get("status") not in ("completed", "deleted")
+            and t.get("metadata", {}).get("decision_needed")
+        ]
+
     def format_for_display(self) -> str:
         completed = sum(1 for t in self.tasks if t.get("status") == "completed")
         total = len(self.tasks)
@@ -115,6 +124,12 @@ class PlanSummary:
 
         if pending:
             lines.append("- Remaining tasks:\n" + "\n".join(pending))
+
+        decisions = self.pending_decisions
+        if decisions:
+            decision_lines = self._format_pending_decisions(decisions=decisions)
+            lines.append("- Pending decisions:\n" + "\n".join(decision_lines))
+
         if self.context.work_type:
             lines.append(f"- Work type: {self.context.work_type}")
         if self.context.tickets:
@@ -127,6 +142,22 @@ class PlanSummary:
 
         return "\n".join(lines)
 
+    @staticmethod
+    def _format_pending_decisions(
+        *,
+        decisions: list[dict[str, Any]],
+    ) -> list[str]:
+        lines: list[str] = []
+        for t in decisions:
+            meta = t.get("metadata", {})
+            desc = meta.get("decision_needed", "")
+            options = meta.get("options", [])
+            line = f"  - #{t.get('id')} {t.get('subject')}: {desc}"
+            if options:
+                line += f" (options: {', '.join(str(o) for o in options)})"
+            lines.append(line)
+        return lines
+
     def format_for_compaction(self) -> str:
         task_lines = []
         for t in self.tasks:
@@ -136,6 +167,8 @@ class PlanSummary:
                 line += f" ({meta['type']})"
             if meta.get("skills"):
                 line += f" → {', '.join(meta['skills'])}"
+            if meta.get("decision_needed"):
+                line += f" ⚠️ DECISION NEEDED: {meta['decision_needed']}"
             task_lines.append(line)
 
         lines = []
@@ -145,6 +178,15 @@ class PlanSummary:
 
         if task_lines:
             lines.append("\n\n### Tasks\n" + "\n".join(task_lines))
+
+        decisions = self.pending_decisions
+        if decisions:
+            decision_lines = self._format_pending_decisions(decisions=decisions)
+            lines.append(
+                "\n\n### Pending Decisions (queued before stop/compaction)\n"
+                + "\n".join(decision_lines)
+            )
+
         if self.context.routing_table:
             routing_lines = [f"{k} → {v}" for k, v in self.context.routing_table.items()]
             lines.append(
