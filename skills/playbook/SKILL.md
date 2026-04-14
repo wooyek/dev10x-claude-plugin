@@ -378,8 +378,17 @@ Read(.claude/Dev10x/playbooks/<key>.yaml)
   → if absent, Read(~/.claude/memory/Dev10x/playbooks/<key>.yaml) + repo match
   → if absent, Read(${CLAUDE_PLUGIN_ROOT}/skills/<skill>/references/playbook.yaml)
   → resolve: overrides first, then defaults
+  → validate version (warn on mismatch)
   → create tasks from steps
 ```
+
+### Version validation (GH-910)
+
+The default playbook includes a `version:` field matching the
+plugin version. After loading, compare the playbook version
+with the plugin version. On mismatch, warn:
+"Playbook version {playbook_version} differs from plugin
+{plugin_version}. Some steps may be outdated."
 
 ## Integration with Orchestration Skills
 
