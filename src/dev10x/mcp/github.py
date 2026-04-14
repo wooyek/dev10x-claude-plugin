@@ -145,6 +145,7 @@ async def issue_create(
     title: str,
     body: str | None = None,
     labels: list[str] | None = None,
+    milestone: str | None = None,
     repo: str | None = None,
 ) -> Result[dict[str, Any]]:
     args = [title]
@@ -153,6 +154,8 @@ async def issue_create(
     if labels:
         for label in labels:
             args.extend(["--label", label])
+    if milestone:
+        args.extend(["--milestone", milestone])
     if repo:
         args.extend(["--repo", repo])
     result = await async_run_script(
