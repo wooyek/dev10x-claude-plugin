@@ -88,6 +88,48 @@ def _format_plan_summary(plan: dict[str, Any]) -> str:
     return PlanSummary.from_dict(data=plan).format_for_display()
 
 
+def _read_friction_level(*, toplevel: str) -> str:
+    session_yaml = Path(toplevel) / ".claude" / "Dev10x" / "session.yaml"
+    if not session_yaml.exists():
+        return ""
+    try:
+        import yaml
+
+        with open(session_yaml) as f:
+            data = yaml.safe_load(f) or {}
+        return data.get("friction_level", "")
+    except Exception:
+        return ""
+
+
+def _format_decision_guidance(
+    *,
+    plan: dict[str, Any],
+    friction_level: str,
+) -> str:
+    from dev10x.domain.session_state import PlanSummary
+
+    summary = PlanSummary.from_dict(data=plan)
+    decisions = summary.pending_decisions
+    if not decisions:
+        has_remaining = any(t.get("status") not in ("completed", "deleted") for t in summary.tasks)
+        if has_remaining:
+            return "Session resumed with tasks remaining. Auto-advance through the task list."
+        return ""
+
+    if friction_level == "adaptive":
+        return (
+            "Session resumed with pending decisions. Friction level is adaptive — "
+            "auto-select recommended options for all queued decisions and continue "
+            "advancing through the task list without calling AskUserQuestion."
+        )
+    return (
+        "Session resumed with pending decisions. "
+        "Re-ask each pending decision using AskUserQuestion — "
+        "invoke Dev10x:ask before advancing."
+    )
+
+
 def session_reload() -> None:
     toplevel = _get_toplevel()
     if not toplevel:
@@ -116,6 +158,10 @@ def session_reload() -> None:
         plan_text = _format_plan_summary(plan=plan)
         if plan_text:
             parts.append(plan_text)
+        friction_level = _read_friction_level(toplevel=toplevel)
+        guidance = _format_decision_guidance(plan=plan, friction_level=friction_level)
+        if guidance:
+            parts.append(guidance)
 
     context = "\n\n".join(parts)
     if not context:
@@ -183,6 +229,14 @@ def context_compact() -> None:
             recovery_file = plugin_root / "references" / "compaction-recovery.md"
             if recovery_file.exists():
                 summary += f"\n\n{recovery_file.read_text()}"
+
+        friction_level = _read_friction_level(toplevel=toplevel)
+        guidance = _format_decision_guidance(
+            plan=plan_data,
+            friction_level=friction_level,
+        )
+        if guidance:
+            summary += f"\n\n### Resume Guidance\n{guidance}"
 
         summary += (
             "\n\n> Reconstructed from persisted plan file. Use TaskList to verify\n"
