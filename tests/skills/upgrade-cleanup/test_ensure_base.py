@@ -122,11 +122,41 @@ class TestEnsureBasePermissionsWithWildcard:
             ["mcp__plugin_Dev10x_cli__mktmp", "mcp__plugin_Dev10x_cli__push_safe"],
         )
 
-        assert count == 2
+        assert count == 3
         data = json.loads(settings_file.read_text())
         allow = data["permissions"]["allow"]
         assert "mcp__plugin_Dev10x_cli__mktmp" in allow
         assert "mcp__plugin_Dev10x_cli__push_safe" in allow
+        assert "mcp__plugin_Dev10x_*" not in allow
+
+    def test_removes_wildcard_even_when_no_missing_permissions(
+        self,
+        settings_file: Path,
+    ) -> None:
+        settings_file.write_text(
+            json.dumps(
+                {
+                    "permissions": {
+                        "allow": [
+                            "mcp__plugin_Dev10x_*",
+                            "mcp__plugin_Dev10x_cli__mktmp",
+                        ]
+                    }
+                }
+            )
+        )
+
+        count, messages = update_paths.ensure_base_permissions(
+            settings_file,
+            ["mcp__plugin_Dev10x_cli__mktmp"],
+        )
+
+        assert count == 1
+        data = json.loads(settings_file.read_text())
+        allow = data["permissions"]["allow"]
+        assert "mcp__plugin_Dev10x_*" not in allow
+        assert "mcp__plugin_Dev10x_cli__mktmp" in allow
+        assert any("non-functional" in m for m in messages)
 
 
 class TestEnsureBasePermissions:

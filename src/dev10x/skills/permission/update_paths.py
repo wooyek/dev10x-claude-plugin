@@ -181,9 +181,10 @@ def ensure_base_permissions(
 
     allow_list: list[str] = data.get("permissions", {}).get("allow", [])
     existing = {r for r in allow_list if not _is_nonfunctional_mcp_wildcard(r)}
+    stale_wildcards = [r for r in allow_list if _is_nonfunctional_mcp_wildcard(r)]
     missing = [p for p in base_permissions if p not in existing]
 
-    if not missing:
+    if not missing and not stale_wildcards:
         return 0, []
 
     if not dry_run:
@@ -196,10 +197,17 @@ def ensure_base_permissions(
                 live_data["permissions"] = {}
             if "allow" not in live_data["permissions"]:
                 live_data["permissions"]["allow"] = []
+            if stale_wildcards:
+                live_data["permissions"]["allow"] = [
+                    r
+                    for r in live_data["permissions"]["allow"]
+                    if not _is_nonfunctional_mcp_wildcard(r)
+                ]
             live_data["permissions"]["allow"].extend(missing)
 
-    messages = [f"  + {p}" for p in missing]
-    return len(missing), messages
+    messages = [f"  - {wc}  (non-functional MCP wildcard removed)" for wc in stale_wildcards]
+    messages.extend(f"  + {p}" for p in missing)
+    return len(missing) + len(stale_wildcards), messages
 
 
 SCRIPT_SCAN_GLOBS: list[str] = [
