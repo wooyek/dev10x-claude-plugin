@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 import traceback
@@ -94,6 +95,9 @@ def permission_denied() -> None:
     Reads JSON from stdin, dispatches to validators that implement
     correct(). Returns retry=true with corrective guidance when a
     validator recognizes the denied command.
+
+    Also runs permission diagnostics to explain *why* a pre-approved
+    tool was prompted (settings override semantics, missing rules).
     Exit codes: 0 always (retry decision is in JSON output).
     """
     from dev10x.domain import HookInput
@@ -101,28 +105,47 @@ def permission_denied() -> None:
     from dev10x.validators.base import Corrector
 
     inp = HookInput.from_stdin()
-    if not inp.command:
-        sys.exit(0)
 
-    for validator in get_validators():
-        try:
-            if not validator.should_run(inp=inp):
+    if inp.command:
+        for validator in get_validators():
+            try:
+                if not validator.should_run(inp=inp):
+                    continue
+                if not isinstance(validator, Corrector):
+                    continue
+                result = validator.correct(inp=inp)
+                if result is not None:
+                    result.emit()
+            except Exception:
+                if _DEBUG:
+                    print(
+                        f"[HOOK_DEBUG] {validator.name} correct() raised:",
+                        file=sys.stderr,
+                    )
+                    traceback.print_exc(file=sys.stderr)
                 continue
-            if not isinstance(validator, Corrector):
-                continue
-            result = validator.correct(inp=inp)
-            if result is not None:
-                result.emit()
-        except Exception:
-            if _DEBUG:
-                print(
-                    f"[HOOK_DEBUG] {validator.name} correct() raised:",
-                    file=sys.stderr,
-                )
-                traceback.print_exc(file=sys.stderr)
-            continue
 
+    _run_permission_diagnostics(raw=inp.raw, cwd=inp.cwd)
     sys.exit(0)
+
+
+def _run_permission_diagnostics(*, raw: dict, cwd: str) -> None:
+    try:
+        from dev10x.hooks.permission_diagnostics import diagnose, format_diagnostic
+
+        result = diagnose(raw=raw, cwd=cwd)
+        if result is None:
+            return
+        message = format_diagnostic(result=result)
+        if message:
+            print(
+                json.dumps({"systemMessage": message}),
+                file=sys.stderr,
+            )
+    except Exception:
+        if _DEBUG:
+            print("[HOOK_DEBUG] permission_diagnostics raised:", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
 
 
 @hook.command(name="validate-edit")
