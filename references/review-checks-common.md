@@ -108,6 +108,32 @@ Before raising any of these, **verify actual code**:
     cosmetic drift (table describes intent, example text outdated) →
     RECOMMENDED. Confirm intent via commit message when unclear.
 
+## Architecture Checklist (GH-916)
+
+Structural checks for new or substantially modified files. These
+catch violations that surface-level bug hunting misses.
+
+1. **Service layer presence** — new endpoints/views MUST delegate
+   business logic to a service class (View→Service→Repository).
+   Direct repository calls from views are a WARNING.
+2. **Function size** — functions/methods exceeding 50 lines likely
+   violate SRP. Flag as WARNING with extraction suggestion.
+3. **DTO usage** — inline dicts with 4+ keys crossing module
+   boundaries should be DTOs (pydantic dataclasses). Flag as INFO.
+4. **Input validation** — manual `request.data["key"]` parsing
+   without serializer/DTO validation is a WARNING. Validate early.
+5. **God function detection** — a single function performing
+   validation + business logic + persistence + response formatting
+   is a structural violation regardless of line count.
+
+**When to apply:** On every PR that adds or significantly modifies
+endpoint/view/service code. Skip for docs-only, config-only, or
+test-only PRs.
+
+**Independence rule:** Evaluate architecture independently of
+prior review comments. Previous surface-bug fixes do not validate
+structural compliance.
+
 ## Parameter Change Analysis
 
 When parameters are added/removed/made optional:
