@@ -174,8 +174,10 @@ def merge_permissions(
             messages.append(f"    + {entry}")
 
     if not dry_run:
+        from dev10x.skills.permission.backup import create_backup
         from dev10x.skills.permission.file_lock import locked_json_update
 
+        create_backup(main_settings)
         with locked_json_update(path=main_settings) as live_data:
             if "permissions" not in live_data:
                 live_data["permissions"] = {}
@@ -189,6 +191,23 @@ def merge_permissions(
     return len(stable_entries), messages
 
 
+def _restore(*, config_path: Path) -> int:
+    from dev10x.skills.permission.backup import restore_all
+
+    config = load_config(config_path)
+    roots = config.get("roots", [])
+    groups = find_worktree_groups(roots)
+    main_settings = [main_project / ".claude" / "settings.local.json" for main_project in groups]
+    restored = restore_all(paths=main_settings)
+    if not restored:
+        print("No backups found to restore.")
+        return 0
+    for original, backup in restored:
+        print(f"  Restored {original} from {backup.name}")
+    print(f"\nRestored {len(restored)} files.")
+    return 0
+
+
 def main() -> int:
     import argparse
 
@@ -200,9 +219,17 @@ def main() -> int:
         action="store_true",
         help="Show what would be merged without modifying files",
     )
+    parser.add_argument(
+        "--restore",
+        action="store_true",
+        help="Restore all main project settings from their most recent backups",
+    )
     args = parser.parse_args()
 
     config_path = find_config()
+
+    if args.restore:
+        return _restore(config_path=config_path)
     print(f"Config: {config_path}")
     config = load_config(config_path)
 
