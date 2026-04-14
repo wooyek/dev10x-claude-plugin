@@ -166,6 +166,37 @@ Parse `tracker`, `ticket_number`, and `fixes_url` from the response.
 Each classified input becomes a **source** entry with its type and
 extracted identifiers. Collect all sources into a list for Phase 2.
 
+### Ambiguous Input Fallback (GH-886)
+
+When ALL inputs classify as `note` (no URLs, ticket IDs, or PR
+numbers matched), the user likely provided natural language
+(e.g., "fix the retry logic", "add dark mode support"). This
+is a valid entry point — do not reject it.
+
+**Fallback path:**
+
+1. **Search for matching tickets** — use
+   `mcp__plugin_Dev10x_cli__detect_tracker` with keywords
+   extracted from the input. If a matching open ticket is found,
+   reclassify the input as that ticket type.
+2. **If no ticket found** — present options via
+   `AskUserQuestion`:
+   - **Work without a ticket (Recommended)** — proceed as
+     `local-only` work type with the note as context
+   - **Create a ticket first** — delegate to
+     `Dev10x:ticket-create` and re-classify
+   - **Search again with different terms** — user provides
+     refined search terms
+
+3. **If ticket found** — confirm with the user:
+   "Found ticket [ID]: [title]. Use this?" and reclassify
+   on confirmation.
+
+**Skip this fallback** when at least one input classified as
+a recognized type (URL, ticket ID, PR number). Mixed inputs
+(ticket + notes) are handled normally — the notes provide
+additional context.
+
 ### Early Workspace Decision
 
 After classification, determine whether a branch is needed and
