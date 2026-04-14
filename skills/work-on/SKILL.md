@@ -387,11 +387,14 @@ guidance applies when *expanding* the epic in Phase 4. In Phase
 how obvious the fix seems. The task list is created first; the
 agent adapts during execution.
 
-**Anti-pattern (GH-729):** A session collapsed "Reproduce the
-issue", "Investigate root cause", and "Implement fix" into a
-single task "Investigate and implement fix" because the root
-cause seemed obvious. This is a Phase 3 violation. All 3 tasks
-MUST exist in the list even if Phase 4 execution skips sub-steps.
+**Anti-pattern (GH-729, GH-928):** A session collapsed
+"Reproduce the issue", "Investigate root cause", and "Implement
+fix" into a single task "Investigate and implement fix" because
+the root cause seemed obvious. Session `da0d9c73` repeated
+this — creating 12 tasks instead of 14 and skipping the
+TaskList self-check entirely. This is a Phase 3 violation.
+All play steps MUST become tasks even if Phase 4 execution
+skips sub-steps.
 
 The task list is the supervisor's interface for tracking progress
 and adding new tasks during the session.
@@ -505,7 +508,8 @@ play definitions. If you cannot confirm this, STOP.
     exist than resolved steps, go back and create the missing
     ones. **DO NOT mark Phase 3 complete until this count
     matches.** The VERIFY is not optional — skipping it is a
-    Phase 3 compliance violation (GH-729). Example: the bugfix
+    Phase 3 compliance violation (GH-729, GH-928). Example: the
+    bugfix
     play with `shipping-pipeline-solo` fragment produces 14
     steps. If `TaskList` shows fewer than 14 Phase 4 subtasks,
     you skipped or collapsed steps — create them now.
@@ -810,8 +814,8 @@ missing, re-read this section before proceeding.
 
 ### Groom Step: Always Delegate, Never Self-Assess
 
-**Hard rule (GH-505, GH-776, recurrence of GH-458):** When the
-plan includes a "Groom commit history" step, you MUST invoke
+**Hard rule (GH-505, GH-776, GH-929):** When the plan includes
+a "Groom commit history" step, you MUST invoke
 `Skill(Dev10x:git-groom)` and let the skill run its own
 analysis. Do NOT run `git develop-log`, `git log`, or any
 commit inspection to pre-assess whether grooming is needed —
@@ -820,13 +824,13 @@ skill to override its decision. The groom skill's Phase 2
 strategy gate determines whether grooming is required — that
 decision belongs to the skill, not to the orchestrator.
 
-**Anti-pattern (GH-776):** The orchestrator invoked the groom
-skill but then ran `git log --oneline develop..HEAD` itself,
-concluded "single commit, nothing to groom", and marked the
-task complete — pre-empting the skill's own Phase 2 analysis.
-Even when the groom skill is expected to be a no-op, the
-skill must run its own logic. The orchestrator must not
-inspect commit history to predict the outcome.
+**Anti-pattern (GH-776, GH-929):** The orchestrator
+pre-assessed "single commit, nothing to groom" and marked
+the task complete without invoking the skill. Session
+`da0d9c73` repeated this — third recurrence. Even when the
+groom skill is expected to be a no-op, the skill must run
+its own logic. The orchestrator must not inspect commit
+history to predict the outcome.
 
 ### CI Re-Monitoring After Force Push
 
@@ -864,6 +868,15 @@ authorization to proceed.
 **Auto-advance on commits:** After creating a commit, immediately
 proceed to the next task. Never pause to show the commit or ask
 for confirmation — the commit is done, move on.
+
+**Auto-advance on code review (GH-932):** When delegating to
+`Dev10x:review` from the shipping pipeline, pass
+`args="--unattended"` so the skill skips the zero-findings
+AskUserQuestion gate and auto-advances to `Dev10x:review-fix`.
+Session `da0d9c73` invoked the skill without this flag,
+causing it to skip the mandatory attended-mode gate and the
+findings file write. The playbook `prompt:` says to use
+`--unattended` — this is not advisory, it is required.
 
 **Auto-advance on draft PR creation:** Create the draft PR and
 immediately proceed to **Monitor CI** — this is mandatory, not
@@ -936,8 +949,11 @@ Return to the blocked task once the blocker resolves.
 6. **verify-acc-dod was invoked** — check the conversation for
    a `Skill(Dev10x:verify-acc-dod)` call. If absent, invoke it
    NOW before presenting the gate. This is the #1 bypass pattern
-   (GH-471, GH-497) — agents perform inline checks instead of
-   delegating. The completion gate MUST NOT fire without it.
+   (GH-471, GH-497, GH-930) — agents perform inline checks
+   instead of delegating. Session `da0d9c73` repeated this —
+   marking the task completed with an inline description and
+   never firing the completion gate AskUserQuestion. The
+   completion gate MUST NOT fire without it.
 
 If any check fails, resolve it before presenting the gate.
 Do NOT present "Work complete" as recommended when preconditions
@@ -1000,7 +1016,7 @@ Common skill delegations:
 | Draft Job Story | `Dev10x:jtbd` skill (attended mode) |
 | Update ticket status | Linear MCP (see references/team-info.md) |
 | Fetch PR context | `gh pr view` + `gh pr diff` |
-| Code review | `Dev10x:review` + `Dev10x:review-fix` skills |
+| Code review | `Dev10x:review` (`--unattended`) + `Dev10x:review-fix` skills |
 | Commit changes | `Dev10x:git-commit` skill |
 | Create draft PR | `Dev10x:gh-pr-create` skill (`--unattended`) |
 | Monitor CI | `Dev10x:gh-pr-monitor` skill |
@@ -1030,7 +1046,7 @@ commands skip.
 
 **Special attention: verify-acc-dod delegation.** The
 acceptance criteria step is the most commonly bypassed
-delegation (GH-471). Agents perform inline AC checks
+delegation (GH-471, GH-930). Agents perform inline AC checks
 (e.g., "CI green, PR merged, looks good") instead of
 invoking `Skill(Dev10x:verify-acc-dod)`. The inline check
 skips structured PR state verification (`gh pr checks`,

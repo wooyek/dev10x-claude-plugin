@@ -144,9 +144,17 @@ and `gh pr ready`.
 
 **REQUIRED: `max_turns: 200` on the Agent call.** Without this,
 haiku agents exhaust their default budget (~19 Bash calls) before
-CI completes on long-running suites. Session GH-446 confirmed
-this failure mode. Always include `max_turns: 200` in the Agent
-parameters — it is not optional.
+CI completes on long-running suites. Sessions GH-446 and GH-931
+confirmed this failure mode — session `da0d9c73` saw the agent
+exit after 18 tool calls with CI still pending. Always include
+`max_turns: 200` in the Agent parameters — it is not optional.
+
+**Anti-pattern (GH-931):** When the monitor agent exhausts its
+budget, the parent orchestrator must NOT retry by dispatching a
+raw `Agent()` call instead of re-invoking `Skill(Dev10x:gh-pr-
+monitor)`. Raw Agent dispatch bypasses the skill's max_turns,
+mode, and task tracking guarantees. If the monitor fails,
+re-invoke the skill — not a raw agent.
 
 **Why haiku?** Monitoring agents run `gh pr checks --watch` and
 report pass/fail — they do not need Opus-level reasoning. Using
