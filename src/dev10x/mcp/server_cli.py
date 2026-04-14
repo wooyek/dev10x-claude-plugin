@@ -674,6 +674,7 @@ async def update_paths(
     dry_run: bool = False,
     ensure_base: bool = False,
     generalize: bool = False,
+    ensure_scripts: bool = False,
     init: bool = False,
     quiet: bool = False,
 ) -> dict:
@@ -684,6 +685,7 @@ async def update_paths(
         dry_run: Preview changes without modifying files
         ensure_base: Add missing base permissions from projects.yaml
         generalize: Replace session-specific args with wildcards
+        ensure_scripts: Verify all plugin scripts have allow rules
         init: Create userspace config from plugin default
         quiet: Suppress per-file details
 
@@ -697,6 +699,7 @@ async def update_paths(
         dry_run=dry_run,
         ensure_base=ensure_base,
         generalize=generalize,
+        ensure_scripts=ensure_scripts,
         init=init,
         quiet=quiet,
     )

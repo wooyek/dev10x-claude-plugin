@@ -128,14 +128,14 @@ entries.
 
 1. Dry run:
 
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/scripts/update-paths.py --ensure-base --dry-run
+```
+mcp__plugin_Dev10x_cli__update_paths(ensure_base=true, dry_run=true)
 ```
 
 2. Apply:
 
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/scripts/update-paths.py --ensure-base
+```
+mcp__plugin_Dev10x_cli__update_paths(ensure_base=true)
 ```
 
 ### 4. Generalize session-specific permissions
@@ -146,14 +146,14 @@ that work across future sessions.
 
 1. Dry run to preview generalizations:
 
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/scripts/update-paths.py --generalize --dry-run
+```
+mcp__plugin_Dev10x_cli__update_paths(generalize=true, dry_run=true)
 ```
 
 2. Apply generalizations:
 
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/scripts/update-paths.py --generalize
+```
+mcp__plugin_Dev10x_cli__update_paths(generalize=true)
 ```
 
 **What gets generalized:**
@@ -171,14 +171,14 @@ add scripts that are not yet enumerated.
 
 1. Dry run to preview missing rules:
 
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/scripts/update-paths.py --ensure-scripts --dry-run
+```
+mcp__plugin_Dev10x_cli__update_paths(ensure_scripts=true, dry_run=true)
 ```
 
 2. Add missing script rules:
 
-```bash
-${CLAUDE_PLUGIN_ROOT}/skills/upgrade-cleanup/scripts/update-paths.py --ensure-scripts
+```
+mcp__plugin_Dev10x_cli__update_paths(ensure_scripts=true)
 ```
 
 **What gets scanned:**
@@ -275,16 +275,16 @@ The plugin default ships with empty roots as a template.
 
 ## Options
 
-### update-paths.py
+### update_paths MCP tool
 
-| Flag | Purpose |
-|------|---------|
-| `--dry-run` | Preview changes without writing |
-| `--version X.Y.Z` | Target a specific version instead of latest |
-| `--init` | Copy plugin default config to userspace for customization |
-| `--ensure-base` | Add missing base permissions from projects.yaml |
-| `--generalize` | Replace session-specific args with wildcard patterns |
-| `--ensure-scripts` | Verify all plugin scripts have allow rules; add missing |
+| Parameter | Purpose |
+|-----------|---------|
+| `dry_run` | Preview changes without writing |
+| `version` | Target a specific version instead of latest |
+| `init` | Copy plugin default config to userspace for customization |
+| `ensure_base` | Add missing base permissions from projects.yaml |
+| `generalize` | Replace session-specific args with wildcard patterns |
+| `ensure_scripts` | Verify all plugin scripts have allow rules; add missing |
 
 ### merge-worktree-permissions.py
 
