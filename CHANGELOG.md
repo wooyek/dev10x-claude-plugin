@@ -3,6 +3,72 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.63.0 — Solo Shipping & Playbook Resilience
+
+Released 2026-04-15
+
+### Features
+
+- **Enable auto-merge in solo-maintainer shipping pipeline** —
+  solo maintainers no longer need to manually merge every PR;
+  the shipping pipeline now includes a conditional merge step
+  ([GH-940])
+- **Enable playbook schema version tracking** — playbook files
+  include a version field bumped automatically on release so
+  drift between skills and core plugin is detectable ([GH-910])
+- **Enable decision-aware session resume guidance** — resumed
+  sessions surface pending decisions from task metadata and
+  inject friction-level guidance so agents re-ask or
+  auto-advance correctly ([GH-934])
+
+### Fixes
+
+- **Prevent non-functional MCP wildcards from masking
+  permissions** — upgrade cleanup detects and removes top-level
+  MCP wildcard patterns that Claude Code ignores at runtime,
+  preventing false coverage from hiding missing tool entries
+  ([GH-943], [GH-942])
+- **Prevent fragment shadowing from dropping skills** — user
+  playbook fragments that shadow defaults now inherit skills,
+  agent, model, and modes fields instead of silently dropping
+  them ([GH-938])
+- **Prevent ACC review-requested from failing solo mode** —
+  review-requested checks are skipped in solo-maintainer mode
+  where no reviewers are ever assigned ([GH-939])
+- **Resolve upgrade-cleanup broken script flags** — MCP tool
+  routes ensure-base, generalize, and ensure-scripts to Python
+  functions directly instead of passing invalid CLI flags
+  ([GH-936])
+
+### Refactors
+
+- **Simplify onboarding skill with reference redirect** —
+  extracted tour content to a references file, reducing
+  SKILL.md from 202 to ~40 lines ([GH-897])
+
+### Docs
+
+- **Document CLI startup performance baseline** — baseline
+  metrics and monitoring instructions for regression tracking
+  ([GH-907])
+- **Clarify tier 2 path after old projects/ removal** — config
+  resolution docs updated to reflect the canonical
+  `~/.claude/memory/Dev10x/` path ([GH-941])
+- **Update gitignore for backup settings files** — settings
+  backup files are now excluded from version control
+
+[GH-897]: https://github.com/Dev10x-Guru/dev10x-claude/issues/897
+[GH-907]: https://github.com/Dev10x-Guru/dev10x-claude/issues/907
+[GH-910]: https://github.com/Dev10x-Guru/dev10x-claude/issues/910
+[GH-934]: https://github.com/Dev10x-Guru/dev10x-claude/issues/934
+[GH-936]: https://github.com/Dev10x-Guru/dev10x-claude/issues/936
+[GH-938]: https://github.com/Dev10x-Guru/dev10x-claude/issues/938
+[GH-939]: https://github.com/Dev10x-Guru/dev10x-claude/issues/939
+[GH-940]: https://github.com/Dev10x-Guru/dev10x-claude/issues/940
+[GH-941]: https://github.com/Dev10x-Guru/dev10x-claude/issues/941
+[GH-942]: https://github.com/Dev10x-Guru/dev10x-claude/issues/942
+[GH-943]: https://github.com/Dev10x-Guru/dev10x-claude/issues/943
+
 ## 0.62.0 — Issue Milestones & Permission Safety
 
 Released 2026-04-14
