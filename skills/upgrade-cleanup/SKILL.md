@@ -39,6 +39,7 @@ Run dry-run first, then apply — no pause between steps.
 2. `TaskCreate(subject="Migrate config files", activeForm="Migrating configs")`
 3. `TaskCreate(subject="Ensure base permissions", activeForm="Ensuring base perms")`
 4. `TaskCreate(subject="Generalize session-specific permissions", activeForm="Generalizing perms")`
+4b. `TaskCreate(subject="Enumerate MCP tool globs", activeForm="Enumerating MCP globs")`
 5. `TaskCreate(subject="Ensure script coverage", activeForm="Verifying script rules")`
 6. `TaskCreate(subject="Merge worktree permissions", activeForm="Merging worktree perms")`
 7. `TaskCreate(subject="Audit permissions for friction", activeForm="Auditing permissions")`
@@ -162,6 +163,37 @@ mcp__plugin_Dev10x_cli__update_paths(generalize=true)
 - `gh-issue-get.sh 15` → `gh-issue-get.sh *` (issue numbers)
 - `generate-commit-list.sh 42` → `generate-commit-list.sh *` (PR args)
 - `/tmp/Dev10x/git/msg.AbCdEf.txt` → `/tmp/Dev10x/git/**` (temp hashes)
+
+### 4b. Enumerate MCP tool globs
+
+Claude Code does not expand `mcp__plugin_Dev10x_*` globs in allow
+rules — glob-shaped MCP rules match nothing, so every MCP call
+triggers a manual approval prompt. This step discovers Dev10x MCP
+tools from the plugin's own server registrations and replaces any
+matching wildcard in a settings file with the enumerated tool list.
+
+1. Dry run to preview expansions:
+
+```
+dev10x permission enumerate-mcp --dry-run
+```
+
+2. Apply expansions:
+
+```
+dev10x permission enumerate-mcp
+```
+
+**What gets expanded:**
+- `mcp__plugin_Dev10x_*` → every tool registered by the Dev10x
+  cli and db MCP servers (deduplicated against existing rules)
+- `mcp__plugin_Dev10x_cli_*` → every tool registered by the Dev10x
+  cli server only
+
+The catalog is auto-discovered by parsing `@server.tool()`
+decorators in `src/dev10x/mcp/server_cli.py` and `server_db.py`,
+so the expansion is always accurate for the plugin version you
+have checked out.
 
 ### 5. Ensure script coverage
 

@@ -269,6 +269,33 @@ def clean(*, dry_run: bool, verbose: bool, restore: bool) -> None:
         )
 
 
+@permission.command(name="enumerate-mcp")
+@click.option("--dry-run", is_flag=True, help="Show changes without modifying files")
+@click.option("--quiet", is_flag=True, help="Suppress per-file details")
+def enumerate_mcp(*, dry_run: bool, quiet: bool) -> None:
+    """Expand `mcp__plugin_Dev10x_*` wildcards into enumerated tool names."""
+    from dev10x.skills.permission import enumerate_mcp as mod
+    from dev10x.skills.permission import update_paths as paths_mod
+
+    config_path = paths_mod.find_config()
+    if not quiet:
+        click.echo(f"Config: {config_path}")
+    config = paths_mod.load_config(config_path)
+
+    settings_files = paths_mod.find_settings_files(
+        roots=config.get("roots", []),
+        include_user=config.get("include_user_settings", True),
+    )
+    if not settings_files:
+        click.echo("No settings files found.")
+        return
+
+    if dry_run and not quiet:
+        click.echo("(dry run — no files will be modified)\n")
+
+    mod.enumerate_settings(settings_files, dry_run=dry_run, quiet=quiet)
+
+
 @permission.command(name="merge-worktree")
 @click.option("--dry-run", is_flag=True, help="Show changes without modifying files")
 @click.option("--restore", is_flag=True, help="Restore settings from most recent backups")
