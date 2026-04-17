@@ -10,6 +10,7 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:gh-pr-merge
 allowed-tools:
+  - AskUserQuestion
   - Bash(gh pr view:*)
   - Bash(gh pr merge:*)
   - Bash(gh pr checks:*)
@@ -156,33 +157,88 @@ merge.
 gh pr checks NUMBER --json name,state,bucket
 ```
 
-All required checks must have `bucket` of `pass`. No checks
-should be `PENDING` or `IN_PROGRESS`. Report any failing or
-pending checks by name.
+All checks must have `bucket` of `pass` — including checks
+that are not required by branch protection. No checks may be
+`PENDING` or `IN_PROGRESS`. Report any failing or pending
+checks by name.
 
-**Pending CI delegation (GH-775):** If any checks are `PENDING`
-or `IN_PROGRESS`, do NOT poll inline with `sleep` + `gh pr
-checks`. Instead, delegate to `Skill(Dev10x:gh-pr-monitor)` to
-wait for CI to complete, then retry the merge validation from
-Check 1. The monitor skill handles CI polling, failure fixing,
-and re-checking reliably — inline sleep loops bypass these
-guardrails.
+`gh-pr-merge` MUST NOT proceed silently past any `PENDING`,
+`IN_PROGRESS`, or `bucket: fail` state. The default response
+is to stay in the fix-and-monitor loop — not to ask the user.
+The user is only consulted when all automated options have
+been exhausted or the failure looks unrelated to the PR.
 
-**Infrastructure failure override (GH-730):** If a check
-fails with an infrastructure error (API billing outage,
-OIDC token validation failure, external service unavailable),
-the failure is non-code-related. In this case:
+**Pending CI delegation (GH-775, GH-955):** If any check is
+`PENDING` or `IN_PROGRESS`, do NOT poll inline with `sleep`
++ `gh pr checks` and do NOT ask the user. Instead, delegate
+to `Skill(Dev10x:gh-pr-monitor)` to wait for CI to complete,
+then retry the merge validation from Check 1. The monitor
+skill handles CI polling reliably; inline sleep loops bypass
+these guardrails. A pending check's verdict is by definition
+unknown — waiting is the only correct behavior.
 
-**REQUIRED: Call `AskUserQuestion`** before proceeding:
-- Question: "CI check `{check-name}` failed due to an
-  infrastructure issue: `{error-summary}`. This is not
-  caused by the code change. Merge anyway?"
-- Options: "Merge anyway" / "Abort — fix CI first"
+**Code-failure auto-fix loop (GH-955):** If a check has
+`bucket: fail` and the failure looks caused by the PR's own
+changes (e.g., lint, type, test, coverage, formatting), do
+NOT ask the user. Delegate to `Skill(Dev10x:gh-pr-monitor)` —
+its Phase 1 "CI Failure Handling" table maps each failure
+type to a fixup strategy (format, type annotations, test
+fixes, etc.). The monitor creates fixup commits, pushes,
+and re-checks until CI turns green. Retry the merge
+validation from Check 1 after the monitor returns.
 
-Infrastructure failure signals: "Credit balance is too low",
-"OIDC token validation", "Resource not accessible by
-integration". Never auto-classify — show the error to the
-user and let them decide.
+Only escalate to `AskUserQuestion` when:
+
+1. The failure has exhausted the monitor's fix attempts
+   (e.g., 5+ rounds of fixup + re-check with the same check
+   still failing), OR
+2. The failure matches the infrastructure signals below
+   (non-code cause — user judgement required to decide
+   whether to merge despite the infra outage).
+
+**Infrastructure failure override (GH-730, ALWAYS_ASK):**
+When a check fails with a clear infrastructure cause — the
+failure is not the PR's fault and no fixup will resolve it —
+fire the user-confirmation gate. Signals include:
+
+- "Credit balance is too low" (API billing / quota outage)
+- "OIDC token validation" (auth handshake failure)
+- "Resource not accessible by integration" (permissions)
+- Repeated identical failures after fixup attempts
+  (monitor exhaustion)
+
+Never auto-classify without evidence — if uncertain whether
+the failure is code or infra, default to the auto-fix loop
+above (safer to attempt a fix than to ask the user
+prematurely).
+
+**REQUIRED: Call `AskUserQuestion`** in this escalation path:
+
+- Question: "CI check `{check-name}` failed due to what
+  looks like an infrastructure issue (`{error-summary}`)
+  and the auto-fix loop cannot resolve it. Merge anyway,
+  or wait?"
+- Options:
+  - **Wait (Recommended)** — re-invoke
+    `Skill(Dev10x:gh-pr-monitor)` to retry CI, then retry
+    merge validation from Check 1
+  - **Merge anyway** — user MUST supply a reason (free text
+    via the `Other` notes field). Record the reason in the
+    skill's task metadata
+    (`TaskUpdate(taskId, metadata={"merge_override_reason":
+    "<user text>", "override_check": "<check-name>",
+    "override_state": "<state>"})`) so `Dev10x:skill-audit`
+    can surface override patterns later.
+  - **Abort** — cancel merge.
+
+The gate fires regardless of `friction_level` or
+`active_modes` — `solo-maintainer adaptive` governs pacing
+between skills, it does NOT authorize silent merges past
+unresolved CI signal. The narrow scope (only after auto-fix
+is exhausted or the failure is clearly infra) keeps the
+user out of the loop for routine code fixes while still
+requiring human judgement for cases where the agent cannot
+safely decide.
 
 ### Check 3: PR is not in draft
 
@@ -342,10 +398,15 @@ error and let the calling skill decide how to proceed.
 ## Important Notes
 
 - Never merge without running ALL 8 checks first
-- Never bypass checks even if "it looks fine" — the only
-  exception is the infrastructure failure override (Check 2)
-  which still requires explicit user confirmation via
-  `AskUserQuestion` (GH-730)
+- Never bypass checks even if "it looks fine" — any `PENDING`,
+  `IN_PROGRESS`, or `FAILURE` (required or not) blocks the
+  merge. Check 2 handles these by delegating to
+  `Dev10x:gh-pr-monitor` (pending → wait; code failure →
+  fixup + re-check). The ALWAYS_ASK gate (GH-955, GH-730)
+  only fires when the auto-fix loop is exhausted or the
+  failure is clearly infrastructure-related. All
+  "Merge anyway" overrides require explicit user
+  confirmation via `AskUserQuestion` with a recorded reason.
 - The solo-maintainer override only skips check 8 (approval),
   not the other 7 checks
 - This skill must NOT be called from background agents
