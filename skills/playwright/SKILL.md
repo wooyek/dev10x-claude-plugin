@@ -40,7 +40,7 @@ Wraps `uv run --with playwright python3` with:
 
 ## Writing Playwright Scripts
 
-Scripts live in `/tmp/claude/playwright/qa-<ticket>-<description>.py`. They must read
+Scripts live in `/tmp/Dev10x/playwright/qa-<ticket>-<description>.py`. They must read
 credentials from environment variables injected by the wrapper:
 
 ```python
@@ -149,7 +149,7 @@ time.sleep(2)  # after result appears
 To use `janusz_ai`, pass `--user janusz_ai` to the wrapper:
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/run-playwright.sh \
-  /tmp/claude/playwright/qa-xxx.py --user janusz_ai
+  /tmp/Dev10x/playwright/qa-xxx.py --user janusz_ai
 ```
 
 ## Running Scripts
@@ -157,12 +157,12 @@ ${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/run-playwright.sh \
 ### Validate only (no browser)
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/run-playwright.sh \
-  /tmp/claude/playwright/qa-xxx.py --validate-only
+  /tmp/Dev10x/playwright/qa-xxx.py --validate-only
 ```
 
 ### Execute
 ```bash
-${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/run-playwright.sh /tmp/claude/playwright/qa-xxx.py
+${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/run-playwright.sh /tmp/Dev10x/playwright/qa-xxx.py
 ```
 
 The wrapper:
@@ -195,5 +195,5 @@ Dev10x:playwright
 ├── Called by: Dev10x:qa-self (Phase 3 execution)
 ├── Reads: /work/tt/tt-e2e/settings.secrets.env (credentials)
 ├── Scripts: run-playwright.sh (validate + inject + run)
-└── Output: /tmp/claude/playwright/  (screenshots, video)
+└── Output: /tmp/Dev10x/playwright/  (screenshots, video)
 ```

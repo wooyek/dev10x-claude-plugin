@@ -36,10 +36,10 @@ When a skill delegates to another skill via `Skill()`:
 
 Temporary file paths for findings or intermediate data:
 
-- **Session temp**: `/tmp/claude/skill-audit/findings-*.json`
+- **Session temp**: `/tmp/Dev10x/skill-audit/findings-*.json`
   - Scoped to a single session
-  - Declared in source skill's `allowed-tools: [Read(/tmp/claude/skill-audit/**)]`
-  - Delegated skill reads from same path: `Skill(args="/tmp/claude/skill-audit/findings.json")`
+  - Declared in source skill's `allowed-tools: [Read(/tmp/Dev10x/skill-audit/**)]`
+  - Delegated skill reads from same path: `Skill(args="/tmp/Dev10x/skill-audit/findings.json")`
 
 - **Memory cache**: `~/.claude/memory/Dev10x/`
   - Persists across sessions (global with repo mapping)
@@ -52,8 +52,8 @@ When Phase N delegates to another skill:
 1. ✓ Skill invocation uses `skill=` and `args=` named parameters
 2. ✓ Target skill's `name:` field matches the `skill=` argument
 3. ✓ Both source and delegated skills declare `allowed-tools` coverage:
-   - Source: `Write(/tmp/claude/<namespace>/findings.*)`
-   - Delegated: `Read(/tmp/claude/<namespace>/findings.*)`
+   - Source: `Write(/tmp/Dev10x/<namespace>/findings.*)`
+   - Delegated: `Read(/tmp/Dev10x/<namespace>/findings.*)`
 4. ✓ Findings file path is deterministic (no dynamic uuids that won't match)
 5. ✓ Task created in Orchestration for the delegation phase
 

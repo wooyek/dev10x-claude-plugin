@@ -16,8 +16,8 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-seq-editor.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
-  - Write(/tmp/claude/git/**)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
+  - Write(/tmp/Dev10x/git/**)
 ---
 
 **Announce:** "Using Dev10x:git to [push / groom commits]."
@@ -87,10 +87,10 @@ Two scripts power fully automated rebases:
 1. Create a unique temp file for the rebase sequence:
 
 ```bash
-/tmp/claude/bin/mktmp.sh git rebase-seq .txt
+/tmp/Dev10x/bin/mktmp.sh git rebase-seq .txt
 ```
 
-Store the returned path (e.g., `/tmp/claude/git/rebase-seq.a7b3c9.txt`).
+Store the returned path (e.g., `/tmp/Dev10x/git/rebase-seq.a7b3c9.txt`).
 
 2. Write the rebase todo (oldest commit first) to that file using
    the Write tool:
@@ -160,8 +160,8 @@ Add to your project's `.claude/settings.local.json`:
       "Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-seq-editor.sh:*)",
       "Bash(git reset --soft:*)",
       "Bash(git push --force-with-lease:*)",
-      "Bash(/tmp/claude/bin/mktmp.sh:*)",
-      "Write(/tmp/claude/git/**)"
+      "Bash(/tmp/Dev10x/bin/mktmp.sh:*)",
+      "Write(/tmp/Dev10x/git/**)"
     ]
   }
 }

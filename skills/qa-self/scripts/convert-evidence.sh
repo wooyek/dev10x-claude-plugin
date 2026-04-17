@@ -2,8 +2,8 @@
 # Convert QA evidence files for Linear upload.
 #
 # Usage:
-#   convert-evidence.sh screenshots /tmp/claude/self-qa/test1.png /tmp/claude/self-qa/test2.png
-#   convert-evidence.sh video /tmp/claude/self-qa/qa-video-dir/recording.webm
+#   convert-evidence.sh screenshots /tmp/Dev10x/self-qa/test1.png /tmp/Dev10x/self-qa/test2.png
+#   convert-evidence.sh video /tmp/Dev10x/self-qa/qa-video-dir/recording.webm
 #
 # Commands:
 #   screenshots  Convert PNGs to JPGs (quality 70, max 1200px wide)

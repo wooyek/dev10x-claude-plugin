@@ -17,9 +17,9 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh:*)
   - Bash(git reset --soft:*)
   - Bash(git push --force-with-lease:*)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
   - mcp__plugin_Dev10x_cli__mktmp
-  - Write(/tmp/claude/git/**)
+  - Write(/tmp/Dev10x/git/**)
 ---
 
 # Git Branch History Grooming
@@ -162,7 +162,7 @@ git commit --fixup=<target-commit-sha>
 git autosquash-develop
 
 # Custom sequence (reordering, message rewrites, splits):
-# 1. Create unique seq file: /tmp/claude/bin/mktmp.sh git rebase-seq .txt
+# 1. Create unique seq file: /tmp/Dev10x/bin/mktmp.sh git rebase-seq .txt
 # 2. Write sequence to the returned path
 # 3. Run: ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-rebase-groom.sh <path> develop
 ```
@@ -192,13 +192,13 @@ Fully automatable — no interactive editor required.
 
 **Use the script** (single permission approval, runs unattended):
 ```bash
-/tmp/claude/bin/mktmp.sh git groom-config .json
+/tmp/Dev10x/bin/mktmp.sh git groom-config .json
 ```
 Write the config to the returned path, then run:
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/git-groom/scripts/mass-rewrite.py <config-path>
 ```
-The script creates its own isolated workdir under `/tmp/claude/git/`.
+The script creates its own isolated workdir under `/tmp/Dev10x/git/`.
 
 Config format:
 ```json
@@ -229,7 +229,7 @@ git log --oneline $(git merge-base develop HEAD)..HEAD
 
 **Step 2:** Create an isolated workdir for this groom session:
 ```bash
-/tmp/claude/bin/mktmp.sh -d git groom
+/tmp/Dev10x/bin/mktmp.sh -d git groom
 ```
 Store the returned path as `$WORKDIR`.
 
@@ -246,7 +246,7 @@ parent directories as needed.
 **Step 4:** Write the complete rebase sequence using the Write tool:
 
 ```bash
-/tmp/claude/bin/mktmp.sh git rebase-seq .txt
+/tmp/Dev10x/bin/mktmp.sh git rebase-seq .txt
 ```
 
 Write to the returned path:

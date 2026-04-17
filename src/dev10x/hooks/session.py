@@ -259,11 +259,11 @@ def session_tmpdir() -> None:
     if not session_id:
         sys.exit(0)
 
-    Path(f"/tmp/claude/{session_id}").mkdir(parents=True, exist_ok=True)
+    Path(f"/tmp/Dev10x/{session_id}").mkdir(parents=True, exist_ok=True)
 
     plugin_root = Path(__file__).parents[3]
     mktmp_src = plugin_root / "bin" / "mktmp.sh"
-    dest_bin = Path("/tmp/claude/bin")
+    dest_bin = Path("/tmp/Dev10x/bin")
     dest_bin.mkdir(parents=True, exist_ok=True)
 
     if mktmp_src.exists():

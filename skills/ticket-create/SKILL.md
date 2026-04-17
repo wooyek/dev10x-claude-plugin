@@ -15,7 +15,7 @@ allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/ticket-create/scripts/:*)
   - Bash(gh issue create:*)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
   - mcp__claude_ai_Linear__save_issue
   - mcp__claude_ai_Linear__get_issue
   - mcp__claude_ai_Linear__list_projects
@@ -217,7 +217,7 @@ Write the description to a temp file first (inline `--body` strings
 break shell quoting on markdown tables and long descriptions):
 ```bash
 # Generate temp path via mktmp.sh, then write body via Write tool
-BODY_FILE=$(/tmp/claude/bin/mktmp.sh gh-issue body .md)
+BODY_FILE=$(/tmp/Dev10x/bin/mktmp.sh gh-issue body .md)
 # Write description content to $BODY_FILE via the Write tool
 gh issue create --repo "$REPO" --title "$TITLE" --body-file "$BODY_FILE" --label "$LABELS"
 ```

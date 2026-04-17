@@ -13,8 +13,8 @@ invocation-name: Dev10x:git-commit
 allowed-tools:
   - AskUserQuestion
   - mcp__plugin_Dev10x_cli__mktmp
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
-  - Write(/tmp/claude/git/**)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
+  - Write(/tmp/Dev10x/git/**)
 ---
 
 # Create Commit
@@ -546,7 +546,7 @@ Options:
    Store the returned `path` value.
    **Fallback** (if MCP unavailable):
    ```bash
-   /tmp/claude/bin/mktmp.sh git commit-msg .txt
+   /tmp/Dev10x/bin/mktmp.sh git commit-msg .txt
    ```
    **Do NOT use hardcoded paths** — hooks reject non-mktmp
    paths and the commit will fail.

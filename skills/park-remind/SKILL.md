@@ -12,8 +12,8 @@ user-invocable: true
 invocation-name: Dev10x:park-remind
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/slack/slack-notify.py:*)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
-  - Write(/tmp/claude/slack/**)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
+  - Write(/tmp/Dev10x/slack/**)
 ---
 
 # Dev10x:park-remind — Slack DM Reminder
@@ -75,7 +75,7 @@ For multi-line messages, write the formatted text to a unique temp file
 using the Write tool first, then pass it via command substitution:
 
 ```bash
-/tmp/claude/bin/mktmp.sh slack remind-msg .txt
+/tmp/Dev10x/bin/mktmp.sh slack remind-msg .txt
 ```
 Write content to the returned path using Write tool, then:
 ```bash

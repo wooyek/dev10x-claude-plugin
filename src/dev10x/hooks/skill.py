@@ -1,6 +1,6 @@
 """Skill and PostToolUse hook logic.
 
-skill_tmpdir: Creates /tmp/claude/<skill-name>/ scratch directory.
+skill_tmpdir: Creates /tmp/Dev10x/<skill-name>/ scratch directory.
 skill_metrics: Appends JSONL metric entry; prunes files older than 30 days.
 ruff_format: Auto-formats Python files with ruff after Edit/Write.
 """
@@ -32,7 +32,7 @@ def _load_stdin() -> dict:
 
 
 def skill_tmpdir() -> None:
-    """Create /tmp/claude/<skill-name>/ scratch directory (PreToolUse hook)."""
+    """Create /tmp/Dev10x/<skill-name>/ scratch directory (PreToolUse hook)."""
     data = _load_stdin()
     skill_name = data.get("tool_input", {}).get("skill") or ""
     if not skill_name:
@@ -40,7 +40,7 @@ def skill_tmpdir() -> None:
 
     safe_name = re.sub(r"[^a-zA-Z0-9._-]", "", skill_name.replace(":", "-"))
     if safe_name:
-        Path(f"/tmp/claude/{safe_name}").mkdir(parents=True, exist_ok=True)
+        Path(f"/tmp/Dev10x/{safe_name}").mkdir(parents=True, exist_ok=True)
 
 
 def skill_metrics() -> None:

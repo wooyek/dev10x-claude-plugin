@@ -25,7 +25,7 @@ class TestSkillTmpdir:
         )
 
         assert result.exit_code == 0
-        assert Path("/tmp/claude/Dev10x-git-commit").exists()
+        assert Path("/tmp/Dev10x/Dev10x-git-commit").exists()
 
     def test_sanitizes_colon_to_dash(self, runner: CliRunner) -> None:
         result = runner.invoke(
@@ -35,7 +35,7 @@ class TestSkillTmpdir:
         )
 
         assert result.exit_code == 0
-        assert Path("/tmp/claude/test-skill-name").exists()
+        assert Path("/tmp/Dev10x/test-skill-name").exists()
 
     def test_exits_silently_without_skill(self, runner: CliRunner) -> None:
         result = runner.invoke(

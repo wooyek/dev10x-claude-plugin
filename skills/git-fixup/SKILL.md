@@ -11,8 +11,8 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:git-fixup
 allowed-tools:
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
-  - Write(/tmp/claude/git/**)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
+  - Write(/tmp/Dev10x/git/**)
 ---
 
 # Create Fixup Commit
@@ -195,7 +195,7 @@ in PosSubModelNode for cohesion.
 
 Create a unique temp file via `mktemp` to avoid cross-session collisions:
 ```bash
-/tmp/claude/bin/mktmp.sh git fixup-msg .txt
+/tmp/Dev10x/bin/mktmp.sh git fixup-msg .txt
 ```
 Store the returned path for subsequent steps.
 

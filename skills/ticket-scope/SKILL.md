@@ -219,7 +219,7 @@ Ask for feedback on:
 
 ```bash
 # Save to /tmp for reference
-/tmp/claude/ticket-scope/TICKET-ID-scope.md
+/tmp/Dev10x/ticket-scope/TICKET-ID-scope.md
 ```
 
 #### 7.2 Update Linear Ticket (Optional)
@@ -403,7 +403,7 @@ Dev10x:ticket-scope
 ├── Uses: Dev10x:jtbd (JTBD story drafting in Phase 4b)
 ├── May lead to: Dev10x:work-on (start implementation)
 ├── Alternative: Dev10x:adr (for architectural decisions)
-└── Saves to: /tmp/claude/ticket-scope/TICKET-ID-scope.md
+└── Saves to: /tmp/Dev10x/ticket-scope/TICKET-ID-scope.md
 ```
 
 ## Example Usage

@@ -493,10 +493,10 @@ async def mktmp(
     ext: str = "",
     directory: bool = False,
 ) -> dict:
-    """Create a unique temp file or directory under /tmp/claude/<namespace>/.
+    """Create a unique temp file or directory under /tmp/Dev10x/<namespace>/.
 
     Args:
-        namespace: Subdirectory under /tmp/claude/ (e.g., "git", "skill-audit")
+        namespace: Subdirectory under /tmp/Dev10x/ (e.g., "git", "skill-audit")
         prefix: Filename prefix (e.g., "commit-msg", "pr-review")
         ext: File extension including dot (e.g., ".txt", ".json"). Ignored for directories.
         directory: If True, create a directory instead of a file.

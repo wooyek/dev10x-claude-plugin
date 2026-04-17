@@ -326,7 +326,7 @@ Write the GraphQL mutation to a temp file and reference it with
 ```bash
 # Write mutation to temp file (use mcp__plugin_Dev10x_cli__mktmp)
 # Then invoke:
-gh api graphql -F query=@/tmp/claude/gh/minimize.graphql \
+gh api graphql -F query=@/tmp/Dev10x/gh/minimize.graphql \
   -f id='{node_id}' -f classifier='OUTDATED'
 ```
 

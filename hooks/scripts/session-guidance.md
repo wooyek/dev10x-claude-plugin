@@ -64,7 +64,7 @@ prompts or brittle command matching.
 ### Temporary files
 - **Preferred**: Use MCP tool `mcp__plugin_Dev10x_cli__mktmp`
   with params `namespace`, `prefix`, `ext`, `directory`
-- **Fallback**: `/tmp/claude/bin/mktmp.sh <namespace> <prefix> [.ext]`
+- **Fallback**: `/tmp/Dev10x/bin/mktmp.sh <namespace> <prefix> [.ext]`
   (requires `Bash()` allow rule in skills)
 - Never `mkdir -p && script` — both methods create dirs automatically
 

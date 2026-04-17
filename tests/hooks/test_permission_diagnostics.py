@@ -25,8 +25,8 @@ class TestExtractToolSignature:
         assert extract_tool_signature(raw=raw) == "Bash(git status)"
 
     def test_write_tool(self) -> None:
-        raw = {"tool_name": "Write", "tool_input": {"file_path": "/tmp/claude/test.txt"}}
-        assert extract_tool_signature(raw=raw) == "Write(/tmp/claude/test.txt)"
+        raw = {"tool_name": "Write", "tool_input": {"file_path": "/tmp/Dev10x/test.txt"}}
+        assert extract_tool_signature(raw=raw) == "Write(/tmp/Dev10x/test.txt)"
 
     def test_read_tool(self) -> None:
         raw = {"tool_name": "Read", "tool_input": {"file_path": "/home/user/file.py"}}
@@ -80,14 +80,14 @@ class TestMatchesRule:
 
     def test_write_glob_match(self) -> None:
         assert _matches_rule(
-            signature="Write(/tmp/claude/gh-issue/test.md)",
-            rule="Write(/tmp/claude/**)",
+            signature="Write(/tmp/Dev10x/gh-issue/test.md)",
+            rule="Write(/tmp/Dev10x/**)",
         )
 
     def test_write_no_match(self) -> None:
         assert not _matches_rule(
             signature="Write(/home/user/secret.txt)",
-            rule="Write(/tmp/claude/**)",
+            rule="Write(/tmp/Dev10x/**)",
         )
 
     def test_mcp_exact_match(self) -> None:
@@ -146,8 +146,8 @@ class TestSuggestRule:
         assert _suggest_rule(signature="Bash(pytest)") == "Bash(pytest:*)"
 
     def test_write_suggests_parent_glob(self) -> None:
-        result = _suggest_rule(signature="Write(/tmp/claude/gh-issue/test.md)")
-        assert result == "Write(/tmp/claude/gh-issue/**)"
+        result = _suggest_rule(signature="Write(/tmp/Dev10x/gh-issue/test.md)")
+        assert result == "Write(/tmp/Dev10x/gh-issue/**)"
 
     def test_read_suggests_parent_glob(self) -> None:
         result = _suggest_rule(signature="Read(/home/user/project/src/main.py)")
@@ -180,7 +180,7 @@ class TestDiagnose:
     def write_raw(self) -> dict:
         return {
             "tool_name": "Write",
-            "tool_input": {"file_path": "/tmp/claude/gh-issue/review.md"},
+            "tool_input": {"file_path": "/tmp/Dev10x/gh-issue/review.md"},
         }
 
     @pytest.fixture()
@@ -226,7 +226,7 @@ class TestDiagnose:
         user_claude = tmp_path / "user_home" / ".claude"
         user_claude.mkdir(parents=True)
         user_settings = user_claude / "settings.json"
-        user_settings.write_text(json.dumps({"permissions": {"allow": ["Write(/tmp/claude/**)"]}}))
+        user_settings.write_text(json.dumps({"permissions": {"allow": ["Write(/tmp/Dev10x/**)"]}}))
 
         monkeypatch.setattr(
             "dev10x.hooks.permission_diagnostics.SETTINGS_PRECEDENCE",
@@ -249,7 +249,7 @@ class TestDiagnose:
         assert "overrides" in result.diagnosis or "replacement" in result.diagnosis
         assert result.matches[0].has_allow_list is True
         assert result.matches[0].matching_rule is None
-        assert result.matches[1].matching_rule == "Write(/tmp/claude/**)"
+        assert result.matches[1].matching_rule == "Write(/tmp/Dev10x/**)"
 
     def test_rule_matched_in_project_local(
         self,
@@ -259,7 +259,7 @@ class TestDiagnose:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         project_local = settings_dir / "settings.local.json"
-        project_local.write_text(json.dumps({"permissions": {"allow": ["Write(/tmp/claude/**)"]}}))
+        project_local.write_text(json.dumps({"permissions": {"allow": ["Write(/tmp/Dev10x/**)"]}}))
 
         monkeypatch.setattr(
             "dev10x.hooks.permission_diagnostics.SETTINGS_PRECEDENCE",
@@ -274,7 +274,7 @@ class TestDiagnose:
 
         result = diagnose(raw=write_raw, cwd=str(tmp_path))
         assert result is not None
-        assert result.matches[0].matching_rule == "Write(/tmp/claude/**)"
+        assert result.matches[0].matching_rule == "Write(/tmp/Dev10x/**)"
 
     def test_mcp_wildcard_matching(
         self,
@@ -316,7 +316,7 @@ class TestDiagnose:
         user_claude = tmp_path / "user_home" / ".claude"
         user_claude.mkdir(parents=True)
         user_settings = user_claude / "settings.json"
-        user_settings.write_text(json.dumps({"permissions": {"allow": ["Write(/tmp/claude/**)"]}}))
+        user_settings.write_text(json.dumps({"permissions": {"allow": ["Write(/tmp/Dev10x/**)"]}}))
 
         monkeypatch.setattr(
             "dev10x.hooks.permission_diagnostics.SETTINGS_PRECEDENCE",
@@ -336,7 +336,7 @@ class TestDiagnose:
 
         result = diagnose(raw=write_raw, cwd=str(tmp_path))
         assert result is not None
-        assert "Write(/tmp/claude/**)" in result.fix_suggestion
+        assert "Write(/tmp/Dev10x/**)" in result.fix_suggestion
         assert "project local" in result.fix_suggestion
 
     def test_fix_suggestion_when_no_rules_anywhere(
@@ -482,7 +482,7 @@ class TestFormatDiagnostic:
             precedence=5,
         )
         return DiagnosticResult(
-            tool_signature="Write(/tmp/claude/gh-issue/review.md)",
+            tool_signature="Write(/tmp/Dev10x/gh-issue/review.md)",
             matches=[
                 RuleMatch(
                     settings_file=project_local,
@@ -491,7 +491,7 @@ class TestFormatDiagnostic:
                 ),
                 RuleMatch(
                     settings_file=user_settings,
-                    matching_rule="Write(/tmp/claude/**)",
+                    matching_rule="Write(/tmp/Dev10x/**)",
                     has_allow_list=True,
                 ),
             ],
@@ -499,12 +499,12 @@ class TestFormatDiagnostic:
                 "project local defines its own permissions.allow list "
                 "which overrides lower-precedence files."
             ),
-            fix_suggestion="Add `Write(/tmp/claude/**)` to project local",
+            fix_suggestion="Add `Write(/tmp/Dev10x/**)` to project local",
         )
 
     def test_contains_tool_signature(self, shadowed_result: DiagnosticResult) -> None:
         output = format_diagnostic(result=shadowed_result)
-        assert "Write(/tmp/claude/gh-issue/review.md)" in output
+        assert "Write(/tmp/Dev10x/gh-issue/review.md)" in output
 
     def test_shows_match_status(self, shadowed_result: DiagnosticResult) -> None:
         output = format_diagnostic(result=shadowed_result)

@@ -106,7 +106,7 @@ Read the relevant frontend code to understand:
 
 ### Phase 2: Write the Playwright Test Script
 
-Generate a self-contained Python script at `/tmp/claude/self-qa/qa-<ticket>-test.py`.
+Generate a self-contained Python script at `/tmp/Dev10x/self-qa/qa-<ticket>-test.py`.
 
 #### 2.1 Script Template
 
@@ -129,7 +129,7 @@ STAGING_URL  = os.environ.get("STAGING_URL", "https://staging-dealers.tiretutor.
 CRM_USERNAME = os.environ.get("CRM_USERNAME", "e2e_test_user")
 CRM_PASSWORD = os.environ["CRM_PASSWORD"]
 SCREENSHOT_DIR = "/tmp"
-VIDEO_DIR = "/tmp/claude/self-qa/qa-<ticket>-video"
+VIDEO_DIR = "/tmp/Dev10x/self-qa/qa-<ticket>-video"
 ```
 
 #### 2.2 Required Patterns
@@ -399,21 +399,21 @@ Always validate syntax before launching a browser:
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/run-playwright.sh \
-  /tmp/claude/self-qa/qa-<ticket>-test.py --validate-only
+  /tmp/Dev10x/self-qa/qa-<ticket>-test.py --validate-only
 ```
 
 Then execute (credentials injected automatically from settings.secrets.env):
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/run-playwright.sh \
-  /tmp/claude/self-qa/qa-<ticket>-test.py
+  /tmp/Dev10x/self-qa/qa-<ticket>-test.py
 ```
 
 For admin-gated features (reopen/void WO), use `--user janusz_ai`:
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/playwright/scripts/run-playwright.sh \
-  /tmp/claude/self-qa/qa-<ticket>-test.py --user janusz_ai
+  /tmp/Dev10x/self-qa/qa-<ticket>-test.py --user janusz_ai
 ```
 
 #### 3.3 Review output
@@ -436,7 +436,7 @@ If tests fail, fix the script and re-run. Common issues:
 Use the bundled conversion script:
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/qa-self/scripts/convert-evidence.sh \
-  screenshots /tmp/claude/self-qa/qa-test1.png /tmp/claude/self-qa/qa-test2.png
+  screenshots /tmp/Dev10x/self-qa/qa-test1.png /tmp/Dev10x/self-qa/qa-test2.png
 ```
 
 Converts PNGs to JPGs (quality 70, max 1200px wide). Prints converted
@@ -447,7 +447,7 @@ file paths to stdout.
 Playwright records video as `.webm`. Convert to `.mp4` for Linear:
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/qa-self/scripts/convert-evidence.sh \
-  video /tmp/claude/self-qa/qa-<ticket>-video/*.webm
+  video /tmp/Dev10x/self-qa/qa-<ticket>-video/*.webm
 ```
 
 Uses ffmpeg (`h264, crf 28, faststart`). Prints the `.mp4` path to
@@ -459,7 +459,7 @@ Use the upload script bundled with this skill (supports images and
 video):
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/qa-self/scripts/upload-screenshots.py \
-  upload /tmp/claude/self-qa/qa-test1.jpg /tmp/claude/self-qa/qa-test2.jpg /tmp/claude/self-qa/qa-video.mp4
+  upload /tmp/Dev10x/self-qa/qa-test1.jpg /tmp/Dev10x/self-qa/qa-test2.jpg /tmp/Dev10x/self-qa/qa-video.mp4
 ```
 
 Output is JSON with `[{"file": "...", "url": "..."}]` — parse the URLs

@@ -104,8 +104,8 @@ class TestSensitiveFiles:
             "/work/project/config/database.yml",
             "/work/project/environment.py",
             "/work/project/config/settings.py",
-            "/tmp/claude/gh-issues/001-setup.json",
-            "/tmp/claude/gh-issues/001-setup.env.json",
+            "/tmp/Dev10x/gh-issues/001-setup.json",
+            "/tmp/Dev10x/gh-issues/001-setup.env.json",
         ],
     )
     def test_allows_non_sensitive_files(self, file_path: str) -> None:

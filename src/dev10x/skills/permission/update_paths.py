@@ -299,7 +299,7 @@ GENERALIZE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"(generate-commit-list\.sh)\s+[^)]+"), r"\1:*"),
     (re.compile(r"(extract-session\.sh)\s+[^)]+"), r"\1:*"),
     (re.compile(r"(\.(?:sh|py))\s+[^):]+(?::\*)?"), r"\1:*"),
-    (re.compile(r"(/tmp/claude/[^/]+/)[^/)]+\.[A-Za-z0-9]{6,}\.(txt|md|json)"), r"\1*"),
+    (re.compile(r"(/tmp/Dev10x/[^/]+/)[^/)]+\.[A-Za-z0-9]{6,}\.(txt|md|json)"), r"\1*"),
     (re.compile(r"(git reset --hard) origin/\S+"), r"\1"),
     (re.compile(r"(git reset --soft) [A-Fa-f0-9]{6,}"), r"\1"),
 ]

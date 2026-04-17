@@ -24,7 +24,7 @@ allowed-tools:
   - Bash(gh issue create:*)
   - Bash(gh label create:*)
   - Bash(gh api repos/:*)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
   - Skill(Dev10x:ticket-create)
 ---
 
@@ -232,7 +232,7 @@ issue bodies clean and reduce permission friction:
 
 1. Create a temp directory for the batch:
    ```bash
-   BATCH_DIR=$(/tmp/claude/bin/mktmp.sh -d gh-issues batch)
+   BATCH_DIR=$(/tmp/Dev10x/bin/mktmp.sh -d gh-issues batch)
    ```
 2. For each issue, write two files via the Write tool:
    - `$BATCH_DIR/NNN-slug.md` — clean body content only

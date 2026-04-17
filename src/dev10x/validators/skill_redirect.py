@@ -91,7 +91,7 @@ _QUICK_TOKENS = frozenset(["commit", "create", "push", "rebase", "checks", "issu
 
 _COMMIT_HEAL_MSG = (
     "\u26d4  `git commit` blocked — wrong temp file path.\n\n"
-    "The `-F` path must be under `/tmp/claude/git/`.\n"
+    "The `-F` path must be under `/tmp/Dev10x/git/`.\n"
     "Create it with: `mcp__plugin_Dev10x_cli__mktmp("
     'namespace="git", prefix="commit-msg", ext=".txt")`\n'
     "then: `git commit -F <returned-path>`\n\n"
@@ -99,7 +99,7 @@ _COMMIT_HEAL_MSG = (
     "`git`), that is why this was blocked."
 )
 
-_WRONG_TEMP_PATH_RE = re.compile(r"-F\s+/tmp/claude/(?!git/)\S+/\S+\.\S+")
+_WRONG_TEMP_PATH_RE = re.compile(r"-F\s+/tmp/Dev10x/(?!git/)\S+/\S+\.\S+")
 
 
 def _format_skill_msg(

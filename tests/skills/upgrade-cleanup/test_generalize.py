@@ -30,7 +30,7 @@ class TestGeneralizePermission:
         [
             "Bash(git log:*)",
             "Bash(gh pr view:*)",
-            "Bash(/tmp/claude/bin/mktmp.sh:*)",
+            "Bash(/tmp/Dev10x/bin/mktmp.sh:*)",
             "mcp__plugin_Dev10x_*",
         ],
     )
@@ -40,11 +40,11 @@ class TestGeneralizePermission:
         assert result is None
 
     def test_generalizes_temp_file_hashes(self) -> None:
-        entry = "Write(/tmp/claude/git/msg.AbCdEfGh.txt)"
+        entry = "Write(/tmp/Dev10x/git/msg.AbCdEfGh.txt)"
 
         result = update_paths.generalize_permission(entry)
 
-        assert result == "Write(/tmp/claude/git/*)"
+        assert result == "Write(/tmp/Dev10x/git/*)"
 
 
 class TestGeneralizePermissions:

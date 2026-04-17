@@ -20,12 +20,12 @@ include_user_settings: true
 # rules that every Dev10x plugin user needs.
 #
 # GH-98:  gh CLI patterns
-# GH-120: /tmp/claude/git/ temp file access
-# GH-274: /tmp/claude/bin/mktmp.sh for all namespaces
+# GH-120: /tmp/Dev10x/git/ temp file access
+# GH-274: /tmp/Dev10x/bin/mktmp.sh for all namespaces
 # GH-101: plugin cache broad rule (covers ${CLAUDE_PLUGIN_ROOT} scripts)
 base_permissions:
   # --- Plugin infrastructure (GH-274, GH-101, GH-426) ---
-  - "Bash(/tmp/claude/bin/mktmp.sh:*)"
+  - "Bash(/tmp/Dev10x/bin/mktmp.sh:*)"
 
   # --- Plugin scripts: bin/ ---
   - "Bash(~/.claude/plugins/cache/**/bin/release.sh:*)"
@@ -146,35 +146,35 @@ base_permissions:
   - "mcp__plugin_Dev10x_db__query"
 
   # --- Temp file namespaces (GH-878) ---
-  # Each /tmp/claude/<namespace>/ is created by mktmp and used by
+  # Each /tmp/Dev10x/<namespace>/ is created by mktmp and used by
   # skills for intermediate files. Enumerate all namespaces here.
-  - "Read(/tmp/claude/git/**)"
-  - "Write(/tmp/claude/git/**)"
-  - "Edit(/tmp/claude/git/**)"
-  - "Read(/tmp/claude/review/**)"
-  - "Write(/tmp/claude/review/**)"
-  - "Edit(/tmp/claude/review/**)"
-  - "Read(/tmp/claude/skill-audit/**)"
-  - "Write(/tmp/claude/skill-audit/**)"
-  - "Edit(/tmp/claude/skill-audit/**)"
-  - "Read(/tmp/claude/playwright/**)"
-  - "Write(/tmp/claude/playwright/**)"
-  - "Edit(/tmp/claude/playwright/**)"
-  - "Read(/tmp/claude/self-qa/**)"
-  - "Write(/tmp/claude/self-qa/**)"
-  - "Edit(/tmp/claude/self-qa/**)"
-  - "Read(/tmp/claude/ticket-scope/**)"
-  - "Write(/tmp/claude/ticket-scope/**)"
-  - "Edit(/tmp/claude/ticket-scope/**)"
-  - "Read(/tmp/claude/slack/**)"
-  - "Write(/tmp/claude/slack/**)"
-  - "Edit(/tmp/claude/slack/**)"
-  - "Read(/tmp/claude/pr-monitor/**)"
-  - "Write(/tmp/claude/pr-monitor/**)"
-  - "Edit(/tmp/claude/pr-monitor/**)"
-  - "Read(/tmp/claude/gh/**)"
-  - "Write(/tmp/claude/gh/**)"
-  - "Edit(/tmp/claude/gh/**)"
+  - "Read(/tmp/Dev10x/git/**)"
+  - "Write(/tmp/Dev10x/git/**)"
+  - "Edit(/tmp/Dev10x/git/**)"
+  - "Read(/tmp/Dev10x/review/**)"
+  - "Write(/tmp/Dev10x/review/**)"
+  - "Edit(/tmp/Dev10x/review/**)"
+  - "Read(/tmp/Dev10x/skill-audit/**)"
+  - "Write(/tmp/Dev10x/skill-audit/**)"
+  - "Edit(/tmp/Dev10x/skill-audit/**)"
+  - "Read(/tmp/Dev10x/playwright/**)"
+  - "Write(/tmp/Dev10x/playwright/**)"
+  - "Edit(/tmp/Dev10x/playwright/**)"
+  - "Read(/tmp/Dev10x/self-qa/**)"
+  - "Write(/tmp/Dev10x/self-qa/**)"
+  - "Edit(/tmp/Dev10x/self-qa/**)"
+  - "Read(/tmp/Dev10x/ticket-scope/**)"
+  - "Write(/tmp/Dev10x/ticket-scope/**)"
+  - "Edit(/tmp/Dev10x/ticket-scope/**)"
+  - "Read(/tmp/Dev10x/slack/**)"
+  - "Write(/tmp/Dev10x/slack/**)"
+  - "Edit(/tmp/Dev10x/slack/**)"
+  - "Read(/tmp/Dev10x/pr-monitor/**)"
+  - "Write(/tmp/Dev10x/pr-monitor/**)"
+  - "Edit(/tmp/Dev10x/pr-monitor/**)"
+  - "Read(/tmp/Dev10x/gh/**)"
+  - "Write(/tmp/Dev10x/gh/**)"
+  - "Edit(/tmp/Dev10x/gh/**)"
 
   # --- gh CLI patterns (GH-98) ---
   - "Bash(gh pr view:*)"

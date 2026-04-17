@@ -234,11 +234,11 @@ class TestMktmp:
         self,
         mock_run: AsyncMock,
     ) -> None:
-        mock_run.return_value = _completed(stdout="/tmp/claude/git/commit-msg.abc123.txt")
+        mock_run.return_value = _completed(stdout="/tmp/Dev10x/git/commit-msg.abc123.txt")
 
         result = await cli_server.mktmp(namespace="git", prefix="commit-msg", ext=".txt")
 
-        assert result["path"] == "/tmp/claude/git/commit-msg.abc123.txt"
+        assert result["path"] == "/tmp/Dev10x/git/commit-msg.abc123.txt"
         mock_run.assert_called_once()
 
     @pytest.mark.asyncio
@@ -247,11 +247,11 @@ class TestMktmp:
         self,
         mock_run: AsyncMock,
     ) -> None:
-        mock_run.return_value = _completed(stdout="/tmp/claude/audit/session.abc123")
+        mock_run.return_value = _completed(stdout="/tmp/Dev10x/audit/session.abc123")
 
         result = await cli_server.mktmp(namespace="audit", prefix="session", directory=True)
 
-        assert result["path"] == "/tmp/claude/audit/session.abc123"
+        assert result["path"] == "/tmp/Dev10x/audit/session.abc123"
 
     @pytest.mark.asyncio
     @patch("dev10x.mcp.utilities.async_run_script", new_callable=AsyncMock)

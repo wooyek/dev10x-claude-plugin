@@ -161,9 +161,9 @@ class TestEnsureBasePermissionsWithWildcard:
 
 class TestEnsureBasePermissions:
     BASE_PERMISSIONS = [
-        "Bash(/tmp/claude/bin/mktmp.sh:*)",
+        "Bash(/tmp/Dev10x/bin/mktmp.sh:*)",
         "Bash(gh pr view:*)",
-        "Write(/tmp/claude/git/**)",
+        "Write(/tmp/Dev10x/git/**)",
     ]
 
     @pytest.fixture()
@@ -182,7 +182,7 @@ class TestEnsureBasePermissions:
                 {
                     "permissions": {
                         "allow": [
-                            "Bash(/tmp/claude/bin/mktmp.sh:*)",
+                            "Bash(/tmp/Dev10x/bin/mktmp.sh:*)",
                             "Bash(git log:*)",
                         ]
                     }
@@ -224,7 +224,7 @@ class TestEnsureBasePermissions:
         data = json.loads(partial_settings.read_text())
         allow = data["permissions"]["allow"]
         assert "Bash(gh pr view:*)" in allow
-        assert "Write(/tmp/claude/git/**)" in allow
+        assert "Write(/tmp/Dev10x/git/**)" in allow
         assert "Bash(git log:*)" in allow  # pre-existing preserved
 
     def test_no_changes_when_complete(self, full_settings: Path) -> None:

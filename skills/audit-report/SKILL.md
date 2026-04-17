@@ -9,9 +9,9 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:audit-report
 allowed-tools:
-  - Read(/tmp/claude/skill-audit/**)
-  - Write(/tmp/claude/skill-audit/**)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
+  - Read(/tmp/Dev10x/skill-audit/**)
+  - Write(/tmp/Dev10x/skill-audit/**)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
   - Skill(Dev10x:ticket-create)
   - Bash(ls ~/.claude/plugins/cache/:*)
 ---
@@ -51,7 +51,7 @@ produced by `Dev10x:skill-audit`. The file contains:
 ```
 
 If no argument is provided, check for the most recent file in
-`/tmp/claude/skill-audit/` matching `findings*.md`.
+`/tmp/Dev10x/skill-audit/` matching `findings*.md`.
 
 ## Workflow
 
@@ -108,7 +108,7 @@ Use the primary skill name (most findings) as the title anchor:
 ### Step 5: Write body to temp file
 
 ```bash
-/tmp/claude/bin/mktmp.sh skill-audit upstream-issue .md
+/tmp/Dev10x/bin/mktmp.sh skill-audit upstream-issue .md
 ```
 
 Write the assembled body to that file using the Write tool.

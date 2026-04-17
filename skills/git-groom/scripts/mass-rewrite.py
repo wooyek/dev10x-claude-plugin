@@ -40,7 +40,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-DEFAULT_TMPDIR = Path("/tmp/claude/git")
+DEFAULT_TMPDIR = Path("/tmp/Dev10x/git")
 
 
 def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess:

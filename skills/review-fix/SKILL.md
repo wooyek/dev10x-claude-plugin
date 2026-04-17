@@ -16,9 +16,9 @@ allowed-tools:
   - Bash(ruff check:*)
   - Bash(black --check:*)
   - Bash(uv run:*)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
-  - Read(/tmp/claude/review/**)
-  - Write(/tmp/claude/review/**)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
+  - Read(/tmp/Dev10x/review/**)
+  - Write(/tmp/Dev10x/review/**)
   - Bash(git commit:*)
 ---
 
@@ -31,7 +31,7 @@ Consume structured findings from `Dev10x:review` and create one
 ## Arguments
 
 - **findings file path** — path to the JSON findings file produced
-  by `Dev10x:review` (e.g., `/tmp/claude/review/findings-abc.json`)
+  by `Dev10x:review` (e.g., `/tmp/Dev10x/review/findings-abc.json`)
 
 ## When to Use
 

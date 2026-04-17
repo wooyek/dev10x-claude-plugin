@@ -111,7 +111,7 @@ If the script exits non-zero, tell the user and stop.
 
 ### Step 2: Check for poll mode
 
-Read the state file at `/tmp/claude/pr-monitor/state-{pr_number}.json`
+Read the state file at `/tmp/Dev10x/pr-monitor/state-{pr_number}.json`
 (if it exists). If the state file contains `phases_completed` that includes
 **both** `phase0` and `phase3`, offer **lightweight polling** instead:
 
@@ -221,7 +221,7 @@ first, then Phase 0, 1, 2, 2.5, and 3 in order.
 Before running any phases, check if work has already been done by
 reading the state file and comparing against current PR state.
 
-1. Read `/tmp/claude/pr-monitor/state-{pr_number}.json` (if exists)
+1. Read `/tmp/Dev10x/pr-monitor/state-{pr_number}.json` (if exists)
 2. Fetch current PR state:
    ```bash
    ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-monitor/scripts/ci-check-status.py \

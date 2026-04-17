@@ -25,7 +25,7 @@ PLUGIN_CONFIG = (
 
 NOISE_PATTERNS = [
     re.compile(r"\.[A-Za-z0-9]{8,}\.(txt|md|json)"),
-    re.compile(r"/tmp/claude/[^/]+/[^/]+\.[A-Za-z0-9]{6,}"),
+    re.compile(r"/tmp/Dev10x/[^/]+/[^/]+\.[A-Za-z0-9]{6,}"),
     re.compile(r"Bash\(if \["),
     re.compile(r"Bash\(then "),
     re.compile(r"Bash\(else "),
@@ -53,7 +53,7 @@ GENERALIZE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"(gh-pr-detect\.sh)\s+[^:)]+"), r"\1"),
     (re.compile(r"(generate-commit-list\.sh)\s+[^:)]+"), r"\1"),
     (re.compile(r"(extract-session\.sh)\s+[^:)]+"), r"\1"),
-    (re.compile(r"(/tmp/claude/[^/]+/)[^/]+\.[A-Za-z0-9]{6,}\.(txt|md|json)"), r"\1**"),
+    (re.compile(r"(/tmp/Dev10x/[^/]+/)[^/]+\.[A-Za-z0-9]{6,}\.(txt|md|json)"), r"\1**"),
     (re.compile(r"(\.[A-Za-z0-9]{8,})\.(txt|md|json)"), r"**"),
     (re.compile(r"(git reset --hard) origin/\S+"), r"\1"),
     (re.compile(r"(git reset --soft) [A-Fa-f0-9]{6,}"), r"\1"),
