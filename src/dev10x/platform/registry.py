@@ -1,0 +1,156 @@
+"""Platform registry core — catalog, config, and persisted user registrations."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+import yaml
+
+REGISTRY_FILE = Path.home() / ".claude" / "memory" / "Dev10x" / "platforms.yaml"
+
+
+@dataclass(frozen=True)
+class PlatformConfig:
+    """Describes where a Dev10x target platform keeps its config and plugins."""
+
+    name: str
+    display_name: str
+    config_dir: Path
+    plugins_dir: Path
+    settings_file: Path
+    playbook_override: str | None = None
+
+    def to_dict(self) -> dict:
+        data = asdict(self)
+        data["config_dir"] = str(self.config_dir)
+        data["plugins_dir"] = str(self.plugins_dir)
+        data["settings_file"] = str(self.settings_file)
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict) -> PlatformConfig:
+        return cls(
+            name=data["name"],
+            display_name=data["display_name"],
+            config_dir=Path(data["config_dir"]).expanduser(),
+            plugins_dir=Path(data["plugins_dir"]).expanduser(),
+            settings_file=Path(data["settings_file"]).expanduser(),
+            playbook_override=data.get("playbook_override"),
+        )
+
+
+def _home_relative(*parts: str) -> Path:
+    """Compose a path under the user home — resolved at call time, not import."""
+    return Path.home().joinpath(*parts)
+
+
+def known_platforms() -> dict[str, PlatformConfig]:
+    """Return the built-in catalog of supported platforms.
+
+    Paths use the platform's default install location. Users who override
+    locations can pass ``--config-dir`` to ``dev10x platform add`` to
+    record the custom path.
+    """
+    return {
+        "claude-code": PlatformConfig(
+            name="claude-code",
+            display_name="Claude Code",
+            config_dir=_home_relative(".claude"),
+            plugins_dir=_home_relative(".claude", "plugins", "cache"),
+            settings_file=_home_relative(".claude", "settings.json"),
+        ),
+        "copilot-cli": PlatformConfig(
+            name="copilot-cli",
+            display_name="GitHub Copilot CLI",
+            config_dir=_home_relative(".copilot"),
+            plugins_dir=_home_relative(".copilot", "plugins"),
+            settings_file=_home_relative(".copilot", "config.yaml"),
+        ),
+        "windsurf": PlatformConfig(
+            name="windsurf",
+            display_name="Windsurf",
+            config_dir=_home_relative(".windsurf"),
+            plugins_dir=_home_relative(".windsurf", "plugins"),
+            settings_file=_home_relative(".windsurf", "settings.json"),
+        ),
+        "continue": PlatformConfig(
+            name="continue",
+            display_name="Continue",
+            config_dir=_home_relative(".continue"),
+            plugins_dir=_home_relative(".continue", "extensions"),
+            settings_file=_home_relative(".continue", "config.json"),
+        ),
+        "cursor": PlatformConfig(
+            name="cursor",
+            display_name="Cursor",
+            config_dir=_home_relative(".cursor"),
+            plugins_dir=_home_relative(".cursor", "extensions"),
+            settings_file=_home_relative(".cursor", "settings.json"),
+        ),
+    }
+
+
+class Registry:
+    """Persisted list of platforms the current user has registered."""
+
+    def __init__(self, *, path: Path | None = None) -> None:
+        self.path = path or REGISTRY_FILE
+
+    def load(self) -> dict[str, PlatformConfig]:
+        if not self.path.is_file():
+            return {}
+        data = yaml.safe_load(self.path.read_text()) or {}
+        entries = data.get("platforms", [])
+        return {entry["name"]: PlatformConfig.from_dict(entry) for entry in entries}
+
+    def save(self, platforms: dict[str, PlatformConfig]) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        serialised = {"platforms": [platforms[name].to_dict() for name in sorted(platforms)]}
+        self.path.write_text(yaml.safe_dump(serialised, sort_keys=False))
+
+    def add(
+        self,
+        name: str,
+        *,
+        config_dir: Path | None = None,
+        playbook_override: str | None = None,
+    ) -> PlatformConfig:
+        catalog = known_platforms()
+        if name not in catalog:
+            raise ValueError(f"Unknown platform '{name}'. Known: {', '.join(sorted(catalog))}")
+        base = catalog[name]
+        if config_dir:
+            base = PlatformConfig(
+                name=base.name,
+                display_name=base.display_name,
+                config_dir=config_dir,
+                plugins_dir=config_dir / base.plugins_dir.relative_to(base.config_dir),
+                settings_file=config_dir / base.settings_file.relative_to(base.config_dir),
+                playbook_override=playbook_override or base.playbook_override,
+            )
+        elif playbook_override:
+            base = PlatformConfig(
+                name=base.name,
+                display_name=base.display_name,
+                config_dir=base.config_dir,
+                plugins_dir=base.plugins_dir,
+                settings_file=base.settings_file,
+                playbook_override=playbook_override,
+            )
+
+        registered = self.load()
+        registered[name] = base
+        self.save(registered)
+        return base
+
+    def remove(self, name: str) -> bool:
+        registered = self.load()
+        if name not in registered:
+            return False
+        del registered[name]
+        self.save(registered)
+        return True
+
+    def list(self) -> list[PlatformConfig]:
+        return [self.load()[name] for name in sorted(self.load())]
