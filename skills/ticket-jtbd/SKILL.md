@@ -109,9 +109,9 @@ If the user approved the story (non-empty return):
 Write the updated body to a temp file (include PR# to avoid clashes),
 then use `--body-file`:
 
-1. Use the Write tool to create `/tmp/claude/pr-body-{PR_NUMBER}.md`
+1. Use the Write tool to create `/tmp/Dev10x/pr-body-{PR_NUMBER}.md`
    with the Job Story prepended to the existing body
-2. Run: `gh pr edit {PR_NUMBER} --repo {REPO} --body-file /tmp/claude/pr-body-{PR_NUMBER}.md`
+2. Run: `gh pr edit {PR_NUMBER} --repo {REPO} --body-file /tmp/Dev10x/pr-body-{PR_NUMBER}.md`
 
 The story goes at the **top** of the description so it's the first
 thing visible in PR lists and Slack previews.
@@ -137,7 +137,7 @@ mcp__claude_ai_Linear__update_issue(
 **JIRA ticket target:**
 Delegate to the `Dev10x:jira` skill for JIRA updates.
 
-1. Use the Write tool to create `/tmp/claude/jira-payload-{TICKET_ID}.json`
+1. Use the Write tool to create `/tmp/Dev10x/jira-payload-{TICKET_ID}.json`
    with the JIRA REST API v3 ADF document format
 2. Invoke `Skill(skill="Dev10x:jira")` to apply the payload to the ticket
 

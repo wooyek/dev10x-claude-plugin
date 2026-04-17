@@ -14,7 +14,7 @@ class TestIsNoise:
         [
             "Bash(find /work/tt -name '*.py')",
             "Bash(find . -type f -name foo)",
-            "Read(/tmp/claude/session/abc.A1b2C3d4.txt)",
+            "Read(/tmp/Dev10x/session/abc.A1b2C3d4.txt)",
             "Bash(if [ -f foo ])",
             "Bash(then echo hello)",
             "Bash(else exit 1)",

@@ -27,7 +27,7 @@ class TestSessionTmpdir:
         )
 
         assert result.exit_code == 0
-        assert Path("/tmp/claude/test-session-abc").exists()
+        assert Path("/tmp/Dev10x/test-session-abc").exists()
 
     def test_exits_silently_without_session_id(self, runner: CliRunner) -> None:
         result = runner.invoke(
@@ -60,8 +60,8 @@ class TestSessionTmpdir:
         )
 
         assert result.exit_code == 0
-        assert Path("/tmp/claude/bin/mktmp.sh").exists()
-        assert Path("/tmp/claude/bin/mktmp.sh").stat().st_mode & 0o111
+        assert Path("/tmp/Dev10x/bin/mktmp.sh").exists()
+        assert Path("/tmp/Dev10x/bin/mktmp.sh").stat().st_mode & 0o111
 
 
 class TestSessionGuidance:

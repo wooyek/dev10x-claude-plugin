@@ -20,7 +20,7 @@ Subcommands:
 Usage:
     pr-notify.py prepare --pr 123 --repo owner/repo
     pr-notify.py send --pr 123 --repo owner/repo \\
-        --channel CHANNEL_ID --message-file /tmp/claude/pr-monitor/pr-notify-msg.txt \\
+        --channel CHANNEL_ID --message-file /tmp/Dev10x/pr-monitor/pr-notify-msg.txt \\
         --reviewer org/team \\
         [--skip-slack] [--skip-reviewers] [--skip-checklist]
     pr-notify.py status --pr 123 --repo owner/repo [--json]

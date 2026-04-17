@@ -75,21 +75,21 @@ class TestGitCommitRedirect:
         assert "Dev10x:git-commit" in result.message
 
     def test_allows_git_commit_f_with_skill_temp(self, validator: SkillRedirectValidator) -> None:
-        inp = _make_input(command="git commit -F /tmp/claude/git/commit-msg.W9DryMXsQ5Aw.txt")
+        inp = _make_input(command="git commit -F /tmp/Dev10x/git/commit-msg.W9DryMXsQ5Aw.txt")
         result = validator.validate(inp=inp)
         assert result is None
 
     def test_allows_git_commit_f_with_alternate_prefix(
         self, validator: SkillRedirectValidator
     ) -> None:
-        inp = _make_input(command="git commit -F /tmp/claude/git/msg.RnUr0daBNpSj.txt")
+        inp = _make_input(command="git commit -F /tmp/Dev10x/git/msg.RnUr0daBNpSj.txt")
         result = validator.validate(inp=inp)
         assert result is None
 
     def test_allows_git_commit_f_without_mktmp_suffix(
         self, validator: SkillRedirectValidator
     ) -> None:
-        inp = _make_input(command="git commit -F /tmp/claude/git/commit-259-v2.txt")
+        inp = _make_input(command="git commit -F /tmp/Dev10x/git/commit-259-v2.txt")
         result = validator.validate(inp=inp)
         assert result is None
 
@@ -104,14 +104,14 @@ class TestGitCommitRedirect:
     def test_blocks_git_commit_f_with_non_git_namespace(
         self, validator: SkillRedirectValidator
     ) -> None:
-        inp = _make_input(command="git commit -F /tmp/claude/commit/msg.knDXJdfzYnVI.txt")
+        inp = _make_input(command="git commit -F /tmp/Dev10x/commit/msg.knDXJdfzYnVI.txt")
         result = validator.validate(inp=inp)
         assert result is not None
         assert "mcp__plugin_Dev10x_cli__mktmp" in result.message
         assert "wrong temp file path" in result.message
 
     def test_healing_msg_suggests_git_namespace(self, validator: SkillRedirectValidator) -> None:
-        inp = _make_input(command="git commit -F /tmp/claude/commit/msg.abc123.txt")
+        inp = _make_input(command="git commit -F /tmp/Dev10x/commit/msg.abc123.txt")
         result = validator.validate(inp=inp)
         assert result is not None
         assert 'namespace="git"' in result.message
@@ -505,7 +505,7 @@ class TestLegitimateSkillCommands:
             ("git commit --fixup=abc1234", "git-fixup skill creates fixup commits"),
             ("git commit --amend", "git-groom may amend during rebase"),
             (
-                "git commit -F /tmp/claude/git/commit-msg.abc123.txt",
+                "git commit -F /tmp/Dev10x/git/commit-msg.abc123.txt",
                 "git-commit skill uses -F with mktmp path",
             ),
             (
@@ -604,7 +604,7 @@ class TestBlockedVsAllowed:
             ("git commit -m 'test'", True),
             ("git commit --fixup=abc", False),
             ("git commit --amend", False),
-            ("git commit -F /tmp/claude/git/msg.abc.txt", False),
+            ("git commit -F /tmp/Dev10x/git/msg.abc.txt", False),
             ("gh pr create --title test", True),
             ("gh issue view 42", True),
             ("gh issue create --title test", True),

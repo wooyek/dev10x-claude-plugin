@@ -21,8 +21,8 @@ allowed-tools:
   - Bash(black --check:*)
   - Bash(mypy:*)
   - Bash(uv run:*)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
-  - Write(/tmp/claude/review/**)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
+  - Write(/tmp/Dev10x/review/**)
   - AskUserQuestion
 ---
 
@@ -162,7 +162,7 @@ review_confidence_threshold: 70  # default
 Write findings to a temp file for handoff:
 
 ```bash
-/tmp/claude/bin/mktmp.sh review findings .json
+/tmp/Dev10x/bin/mktmp.sh review findings .json
 ```
 
 Write the findings array as JSON to the temp file path.

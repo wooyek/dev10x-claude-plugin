@@ -51,8 +51,8 @@ Files matching: `skills/**`
    available — do NOT flag them as missing from `allowed-tools`.
    Only **MCP tools** and **Bash script paths** require declaration.
 8b. **`allowed-tools` sync** — when a PR adds `mktmp.sh <ns> ...` calls,
-    verify BOTH entries: `Bash(/tmp/claude/bin/mktmp.sh:*)` AND
-    `Write(/tmp/claude/<ns>/**)`. Missing either causes WARNING.
+    verify BOTH entries: `Bash(/tmp/Dev10x/bin/mktmp.sh:*)` AND
+    `Write(/tmp/Dev10x/<ns>/**)`. Missing either causes WARNING.
 8c. **Plugin directory existence** — for every `${CLAUDE_PLUGIN_ROOT}/skills/<name>/`
     entry in `allowed-tools`, verify `skills/<name>/` exists using
     Glob(`skills/<name>/SKILL.md`).

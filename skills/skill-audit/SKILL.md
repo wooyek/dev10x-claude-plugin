@@ -15,12 +15,12 @@ allowed-tools:
   - AskUserQuestion
   - Read(~/.claude/**)
   - Read(~/.claude/skills/**)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
-  - Read(/tmp/claude/skill-audit/**)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
+  - Read(/tmp/Dev10x/skill-audit/**)
   - Write(~/.claude/**)
-  - Write(/tmp/claude/skill-audit/**)
+  - Write(/tmp/Dev10x/skill-audit/**)
   - Edit(~/.claude/**)
-  - Edit(/tmp/claude/skill-audit/**)
+  - Edit(/tmp/Dev10x/skill-audit/**)
   - Bash(${CLAUDE_PLUGIN_ROOT}/skills/skill-audit/scripts/:*)
   - mcp__plugin_Dev10x_cli__audit_extract_session
   - mcp__plugin_Dev10x_cli__audit_analyze_actions
@@ -285,7 +285,7 @@ results because the audit itself dominates the transcript.
 
 Create a unique output file:
 ```bash
-/tmp/claude/bin/mktmp.sh skill-audit audit-transcript .md
+/tmp/Dev10x/bin/mktmp.sh skill-audit audit-transcript .md
 ```
 Store the returned path, then run the extraction script:
 ```bash
@@ -311,11 +311,11 @@ Locate the skills directory: `~/.claude/skills/`
 Create a temp file for each analysis phase's output:
 
 ```bash
-/tmp/claude/bin/mktmp.sh skill-audit phase1-actions .md
-/tmp/claude/bin/mktmp.sh skill-audit phase2-coverage .md
-/tmp/claude/bin/mktmp.sh skill-audit phase3-compliance .md
-/tmp/claude/bin/mktmp.sh skill-audit phase4-permissions .md
-/tmp/claude/bin/mktmp.sh skill-audit phase5-lessons .md
+/tmp/Dev10x/bin/mktmp.sh skill-audit phase1-actions .md
+/tmp/Dev10x/bin/mktmp.sh skill-audit phase2-coverage .md
+/tmp/Dev10x/bin/mktmp.sh skill-audit phase3-compliance .md
+/tmp/Dev10x/bin/mktmp.sh skill-audit phase4-permissions .md
+/tmp/Dev10x/bin/mktmp.sh skill-audit phase5-lessons .md
 ```
 
 Store the returned paths. Phase 1 and Phase 4 scripts write
@@ -1049,7 +1049,7 @@ Write a findings summary to a temp file so the delegated
 skill can read it without needing the full transcript:
 
 ```bash
-/tmp/claude/bin/mktmp.sh skill-audit findings .md
+/tmp/Dev10x/bin/mktmp.sh skill-audit findings .md
 ```
 
 Write the upstream-relevant findings table and proposed fixes

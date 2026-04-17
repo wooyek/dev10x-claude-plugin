@@ -127,7 +127,7 @@ the primary invocation method. MCP calls avoid permission friction
 mcp__plugin_Dev10x_cli__mktmp(namespace="git", prefix="msg", ext=".txt")
 
 # ⚠️ FALLBACK — direct script (needs Bash allow-rule)
-/tmp/claude/bin/mktmp.sh git msg .txt
+/tmp/Dev10x/bin/mktmp.sh git msg .txt
 ```
 
 Use the direct script only when the MCP server is unavailable
@@ -146,7 +146,7 @@ tool-use protocol.
 mcp__plugin_Dev10x_cli__mktmp git commit-msg .txt
 
 # ✅ CORRECT — use the underlying CLI script in shell contexts
-/tmp/claude/bin/mktmp.sh git commit-msg .txt
+/tmp/Dev10x/bin/mktmp.sh git commit-msg .txt
 ```
 
 MCP tool names belong only in:

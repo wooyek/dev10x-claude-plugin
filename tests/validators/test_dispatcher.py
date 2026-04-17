@@ -80,13 +80,13 @@ class TestDispatcherBlocking:
     def test_allows_commit_with_skill_temp_f_flag(self) -> None:
         result = _run_hook(
             tool_name="Bash",
-            command="git commit -F /tmp/claude/git/commit-msg.W9DryMXsQ5Aw.txt",
+            command="git commit -F /tmp/Dev10x/git/commit-msg.W9DryMXsQ5Aw.txt",
         )
         assert result.returncode == 0
 
     def test_allows_commit_with_any_file_under_git_namespace(self) -> None:
         result = _run_hook(
             tool_name="Bash",
-            command="git commit -F /tmp/claude/git/msg.txt",
+            command="git commit -F /tmp/Dev10x/git/msg.txt",
         )
         assert result.returncode == 0

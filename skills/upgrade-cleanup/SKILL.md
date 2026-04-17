@@ -161,7 +161,7 @@ mcp__plugin_Dev10x_cli__update_paths(generalize=true)
 - `gh-pr-detect.sh 42` → `gh-pr-detect.sh *` (PR numbers)
 - `gh-issue-get.sh 15` → `gh-issue-get.sh *` (issue numbers)
 - `generate-commit-list.sh 42` → `generate-commit-list.sh *` (PR args)
-- `/tmp/claude/git/msg.AbCdEf.txt` → `/tmp/claude/git/**` (temp hashes)
+- `/tmp/Dev10x/git/msg.AbCdEf.txt` → `/tmp/Dev10x/git/**` (temp hashes)
 
 ### 5. Ensure script coverage
 

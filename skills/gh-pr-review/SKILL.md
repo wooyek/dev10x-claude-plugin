@@ -11,8 +11,8 @@ user-invocable: true
 invocation-name: Dev10x:gh-pr-review
 allowed-tools:
   - Bash(gh:*)
-  - Bash(/tmp/claude/bin/mktmp.sh:*)
-  - Write(/tmp/claude/git/**)
+  - Bash(/tmp/Dev10x/bin/mktmp.sh:*)
+  - Write(/tmp/Dev10x/git/**)
 ---
 
 # GitHub PR Review
@@ -174,7 +174,7 @@ Use the Write tool to create the review JSON, then post via `gh api --input`:
 
 1. Create a unique temp file:
 ```bash
-/tmp/claude/bin/mktmp.sh git pr-review .json
+/tmp/Dev10x/bin/mktmp.sh git pr-review .json
 ```
 
 2. Write the review payload to the unique path:

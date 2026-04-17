@@ -71,7 +71,7 @@ class TestSkillRedirectCorrect:
 
     def test_returns_none_for_allowed_commit(self, validator) -> None:
         inp = BashHookInputFaker.build(
-            command="git commit -F /tmp/claude/git/commit-msg.abc123.txt",
+            command="git commit -F /tmp/Dev10x/git/commit-msg.abc123.txt",
         )
         result = validator.correct(inp=inp)
         assert result is None

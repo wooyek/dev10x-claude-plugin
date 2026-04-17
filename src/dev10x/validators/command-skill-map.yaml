@@ -54,7 +54,7 @@ rules:
     except:
       - "--fixup"
       - "--amend"
-      - "-F /tmp/claude/git/"
+      - "-F /tmp/Dev10x/git/"
     hook_block: true
     compensations:
       - type: use-skill

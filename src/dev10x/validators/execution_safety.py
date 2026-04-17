@@ -36,7 +36,7 @@ APPROVED_ABS_PREFIXES = (
 SHELL_WRITE_MSG = (
     "Use the Write/Edit tool instead of cat/echo/printf redirects.\n"
     "For multi-line commit messages: create a unique file with"
-    " /tmp/claude/bin/mktmp.sh git commit-msg .txt,"
+    " /tmp/Dev10x/bin/mktmp.sh git commit-msg .txt,"
     " Write content to the returned path, then git commit -F <path>"
 )
 
@@ -45,7 +45,7 @@ PYTHON3_INLINE_MSG = """\
 
 Use the Write tool to create a self-contained uv script instead:
 
-  Step 1 \u2014 Write the script to /tmp/claude/<name>.py via the Write tool:
+  Step 1 \u2014 Write the script to /tmp/Dev10x/<name>.py via the Write tool:
 
     #!/usr/bin/env -S uv run --script
     # /// script
@@ -57,12 +57,12 @@ Use the Write tool to create a self-contained uv script instead:
 
   Step 2 \u2014 Run it:
 
-    uv run --script /tmp/claude/<name>.py
+    uv run --script /tmp/Dev10x/<name>.py
 
 Benefits:
   - Reproducible: deps declared inline (PEP 723), no pip install needed
   - Auditable: Write tool diffs show exactly what runs
-  - Permitted: uv run:* is pre-approved; /tmp/claude/ is writable
+  - Permitted: uv run:* is pre-approved; /tmp/Dev10x/ is writable
 
 If the script needs no third-party deps, the # /// block can be omitted."""
 
