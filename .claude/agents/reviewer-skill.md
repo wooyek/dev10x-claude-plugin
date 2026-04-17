@@ -97,6 +97,16 @@ Files matching: `skills/**`
       exceed 400 lines if they contain multiple complete sub-workflows
     - Each exemption must have a one-line justification
 
+14b. **Instruction density budget** (GH-882) — run
+    `dev10x skill count-instructions skills/<name>/SKILL.md`. Flag:
+    - ≥ 100 actionable instructions: WARNING — review for compaction
+    - ≥ 150 actionable instructions: CRITICAL — split or extract;
+      frontier LLMs silently drop steps past this budget (QRSPI)
+    Counts ordered lists, bulleted imperatives, enforcement markers
+    (`REQUIRED:`, `MUST`, `DO NOT`), and bare tool-call specs.
+    Exemptions follow the same rule as 14: orchestration hubs may
+    exceed the budget with a one-line justification.
+
 ## Output Format
 
 Apply to ALL `skills/**` files in the diff, including same-PR additions.
