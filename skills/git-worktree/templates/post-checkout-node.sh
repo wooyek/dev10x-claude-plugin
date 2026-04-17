@@ -51,6 +51,7 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
 
     # ── FILES TO COPY (add new entries here) ────────────────────────
     copy_clean ".env"
+    copy_clean ".env.supabase"
     copy_clean ".claude/" worktrees
 
     if [ ! -d .claude ]; then
