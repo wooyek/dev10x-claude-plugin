@@ -43,6 +43,7 @@ class LazyGroup(click.Group):
         "hook": "dev10x.commands.hook.hook",
         "init": "dev10x.commands.init.init",
         "permission": "dev10x.commands.permission.permission",
+        "platform": "dev10x.commands.platform.platform",
         "validate": "dev10x.commands.validate.validate",
         "skill": "dev10x.commands.skill.skill",
     },
