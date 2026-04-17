@@ -1157,8 +1157,36 @@ multiple `Fixes:` lines.
 **Strategy selection:** When the user explicitly requests
 bundling (e.g., "one PR", "atomic commits", "bundle these"),
 use Strategy B. When the user provides multiple independent
-issues without bundling intent, use Strategy A (fanout).
-When ambiguous, ask via `AskUserQuestion`.
+issues without bundling intent, apply the **Same-Milestone
+Heuristic (GH-948)** below; otherwise use Strategy A (fanout).
+When still ambiguous, ask via `AskUserQuestion`.
+
+**Same-Milestone Heuristic (GH-948):** Prefer Strategy B
+(bundled) when ALL of these conditions hold:
+
+1. **Same milestone** — every classified ticket belongs to
+   the same GitHub milestone (or Linear project). Detect via
+   the `milestone` field from `mcp__plugin_Dev10x_cli__issue_get`
+   or the Linear project field. Skip this check if any ticket
+   lacks a milestone field.
+2. **Solo-maintainer mode active** — `active_modes` in
+   `.claude/Dev10x/session.yaml` contains `solo-maintainer`.
+   Team reviewers imply separate review cycles, so fanout
+   remains correct for team modes.
+3. **Small/medium effort** — no ticket is labeled `effort:L`,
+   `effort:XL`, or `size:L`+. Large epics warrant isolation
+   even within a milestone.
+4. **Thematically related** — tickets share at least one
+   non-milestone label (e.g., all `audit:patterns`, all
+   `refactor:cleanup`).
+
+When all four conditions hold, auto-select Strategy B at
+adaptive friction level; recommend Strategy B at guided level.
+When any condition fails, fall back to Strategy A (fanout).
+
+The heuristic only changes the **recommended** strategy — the
+strategy gate still presents both options so the user can
+override.
 
 **Anti-pattern (PROHIBITED for both strategies):**
 ```
