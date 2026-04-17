@@ -56,6 +56,46 @@
           "signal": "Output recommends Dev10x:git as the replacement"
         }
       ]
+    },
+    {
+      "name": "follow-up-gate-after-rejection",
+      "description": "After a rejected command, skill offers follow-up via AskUserQuestion (not plain text)",
+      "setup": "Agent ran 'Monitor' for CI polling, user rejected it and invoked /Dev10x:skill-reinforcement",
+      "checks": [
+        {
+          "type": "tool_called",
+          "tool": "AskUserQuestion",
+          "assertion": "follow_up_uses_tool",
+          "signal": "AskUserQuestion is called with retry options after the reinforcement message"
+        },
+        {
+          "type": "behavioral",
+          "assertion": "offers_invoke_recommended_skill",
+          "signal": "Options include invoking the recommended skill (e.g., Dev10x:gh-pr-monitor) as the Recommended choice"
+        },
+        {
+          "type": "behavioral",
+          "assertion": "offers_cancel_option",
+          "signal": "Options include cancel/discard to avoid resuming the rejected workflow"
+        },
+        {
+          "type": "behavioral",
+          "assertion": "no_plain_text_followup",
+          "signal": "Output does not use plain-text questions like 'Want me to invoke X?' for the follow-up prompt"
+        }
+      ]
+    },
+    {
+      "name": "no-follow-up-when-informational",
+      "description": "When invoked informationally (not after a rejection), no follow-up gate is fired",
+      "setup": "User invoked '/Dev10x:skill-reinforcement kubectl' to learn the recommended skill, no prior rejection",
+      "checks": [
+        {
+          "type": "behavioral",
+          "assertion": "skips_follow_up_gate",
+          "signal": "AskUserQuestion is not called — the reinforcement message is informational only"
+        }
+      ]
     }
   ],
   "trigger_evals": {

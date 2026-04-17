@@ -14,6 +14,7 @@ description: >
 user-invocable: true
 invocation-name: Dev10x:skill-reinforcement
 allowed-tools:
+  - AskUserQuestion
   - Read(~/.claude/SKILLS.md)
   - Read(${CLAUDE_PLUGIN_ROOT}/skills/skill-reinforcement/references/*)
   - Read(${CLAUDE_PLUGIN_ROOT}/src/dev10x/validators/command-skill-map.yaml)
@@ -127,6 +128,35 @@ End with a brief reminder:
 > Always check if a skill or MCP tool exists before reaching for
 > CLI commands. Skills provide consistent behavior, proper tool
 > declarations, and avoid permission friction.
+
+### Step 6: Offer follow-up action (REQUIRED when command was rejected)
+
+If the triggering command was **rejected** by the user (denied
+the Bash tool call), the reinforcement must actively offer to
+retry the intended action via the recommended skill. Plain text
+offers ("Want me to invoke X?") do NOT block execution and break
+the structured decision flow used across Dev10x skills.
+
+**REQUIRED: Call `AskUserQuestion`** (do NOT use plain text).
+
+1. `AskUserQuestion(questions=[{question: "Invoke <recommended-skill> now to complete the intended action?", header: "Retry", options: [{label: "Yes, invoke <skill> now (Recommended)", description: "Re-run the intended action via the correct skill"}, {label: "I'll invoke it manually later", description: "Skip for now — user will handle"}, {label: "Cancel — discard the attempted operation", description: "Do not retry"}], multiSelect: false}])`
+
+Substitute `<recommended-skill>` with the skill identified in
+Step 2 (e.g., `Dev10x:gh-pr-monitor`, `Dev10x:k8s`,
+`Dev10x:git`).
+
+**Skip this gate when:**
+
+- The user invoked the skill informationally (not after a
+  rejection) and no follow-up action is implied
+- No recommended skill was identified (Step 3 fallback with
+  no clear match) — ask the user what they expected instead
+- The triggering command was approved, not rejected — the
+  intended action has already run
+
+On approval, invoke the recommended skill immediately. On
+cancellation, acknowledge and stop — do NOT resume the
+rejected workflow.
 
 ## Examples
 
