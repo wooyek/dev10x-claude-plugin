@@ -75,6 +75,7 @@ if [ "$1" = "0000000000000000000000000000000000000000" ]; then
 
     # ── FILES TO COPY (add new entries here) ────────────────────────
     copy_clean ".env"
+    copy_clean ".env.supabase"
     copy_clean "development.secrets.env"
     copy_clean ".claude/" worktrees          # exclude worktrees subdir
     copy_clean ".idea/"
