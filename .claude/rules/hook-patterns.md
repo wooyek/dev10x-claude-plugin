@@ -62,6 +62,80 @@ Examples:
 - Different fallback values in readers (one uses `""`, other uses
   `"unknown"`)
 
+## Direct-Shebang + Orchestrator Pattern (GH-959)
+
+**Default every new hook entry to a direct-shebang script wrapped
+with `audit-wrap`.** Consolidate multi-entry events (SessionStart,
+Stop) into a single orchestrator that runs features in-process.
+
+### Anti-pattern: `uv run --project` entries
+
+```json
+"command": "uv run --project $CLAUDE_PLUGIN_ROOT dev10x hook session tmpdir"
+```
+
+Every invocation pays `uv` project-resolution, env-build, and the
+full CLI import cost — even for trivial hooks. SessionStart fired
+5 such entries on every session, multiplying the penalty.
+
+### Correct pattern
+
+```json
+"command": "$CLAUDE_PLUGIN_ROOT/hooks/scripts/audit-wrap session-start $CLAUDE_PLUGIN_ROOT/hooks/scripts/session-start.py"
+```
+
+- `audit-wrap` records total_ms (including startup)
+- The Python script uses a PEP 723 inline-metadata shebang
+  (`#!/usr/bin/env -S uv run --script`)
+- The orchestrator imports feature functions from
+  `dev10x.hooks.*` and runs them in-process
+
+### Consolidation checklist
+
+When multiple feature functions share one event, create ONE
+orchestrator script that:
+
+1. Reads stdin **once**, parses the JSON into `data`
+2. Passes `data` to each feature function (features accept an
+   optional `data: dict | None` parameter; backward-compat stdin
+   read when `None`)
+3. Wraps each feature with `@audit_hook(name=..., event=...)`
+   so body-phase timing lands in the JSONL log
+4. Isolates failures — a raising feature must not skip the rest
+   (catch `SystemExit` and `Exception` per feature)
+5. For `additionalContext` producers (session_reload,
+   session_guidance), extract a `build_*_context()` helper that
+   returns the string; orchestrator merges all strings into one
+   envelope
+6. Preserves stdout when it matters (session_goodbye prints to
+   the user); use `contextlib.redirect_stdout` in the orchestrator
+   only for features that emit structured JSON
+
+### Adding a new SessionStart/Stop feature
+
+1. Write the logic in `src/dev10x/hooks/session.py` with an
+   optional `data: dict | None` parameter
+2. Add a call to the feature inside
+   `hooks/scripts/session-start.py` (or `session-stop.py`),
+   wrapped with `@audit_hook`
+3. Add a test in `tests/hooks/test_orchestrators.py` verifying
+   the feature runs and the orchestrator exits cleanly
+
+Do NOT create a new hook entry in `hooks/hooks.json` for a
+SessionStart/Stop feature — always extend the orchestrator.
+
+### Audit wrapper application
+
+Every entry in `hooks/hooks.json` is prefixed with `audit-wrap`:
+
+```
+$CLAUDE_PLUGIN_ROOT/hooks/scripts/audit-wrap <name> <command-path>
+```
+
+This captures total wall-clock timing (including `uv run`
+startup) and injects `DEV10X_HOOK_SPAN_ID` so body-phase records
+from `@audit_hook` correlate with wrap-phase records.
+
 ## Profile Tiers (GH-413)
 
 Bash command validators declare a profile tier so users can dial
