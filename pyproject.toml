@@ -2,12 +2,32 @@
 name = "Dev10x"
 version = "0.64.0.dev0"
 description = "Claude Code plugin providing reusable skills, hooks, and commands"
+readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.12"
+authors = [{ name = "Janusz Skonieczny" }]
+keywords = ["claude", "claude-code", "plugin", "ai", "developer-tools"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Build Tools",
+]
 dependencies = [
     "click>=8.0",
     "msgpack>=1.0",
     "pyyaml>=6.0",
 ]
+
+[project.urls]
+Homepage = "https://dev10x.guru"
+Repository = "https://github.com/Dev10x-Guru/dev10x-claude"
+Issues = "https://github.com/Dev10x-Guru/dev10x-claude/issues"
+Changelog = "https://github.com/Dev10x-Guru/dev10x-claude/blob/main/CHANGELOG.md"
 
 [project.scripts]
 dev10x = "dev10x.cli:cli"
