@@ -3,6 +3,78 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.64.0 — Platform Reach & Merge Safety
+
+Released 2026-04-18
+
+### Features
+
+- **Support multi-platform installs via unified CLI** — register
+  any AI assistant (Claude Code, Copilot, Windsurf, Continue,
+  Cursor, or custom targets) with `dev10x platform add/list/remove`
+  so Dev10x can extend beyond its original two-host scope without
+  per-user path editing ([GH-908])
+- **Automate PyPI publishing on release tags** — `v*` tag pushes
+  publish the `dev10x` package via OIDC trusted publishing, so
+  users can `pip install Dev10x` for CI scripts and hook
+  integration without manual upload steps ([GH-953])
+- **Guide new users through Dev10x onboarding** — `dev10x init`
+  seeds starter config and prints a Next 5 Commands quick-start
+  card, replacing the zero-direction `/help` landing with a
+  frictionless guided setup ([GH-906])
+- **Prevent silent merges past unresolved CI checks** —
+  `Dev10x:gh-pr-merge` now blocks on `PENDING`, `IN_PROGRESS`, or
+  any `bucket:fail` state and requires an explicit reason for
+  override, closing the gap that shipped a bundle while e2e was
+  still running ([GH-955])
+- **Enforce instruction budget for large skills** — new
+  `dev10x skill count-instructions` command measures actionable
+  instructions and warns when skills exceed the 150-instruction
+  reliability threshold from QRSPI research ([GH-882])
+- **Offer structured retry after rejected commands** — when a
+  user rejects a CLI command, `Dev10x:skill-reinforcement` now
+  fires `AskUserQuestion` with retry/manual/cancel options
+  instead of a plain-text follow-up that could silently auto-
+  advance ([GH-952])
+- **Prefer bundled PR for same-milestone multi-issue work** —
+  `Dev10x:work-on` auto-selects a bundled PR strategy when all
+  tickets share a milestone under solo-maintainer mode, cutting
+  N branch switches, CI cycles, and merges down to one
+  ([GH-948])
+- **Enable MCP glob enumeration in upgrade-cleanup** — new
+  `dev10x permission enumerate-mcp` subcommand replaces
+  `mcp__plugin_Dev10x_*` wildcards with enumerated tool names,
+  eliminating the manual approval prompts Claude Code fires when
+  globs silently match nothing ([GH-947])
+- **Enable Supabase env bootstrap in worktree hooks** — post-
+  checkout hooks now copy `.env.supabase` into new worktrees so
+  local Supabase connectivity works without manual file copying
+  ([GH-946])
+
+### Refactors
+
+- **Isolate Dev10x scratch files under /tmp/Dev10x/** — plugin
+  scratch files, session state, and the mktmp binary moved from
+  the shared `/tmp/claude/` namespace to `/tmp/Dev10x/`, letting
+  users scope allow rules to plugin-only paths ([GH-949])
+
+### Chores
+
+- **Keep scheduled_tasks.lock out of version control** — the
+  session-local scheduler lock file is now gitignored so it
+  cannot land alongside unrelated skill changes ([GH-955])
+
+[GH-882]: https://github.com/Dev10x-Guru/dev10x-claude/issues/882
+[GH-906]: https://github.com/Dev10x-Guru/dev10x-claude/issues/906
+[GH-908]: https://github.com/Dev10x-Guru/dev10x-claude/issues/908
+[GH-946]: https://github.com/Dev10x-Guru/dev10x-claude/issues/946
+[GH-947]: https://github.com/Dev10x-Guru/dev10x-claude/issues/947
+[GH-948]: https://github.com/Dev10x-Guru/dev10x-claude/issues/948
+[GH-949]: https://github.com/Dev10x-Guru/dev10x-claude/issues/949
+[GH-952]: https://github.com/Dev10x-Guru/dev10x-claude/issues/952
+[GH-953]: https://github.com/Dev10x-Guru/dev10x-claude/issues/953
+[GH-955]: https://github.com/Dev10x-Guru/dev10x-claude/issues/955
+
 ## 0.63.0 — Solo Shipping & Playbook Resilience
 
 Released 2026-04-15
