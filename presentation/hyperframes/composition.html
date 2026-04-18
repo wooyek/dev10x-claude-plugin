@@ -1,0 +1,296 @@
+<!--
+  Dev10x — 2-minute product walkthrough
+  HyperFrames composition. Render target: 1920x1080, 24 fps, ~170s.
+
+  Track layout:
+    0  background music
+    1  voice-over / avatar audio (rides with avatar clips)
+    2  avatar video (PiP or mid-shot)
+    3  screen capture (terminal / diagrams)
+    4  overlay graphics (text cards, callouts, lottie)
+    5  SFX
+
+  Timings are in seconds from composition start.
+  See script.md for VO and asset cues.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Dev10x walkthrough</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="stage"
+     data-composition-id="dev10x-walkthrough-v1"
+     data-start="0"
+     data-duration="170"
+     data-width="1920"
+     data-height="1080"
+     data-fps="24"
+     data-background="#0b0f14">
+
+  <!-- ====================================================== -->
+  <!-- Track 0 — background music                              -->
+  <!-- ====================================================== -->
+  <audio id="bg-music"
+         data-start="0" data-duration="170"
+         data-track-index="0" data-volume="0.18"
+         src="assets/bg-music.wav"></audio>
+
+  <!-- ====================================================== -->
+  <!-- Scene 1 — Cold open (0–10)                              -->
+  <!-- ====================================================== -->
+  <video id="avatar-intro"
+         data-start="0" data-duration="10"
+         data-track-index="2"
+         data-x="560" data-y="140" data-width="800" data-height="800"
+         src="assets/avatar-intro.mp4" muted playsinline></video>
+
+  <div id="hook-command"
+       class="clip text-hero"
+       data-start="2" data-duration="8"
+       data-track-index="4"
+       data-animation="fade-in-chars"
+       data-x="0" data-y="880" data-width="1920" data-height="120">
+    /Dev10x:work-on  TEAM-133  sentry://...
+  </div>
+
+  <audio id="sfx-whoosh-1"
+         data-start="9" data-duration="0.5"
+         data-track-index="5" data-volume="0.8"
+         src="assets/sfx-whoosh.wav"></audio>
+
+  <!-- ====================================================== -->
+  <!-- Scene 2 — work-on orchestrator (10–35)                  -->
+  <!-- ====================================================== -->
+  <video id="screen-work-on"
+         data-start="10" data-duration="25"
+         data-track-index="3"
+         data-x="420" data-y="120" data-width="1080" data-height="720"
+         src="assets/screen-work-on.mp4" muted playsinline></video>
+
+  <video id="avatar-talk-1"
+         data-start="10" data-duration="25"
+         data-track-index="2"
+         data-x="60" data-y="700" data-width="320" data-height="320"
+         data-border-radius="160"
+         src="assets/avatar-talking.mp4" muted playsinline></video>
+
+  <div class="clip text-card" id="card-classify"
+       data-start="12" data-duration="3" data-track-index="4"
+       data-animation="slide-up"
+       data-x="1520" data-y="200" data-width="360" data-height="140">
+    <div class="card-title">Phase 1 · Classify</div>
+    <div class="tag">linear</div><div class="tag">pr</div>
+    <div class="tag">sentry</div><div class="tag">note</div>
+  </div>
+
+  <div class="clip text-card" id="card-gather"
+       data-start="15" data-duration="3" data-track-index="4"
+       data-animation="slide-up"
+       data-x="1520" data-y="350" data-width="360" data-height="140">
+    <div class="card-title">Phase 2 · Gather (parallel)</div>
+    <div class="fanout-graphic"></div>
+  </div>
+
+  <div class="clip text-card" id="card-plan"
+       data-start="18" data-duration="3" data-track-index="4"
+       data-animation="slide-up"
+       data-x="1520" data-y="500" data-width="360" data-height="140">
+    <div class="card-title">Phase 3 · Plan</div>
+    <div class="hint">14 tasks — Approve / Edit</div>
+  </div>
+
+  <div class="clip text-card" id="card-execute"
+       data-start="21" data-duration="3" data-track-index="4"
+       data-animation="slide-up"
+       data-x="1520" data-y="650" data-width="360" data-height="140">
+    <div class="card-title">Phase 4 · Execute</div>
+    <div class="hint">✓ ✓ ✓ ✓ ...</div>
+  </div>
+
+  <div class="clip pill-mode"
+       data-start="28" data-duration="7" data-track-index="4"
+       data-animation="fade-in"
+       data-x="1440" data-y="980" data-width="460" data-height="60">
+    friction: adaptive  ·  mode: solo-maintainer
+  </div>
+
+  <!-- ====================================================== -->
+  <!-- Scene 3 — Review + fixups (35–55)                        -->
+  <!-- ====================================================== -->
+  <video id="screen-review"
+         data-start="35" data-duration="20"
+         data-track-index="3"
+         data-x="60" data-y="140" data-width="1200" data-height="800"
+         src="assets/screen-review.mp4" muted playsinline></video>
+
+  <video id="avatar-talk-1b"
+         data-start="35" data-duration="20"
+         data-track-index="2"
+         data-x="1380" data-y="400" data-width="480" data-height="480"
+         data-border-radius="240"
+         src="assets/avatar-talking.mp4" muted playsinline></video>
+
+  <div class="clip lottie" id="fixup-lottie-1"
+       data-start="44" data-duration="1.5" data-track-index="4"
+       data-lottie-src="assets/lottie-checkmark.json"
+       data-x="1380" data-y="260" data-width="160" data-height="160"></div>
+
+  <div class="clip lottie" id="fixup-lottie-2"
+       data-start="47" data-duration="1.5" data-track-index="4"
+       data-lottie-src="assets/lottie-checkmark.json"
+       data-x="1540" data-y="260" data-width="160" data-height="160"></div>
+
+  <div class="clip lottie" id="fixup-lottie-3"
+       data-start="50" data-duration="1.5" data-track-index="4"
+       data-lottie-src="assets/lottie-checkmark.json"
+       data-x="1700" data-y="260" data-width="160" data-height="160"></div>
+
+  <!-- ====================================================== -->
+  <!-- Scene 4 — gh-pr-respond auto-chain (55–85)              -->
+  <!-- ====================================================== -->
+  <video id="screen-respond"
+         data-start="55" data-duration="30"
+         data-track-index="3"
+         data-x="60" data-y="140" data-width="1200" data-height="720"
+         src="assets/screen-respond.mp4" muted playsinline></video>
+
+  <video id="avatar-talk-2"
+         data-start="55" data-duration="30"
+         data-track-index="2"
+         data-x="1380" data-y="140" data-width="480" data-height="480"
+         data-border-radius="240"
+         src="assets/avatar-talking-2.mp4" muted playsinline></video>
+
+  <div class="clip pipeline-diagram"
+       data-start="58" data-duration="24" data-track-index="4"
+       data-animation="stage-sweep"
+       data-x="1340" data-y="660" data-width="560" data-height="360">
+    <div class="node" data-stage="0">fixup</div>
+    <div class="node" data-stage="1">push</div>
+    <div class="node" data-stage="2">groom</div>
+    <div class="node" data-stage="3">push -f</div>
+    <div class="node" data-stage="4">ready</div>
+    <div class="node pulse" data-stage="5">monitor</div>
+    <div class="node" data-stage="6">merge</div>
+  </div>
+
+  <div class="clip callout"
+       data-start="75" data-duration="10" data-track-index="4"
+       data-animation="sticky-note"
+       data-x="60" data-y="900" data-width="1180" data-height="120">
+    force push invalidates CI — re-monitor before declaring green
+  </div>
+
+  <audio id="sfx-chime-1" data-start="62" data-duration="0.3" data-track-index="5" src="assets/sfx-chime.wav"></audio>
+  <audio id="sfx-chime-2" data-start="65" data-duration="0.3" data-track-index="5" src="assets/sfx-chime.wav"></audio>
+  <audio id="sfx-chime-3" data-start="68" data-duration="0.3" data-track-index="5" src="assets/sfx-chime.wav"></audio>
+  <audio id="sfx-chime-4" data-start="71" data-duration="0.3" data-track-index="5" src="assets/sfx-chime.wav"></audio>
+  <audio id="sfx-chime-5" data-start="78" data-duration="0.3" data-track-index="5" src="assets/sfx-chime.wav"></audio>
+  <audio id="sfx-chime-6" data-start="82" data-duration="0.3" data-track-index="5" src="assets/sfx-chime.wav"></audio>
+
+  <!-- ====================================================== -->
+  <!-- Scene 5 — gh-pr-monitor background (85–110)              -->
+  <!-- ====================================================== -->
+  <video id="screen-monitor"
+         data-start="85" data-duration="25"
+         data-track-index="3"
+         data-x="60" data-y="140" data-width="1400" data-height="800"
+         src="assets/screen-monitor.mp4" muted playsinline></video>
+
+  <video id="avatar-talk-2b"
+         data-start="85" data-duration="25"
+         data-track-index="2"
+         data-x="1520" data-y="400" data-width="340" data-height="340"
+         data-border-radius="170"
+         src="assets/avatar-talking-2.mp4" muted playsinline></video>
+
+  <div class="clip status-timeline"
+       data-start="88" data-duration="20" data-track-index="4"
+       data-x="60" data-y="960" data-width="1800" data-height="80">
+    <span class="tick done">CI ✓</span>
+    <span class="tick done">claude-review: 2 → fixups pushed ✓</span>
+    <span class="tick done">hygiene-review ✓</span>
+    <span class="tick ready">ready to merge</span>
+  </div>
+
+  <!-- ====================================================== -->
+  <!-- Scene 6 — Beautiful git log (110–135)                   -->
+  <!-- ====================================================== -->
+  <video id="git-log-scroll"
+         data-start="110" data-duration="25"
+         data-track-index="3"
+         data-x="240" data-y="60" data-width="1440" data-height="900"
+         src="assets/git-log-scroll.mp4" muted playsinline></video>
+
+  <audio id="sfx-keystroke-loop"
+         data-start="110" data-duration="25"
+         data-track-index="5" data-volume="0.35"
+         data-loop="true"
+         src="assets/sfx-keystroke.wav"></audio>
+
+  <div class="clip callout-pill"
+       data-start="128" data-duration="7" data-track-index="4"
+       data-animation="fade-in"
+       data-x="480" data-y="1000" data-width="960" data-height="60">
+    gitmoji + ticket + JTBD outcome — enforced by hooks
+  </div>
+
+  <!-- ====================================================== -->
+  <!-- Scene 7 — Hook profile tiers (135–155)                  -->
+  <!-- ====================================================== -->
+  <video id="screen-hooks"
+         data-start="135" data-duration="20"
+         data-track-index="3"
+         data-x="60" data-y="140" data-width="1800" data-height="720"
+         src="assets/screen-hooks.mp4" muted playsinline></video>
+
+  <div class="clip terminal-line"
+       data-start="150" data-duration="5" data-track-index="4"
+       data-animation="type-in"
+       data-x="240" data-y="920" data-width="1440" data-height="80">
+    $ export DEV10X_HOOK_PROFILE=strict
+  </div>
+
+  <!-- ====================================================== -->
+  <!-- Scene 8 — Close (155–170)                               -->
+  <!-- ====================================================== -->
+  <video id="avatar-outro"
+         data-start="155" data-duration="15"
+         data-track-index="2"
+         data-x="560" data-y="100" data-width="800" data-height="800"
+         src="assets/avatar-outro.mp4" muted playsinline></video>
+
+  <div class="clip stats-block"
+       data-start="157" data-duration="10" data-track-index="4"
+       data-animation="count-up"
+       data-x="560" data-y="720" data-width="800" data-height="220">
+    <div class="stat"><span data-count-to="70">0</span> skills</div>
+    <div class="stat"><span data-count-to="21">0</span> agents</div>
+    <div class="stat"><span data-count-to="16">0</span> hooks</div>
+  </div>
+
+  <img id="logo"
+       class="clip"
+       data-start="165" data-duration="5" data-track-index="4"
+       data-animation="fade-in"
+       data-x="860" data-y="960" data-width="200" data-height="60"
+       src="assets/logo.png"/>
+
+  <div class="clip url-footer"
+       data-start="165" data-duration="5" data-track-index="4"
+       data-x="0" data-y="1030" data-width="1920" data-height="40">
+    github.com/Dev10x-Guru/dev10x-claude
+  </div>
+
+  <audio id="sfx-close"
+         data-start="168" data-duration="2"
+         data-track-index="5" data-volume="0.9"
+         src="assets/sfx-close.wav"></audio>
+
+</div>
+</body>
+</html>
