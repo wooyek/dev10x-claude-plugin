@@ -591,6 +591,34 @@ class TestCommandPrefixOverride:
         assert "prefix it with" in result.message
 
 
+class TestMcpUnavailableHint:
+    """MCP tool redirect messages must warn against DEV10X_SKIP_CMD_VALIDATION
+    as a workaround for MCP disconnect (GH-957)."""
+
+    def test_mcp_block_includes_reconnect_guidance(
+        self, validator: SkillRedirectValidator
+    ) -> None:
+        inp = _make_input(command="gh issue view 42")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "MCP server is disconnected" in result.message
+        assert "/mcp" in result.message
+
+    def test_mcp_block_warns_against_skip_flag(self, validator: SkillRedirectValidator) -> None:
+        inp = _make_input(command="gh issue view 42")
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "Do NOT use DEV10X_SKIP_CMD_VALIDATION" in result.message
+
+    def test_skill_redirect_does_not_include_mcp_hint(
+        self, validator: SkillRedirectValidator
+    ) -> None:
+        inp = _make_input(command='git commit -m "test"')
+        result = validator.validate(inp=inp)
+        assert result is not None
+        assert "MCP server is disconnected" not in result.message
+
+
 class TestBlockedVsAllowed:
     """Verify the boundary between blocked and allowed for each hook rule."""
 
