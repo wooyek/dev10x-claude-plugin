@@ -49,6 +49,9 @@ Missing declarations cause per-invocation approval friction — users cannot
 invoke the skill without approving tool access each time. See
 `.claude/rules/mcp-tools.md` for MCP vs. direct script trade-offs.
 
+**Enumeration requirement**: MCP tools must be listed individually (not as
+glob wildcards like `mcp__plugin_Dev10x_cli__*`) for pre-approval to work.
+
 ## Coding Style
 
 - **Python scripts**: ruff + black (line-length 99)
