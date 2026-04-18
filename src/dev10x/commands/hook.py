@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import traceback
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import click
@@ -23,6 +24,13 @@ def validate_bash() -> None:
     Reads JSON from stdin, dispatches to registered validators.
     Exit codes: 0=allow, 2=block.
     """
+    from dev10x.hooks.audit import audit_hook
+
+    _run = audit_hook(name="validate-bash", event="PreToolUse")(_validate_bash_body)
+    _run()
+
+
+def _validate_bash_body() -> None:
     from dev10x.domain import HookInput
     from dev10x.validators import get_validators
 
@@ -274,3 +282,78 @@ def ruff_format_cmd() -> None:
     from dev10x.hooks.skill import ruff_format
 
     ruff_format()
+
+
+@hook.group(name="audit")
+def audit_group() -> None:
+    """Hook execution audit commands (GH-860)."""
+
+
+@audit_group.command(name="summary")
+@click.option(
+    "--since",
+    "since",
+    default=None,
+    help="Relative window (e.g., 24h, 7d). Default: all records in retention.",
+)
+@click.option(
+    "--hook",
+    "hook_filter",
+    default=None,
+    help="Filter by hook name prefix.",
+)
+def audit_summary(since: str | None, hook_filter: str | None) -> None:
+    """Summarize hook execution timing by hook name."""
+
+    from dev10x.hooks.audit import iter_records, summarize
+
+    since_dt = None
+    if since:
+        since_dt = _parse_since(value=since)
+
+    records = iter_records(since=since_dt)
+    stats = summarize(records=records)
+    if hook_filter:
+        stats = {k: v for k, v in stats.items() if k.startswith(hook_filter)}
+
+    if not stats:
+        click.echo("No audit records found.")
+        return
+
+    header = f"{'hook':<30} {'count':>6} {'body_ms':>9} {'total_ms':>9} {'startup_ms':>11} {'err':>4} {'blk':>4}"
+    click.echo(header)
+    click.echo("-" * len(header))
+    for name in sorted(stats.keys()):
+        s = stats[name]
+        click.echo(
+            f"{name:<30} {s['count']:>6} {s['body_ms_avg']:>9} "
+            f"{s['total_ms_avg']:>9} {s['startup_ms_avg']:>11} "
+            f"{s['error_count']:>4} {s['block_count']:>4}"
+        )
+
+
+@audit_group.command(name="prune")
+@click.option("--days", type=int, default=None, help="Override retention days.")
+def audit_prune(days: int | None) -> None:
+    """Delete log files older than the retention window."""
+    from dev10x.hooks.audit import prune
+
+    deleted = prune(retain_days=days)
+    click.echo(f"Deleted {deleted} log file(s).")
+
+
+def _parse_since(*, value: str) -> datetime | None:
+    """Parse a relative time window like '24h' or '7d'."""
+    value = value.strip().lower()
+    if not value:
+        return None
+    try:
+        if value.endswith("h"):
+            return datetime.now(UTC) - timedelta(hours=int(value[:-1]))
+        if value.endswith("d"):
+            return datetime.now(UTC) - timedelta(days=int(value[:-1]))
+        if value.endswith("m"):
+            return datetime.now(UTC) - timedelta(minutes=int(value[:-1]))
+    except ValueError:
+        return None
+    return None
