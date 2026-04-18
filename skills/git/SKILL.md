@@ -51,7 +51,15 @@ MCP calls avoid `Bash()` allow-rule matching and provide
 structured responses. Use the MCP tool as the default for
 all push operations.
 
-**Fallback: wrapper script** (when MCP server is unavailable):
+**MCP server unavailable.** If `mcp__plugin_Dev10x_cli__push_safe`
+is listed as "no longer available" in system-reminders, STOP and
+ask the user to reconnect via `/mcp` or a session restart. Do NOT
+fall back to the wrapper script (blocked by
+`validate-bash-command.py`) or use `DEV10X_SKIP_CMD_VALIDATION` —
+see `references/mcp-unavailable-escape-hatch.md`.
+
+**Fallback: wrapper script** (only when MCP is healthy but the
+tool call errored for another reason):
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/git/scripts/git-push-safe.sh [flags] [remote] [refspec]

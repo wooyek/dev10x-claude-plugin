@@ -96,7 +96,14 @@ When the user invokes `/Dev10x:gh-pr-monitor`:
 with the PR argument (URL, bare number, or empty). Parse
 `PR_NUMBER`, `REPO`, `PR_URL`, `BRANCH` from the response.
 
-**Fallback (script):** If the MCP tool is unavailable:
+**MCP server unavailable.** If the tool is listed as "no longer
+available" in system-reminders, STOP and ask the user to reconnect
+via `/mcp` or a session restart. Do NOT fall back to the wrapper
+script or use `DEV10X_SKIP_CMD_VALIDATION` — see
+`references/mcp-unavailable-escape-hatch.md`.
+
+**Fallback (script):** Only when the MCP server is healthy but the
+tool call errored for another reason:
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/gh-context/scripts/gh-pr-detect.sh "$ARG"

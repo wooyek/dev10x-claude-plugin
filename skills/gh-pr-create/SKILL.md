@@ -173,7 +173,14 @@ When a PR number or URL is provided as argument, switch to "update" mode:
 `mcp__plugin_Dev10x_cli__verify_pr_state` to validate branch
 state. Parse `BRANCH_NAME` and `ISSUE` from the response.
 
-**Fallback (script):** If the MCP tool is unavailable:
+**MCP server unavailable.** If the tool is listed as "no longer
+available" in system-reminders, STOP and ask the user to reconnect
+via `/mcp` or a session restart. Do NOT fall back to the wrapper
+script or use `DEV10X_SKIP_CMD_VALIDATION` — see
+`references/mcp-unavailable-escape-hatch.md`.
+
+**Fallback (script):** Only when the MCP server is healthy but the
+tool call errored for another reason:
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/gh-pr-create/scripts/verify-state.sh

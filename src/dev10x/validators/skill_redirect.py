@@ -61,6 +61,15 @@ OVERRIDE_HINT = (
     f"  {SKIP_ENV_VAR}=true <command>"
 )
 
+MCP_UNAVAILABLE_HINT = (
+    "\n\n\u26a0\ufe0f  If the MCP server is disconnected "
+    '(tool listed as "no longer available" in system-reminders), '
+    "STOP and ask the user to reconnect via `/mcp` or a session "
+    f"restart. Do NOT use {SKIP_ENV_VAR} as a workaround — that "
+    "flag is reserved for skill-authorized exceptions, not transient "
+    "MCP unavailability."
+)
+
 
 _CONFIG: Config | None = None
 _ENGINE: RuleEngine | None = None
@@ -123,13 +132,17 @@ def _format_skill_msg(
                 f"Why: Raw CLI bypasses structured responses and causes\n"
                 f"permission friction ({comp.guardrails}).\n\n"
                 f"If the MCP server is unavailable, fall back to:\n"
-                f"{comp.description}{file_issue_hint}{OVERRIDE_HINT}"
+                f"{comp.description}"
+                f"{MCP_UNAVAILABLE_HINT}"
+                f"{file_issue_hint}{OVERRIDE_HINT}"
             )
         return (
             f"\u26d4  `{label}` blocked — use the MCP tool instead.\n\n"
             f"  Tool: `{comp.tool}`\n\n"
             f"Why: Raw CLI bypasses structured responses and causes\n"
-            f"permission friction ({comp.guardrails}).{file_issue_hint}{OVERRIDE_HINT}"
+            f"permission friction ({comp.guardrails})."
+            f"{MCP_UNAVAILABLE_HINT}"
+            f"{file_issue_hint}{OVERRIDE_HINT}"
         )
 
     if friction_level == "guided" and comp.fallback:
