@@ -31,29 +31,31 @@ def _load_stdin() -> dict:
         return {}
 
 
-def skill_tmpdir() -> None:
+def skill_tmpdir(data: dict | None = None) -> None:
     """Create /tmp/Dev10x/<skill-name>/ scratch directory (PreToolUse hook)."""
-    data = _load_stdin()
+    if data is None:
+        data = _load_stdin()
     skill_name = data.get("tool_input", {}).get("skill") or ""
     if not skill_name:
-        sys.exit(0)
+        return
 
     safe_name = re.sub(r"[^a-zA-Z0-9._-]", "", skill_name.replace(":", "-"))
     if safe_name:
         Path(f"/tmp/Dev10x/{safe_name}").mkdir(parents=True, exist_ok=True)
 
 
-def skill_metrics() -> None:
+def skill_metrics(data: dict | None = None) -> None:
     """Append skill invocation metric to JSONL file (PostToolUse hook)."""
-    data = _load_stdin()
+    if data is None:
+        data = _load_stdin()
 
     skill_name = data.get("tool_input", {}).get("skill") or ""
     if not skill_name:
-        sys.exit(0)
+        return
 
     session_id = data.get("session_id") or ""
     if not session_id:
-        sys.exit(0)
+        return
 
     toplevel = _get_toplevel()
     project_hash = hashlib.md5(toplevel.encode()).hexdigest()
@@ -79,13 +81,14 @@ def skill_metrics() -> None:
             pass
 
 
-def ruff_format() -> None:
+def ruff_format(data: dict | None = None) -> None:
     """Auto-format Python files with ruff after Edit/Write (PostToolUse hook)."""
-    data = _load_stdin()
+    if data is None:
+        data = _load_stdin()
 
     file_path = data.get("tool_input", {}).get("file_path") or ""
     if not file_path:
-        sys.exit(0)
+        return
 
     path = Path(file_path)
     if path.suffix != ".py" or not path.is_file():

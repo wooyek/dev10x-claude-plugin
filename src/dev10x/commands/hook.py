@@ -320,7 +320,10 @@ def audit_summary(since: str | None, hook_filter: str | None) -> None:
         click.echo("No audit records found.")
         return
 
-    header = f"{'hook':<30} {'count':>6} {'body_ms':>9} {'total_ms':>9} {'startup_ms':>11} {'err':>4} {'blk':>4}"
+    header = (
+        f"{'hook':<30} {'count':>6} {'body_ms':>9} {'total_ms':>9} "
+        f"{'startup_ms':>11} {'err':>4} {'blk':>4}"
+    )
     click.echo(header)
     click.echo("-" * len(header))
     for name in sorted(stats.keys()):

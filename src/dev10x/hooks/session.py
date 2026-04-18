@@ -130,10 +130,11 @@ def _format_decision_guidance(
     )
 
 
-def session_reload() -> None:
+def build_reload_context() -> str:
+    """Build the session-reload additionalContext string. Empty when no state."""
     toplevel = _get_toplevel()
     if not toplevel:
-        sys.exit(0)
+        return ""
 
     project_hash = hashlib.md5(toplevel.encode()).hexdigest()
     state_dir = Path.home() / ".claude" / "projects" / "_session_state"
@@ -144,7 +145,7 @@ def session_reload() -> None:
     has_plan = plan_file.exists()
 
     if not state and not has_plan:
-        sys.exit(0)
+        return ""
 
     parts: list[str] = []
 
@@ -163,7 +164,11 @@ def session_reload() -> None:
         if guidance:
             parts.append(guidance)
 
-    context = "\n\n".join(parts)
+    return "\n\n".join(parts)
+
+
+def session_reload() -> None:
+    context = build_reload_context()
     if not context:
         sys.exit(0)
 
@@ -248,16 +253,17 @@ def context_compact() -> None:
     print(f'{{"hookSpecificOutput":{{"systemMessage":"{escaped}"}}}}')
 
 
-def session_tmpdir() -> None:
+def session_tmpdir(data: dict | None = None) -> None:
     """Create session scratch directory and install mktmp.sh (SessionStart hook)."""
-    try:
-        data = json.load(sys.stdin)
-    except (json.JSONDecodeError, EOFError):
-        sys.exit(0)
+    if data is None:
+        try:
+            data = json.load(sys.stdin)
+        except (json.JSONDecodeError, EOFError):
+            sys.exit(0)
 
     session_id = data.get("session_id") or ""
     if not session_id:
-        sys.exit(0)
+        return
 
     Path(f"/tmp/Dev10x/{session_id}").mkdir(parents=True, exist_ok=True)
 
@@ -272,15 +278,21 @@ def session_tmpdir() -> None:
         dest.chmod(0o755)
 
 
-def session_guidance() -> None:
-    """Output session-guidance.md as additionalContext (SessionStart hook)."""
+def build_guidance_context() -> str:
+    """Return the session-guidance.md contents, or empty string if missing."""
     plugin_root = Path(__file__).parents[3]
     guidance_file = plugin_root / "hooks" / "scripts" / "session-guidance.md"
-
     if not guidance_file.exists():
+        return ""
+    return guidance_file.read_text()
+
+
+def session_guidance() -> None:
+    """Output session-guidance.md as additionalContext (SessionStart hook)."""
+    content = build_guidance_context()
+    if not content:
         sys.exit(0)
 
-    content = guidance_file.read_text()
     escaped = _escape_for_json(s=content)
     print(
         '{"hookSpecificOutput":{"hookEventName":"SessionStart",'
@@ -448,20 +460,21 @@ def session_migrate_permissions() -> None:
         )
 
 
-def session_persist() -> None:
+def session_persist(data: dict | None = None) -> None:
     """Persist session state to disk for next-session reload (SessionStop hook)."""
-    try:
-        data = json.load(sys.stdin)
-    except (json.JSONDecodeError, EOFError):
-        sys.exit(0)
+    if data is None:
+        try:
+            data = json.load(sys.stdin)
+        except (json.JSONDecodeError, EOFError):
+            sys.exit(0)
 
     session_id = data.get("session_id") or ""
     if not session_id:
-        sys.exit(0)
+        return
 
     toplevel = _get_toplevel()
     if not toplevel:
-        sys.exit(0)
+        return
 
     project_hash = hashlib.md5(toplevel.encode()).hexdigest()
     state_dir = Path.home() / ".claude" / "projects" / "_session_state"
@@ -498,12 +511,13 @@ def session_persist() -> None:
     state_file.write_text(json.dumps(state, indent=2))
 
 
-def session_goodbye() -> None:
+def session_goodbye(data: dict | None = None) -> None:
     """Output goodbye message with community link and resume hint (SessionStop hook)."""
-    try:
-        data = json.load(sys.stdin)
-    except (json.JSONDecodeError, EOFError):
-        data = {}
+    if data is None:
+        try:
+            data = json.load(sys.stdin)
+        except (json.JSONDecodeError, EOFError):
+            data = {}
 
     session_id = data.get("session_id") or ""
 
