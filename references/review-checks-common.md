@@ -72,6 +72,13 @@ Before raising any of these, **verify actual code**:
     entry is renamed, verify the new namespace matches the first argument of
     every `mktmp.sh` invocation in that SKILL.md. A mismatch causes a
     write-permission rejection at runtime.
+15b. **Bulk path migrations** — when a PR bulk-renames paths (e.g.,
+    `/tmp/claude/` → `/tmp/Dev10x/` across multiple files), verify:
+    (a) All `Bash()` path declarations match the renamed paths,
+    (b) All `Read()` and `Write()` declarations are updated consistently,
+    (c) Documentation files and code comments reference the new paths.
+    Spot-check 3-5 random files in the changed set to catch inconsistent
+    edits. Bulk migrations that miss doc updates are RECOMMENDED fixes.
 16. **Ticket-ID when self-motivated** — if PR body contains
     `Fixes: none — self-motivated`, do not flag missing ticket ID in
     PR title or commit messages. No issue exists to reference.
@@ -107,6 +114,13 @@ Before raising any of these, **verify actual code**:
     risk (users copy stale alias → command fails) → CRITICAL/REQUIRED. Pure
     cosmetic drift (table describes intent, example text outdated) →
     RECOMMENDED. Confirm intent via commit message when unclear.
+23. **MCP tool enumeration consistency** — when a PR adds MCP tool support via
+    new `mcp__plugin_*` declarations in `allowed-tools:`: (a) verify all MCP
+    tools are declared in `.claude-plugin/plugin.json`, (b) verify the tool
+    naming follows `mcp__plugin_Dev10x_<server>__<function>`, (c) when a tool
+    is used in multiple skills, verify each skill's `allowed-tools` includes
+    the full tool name (not a wildcard pattern unless intentional). Spot-check
+    one skill per MCP server. See `.claude/rules/mcp-tools.md` for naming.
 
 ## Architecture Checklist (GH-916)
 
