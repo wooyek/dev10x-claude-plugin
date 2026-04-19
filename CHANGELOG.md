@@ -3,6 +3,43 @@
 All notable changes to the Dev10x Claude Code Plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.65.0 — Hook Performance & Control
+
+Released 2026-04-19
+
+### Features
+
+- **Shorten session startup by consolidating hooks** —
+  SessionStart now runs 5 features in one orchestrator (Stop
+  runs 2), replacing 8 `uv run --project` wrappers with
+  direct-shebang scripts so every session feels faster without
+  paying uv project resolution and CLI import cost per hook
+  ([GH-959])
+- **Surface per-hook execution timing for latency triage** —
+  `@audit_hook` plus an `audit-wrap` shell wrapper capture
+  body-phase and total (including uv startup) timing per
+  invocation to `/tmp/Dev10x/logs/hooks-*.jsonl`, with
+  `dev10x hook audit summary` and `prune` subcommands so slow
+  hooks are diagnosable before users complain ([GH-860])
+- **Let users dial hook strictness per session** — validator
+  specs now carry `rule_id` (DX001–DX008), `profile`
+  (minimal/standard/strict), and `experimental` flags, so
+  `DEV10X_HOOK_PROFILE`, `DEV10X_HOOK_DISABLE`, and
+  `DEV10X_HOOK_EXPERIMENTAL` can drop opinionated rules for
+  throwaway work while keeping safety-critical guardrails on
+  shared-repo commits ([GH-413])
+- **Guide users to reconnect MCP instead of bypassing hook** —
+  when the `Dev10x_cli` MCP server is unavailable, use-tool
+  block messages now instruct the agent to ask the user to
+  reconnect rather than fall back to wrapper scripts or reach
+  for `DEV10X_SKIP_CMD_VALIDATION`, which users reject for
+  transient outages ([GH-957])
+
+[GH-413]: https://github.com/Dev10x-Guru/dev10x-claude/issues/413
+[GH-860]: https://github.com/Dev10x-Guru/dev10x-claude/issues/860
+[GH-957]: https://github.com/Dev10x-Guru/dev10x-claude/issues/957
+[GH-959]: https://github.com/Dev10x-Guru/dev10x-claude/issues/959
+
 ## 0.64.0 — Platform Reach & Merge Safety
 
 Released 2026-04-18
